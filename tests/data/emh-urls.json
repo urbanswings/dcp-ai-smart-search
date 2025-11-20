@@ -1,0 +1,92 @@
+{
+  "AU": {
+    "INT": "https://australia.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://australia.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://australia.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.au/passengercars/buy/new-car/search-results.html"
+  },
+  "BR": {
+    "INT": "https://brazil.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://brazil.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://brazil.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www2.mercedes-benz.com.br/passengercars/buy/new-car/search-results.html"
+  },
+  "EG": {
+    "INT": "https://egypt.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://egypt.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://egypt.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.eg/en/passengercars/buy/new-car/search-results.html"
+  },
+  "ID": {
+    "INT": "https://indonesia.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://indonesia.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://indonesia.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.id/passengercars/buy/new-car/search-results.html"
+  },
+  "IN": {
+    "INT": "https://india.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://india.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://india.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.in/passengercars/buy/new-car/search-results.html"
+  },
+  "JP": {
+    "INT": "https://japan.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://japan.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://japan.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.jp/passengercars/buy/new-car/search-results.html"
+  },
+  "KR": {
+    "INT": "https://south-korea.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://south-korea.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://south-korea.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.kr/passengercars/buy/new-car/search-results.html"
+  },
+  "MX": {
+    "INT": "https://mexico.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/es/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://mexico.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/es/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://mexico.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/es/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.mx/es/passengercars/buy/new-car/search-results.html"
+  },
+  "MY": {
+    "INT": "https://malaysia.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://malaysia.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://malaysia.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.my/passengercars/buy/new-car/search-results.html"
+  },
+  "NZ": {
+    "INT": "https://new-zealand.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://new-zealand.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://new-zealand.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.nz/passengercars/buy/new-car/search-results.html"
+  },
+  "SG": {
+    "INT": "https://singapore.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://singapore.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://singapore.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.sg/passengercars/buy/new-car/search-results.html"
+  },
+  "TH": {
+    "INT": "https://thailand.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://thailand.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://thailand.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.th/en/passengercars/buy/new-car/search-results.html"
+  },
+  "TR": {
+    "INT": "https://turkey.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://turkey.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://turkey.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.tr/passengercars/buy/new-car/search-results.html"
+  },
+  "VN": {
+    "INT": "https://vietnam.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://vietnam.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://vietnam.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/en/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.com.vn/en/passengercars/buy/new-car/search-results.html"
+  },
+  "ZA": {
+    "INT": "https://south-africa.int-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PREPROD": "https://south-africa.pprod-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "DEV": "https://south-africa.test-publish.mbmxp.aem.oneweb.mercedes-benz.com/passengercars/buy/new-car/search-results.html",
+    "PROD": "https://www.mercedes-benz.co.za/passengercars/buy/new-car/search-results.html"
+  }
+}
