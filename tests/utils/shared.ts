@@ -1,4 +1,6 @@
 // Shared utilities for both UI and API testing
+import fs from 'fs/promises';
+import path from 'path';
 
 export interface TestEntry {
   timestamp: string;
@@ -28,6 +30,11 @@ export function shouldRunUiTests(): boolean {
 export function shouldRunApiTests(): boolean {
   const mode = getTestMode();
   return mode === 'api' || mode === 'both';
+}
+
+export async function ensureDirectoryExists(filePath: string): Promise<void> {
+  const dir = path.dirname(filePath);
+  await fs.mkdir(dir, { recursive: true });
 }
 
 export function getOutputFileName(testType: string): string {

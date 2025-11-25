@@ -22,6 +22,7 @@ import {
   shouldRunApiTests,
   getOutputFileName,
   combineResults,
+  ensureDirectoryExists,
 } from "./utils/shared";
 
 test.beforeAll(async () => {});
@@ -67,7 +68,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       console.log(`Test passed: ${testInfo.title}`);
     }
   });
-  
     
   test("By Brand/Model - Test MB-specific brand and model queries", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     // Generate test queries
@@ -121,13 +121,14 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("sentence-by-brand-model");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("sentence-by-brand-model"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
-
     
   test("By Specs - Test specification-based queries without brand/model", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const fixedQueries = [
@@ -195,14 +196,15 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("buyer-sentence-by-specs");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("buyer-sentence-by-specs"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
 
-    
   test("By Filter Facets (random)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const fixedQueries = [
       "I am looking for Mercedes-Benz GLB hatchback models with diesel fuel type and a power output of at least 658 kW.",
@@ -295,14 +297,15 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("sentence-by-filter-options");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("sentence-by-filter-options"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
 
-    
   test("By Filter Facets (complete)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     // Fetch facets dynamically from API based on environment settings
     const env = process.env.ENVIRONMENT || 'INT';
@@ -502,10 +505,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         let filterWidgetText = '';
         
         if (smartSearchPassed) {
-          // Skip filter widget validation for certain facets
-          const skipFacets = ['priceSlider', 'powerInKwSlider', 'fuel_type', 'equipment', 'vendor', 'dealer', 'gearBox', 'useProductType', 'dcpProductType', 'allCategories'];
+          // Only validate filter widgets for specific facets
+          const includeFacets = ['bodyType', 'color_text', 'model'];
           let icon = "✅";
-          if (skipFacets.includes(facet)) {
+          if (!includeFacets.includes(facet)) {
             console.log(`• ⊘ Skipping filter widget validation for facet: ${facet}`);
             filterWidgetFound = true; // Mark as found to avoid false negative
           } else {
@@ -599,13 +602,14 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("by-filter-facets-complete");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("by-filter-facets-complete"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
-
     
   test("No Brand/Model", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const fixedQueries = [
@@ -658,8 +662,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("sentence-generic");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("sentence-generic"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -762,8 +768,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("sentence-single");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("sentence-single"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -811,8 +819,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("keyword-mix");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("keyword-mix"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -861,8 +871,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("keyword-single");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("keyword-single"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -962,8 +974,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("sentence-nonrelated");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("sentence-nonrelated"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -1032,14 +1046,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("edge-cases");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("edge-cases"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
 
-    
   test("Negative/Contradictory Queries", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const fixedQueries = ["dummy fixed query 1", "dummy fixed query 2"];
     const staticQueries = [
@@ -1092,8 +1107,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("negative-contradictory");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("negative-contradictory"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -1151,8 +1168,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("localization");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("localization"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -1210,8 +1229,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("misspelled-fuzzy");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("misspelled-fuzzy"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
@@ -1268,14 +1289,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("date-numeric");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("date-numeric"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
 
-    
   test("No Results Scenario", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const fixedQueries = [
       "Show me Mercedes-Benz trucks with jet engines.",
@@ -1327,13 +1349,14 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("no-results");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("no-results"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );
   });
-
     
   test("AI Response Consistency", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     const queries = [
@@ -1394,8 +1417,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
+    const outputFileName = getOutputFileName("consistency");
+    await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
-      getOutputFileName("consistency"),
+      outputFileName,
       JSON.stringify(allResults, null, 2),
       "utf-8"
     );

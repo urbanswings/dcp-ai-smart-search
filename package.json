@@ -1,13 +1,11 @@
 {
   "name": "dcp-ai-smart-search",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "index.js",
   "scripts": {
-    "test": "TEST_MODE=both TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test && node generate-results-html.js",
-    "test:headed": "TEST_MODE=both TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test --headed && node generate-results-html.js",
+    "test": "TEST_MODE=both TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test && node generate-results-html.js",    
     "test:ui-only": "TEST_MODE=ui TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test && node generate-results-html.js",
     "test:api-only": "TEST_MODE=api TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test && node generate-results-html.js",
-    "test:both": "TEST_MODE=both TMPDIR=.playwright-tmp PLAYWRIGHT_CACHE_DIR=.playwright-cache npx playwright test && node generate-results-html.js",
     "report": "node generate-results-html.js && open $(ls -t results/html/*.html | head -1)",
     "clean": "./clean-old-results.sh",
     "convert-facets": "node tests/utils/facetToJson.js"
