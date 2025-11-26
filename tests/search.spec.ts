@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { test, Browser, Page } from "@playwright/test";
 import fs from "fs/promises";
+import path from "path";
 import {
   queriesPath,
   openai,
@@ -25,7 +26,15 @@ import {
   ensureDirectoryExists,
 } from "./utils/shared";
 
-test.beforeAll(async () => {});
+// Load fixed queries from JSON file
+const fixedQueriesPath = path.join(__dirname, "data/fixed-queries.json");
+let fixedQueriesData: any = {};
+
+test.beforeAll(async () => {
+  const data = await fs.readFile(fixedQueriesPath, "utf-8");
+  fixedQueriesData = JSON.parse(data);
+});
+
 
 test.describe("AI Smart Search - Vehicles MB", () => {
   const describeName = "Vehicles MB";
@@ -71,10 +80,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     
   test("By Brand/Model - Test MB-specific brand and model queries", { tag: ['@ui', '@api'] }, async ({ browser }) => {
     // Generate test queries
-    const fixedQueries = [
-      "Show me Mercedes-Benz S-Class Sedans", 
-      "We have been considering Mercedes-Benz EQS in white"
-    ];
+    const fixedQueries = fixedQueriesData.byBrandModel;
     const genericQueries: string[] = [];
     for (let i = 0; i < 8; i++) {
       const query = await generateOpenAIQuery(
@@ -131,10 +137,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
     
   test("By Specs - Test specification-based queries without brand/model", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "A compact vehicle with a fuel-efficient hybrid engine and a sleek, modern exterior design.",
-      "Aiming for a sleek exterior design with a powerful engine under the hood to match my adventurous spirit."
-    ];
+    const fixedQueries = fixedQueriesData.bySpecs;
     const buyerQueries: string[] = [];
     const seenQueries = new Set<string>();
     let attempts = 0;
@@ -206,10 +209,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
 
   test("By Filter Facets (random)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "I am looking for Mercedes-Benz GLB hatchback models with diesel fuel type and a power output of at least 658 kW.",
-      "Are there any vehicles with a hybrid gasoline fuel type and specifically looking for the GLB model?"
-    ];
+    const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
     // Facet values for visible filters
     const filterOptions = {
       model: ["B-CLASS", "GLS", "GLB"],
@@ -612,10 +612,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
     
   test("No Brand/Model", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "I'm in the market for a vehicle that combines impressive fuel efficiency with advanced safety features.",
-      "Get me vehicles that have a sleek design and cutting-edge technology features to enhance my driving experience."
-    ];
+    const fixedQueries = fixedQueriesData.noBrandModel;
     const genericQueries: string[] = [];
     for (let i = 0; i < 10; i++) {
       const query = await generateOpenAIQuery(
@@ -670,6 +667,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       "utf-8"
     );
   });
+
+  test("Conversational", { tag: ['@ui', '@api'] }, async ({ browser }) => {
+    
+  });
 });
 
 test.describe("AI Smart Search - Vehicles Non-MB", () => {
@@ -715,10 +716,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   });
 
   test("By Brand/Model (Sentence|Single)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "I'm interested in learning more about the Tesla Model X, can you show me some information on this vehicle?",
-      "Help me explore the available options of famous cars in the movie Fast and Furious."
-    ];
+    const fixedQueries = fixedQueriesData.sentenceSingle;
     const file = await fs.readFile(queriesPath, "utf-8");
     const vehicleBrandsAndModels: string[] = JSON.parse(file);
     const generatedQueries = [];
@@ -778,10 +776,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   });
 
   test("By Brand/Model (Keyword|Mix)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "BMW 2 Series ford f-150 subaru outback Mercedes-Benz EQB nissan maxima",
-      "toyota highlander BMW 2 Series"
-    ];
+    const fixedQueries = fixedQueriesData.keywordMix;
     const combos = await getRandomVehicleCombinations(10, 2, 5);
     const allQueries = [...fixedQueries, ...combos];
     
@@ -829,10 +824,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   });
 
   test("By Brand/Model (Keyword|Single)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "tesla model x",
-      "ford mustang"
-    ];
+    const fixedQueries = fixedQueriesData.keywordSingle;
     const file = await fs.readFile(queriesPath, "utf-8");
     const vehicleBrandsAndModels: string[] = JSON.parse(file);
     const allQueries = [...fixedQueries, ...vehicleBrandsAndModels.slice(0, 10)];
@@ -924,10 +916,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("Random Topics", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "What are the health benefits of drinking green tea daily?", 
-      "I had Hawaiian Pizza for lunch. What about you?"
-    ];
+    const fixedQueries = fixedQueriesData.randomTopics;
     const openaiQueries = [];
     for (let i = 0; i < 8; i++) {
       const query = await generateOpenAIQuery(
@@ -1056,11 +1045,8 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("Negative/Contradictory Queries", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = ["dummy fixed query 1", "dummy fixed query 2"];
-    const staticQueries = [
-      "A bright orange convertible Mercedes-Benz G-Wagon with bulletproof windows from the 1980s is what I'm looking for.",
-      "I heard you guys have a Mercedes-Benz G-Class from the 1950s with a top speed of over 1000 mph.",
-    ];
+    const fixedQueries = fixedQueriesData.negativeContradictory.fixed;
+    const staticQueries = fixedQueriesData.negativeContradictory.static;
     const openaiQueries = [];
     for (let i = 0; i < 8; i++) {
       const query = await generateOpenAIQuery(
@@ -1117,11 +1103,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("Language/Localization", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "2024년 이후 등록된 흰색 벤츠 차량을 보여주세요.", // Korean
-      "Show me Mercedes-Benz cars with black interior.", // English
-      "벤츠 GLS SUV in White", // Mixed
-    ];
+    const fixedQueries = fixedQueriesData.localization;
     const openaiQueries = [];
     for (let i = 0; i < 7; i++) {
       const query = await generateOpenAIQuery(
@@ -1178,11 +1160,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("Misspelled/Fuzzy Queries", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "Show me Mercedez GLS Suv",
-      "I'm looking for a Benz B-CLAS Hatcback",
-      "GLB Sedn White",
-    ];
+    const fixedQueries = fixedQueriesData.misspelledFuzzy;
     const openaiQueries = [];
     for (let i = 0; i < 7; i++) {
       const query = await generateOpenAIQuery(
@@ -1239,10 +1217,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("By Filter Facets (Date Range/Numeric Filters)", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "Show me Mercedes-Benz cars registered between 2020 and 2022.",
-      "Find vehicles with mileage less than 10,000 km and price above 100,000,000.",
-    ];
+    const fixedQueries = fixedQueriesData.dateNumeric;
     const openaiQueries = [];
     for (let i = 0; i < 8; i++) {
       const query = await generateOpenAIQuery(
@@ -1299,10 +1274,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
 
   test("No Results Scenario", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const fixedQueries = [
-      "Show me Mercedes-Benz trucks with jet engines.",
-      "Find me a Mercedes-Benz convertible with 1,000,000 km mileage with 10 wheels.",
-    ];
+    const fixedQueries = fixedQueriesData.noResults;
     const openaiQueries = [];
     for (let i = 0; i < 8; i++) {
       const query = await generateOpenAIQuery(
@@ -1359,11 +1331,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   });
     
   test("AI Response Consistency", { tag: ['@ui', '@api'] }, async ({ browser }) => {
-    const queries = [
-      "Show me Mercedes-Benz GLS SUVs in White",
-      "Looking for a Merceds Bens SUV in silvr color.",
-      "Curious about a vehicle with a powerful V8 engine, sleek design, and a comfortable leather interior.",
-    ];
+    const queries = fixedQueriesData.consistency;
     
     const uiResults = [];
     const apiResults = [];

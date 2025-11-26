@@ -1,0 +1,68 @@
+{
+  "byBrandModel": [
+    "Show me Mercedes-Benz S-Class Sedans",
+    "We have been considering Mercedes-Benz EQS in white"
+  ],
+  "bySpecs": [
+    "A compact vehicle with a fuel-efficient hybrid engine and a sleek, modern exterior design.",
+    "Aiming for a sleek exterior design with a powerful engine under the hood to match my adventurous spirit."
+  ],
+  "byFilterFacetsRandom": [
+    "I am looking for Mercedes-Benz GLB hatchback models with diesel fuel type and a power output of at least 658 kW.",
+    "Are there any vehicles with a hybrid gasoline fuel type and specifically looking for the GLB model?"
+  ],
+  "noBrandModel": [
+    "I'm in the market for a vehicle that combines impressive fuel efficiency with advanced safety features.",
+    "Get me vehicles that have a sleek design and cutting-edge technology features to enhance my driving experience."
+  ],
+  "conversational": [],
+  "sentenceSingle": [
+    "I'm interested in learning more about the Tesla Model X, can you show me some information on this vehicle?",
+    "Help me explore the available options of famous cars in the movie Fast and Furious."
+  ],
+  "keywordMix": [
+    "BMW 2 Series ford f-150 subaru outback Mercedes-Benz EQB nissan maxima",
+    "toyota highlander BMW 2 Series"
+  ],
+  "keywordSingle": [
+    "tesla model x",
+    "ford mustang"
+  ],
+  "randomTopics": [
+    "What are the health benefits of drinking green tea daily?",
+    "I had Hawaiian Pizza for lunch. What about you?"
+  ],
+  "edgeCase": {
+    "note": "Edge cases use dynamic generation like A.repeat(501) and special chars, defined in test code"
+  },
+  "negativeContradictory": {
+    "fixed": ["dummy fixed query 1", "dummy fixed query 2"],
+    "static": [
+      "A bright orange convertible Mercedes-Benz G-Wagon with bulletproof windows from the 1980s is what I'm looking for.",
+      "I heard you guys have a Mercedes-Benz G-Class from the 1950s with a top speed of over 1000 mph."
+    ]
+  },
+  "localization": [
+    "2024년 이후 등록된 흰색 벤츠 차량을 보여주세요.",
+    "Show me Mercedes-Benz cars with black interior.",
+    "벤츠 GLS SUV in White"
+  ],
+  "misspelledFuzzy": [
+    "Show me Mercedez GLS Suv",
+    "I'm looking for a Benz B-CLAS Hatcback",
+    "GLB Sedn White"
+  ],
+  "dateNumeric": [
+    "Show me Mercedes-Benz cars registered between 2020 and 2022.",
+    "Find vehicles with mileage less than 10,000 km and price above 100,000,000."
+  ],
+  "noResults": [
+    "Show me Mercedes-Benz trucks with jet engines.",
+    "Find me a Mercedes-Benz convertible with 1,000,000 km mileage with 10 wheels."
+  ],
+  "consistency": [
+    "Show me Mercedes-Benz GLS SUVs in White",
+    "Looking for a Merceds Bens SUV in silvr color.",
+    "Curious about a vehicle with a powerful V8 engine, sleek design, and a comfortable leather interior."
+  ]
+}
