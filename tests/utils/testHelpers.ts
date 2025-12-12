@@ -94,11 +94,12 @@ export async function generateOpenAIQuery(
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
+      temperature: 0.7,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      max_tokens: maxTokens,
+      max_completion_tokens: maxTokens,
     });
     return completion.choices[0].message.content?.trim() ?? fallback;
   } catch (err) {
@@ -114,14 +115,14 @@ export async function evaluateSearchResult(resultText: string): Promise<string> 
         {
           role: "system",
           content:
-            'You are an expert car sales assistant. Evaluate the following search result and respond with whether it only suggests Mercedes-Benz cars, generally suggests Mercedes-Benz, or is unexpected/generic.',
+            'You are an expert car sales assistant. Evaluate the following search result and respond with whether it only suggests Mercedes-Benz cars, generally suggests Mercedes-Benz, or is unexpected/generic. Ensure no technical leakage. Maintains Mercedes-Benz luxury tone by being un-biased, transparent and non-technical.',
         },
         {
           role: "user",
           content: resultText,
         },
       ],
-      max_tokens: 50,
+      max_completion_tokens: 50,
     });
     return (
       completion.choices[0].message.content ??
