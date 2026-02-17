@@ -1,92 +1,30 @@
 {
-  "multiIntent": [
-    "Show me SUVs and also tell me about financing.",
-    "I want a sedan or a coupe, and do you have any discounts?",
-    "Find me electric cars and compare insurance options.",
-    "Show me hatchbacks and explain the warranty details.",
-    "I need a family car or a compact vehicle, and what are the return policies?",
-    "Show me convertibles and also list the safety features available."
-  ],
-  "clarification": [
-    "What do you mean by coupe?",
-    "Do you want a new or used vehicle?",
-    "Can you clarify what 'GLB' stands for?",
-    "I want to know what is the return policy?",
-    "Can you explain the warranty options available?",
-    "What financing options do you offer?"
-  ],
-  "priceNegotiation": [
-    "Can I get a discount on the GLC?",
-    "Is there any special offer for the EQS?",
-    "Can you match the price of another dealer?",
-    "Are there any discounts available?",
-    "Do you have any special offers?",
-    "What deals are currently running?",
-    "Can I get a rebate on this?",
-    "Are there any ongoing sales?"
-  ],
-  "unusualUnits": [
-    "Show me cars with mileage under 10,000 miles.",
-    "Find vehicles with fuel efficiency above 30 mpg.",
-    "Do you have cars with boot space over 15 cubic feet?",
-    "I want used cars with mileage under 1000 bpm",
-    "Show me cars with fuel efficiency above 150 km/l",
-    "Find vehicles with boot space over 400 liters"
-  ],
-  "jokeHumor": [
-    "Can I get a car that flies?",
-    "Do you have any invisible cars?",
-    "Show me a car that runs on pizza."
-  ],
-  "repeatLooping": [
-    "Show me SUVs.",
-    "Show me SUVs again.",
-    "Can you show me SUVs one more time?"
-  ],
-  "brandLoyaltySwitching": [
-    "I’ve always driven BMW, why should I choose Mercedes-Benz?",
-    "Convince me to switch from Audi to Mercedes-Benz.",
-    "I’m a loyal Mercedes-Benz customer, what’s new for me?"
-  ],
-  "accessibilityNeeds": [
-    "Show me cars suitable for wheelchair users.",
-    "Do you have vehicles with hand controls?",
-    "Find me cars with easy access for elderly passengers."
-  ],
-  "environmentalConcerns": [
-    "Show me eco-friendly vehicles.",
-    "Do you have any low-emission cars?",
-    "Find me sustainable or hybrid Mercedes-Benz models."
-  ],
   "byFixedQuery": [
-    "show me sedan",
+    "muéstrame sedán",
     "cla 200",
-    "do you have coupe? it is a two-door car",
-    "i'm looking for a family car",
-    "find me a fast sports car",
-    "purple color cars only",
-    "i want an electric vehicle",
-    "i need a nice and beautiful compact vehicle",
-    "you guys have something from 2020 or silver color car",
-    "can you give suggestions?",
-    "i'm interested in convertibles",
-    "who are the top car manufacturers?",
-    "what is your return policy on vehicles?",
-    "do you offer financing options?",
-    "can i schedule a test drive?",
-    "is there any promotion?",
-    "what warranty do you provide on new cars?",
-    "shortlist me fuel-efficient cars but not diesel or hybrid",
-    "find me cars with advanced safety features and low mileage",
-    "can you list me bmw x5?",
-    "show me the list again",
-    "where is my order? i made a purchase last week but didn't receive any updates",
-    "i have not been contacted yet",
-    "recommend me the best pizza restaurants nearby",
+    "¿tienes cupé? es un coche de dos puertas",
+    "estoy buscando un coche familiar",
+    "encuéntrame un coche deportivo rápido",
+    "quiero un vehículo eléctrico",
+    "necesito un vehículo compacto bonito y hermoso",
+    "¿puedes darme sugerencias?",
+    "me interesan los convertibles",
+    "¿quiénes son los principales fabricantes de automóviles?",
+    "¿cuál es su política de devoluciones en vehículos?",
+    "¿ofrecen opciones de financiamiento?",
+    "¿puedo programar una prueba de manejo?",
+    "¿qué garantía ofrecen en autos nuevos?",
+    "muéstrame autos eficientes en combustible pero que no sean diésel ni híbridos",
+    "encuéntrame autos con características de seguridad avanzadas y bajo kilometraje",
+    "¿puedes listar el bmw x5?",
+    "muéstrame la lista de nuevo",
+    "¿dónde está mi pedido? hice una compra la semana pasada pero no he recibido actualizaciones",
+    "aún no me han contactado",
+    "recomiéndame los mejores restaurantes de pizza cercanos",
     "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
-    "give me a call at 123-456-7890 to discuss my car options",
-    "<p>i want to order</p>",
-    "tell me more about the CLA 911 GTS"
+    "llámame al 123-456-7890 para hablar sobre mis opciones de coche",
+    "<p>Quiero ordenar</p>",
+    "cuéntame más sobre el CLA 911 GTS"
   ],
   "byBrandModel": [
     "Show me Mercedes-Benz S-Class Sedans",
@@ -94,13 +32,11 @@
   ],
   "bySpecs": [
     "A compact vehicle with a fuel-efficient hybrid engine and a sleek, modern exterior design.",
-    "Aiming for a powerful V8 engine under the hood with a 4-wheel drive to match my adventurous spirit."
+    "Aiming for a sleek exterior design with a powerful engine under the hood to match my adventurous spirit."
   ],
   "byFilterFacetsRandom": [
     "I am looking for Mercedes-Benz GLB hatchback models with diesel fuel type and a power output of at least 658 kW.",
     "Are there any vehicles with a hybrid gasoline fuel type and specifically looking for the GLB model?"
-  ],
-  "byFilterFacetsComplete": [
   ],
   "noBrandModel": [
     "I'm in the market for a vehicle that combines impressive fuel efficiency with advanced safety features.",
@@ -127,41 +63,6 @@
     "I had Hawaiian Pizza for lunch. What about you?"
   ],
   "edgeCase": [],
-  "ambiguous": [
-    "Show me a classic",
-    "I want something sporty",
-    "Looking for a luxury ride"
-  ],
-  "accessibilityVoice": [
-    "Um, can you show me SUVs?",
-    "Uh, I guess I'm looking for a family car, maybe?",
-    "So, like, what cars do you have with sunroofs?"
-  ],
-  "shortLong": [
-    "SUV",
-    "I'm looking for a Mercedes-Benz vehicle that is electric, has a panoramic sunroof, leather seats, advanced safety features, and is available in blue or black, preferably with low mileage and under warranty.",
-    "Car"
-  ],
-  "negativeSentiment": [
-    "I didn’t like the last car you showed me.",
-    "The previous results were not helpful.",
-    "Why are there never any good options?"
-  ],
-  "comparison": [
-    "Compare the EQB and GLC.",
-    "Which is better, CLA or C-Class?",
-    "Show me differences between GLA and GLB."
-  ],
-  "emojiSpecial": [
-    "Show me SUVs 🚗",
-    "Any red cars? 🔴",
-    "Find me something cool 😎"
-  ],
-  "outOfStockDiscontinued": [
-    "Show me the 2010 SLS AMG.",
-    "Do you have any discontinued models?",
-    "Looking for a Mercedes-Benz R-Class."
-  ],
   "negativeContradictory": [
     "A bright orange convertible Mercedes-Benz G-Wagon with bulletproof windows from the 1980s is what I'm looking for.",
     "I heard you guys have a Mercedes-Benz G-Class from the 1950s with a top speed of over 1000 mph."
@@ -169,7 +70,7 @@
   "localization": [
     "2024년 이후 등록된 흰색 벤츠 차량을 보여주세요.",
     "Show me Mercedes-Benz cars with black interior.",
-    "bana göster GLS SUV in White"
+    "벤츠 GLS SUV in White"
   ],
   "misspelledFuzzy": [
     "Show me Mercedez GLS Suv",

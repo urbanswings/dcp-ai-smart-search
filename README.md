@@ -40,12 +40,11 @@ dcp-ai-smart-search/
 │   │   ├── apiHelpers.ts          # API test helper functions
 │   │   ├── shared.ts              # Shared utilities
 │   │   ├── facetToJson.js         # Facet conversion utility
-│   │   ├── facets-ncos.json       # NCOS facets (example)
+│   │   ├── facets-ncos.json       # NCOS facets (updated example)
 │   │   └── search-api-response-ncos.json  # NCOS API response (example)
 │   └── data/
 │       ├── dcp-urls.json          # DCP environment URLs
 │       ├── emh-urls.json          # EMH environment URLs
-│       ├── facets-kr-ucos-dcp.json  # KR UCOS DCP facets
 │       ├── search-api-response-kr-ucos-dcp.json  # KR UCOS API response
 │       └── search-queries.json     # Non-MB brand/model queries
 ├── results/                       # Test results (gitignored)
@@ -273,6 +272,11 @@ AEM_PASS_PREPROD=your-password
 AEM_USER_INT=your-username
 AEM_PASS_INT=your-password
 OPENAI_API_KEY=your-openai-key
+
+# Attach to existing browser (optional)
+# One of these can be set to enable CDP attach
+PLAYWRIGHT_CDP_URL=http://localhost:9222
+# CDP_URL=http://localhost:9222
 ```
 
 ### 3. Run Tests
@@ -294,6 +298,81 @@ node generate-results-html.js
 ```
 
 - Output: `results/html/search-results-all-<timestamp>.html`
+
+---
+
+## Attach to Existing Browser (CDP)
+
+You can run UI tests against an already-opened Chrome browser by attaching via the Chrome DevTools Protocol (CDP). This is useful for reusing a persistent profile or live-debugging in a visible session.
+
+### Default: Clone default profile with incognito mode
+
+The default `chrome:cdp` script clones your Default profile (preserving extensions/settings) and launches in incognito mode:
+
+```sh
+npm run chrome:cdp
+```
+
+Then run tests attached to that browser:
+
+```sh
+npm run test:cdp
+# or UI-only
+npm run test:cdp:ui-only
+```
+
+### Additional profile options
+
+- **Use your real default profile (no incognito, requires quit):**
+  ```sh
+  npm run chrome:cdp:use-default
+  ```
+
+- **Use a specific profile path:**
+  Set in `.env` (macOS example):
+  ```properties
+  CHROME_USER_DATA_DIR="$HOME/Library/Application Support/Google/Chrome"
+  CHROME_PROFILE_DIR=Default
+  ```
+  Then launch:
+  ```sh
+  npm run chrome:cdp:profile
+  ```
+
+- **Clone default profile without incognito:**
+  ```sh
+  npm run chrome:cdp:clone-default
+  ```
+
+### Set the CDP URL
+
+Add to `.env` (or export in your shell):
+
+```properties
+PLAYWRIGHT_CDP_URL=http://localhost:9222
+# or
+CDP_URL=http://localhost:9222
+```
+
+### Incognito context toggle (Playwright-side)
+
+Force Playwright to use a fresh incognito context when attaching via CDP (in addition to the browser's incognito window):
+
+```properties
+PLAYWRIGHT_CDP_INCOGNITO=true
+```
+
+Notes:
+- `npm run chrome:cdp` clones your default profile and launches in incognito mode (extensions/settings preserved in temp profile, incognito isolation).
+- Incognito windows do not load extensions unless explicitly allowed in each extension's settings.
+- Using `PLAYWRIGHT_CDP_INCOGNITO=true` creates an additional fresh incognito context in Playwright (independent of the browser's incognito window).
+```
+
+Notes:
+- Quit Chrome before using your real profile (Options A/B) to avoid profile lock or data corruption.
+- http basic auth via `httpCredentials` cannot be applied when attaching to a persistent context. Pre-authenticate in that profile or run without CDP for those tests.
+- CDP attach affects UI execution; API calls run normally.
+- Clear the temporary clone by removing `/tmp/chrome-dev-profile` if needed.
 
 ### 5. View Results
 
@@ -428,10 +507,10 @@ For issues or feature requests, please contact the project owner or open an issu
 
 ## Example Command Line Usage
 
-Run with custom environment for a single test run:
+Run with custom options for a single test run:
 
 ```sh
-ENVIRONMENT=INT COUNTRY=JP PRODUCT=UCOS npx playwright test
+ENVIRONMENT=INT COUNTRY=TR PRODUCT=NCOS TEST_MODE=api npx playwright test -g "AI Smart Search - Sanity Test"
 ```
 
 ---

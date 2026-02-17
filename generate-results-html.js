@@ -1,9 +1,13 @@
 const fs = require('fs');
 const path = require('path');
 
-// Find all search-results*.json files in ./results/json
-const resultsJsonDir = path.join(__dirname, 'results', 'json');
-const files = fs.readdirSync(resultsJsonDir).filter(f => f.startsWith('search-results') && f.endsWith('.json'));
+// Find all search-results*.json files in ./results/json or provided path
+// Usage: node generate-results-html.js [path-to-json-dir]
+const inputPath = process.argv[2];
+const resultsJsonDir = inputPath 
+  ? (path.isAbsolute(inputPath) ? inputPath : path.join(process.cwd(), inputPath))
+  : path.join(__dirname, 'results', 'json');
+const files = fs.readdirSync(resultsJsonDir).filter(f => f.includes('search-results') && f.endsWith('.json'));
 let allResults = [];
 files.forEach(file => {
   const data = JSON.parse(fs.readFileSync(path.join(resultsJsonDir, file), 'utf8'));
@@ -23,11 +27,11 @@ allResults = allResults.map(r => {
     // For API results, treat "no_results" scenarios as successful responses (not errors)
     // Also treat expected status code matches as successful
     const isExpectedStatusCode = r.openaiEvaluation && r.openaiEvaluation.includes('Expected status code') && r.openaiEvaluation.includes('received as expected');
-    const isActualError = r.hasError && r.error && !r.error.includes('no_results') && !isExpectedStatusCode;
-    const hasValidMessage = r.apiResults?.smartSearchResponse?.message_to_user || r.apiResults?.message_to_user || isExpectedStatusCode;
+    const isActualError = r.hasError && !isExpectedStatusCode;
+    const hasValidMessage = r.apiResults?.data?.smartSearch?.message || r.apiResults?.message || isExpectedStatusCode;
     
-    const resultText = r.apiResults?.smartSearchResponse?.message_to_user || 
-                      r.apiResults?.message_to_user || 
+    const resultText = r.apiResults?.data?.smartSearch?.message || 
+                      r.apiResults?.message || 
                       'No message available';
     
     return {
@@ -99,6 +103,8 @@ let html = `<!DOCTYPE html>
     .badge-fail { background-color: #dc3545; }
     #chart-container, #chart-title-container { min-height: 350px; }
     #describeChart, #titleChart { min-height: 320px; max-height: 400px; width: 100%; display: block; }
+    .query-text { width: 30%; word-break: break-word; }
+    .result-text { max-width: 400px; overflow-wrap: break-word; width: 50%; }
   </style>
 </head>
 <body>
@@ -401,10 +407,35 @@ exportBtn.addEventListener("click", function() {
 </html>
 `;
 
-const safeTimestamp = new Date().toISOString().replace(/[:.]/g, '-').replace('T', '_').slice(0,19);
+// Extract metadata from the path or filenames
+let country = 'UNKNOWN';
+let product = 'UNKNOWN';
+let dateStr = new Date().toISOString().slice(0, 10);
+let env = 'UNKNOWN';
+
+// Try to extract from directory path (e.g., results/json/2026-02-03_INT)
+const dirParts = resultsJsonDir.split(path.sep);
+const lastDir = dirParts[dirParts.length - 1];
+const dirMatch = lastDir.match(/^(\d{4}-\d{2}-\d{2})_(\w+)$/);
+if (dirMatch) {
+  dateStr = dirMatch[1];
+  env = dirMatch[2];
+}
+
+// Try to extract country and product from the first JSON filename
+// Expected format: TR_NCOS_search-results_...
+if (files.length > 0) {
+  const firstFile = files[0];
+  const fileMatch = firstFile.match(/^([A-Z]{2})_([A-Z]+)_/);
+  if (fileMatch) {
+    country = fileMatch[1];
+    product = fileMatch[2];
+  }
+}
+
 const outputDir = path.join(__dirname, 'results', 'html');
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-const outputFile = path.join(outputDir, `search-results-all-${safeTimestamp}.html`);
+const outputFile = path.join(outputDir, `search-results-all_${country}_${product}_${dateStr}_${env}.html`);
 fs.writeFileSync(outputFile, html, 'utf8');
 
 console.log(`Results written to ${outputFile}`);

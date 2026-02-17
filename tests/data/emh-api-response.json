@@ -1,0 +1,2394 @@
+{
+  "data": {
+    "search": {
+      "facets": {
+        "brand": {
+          "values": [
+            {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz",
+              "count": 182
+            },
+            {
+              "label": "Marka",
+              "formattedValue": "Mercedes-AMG",
+              "value": "Mercedes-AMG",
+              "count": 17
+            },
+            {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Maybach",
+              "value": "Mercedes-Maybach",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "modelIdentifier": {
+          "values": [
+            {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A",
+              "count": 20
+            },
+            {
+              "label": "Model",
+              "formattedValue": "C-Serisi",
+              "value": "C",
+              "count": 83
+            },
+            {
+              "label": "Model",
+              "formattedValue": "CLA",
+              "value": "CLA",
+              "count": 6
+            },
+            {
+              "label": "Model",
+              "formattedValue": "E-Serisi",
+              "value": "E",
+              "count": 57
+            },
+            {
+              "label": "Model",
+              "formattedValue": "EQA",
+              "value": "EQA",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "EQS",
+              "value": "EQS",
+              "count": 3
+            },
+            {
+              "label": "Model",
+              "formattedValue": "G-Serisi",
+              "value": "G",
+              "count": 4
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLB",
+              "value": "GLB",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC",
+              "count": 22
+            },
+            {
+              "label": "Model",
+              "formattedValue": "Mercedes-AMG GT",
+              "value": "AMGGT",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "S-Serisi",
+              "value": "S",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "SL",
+              "value": "SL",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "motorization": {
+          "values": [
+            {
+              "value": "A 200",
+              "count": 11
+            },
+            {
+              "value": "A 45 S 4MATIC+",
+              "count": 9
+            },
+            {
+              "value": "C 200 4MATIC",
+              "count": 83
+            },
+            {
+              "value": "CLA 45 S 4MATIC+",
+              "count": 6
+            },
+            {
+              "value": "E 180",
+              "count": 37
+            },
+            {
+              "value": "E 220 d 4MATIC",
+              "count": 20
+            },
+            {
+              "value": "EQA 250+",
+              "count": 1
+            },
+            {
+              "value": "EQS 450 4MATIC",
+              "count": 3
+            },
+            {
+              "value": "G 580",
+              "count": 4
+            },
+            {
+              "value": "GLB 200",
+              "count": 1
+            },
+            {
+              "value": "GLC 300 d 4MATIC",
+              "count": 4
+            },
+            {
+              "value": "GT 43",
+              "count": 1
+            },
+            {
+              "value": "S 580",
+              "count": 1
+            },
+            {
+              "value": "SL 43",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "bodyType": {
+          "values": [
+            {
+              "label": "Gövde Tipi",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE",
+              "count": 144
+            },
+            {
+              "label": "Gövde Tipi",
+              "value": "SUV_OFFROADER",
+              "count": 28
+            },
+            {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK",
+              "count": 20
+            },
+            {
+              "label": "Gövde Tipi",
+              "formattedValue": "Coupé",
+              "value": "COUPE",
+              "count": 7
+            },
+            {
+              "label": "Gövde Tipi",
+              "value": "CABRIO_ROADSTER",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "stockType": {
+          "values": [
+            {
+              "value": "IN_PIPELINE",
+              "count": 52
+            },
+            {
+              "value": "AVAILABLE",
+              "count": 148
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "price": {
+          "values": {
+            "min": 3263131,
+            "max": 33610110,
+            "count": 200
+          },
+          "facetType": "RANGE"
+        },
+        "monthlyRate": {
+          "facetType": "RANGE"
+        },
+        "campaigns": {
+          "values": [
+            {
+              "formattedValue": "RCOC--2757 TR Unit test vehicle with Mandatory",
+              "value": "a6fe1183",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "fuelType": {
+          "values": [
+            {
+              "label": "Yakıt Tipi",
+              "formattedValue": "Benzin",
+              "value": "PETROL",
+              "count": 167
+            },
+            {
+              "label": "Yakıt Tipi",
+              "formattedValue": "Benzin/Elektrik",
+              "value": "PETROL_ELECTRIC_PLUGIN_HYBRID",
+              "count": 1
+            },
+            {
+              "label": "Yakıt Tipi",
+              "formattedValue": "Dizel",
+              "value": "DIESEL",
+              "count": 24
+            },
+            {
+              "label": "Yakıt Tipi",
+              "formattedValue": "Elektrik",
+              "value": "ELECTRIC",
+              "count": 8
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "enginePowerHP": {
+          "values": {
+            "min": 163,
+            "max": 587,
+            "count": 200
+          },
+          "facetType": "RANGE"
+        },
+        "driveType": {
+          "values": [
+            {
+              "label": "Tahrik türü",
+              "formattedValue": "",
+              "value": "UNDEFINED",
+              "count": 200
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "gearbox": {
+          "values": [
+            {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC",
+              "count": 200
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "modelYear": {
+          "values": {
+            "min": 2025,
+            "max": 2026,
+            "count": 200
+          },
+          "facetType": "RANGE"
+        },
+        "upholstery": {
+          "values": [
+            {
+              "formattedValue": "Bej",
+              "value": "UPHOLSTERY_COLOR_BEIGE",
+              "count": 13
+            },
+            {
+              "formattedValue": "Gri",
+              "value": "UPHOLSTERY_COLOR_GREY",
+              "count": 55
+            },
+            {
+              "formattedValue": "Kahverengi",
+              "value": "UPHOLSTERY_COLOR_BROWN",
+              "count": 120
+            },
+            {
+              "formattedValue": "Kırmızı",
+              "value": "UPHOLSTERY_COLOR_RED",
+              "count": 4
+            },
+            {
+              "formattedValue": "Siyah",
+              "value": "UPHOLSTERY_COLOR_BLACK",
+              "count": 8
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "packages": {
+          "values": [
+            {
+              "formattedValue": "Advanced Plus Paketi",
+              "value": "7a7f0974",
+              "count": 43
+            },
+            {
+              "formattedValue": "Premium paketi",
+              "value": "4b7d0799",
+              "count": 132
+            },
+            {
+              "formattedValue": "Premium Plus Paketi",
+              "value": "73b4093d",
+              "count": 18
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "lines": {
+          "values": [
+            {
+              "formattedValue": "AMG line",
+              "value": "20b704b9",
+              "count": 140
+            },
+            {
+              "formattedValue": "Electric Art tasarım konsepti",
+              "value": "f7c50e38",
+              "count": 3
+            },
+            {
+              "formattedValue": "Exclusive",
+              "value": "2ae305d4",
+              "count": 38
+            },
+            {
+              "formattedValue": "Progressive (modern)",
+              "value": "80d309ab",
+              "count": 1
+            },
+            {
+              "formattedValue": "V8-Styling dış tasarım paketi",
+              "value": "22b40fd9",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "equipment": {
+          "values": [
+            {
+              "formattedValue": "360° kamerası",
+              "value": "531b08a0",
+              "count": 145
+            },
+            {
+              "formattedValue": "AIR-BALANCE",
+              "value": "2cc5050b",
+              "count": 4
+            },
+            {
+              "formattedValue": "Akıllı telefon entegrasyonu",
+              "value": "8780edb",
+              "count": 200
+            },
+            {
+              "formattedValue": "Ambiyans aydınlatması",
+              "value": "a9290c88",
+              "count": 200
+            },
+            {
+              "formattedValue": "AMG aerodinamik paketi",
+              "value": "8a410a33",
+              "count": 15
+            },
+            {
+              "formattedValue": "AMG Driver Package",
+              "value": "60be0849",
+              "count": 15
+            },
+            {
+              "formattedValue": "AMG DYNAMIC PLUS paketi",
+              "value": "7f180918",
+              "count": 1
+            },
+            {
+              "formattedValue": "AMG Performance High-End koltuk paketi",
+              "value": "521a0fbf",
+              "count": 15
+            },
+            {
+              "formattedValue": "AMG Performance koltuklar",
+              "value": "aa8d0b7c",
+              "count": 16
+            },
+            {
+              "formattedValue": "AMG TRACK PACE",
+              "value": "3c4005bf",
+              "count": 16
+            },
+            {
+              "formattedValue": "Arka aks direksiyon tertibatı",
+              "value": "f1280e4f",
+              "count": 44
+            },
+            {
+              "formattedValue": "Arka bölüm eğlence sistemi",
+              "value": "6b80efb",
+              "count": 1
+            },
+            {
+              "formattedValue": "Arka koltuk ısıtması",
+              "value": "ab1d0cfc",
+              "count": 83
+            },
+            {
+              "formattedValue": "Augmented Reality (artırılmış gerçeklik)",
+              "value": "1d8d164e",
+              "count": 148
+            },
+            {
+              "formattedValue": "Ayna paketi",
+              "value": "34810643",
+              "count": 138
+            },
+            {
+              "formattedValue": "Direksiyon asistanı",
+              "value": "83cd0ac5",
+              "count": 9
+            },
+            {
+              "formattedValue": "Direksiyon simidi ısıtması",
+              "value": "fa280f83",
+              "count": 10
+            },
+            {
+              "formattedValue": "Distronic mesafe sabitleyici",
+              "value": "dc1d0d0e",
+              "count": 8
+            },
+            {
+              "formattedValue": "EASY-PACK arka kapak",
+              "value": "6b4c0881",
+              "count": 28
+            },
+            {
+              "formattedValue": "ENERGIZING Paketi",
+              "value": "550a078c",
+              "count": 7
+            },
+            {
+              "formattedValue": "Ergonomik koltuklar",
+              "value": "780a09c0",
+              "count": 21
+            },
+            {
+              "formattedValue": "Gece paketi",
+              "value": "33a3062e",
+              "count": 53
+            },
+            {
+              "formattedValue": "Geri sürüş kamerası",
+              "value": "baa80d83",
+              "count": 57
+            },
+            {
+              "formattedValue": "Hafıza fonksiyonlu elektrikli ayarlanabilir koltuklar",
+              "value": "da2d1820",
+              "count": 136
+            },
+            {
+              "formattedValue": "Hyperscreen",
+              "value": "37be06a4",
+              "count": 3
+            },
+            {
+              "formattedValue": "Hırsızlık alarm sistemi",
+              "value": "ee370e44",
+              "count": 10
+            },
+            {
+              "formattedValue": "Isıtmalı ön cam",
+              "value": "82500ac8",
+              "count": 4
+            },
+            {
+              "formattedValue": "İklimlendirme",
+              "value": "57cf088d",
+              "count": 196
+            },
+            {
+              "formattedValue": "KEYLESS-GO",
+              "value": "29c604ff",
+              "count": 200
+            },
+            {
+              "formattedValue": "Koltuk iklimlendirmesi",
+              "value": "96e80af8",
+              "count": 100
+            },
+            {
+              "formattedValue": "Kör nokta yardımcısı",
+              "value": "c2850e01",
+              "count": 195
+            },
+            {
+              "formattedValue": "LED farlar",
+              "value": "2b1a0589",
+              "count": 32
+            },
+            {
+              "formattedValue": "MBUX multimedya sistemi",
+              "value": "97e00ad1",
+              "count": 197
+            },
+            {
+              "formattedValue": "Navigasyon sistemi",
+              "value": "6ede0959",
+              "count": 200
+            },
+            {
+              "formattedValue": "Park yardımcı sistemi",
+              "value": "ada20c52",
+              "count": 200
+            },
+            {
+              "formattedValue": "PRE-SAFE",
+              "value": "1fd1044f",
+              "count": 10
+            },
+            {
+              "formattedValue": "Ses sistemi",
+              "value": "35510665",
+              "count": 200
+            },
+            {
+              "formattedValue": "Superscreen",
+              "value": "381606ab",
+              "count": 60
+            },
+            {
+              "formattedValue": "Sürgülü tavan",
+              "value": "74260a6b",
+              "count": 198
+            },
+            {
+              "formattedValue": "Sürücü ekranı",
+              "value": "810e0b67",
+              "count": 193
+            },
+            {
+              "formattedValue": "Sürüş yardımcı paketi",
+              "value": "fdfd0f6b",
+              "count": 9
+            },
+            {
+              "formattedValue": "Trafik işareti yardımcısı",
+              "value": "ff2d0ff1",
+              "count": 11
+            },
+            {
+              "formattedValue": "Uzun far yardımcısı",
+              "value": "9e340c99",
+              "count": 200
+            },
+            {
+              "formattedValue": "Ön cam sanal göstergesi",
+              "value": "c3da0cc9",
+              "count": 39
+            },
+            {
+              "formattedValue": "Ön koltuk ısıtması",
+              "value": "af700d44",
+              "count": 100
+            },
+            {
+              "formattedValue": "Şerit takip yardımcısı",
+              "value": "de6c0ede",
+              "count": 200
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "color": {
+          "values": [
+            {
+              "formattedValue": "Beyaz",
+              "value": "PAINT_COLOR_WHITE",
+              "count": 14
+            },
+            {
+              "formattedValue": "Gri",
+              "value": "PAINT_COLOR_GREY",
+              "count": 74
+            },
+            {
+              "formattedValue": "Gümüş",
+              "value": "PAINT_COLOR_SILVER",
+              "count": 11
+            },
+            {
+              "formattedValue": "Kırmızı",
+              "value": "PAINT_COLOR_RED",
+              "count": 1
+            },
+            {
+              "formattedValue": "Siyah",
+              "value": "PAINT_COLOR_BLACK",
+              "count": 100
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "generation": {
+          "values": [],
+          "facetType": "MULTI_VALUE"
+        },
+        "seats": {
+          "values": [
+            {
+              "value": 2,
+              "count": 1
+            },
+            {
+              "value": 4,
+              "count": 1
+            },
+            {
+              "value": 5,
+              "count": 198
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "payload": {
+          "facetType": "RANGE"
+        },
+        "maximumWeight": {
+          "values": {
+            "min": 1870,
+            "max": 3500,
+            "count": 200
+          },
+          "facetType": "RANGE"
+        }
+      },
+      "navigation": {
+        "currentLimit": 12,
+        "currentPage": 0,
+        "currentSortingCode": "price-asc",
+        "totalPages": 17,
+        "totalResults": 200
+      },
+      "results": [
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0011261",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-02",
+          "identification": {
+            "code": "W177_0558115759_TR_737190",
+            "commissionNumber": "0558115759",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0014053",
+            "mpcId": "GS0004708",
+            "variantId": "191-654-9568c5923a5fc9733994950547e2917b-GS0014053",
+            "vxVehicleId": "737190",
+            "allDealers": [
+              "GS0014053"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZgkfZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-13",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC00110725",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-02",
+          "identification": {
+            "code": "W177_0558115750_TR_737284",
+            "commissionNumber": "0558115750",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS00112593",
+            "mpcId": "GS0004708",
+            "variantId": "787-654-9568c5923a5fc9733994950547e2917b-GS00112593",
+            "vxVehicleId": "737284",
+            "allDealers": [
+              "GS00112593"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-06",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0008307",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-02",
+          "identification": {
+            "code": "W177_0558115754_TR_737306",
+            "commissionNumber": "0558115754",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004708",
+            "variantId": "787-654-9568c5923a5fc9733994950547e2917b",
+            "vxVehicleId": "737306",
+            "allDealers": [
+              "GS0010422",
+              "GS0032780"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-06",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0050200",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558124918_TR_790481",
+            "commissionNumber": "0558124918",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0061674",
+            "mpcId": "GS0004708",
+            "variantId": "191-654-9568c5923a5fc9733994950547e2917b-GS0061674",
+            "vxVehicleId": "790481",
+            "allDealers": [
+              "GS0061674"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZgkfZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-22",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC00110166",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558124799_TR_790482",
+            "commissionNumber": "0558124799",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS00111241",
+            "mpcId": "GS0004708",
+            "variantId": "922-654-9568c5923a5fc9733994950547e2917b-GS00111241",
+            "vxVehicleId": "790482",
+            "allDealers": [
+              "GS00111241"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZUnRZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-23",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0011261",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "141 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "141"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558125066_TR_790584",
+            "commissionNumber": "0558125066",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0014053",
+            "mpcId": "GS0004708",
+            "variantId": "787-641-ab22906eac81cf12850f158d08bb1f34-GS0014053",
+            "vxVehicleId": "790584",
+            "allDealers": [
+              "GS0014053"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNxFqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PQqbApetbI5uscDQC3UkTkzNGLdm7jucZhKVHtc%25YhQDd9ZIXGEibEJ0l8o1OB2GQnbAp0TwI5uBv4QC3D76kzN7z6m7jKeIhKVvsL%25vqLUjyLRanfYaxHbJrH18j%25n8520R%256d9lo25DAIwiwOoZ1qgqyfyzda8CD7dB3AF6h0HJ&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-06",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0011261",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-02",
+          "identification": {
+            "code": "W177_0558125061_TR_790580",
+            "commissionNumber": "0558125061",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0014053",
+            "mpcId": "GS0004708",
+            "variantId": "787-654-9568c5923a5fc9733994950547e2917b-GS0014053",
+            "vxVehicleId": "790580",
+            "allDealers": [
+              "GS0014053"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-01",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0012522",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558125045_TR_790475",
+            "commissionNumber": "0558125045",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0015844",
+            "mpcId": "GS0004708",
+            "variantId": "787-654-9568c5923a5fc9733994950547e2917b-GS0015844",
+            "vxVehicleId": "790475",
+            "allDealers": [
+              "GS0015844"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-05",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0024546",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558124834_TR_790453",
+            "commissionNumber": "0558124834",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "dealerId": "GS0030474",
+            "mpcId": "GS0004708",
+            "variantId": "787-654-9568c5923a5fc9733994950547e2917b-GS0030474",
+            "vxVehicleId": "790453",
+            "allDealers": [
+              "GS0030474"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-28",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "consignorCompanyId": "GC0001505",
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558124961_TR_790893",
+            "commissionNumber": "0558124961",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004708",
+            "variantId": "191-654-9568c5923a5fc9733994950547e2917b",
+            "vxVehicleId": "790893",
+            "allDealers": [
+              "GS0002372",
+              "GS0079461"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZgkfZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-28",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "GC_CONSIGNMENT_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MULTIBEAM LED teknolojili farlar"
+              }
+            ]
+          },
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "6,2 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "6.2"
+              },
+              {
+                "displayValue": "140 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "140"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "estimatedArrivalDate": "2026-12-04",
+          "identification": {
+            "code": "W177_0558124932_TR_790900",
+            "commissionNumber": "0558124932",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004708",
+            "variantId": "922-654-9568c5923a5fc9733994950547e2917b",
+            "vxVehicleId": "790900",
+            "allDealers": [
+              "GS0002369",
+              "GS0002370",
+              "GS0002372",
+              "GS0002373",
+              "GS0002376",
+              "GS0002380",
+              "GS0002381",
+              "GS0002383",
+              "GS0002385",
+              "GS0002387",
+              "GS0002390",
+              "GS0002391",
+              "GS0002393",
+              "GS0010422",
+              "GS00104468",
+              "GS00110539",
+              "GS00110691",
+              "GS00110775",
+              "GS00111241",
+              "GS00112069",
+              "GS00112070",
+              "GS00112071",
+              "GS00112072",
+              "GS00112386",
+              "GS00112593",
+              "GS00112661",
+              "GS00112666",
+              "GS00113247",
+              "GS0012490",
+              "GS0012503",
+              "GS0012512",
+              "GS0012515",
+              "GS0014053",
+              "GS0014057",
+              "GS0014066",
+              "GS0014933",
+              "GS0015844",
+              "GS0016592",
+              "GS0028780",
+              "GS0030474",
+              "GS0031877",
+              "GS0032710",
+              "GS0032780",
+              "GS0035577",
+              "GS0039757",
+              "GS0042942",
+              "GS0044947",
+              "GS0050336",
+              "GS0052271",
+              "GS0061674",
+              "GS0062054",
+              "GS0076602",
+              "GS0079461",
+              "GSTRC10000",
+              "GSTRC10008",
+              "GSTRC10030",
+              "GSTRC10034",
+              "GSTRC10042",
+              "GSTRC10043",
+              "GSTRC10047",
+              "GSTRC10115"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/images/dynamic/stage/TR/177087/806_056/iris.png?q=COSY-EU-100-1713d0VXqNEeqtyO67PobzIr3eWsrrCsdRRzwQZUnRZbMw3SGtGyUtsd2sDcUfp8fXGEuiRJ0l3ItOB2NQObApjTXI5uV62QC3qXFkzNRLkm7jA6ZhKV5Kh%25vqCJjyLRgcDYaxPXxrH1eHDn8wsocoiZUIEM4FnCwTg9otn6PDMSoSeWza3tsd7oTcUfKmcXGE4yBJ0lg0VOB2PSObApet9I5usQMQC3UvWkzNptwm7jaSthymI9WFwbcUf8OfXGEHnxJ0lUIrOB2ZNCbAp5AoI5uC4JQC3zg7kzN7Pum7jKyDhKVvXt%25vqLukyL0fsjko9wdYf0ZGJRaRcYxqN8NmDmA9KLBZ59U2G1oQsvt&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-24",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "IN_PIPELINE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "120 kW (163 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "163 bg",
+                  "value": 163,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "17708710",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Hatchback",
+              "value": "HATCHBACK"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "A 200",
+            "name": "A 200 FL AMG",
+            "typeClass": "W177",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "A-Serisi",
+              "value": "A"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "AMG DYNAMIC PLUS Paketi"
+              },
+              {
+                "label": "Sürüş Yardım Paketi PLUS"
+              },
+              {
+                "label": "AMG Performance spor koltuklar"
+              }
+            ]
+          },
+          "emissionAndConsumption": {
+            "attributes": [
+              {
+                "displayValue": "10,3 l/100km",
+                "id": "FuelEconomy",
+                "label": "Karma Yakıt Tüketimi",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "l/100km",
+                "value": "10.3"
+              },
+              {
+                "displayValue": "235 gCO₂/km",
+                "id": "Emissions",
+                "label": "Karma CO₂ Emisyonu",
+                "mustShowIn": [
+                  "SHORTOVERVIEW",
+                  "DETAILVIEW"
+                ],
+                "unit": "gCO₂/km",
+                "value": "235"
+              }
+            ],
+            "footnotes": "Belirtilen değerler yasal olarak şart koşulan ölçme teknikleri ile elde edilmiştir. 2017/1153 (AB) sayılı uygulama direktifinin 2. maddesinin 1 numaralı hükmüne göre belirlenen “WLTP-CO2 değerleri” söz konusudur. Yakıt tüketimi değerleri bu değerler temelinde hesaplanmıştır. Elektrik tüketimi, 692/2008/EG yönetmeliği uyarınca tespit edilmiştir.",
+            "testProcedure": "WLTP"
+          },
+          "identification": {
+            "code": "C192_0558114692_TR_748137",
+            "commissionNumber": "0558114692",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004708",
+            "variantId": "992-824-19d6b8e02eb981c823a2015bbc1735fc",
+            "vxVehicleId": "748137",
+            "allDealers": [
+              "GS0002369",
+              "GS0002370",
+              "GS0002372",
+              "GS0002373",
+              "GS0002376",
+              "GS0002380",
+              "GS0002381",
+              "GS0002383",
+              "GS0002385",
+              "GS0002387",
+              "GS0002390",
+              "GS0002391",
+              "GS0002393",
+              "GS0010422",
+              "GS00104468",
+              "GS00110539",
+              "GS00110691",
+              "GS00110775",
+              "GS00111241",
+              "GS00112069",
+              "GS00112070",
+              "GS00112071",
+              "GS00112072",
+              "GS00112386",
+              "GS00112593",
+              "GS00112661",
+              "GS00112666",
+              "GS00113247",
+              "GS0012490",
+              "GS0012503",
+              "GS0012512",
+              "GS0012515",
+              "GS0014053",
+              "GS0014057",
+              "GS0014066",
+              "GS0014933",
+              "GS0015844",
+              "GS0016592",
+              "GS0028780",
+              "GS0030474",
+              "GS0031877",
+              "GS0032710",
+              "GS0032780",
+              "GS0035577",
+              "GS0039757",
+              "GS0042942",
+              "GS0044947",
+              "GS0050336",
+              "GS0052271",
+              "GS0061674",
+              "GS0062054",
+              "GS0076602",
+              "GS0079461",
+              "GSTRC10000",
+              "GSTRC10008",
+              "GSTRC10030",
+              "GSTRC10034",
+              "GSTRC10042",
+              "GSTRC10043",
+              "GSTRC10047",
+              "GSTRC10115"
+            ]
+          },
+          "images": {
+            "default": "https://assets.oneweb.mercedes-benz.com/iris/iris.png?COSY-EU-100-1713d0VXqrheqtyO67PobzIr3eWsrrCsdRRzwQZUkRZbMw3SGtlaItsd2HtcUfpMqXGEjnmJ0leYhOB2sB5bApUkbI5uLoYQC3ahQkzNHt9m7j82DhKVi%25N%25vqmvZyLRhYmYax%25t8rH1GIdn8w7O4oiZKiEM4FvSlTg9LY96PDaGbSeWFXMtsdB%25ycJtTjqNuMYax54xrH1Ajqn8wusIoiZ46pM4FgRQTg735wrcldu637SlaW19Q6DF1ssfjcVWyDVS%25qjuauQFQ0ZzKG1BZeEsVDFjH6icWf4NfCQR&&BKGND=9&IMGT=P27&POV=BE030"
+          },
+          "productionDate": "2025-06-17",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Yakıt Tipi",
+                "formattedValue": "Benzin",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Motor Gücü",
+                "formattedValue": "310 kW (421 bg)",
+                "combustionKw": {
+                  "label": "kW cinsinden güç",
+                  "formattedValue": "310 kW",
+                  "value": 310,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "BG cinsinden güç",
+                  "formattedValue": "421 bg",
+                  "value": 421,
+                  "unit": "bg"
+                },
+                "combinedKw": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "310 kW",
+                  "value": 310,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "Sistem gücü bg cinsinden",
+                  "formattedValue": "421 bg",
+                  "value": 421,
+                  "unit": "bg"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Vites",
+              "formattedValue": "Otomatik",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "19234210",
+            "bodyType": {
+              "label": "Gövde Tipi",
+              "formattedValue": "Coupé",
+              "value": "COUPE"
+            },
+            "brand": {
+              "label": "Marka",
+              "formattedValue": "Mercedes-AMG",
+              "value": "Mercedes-AMG"
+            },
+            "category": {
+              "label": "Araç kategorisi",
+              "formattedValue": "Özel araç",
+              "value": "PC"
+            },
+            "modelYear": 2025,
+            "modelYearCode": "806",
+            "motorization": "GT 43",
+            "name": "Mercedes-AMG GT 43",
+            "typeClass": "C192",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "Mercedes-AMG GT",
+              "value": "AMGGT"
+            }
+          },
+          "wholesale": false
+        }
+      ]
+    }
+  }
+}
