@@ -97,7 +97,7 @@ export async function processAndLogResult({
   console.log(`${icon} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${query}'`);
-  console.log(`Response:      '${results}'`);
+  console.log(`Response:      '${smartSearchMessage}'`);
   if (lang !== "en") {
     const queryEn = await fetchTranslation(query, "en");
     const smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");

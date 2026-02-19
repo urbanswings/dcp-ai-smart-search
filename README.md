@@ -505,6 +505,86 @@ For issues or feature requests, please contact the project owner or open an issu
 
 ---
 
+
+## Using Chrome DevTools Protocol (CDP) with Playwright
+
+You can run Playwright UI tests by attaching to an already running Chrome browser using the Chrome DevTools Protocol (CDP). This is useful for debugging, using a persistent browser profile, or running tests in a visible session.
+
+### 1. Start Chrome with Remote Debugging
+
+
+Start Chrome with the remote debugging port enabled (default is 9222):
+
+**On macOS:**
+
+```sh
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --remote-debugging-port=9222
+```
+
+Or (recommended, avoids escaping issues):
+
+```sh
+open -a "Google Chrome" --args --remote-debugging-port=9222
+```
+
+If you see `no such file or directory`, make sure Google Chrome is installed in your `/Applications` folder. You can also check the path by running:
+
+```sh
+ls /Applications/Google\ Chrome.app/Contents/MacOS/
+```
+
+**On Windows or Linux:**
+
+```sh
+chrome --remote-debugging-port=9222
+```
+
+Or use the provided npm script to launch Chrome with a cloned profile in incognito mode:
+
+```sh
+npm run chrome:cdp
+```
+
+### 2. Set the CDP URL
+
+Add the following to your `.env` file (or export in your shell):
+
+```properties
+PLAYWRIGHT_CDP_URL=http://localhost:9222
+# or
+CDP_URL=http://localhost:9222
+```
+
+Optionally, to force Playwright to use a fresh incognito context when attaching via CDP, set:
+
+```properties
+PLAYWRIGHT_CDP_INCOGNITO=true
+```
+
+### 3. Run Tests Using CDP
+
+Run tests with the CDP-attached browser:
+
+```sh
+npm run test:cdp
+# or for UI-only
+npm run test:cdp:ui-only
+```
+
+You can also use Playwright's CLI directly:
+
+```sh
+npx playwright test --project=cdp
+```
+
+### Notes
+- When attaching to a persistent browser, HTTP basic auth via `httpCredentials` cannot be applied. Pre-authenticate in your profile if needed.
+- Incognito windows do not load extensions unless allowed in extension settings.
+- Remove `/tmp/chrome-dev-profile` to clear the temporary cloned profile if needed.
+- CDP attach only affects UI tests; API tests run as usual.
+
+---
+
 ## Example Command Line Usage
 
 Run with custom options for a single test run:

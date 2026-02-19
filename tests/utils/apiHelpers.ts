@@ -238,6 +238,7 @@ export class SearchApiClient {
   ): Promise<ApiSearchResult> {
     const responseStartTime = startTime || Date.now();
     try {
+      const env = process.env.ENVIRONMENT || "INT";
       const country = process.env.COUNTRY?.toUpperCase() || "TR";
       const language = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
       const product = process.env.PRODUCT?.toUpperCase() || "UCOS";
@@ -247,7 +248,9 @@ export class SearchApiClient {
       const endpoint =
         process.env.API_ENDPOINT_LOCAL === "true"
           ? "http://localhost:8080/api/v2/search"
-          : process.env.ENVIRONMENT?.toUpperCase() === "INT"
+          : env?.toUpperCase() === "PROD"
+          ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+          : env?.toUpperCase() === "INT"
           ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
           : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
 
@@ -362,7 +365,11 @@ export async function fetchEmhApiResponse(): Promise<any> {
 
   try {
     const apiUrl =
-      env?.toUpperCase() === "INT"
+      process.env.API_ENDPOINT_LOCAL === "true"
+        ? "http://localhost:8080/api/v2/search"
+        : env?.toUpperCase() === "PROD"
+        ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+        : env?.toUpperCase() === "INT"
         ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
         : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
 
