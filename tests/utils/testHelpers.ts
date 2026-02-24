@@ -245,8 +245,9 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
       );
     }
     context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      ...(httpCredentials ? { httpCredentials: httpCredentials } : {}),
+      viewport: null,
+      deviceScaleFactor: undefined,
+      ...(httpCredentials ? { httpCredentials } : {}),
     });
   }
   const page = await context.newPage();
@@ -317,10 +318,14 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
 }
 
 export async function handleCookieBanner(page: Page): Promise<void> {
-  await page
-    .locator(".cmm-cookie-banner__content")
-    .waitFor({ state: "visible" });
-  await page.click(".button--accept-all");
+  try {
+    await page
+      .locator(".cmm-cookie-banner__content")
+      .waitFor({ state: "visible", timeout: 6000 });
+    await page.click(".button--accept-all");
+  } catch (e) {
+    console.debug("[DEBUG] Cookie banner not visible, continuing execution...");
+  }
 }
 
 export async function performUISmartSearchAndGetResults(
