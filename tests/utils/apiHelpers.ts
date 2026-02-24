@@ -101,7 +101,7 @@ export class SearchApiClient {
     }
   }
 
-  async performSearch(query: string): Promise<ApiSearchResult> {
+  async performSearch(query: any): Promise<ApiSearchResult> {
     const startTime = Date.now();
     const project = process.env.PROJECT?.toUpperCase() || "DCP";
 
@@ -232,7 +232,7 @@ export class SearchApiClient {
   }
 
   private async performEmhSearchWithFacets(
-    query: string,
+    query: any,
     facets?: Record<string, any>,
     startTime?: number
   ): Promise<ApiSearchResult> {
@@ -254,11 +254,12 @@ export class SearchApiClient {
           ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
           : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
 
+      const actualInput = query?.value ?? query;
       const payload =
         process.env.API_ENDPOINT_LOCAL === "true"
           ? {
               request_id: "cf19cf25-90b6-406b-8388-fda1757e94e5",
-              user_query: query,
+              user_query: actualInput,
               country_code: country,
               sales_channel: salesChannel,
               lang: language,
@@ -272,7 +273,7 @@ export class SearchApiClient {
                 profileId: `${country}-${
                   product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES"
                 }`,
-                query: query,
+                query: actualInput,
                 sortingType: "price-asc",
               },
               query: `query AiSearch($isUcos: Boolean = false, $language: String, $limit: Int! = 10, $profileId: String!, $sortingType: String! = \"price-asc\", $query: String!) {\n  smartSearch(\n    language: $language\n    limit: $limit\n    profileId: $profileId\n    sortingType: $sortingType\n    query: $query\n  ) {\n    message\n    parameters {\n      contextType\n      isUcos\n      limit\n      sortingType\n      language\n      profileId\n      vehicleCategory\n      modelIdentifier\n      color\n      upholstery\n      brand\n      fuelType\n      price {\n        min\n        max\n      }\n      mileage {\n        min\n        max\n      }\n      modelYear {\n        min\n        max\n      }\n    }\n    facets {\n      brand {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      modelIdentifier {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      bodyType {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      price {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n          }\n          facetType\n        }\n      }\n      monthlyRate {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n          }\n          facetType\n        }\n      }\n      campaigns {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      fuelType {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      enginePowerHP {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n          }\n          facetType\n        }\n      }\n      gearbox {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      modelYear {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n          }\n          facetType\n        }\n      }\n      mileage {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n          }\n          facetType\n        }\n      }\n      upholstery {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      upholsteryPolish {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      packages {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      lines {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      equipment {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      colorPolish {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      color {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n          }\n          facetType\n        }\n      }\n      dealerId {\n        ... on SimpleCountFacet {\n          values {\n            value\n            count\n          }\n          facetType\n        }\n      }\n    }\n    navigation {\n      currentLimit\n      currentPage\n      currentSortingCode\n      totalPages\n      totalResults\n    }\n    results {\n      characteristics {\n        stockCategories {\n          code\n        }\n        highlights {\n          label\n        }\n        campaigns {\n          description\n          footnote\n          label\n        }\n      }\n      consignorCompanyId\n      emissionAndConsumption {\n        attributes {\n          displayValue\n          id\n          label\n          mustShowIn\n          unit\n          value\n        }\n        footnotes\n        testProcedure\n      }\n      envkv {\n        co2Classes {\n          primary\n          secondary\n        }\n      }\n      estimatedArrivalDate\n      identification {\n        code\n        commissionNumber\n        dcpProductType\n        dealerId\n        dealerGroupName\n        mpcId\n        variantId\n        vin\n        vxVehicleId\n        allDealers\n      }\n      images {\n        default\n      }\n      productionDate\n      preProductionVehicle\n      stock {\n        stockType\n      }\n      stockCategory\n      technicalInformation {\n        engine {\n          fuelType {\n            ...TechnicalData\n          }\n          power {\n            ...PowerData\n          }\n        }\n        transmission {\n          ...TechnicalData\n        }\n      }\n      usedVehicleData @include(if: $isUcos) {\n        mileage {\n          ...IntegerTechnicalData\n        }\n        firstRegistrationDate\n        vehicleInspection {\n          maintenance\n        }\n        warranty {\n          status\n          unlimitedDistance\n        }\n      }\n      vehicleModel {\n        baumuster\n        bodyType {\n          ...TechnicalData\n        }\n        brand {\n          ...TechnicalData\n        }\n        category {\n          ...TechnicalData\n        }\n        facelift\n        generation\n        modelYear\n        modelYearCode\n        motorization\n        name\n        steeringPosition {\n          ...TechnicalData\n        }\n        typeClass\n        vehicleClass {\n          ...TechnicalData\n        }\n      }\n      wholesale\n    }\n  }\n}\n\nfragment IntegerTechnicalData on IntegerTechnicalData {\n  label\n  formattedValue\n  value\n  unit\n}\n\nfragment PowerData on Power {\n  label\n  formattedValue\n  combustionKw {\n    ...IntegerTechnicalData\n  }\n  combustionHp {\n    ...IntegerTechnicalData\n  }\n  electricKw {\n    ...IntegerTechnicalData\n  }\n  electricHp {\n    ...IntegerTechnicalData\n  }\n  combinedKw {\n    ...IntegerTechnicalData\n  }\n  combinedHp {\n    ...IntegerTechnicalData\n  }\n}\n\nfragment TechnicalData on TechnicalData {\n  label\n  formattedValue\n  value\n  unit\n}`,
@@ -345,7 +346,7 @@ export class SearchApiClient {
 }
 
 export async function performApiSmartSearchAndGetResults(
-  query: string,
+  query: any = "",
   facets?: Record<string, any>
 ): Promise<ApiSearchResult> {
   const apiClient = new SearchApiClient();
@@ -451,7 +452,7 @@ export async function processAndLogApiResult({
   customEval,
   expectedStatusCode,
 }: {
-  query: string;
+  query: any;
   result: ApiSearchResult;
   testDescribe: string;
   testTitle: string;
@@ -564,6 +565,7 @@ export async function processAndLogApiResult({
   const icon = hasError ? "❌" : "✅";
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
   const projectEnv = process.env.PROJECT?.toUpperCase();
+  const actualInput = query?.value ?? query;
   const smartSearchMessage =
     projectEnv === "EMH"
       ? result.results?.data?.smartSearch?.message ||
@@ -577,10 +579,10 @@ export async function processAndLogApiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${icon} ${evaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Query:         '${query}'`);
+  console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
   if (lang !== "en") {
-    const queryEn = await fetchTranslation(query, "en");
+    const queryEn = await fetchTranslation(actualInput, "en");
     const smartSearchMessageEn = await fetchTranslation(
       smartSearchMessage,
       "en"

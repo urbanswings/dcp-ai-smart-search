@@ -64,13 +64,13 @@ export async function processAndLogResult({
   testTitle,
   customEval,
 }: {
-  query: string;
+  query: any;
   results: UiSearchResult;
   testDescribe: string;
   testTitle: string;
   customEval?: (resultText: string) => Promise<string>;
 }) {
-
+  const actualInput = query?.value ?? query;
   const smartSearchMessage = results.results;
   let openaiEvaluation: string;
   let passed: boolean;
@@ -96,10 +96,10 @@ export async function processAndLogResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${icon} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Query:         '${query}'`);
+  console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
   if (lang !== "en") {
-    const queryEn = await fetchTranslation(query, "en");
+    const queryEn = await fetchTranslation(actualInput, "en");
     const smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");
     console.log(`Query (EN):    '${queryEn}'`);
     console.log(`Response (EN): '${smartSearchMessageEn}'`);
@@ -171,7 +171,10 @@ export async function evaluateSearchResult(
       );
     }
     return completion.choices[0].message.content ?? "No response from OpenAI.";
-  } catch (err) {
+  } catch (err: any) {
+    console.warn(
+        `[WARN] OpenAI Evaluation indicates failure: ${err.message}`
+      );
     return "Error from OpenAI.";
   }
 }
@@ -194,7 +197,10 @@ export async function getRandomVehicleCombinations(
 }
 
 export async function setupContextAndPage(browser?: Browser): Promise<Page> {
+  const country = COUNTRY || "KR";
+  const env = ENVIRONMENT || "PROD";  
   let httpCredentials;
+  
   if (ENVIRONMENT === "INT") {
     if (
       process.env.PROJECT === "DCP" &&
@@ -245,47 +251,59 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
       );
     }
     context = await browser.newContext({
-      viewport: { width: 1920, height: 1080 },
-      ...(httpCredentials ? { httpCredentials: httpCredentials } : {}),
+      viewport: null,
+      deviceScaleFactor: undefined,
+      ...(httpCredentials ? { httpCredentials } : {}),
     });
   }
   const page = await context.newPage();
 
-  // Intercept and override the response payload
-  await page.route(
-    "https://int.assets.oneweb.mercedes-benz.com/plugin/emh-dcps-mrktplc-vehicles-configuration/latest/ucos/int-01/config_kr.json",
-    async (route) => {
-      const response = await route.fetch();
-      const originalPayload = await response.json();
+  // Intercept and override the response payload only if OVERRIDE_CONFIG_FILE is set to 'true'
+  if (process.env.OVERRIDE_CONFIG_FILE === 'true') {
+    await page.route(
+      (urlObj: URL) => {
+        const url = urlObj.toString();
+        // Use the value from the 'country' variable for the config file match
+        const countryCode = country.toLowerCase();
+        const configRegex = new RegExp(`config_${countryCode}\\.json$`, 'i');
+        return (
+          url.includes('emh-dcps-mrktplc-vehicles-configuration') &&
+          configRegex.test(url)
+        );
+      },
+      async (route) => {
+        const response = await route.fetch();
+        const originalPayload = await response.json();
 
-      // Modify the payload
-      const modifiedPayload = {
-        ...originalPayload,
-        srp: {
-          ...originalPayload.srp,
-          enableSmartSearch: true,
-          availableCategories: Array.isArray(
-            originalPayload.srp.availableCategories
-          )
-            ? [
-                {
-                  ...originalPayload.srp.availableCategories[0],
-                  enableSmartSearch: true,
-                },
-                ...originalPayload.srp.availableCategories.slice(1),
-              ]
-            : originalPayload.srp.availableCategories,
-        },
-      };
+        // Modify the payload
+        const modifiedPayload = {
+          ...originalPayload,
+          srp: {
+            ...originalPayload.srp,
+            enableSmartSearch: true,
+            availableCategories: Array.isArray(
+              originalPayload.srp.availableCategories
+            )
+              ? [
+                  {
+                    ...originalPayload.srp.availableCategories[0],
+                    enableSmartSearch: true,
+                  },
+                  ...originalPayload.srp.availableCategories.slice(1),
+                ]
+              : originalPayload.srp.availableCategories,
+          },
+        };
 
-      // Fulfill the route with the modified payload
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(modifiedPayload),
-      });
-    }
-  );
+        // Fulfill the route with the modified payload
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify(modifiedPayload),
+        });
+      }
+    );
+  }
 
   // Dynamically select URL file based on PROJECT
   let urlFilePath = "./tests/data/emh-urls.json";
@@ -296,8 +314,6 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   }
   const urlsFile = await fs.readFile(urlFilePath, "utf-8");
   const urls = JSON.parse(urlsFile);
-  const country = COUNTRY || "KR";
-  const env = ENVIRONMENT || "PROD";
   let url = urls[country]?.[env];
   if (!url) {
     // fallback to Korea PROD if not found
@@ -317,15 +333,19 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
 }
 
 export async function handleCookieBanner(page: Page): Promise<void> {
-  await page
-    .locator(".cmm-cookie-banner__content")
-    .waitFor({ state: "visible" });
-  await page.click(".button--accept-all");
+  try {
+    await page
+      .locator(".cmm-cookie-banner__content")
+      .waitFor({ state: "visible", timeout: 6000 });
+    await page.click(".button--accept-all");
+  } catch (e) {
+    console.debug("[DEBUG] Cookie banner not visible, continuing execution...");
+  }
 }
 
 export async function performUISmartSearchAndGetResults(
   page: Page,
-  inputText: string = "",
+  query: any = "",
   submitDisabled: boolean = false
 ): Promise<UiSearchResult> {
   const searchButton = page.locator(
@@ -342,12 +362,13 @@ export async function performUISmartSearchAndGetResults(
     await page.waitForTimeout(1000);
   }
 
+  const actualInput = query?.value ?? query;
   const input = page.locator(
     "wb7-input.smart-search__input wb7-grey-box input"
   );
-  console.debug(`[DEBUG] Filling input with: '${inputText}'`);
+  console.debug(`[DEBUG] Filling input with: '${actualInput}'`);
   await input.fill(" ");
-  await input.fill(inputText);
+  await input.fill(actualInput);
 
   if (submitDisabled) {
     const isDisabled = !(await searchButton.isEnabled());
@@ -363,7 +384,7 @@ export async function performUISmartSearchAndGetResults(
     if (isDisabled && notClickable) {
       console.debug("[DEBUG] PASSED: Submit Button Disabled");
       return {
-        query: inputText,
+        query: query,
         results: "[Script] PASSED: Submit Button Disabled",
         responseTime: 0,
         error: undefined,
@@ -371,7 +392,7 @@ export async function performUISmartSearchAndGetResults(
     } else {
       console.debug("[DEBUG] FAILED: Submit Button Enabled");
       return {
-        query: inputText,
+        query: query,
         results: "[Script] FAILED: Submit Button Enabled",
         responseTime: 0,
         error: "Submit button was enabled when it should be disabled",
@@ -420,7 +441,7 @@ export async function performUISmartSearchAndGetResults(
 
   const responseTime = Date.now() - startTime;
   return {
-    query: inputText,
+    query: query,
     results: resultText,
     responseTime,
     error: retries === 3 ? "Failed to retrieve results after 3 attempts" : undefined,
