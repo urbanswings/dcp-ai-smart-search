@@ -59,34 +59,174 @@
     "Find me sustainable or hybrid Mercedes-Benz models."
   ],
   "byFixedQuery": [
-    "show me sedan",
-    "cla 200",
-    "do you have coupe? it is a two-door car",
-    "i'm looking for a family car",
-    "find me a fast sports car",
-    "purple color cars only",
-    "i want an electric vehicle",
-    "i need a nice and beautiful compact vehicle",
-    "you guys have something from 2020 or silver color car",
-    "can you give suggestions?",
-    "i'm interested in convertibles",
-    "who are the top car manufacturers?",
-    "what is your return policy on vehicles?",
-    "do you offer financing options?",
-    "can i schedule a test drive?",
-    "is there any promotion?",
-    "what warranty do you provide on new cars?",
-    "shortlist me fuel-efficient cars but not diesel or hybrid",
-    "find me cars with advanced safety features and low mileage",
-    "can you list me bmw x5?",
-    "show me the list again",
-    "where is my order? i made a purchase last week but didn't receive any updates",
-    "i have not been contacted yet",
-    "recommend me the best pizza restaurants nearby",
-    "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
-    "give me a call at 123-456-7890 to discuss my car options",
-    "<p>i want to order</p>",
-    "tell me more about the CLA 911 GTS"
+    {
+      "value": "show me some nice sedans",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "cla 200",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "do you have coupe? it is a two-door car",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "i'm looking for a family car",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "find me a fast sports car",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "purple color cars only",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "i want an electric vehicle",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "i need a nice and beautiful compact vehicle",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "you guys have something from 2020 or silver color car",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "can you give suggestions?",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "i'm interested in convertibles",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "who are the top car manufacturers?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "what is your return policy on vehicles?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "do you offer financing options?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "can i schedule a test drive?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "is there any promotion?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "what warranty do you provide on new cars?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "shortlist me fuel-efficient cars but not diesel or hybrid",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "find me cars with advanced safety features and low mileage",
+      "shouldRecommend": true,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "can you list me bmw x5?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "show me the list again",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "where is my order? i made a purchase last week but didn't receive any updates",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "i have not been contacted yet",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "recommend me the best pizza restaurants nearby",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "give me a call at 123-456-7890 to discuss my car options",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "<p>i want to order</p>",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "tell me more about the CLA 911 GTS",
+      "shouldRecommend": false,
+      "shouldFilter": [],
+      "aiEvaluationHints": []
+    }
   ],
   "byBrandModel": [
     "Show me Mercedes-Benz S-Class Sedans",
@@ -100,8 +240,7 @@
     "I am looking for Mercedes-Benz GLB hatchback models with diesel fuel type and a power output of at least 658 kW.",
     "Are there any vehicles with a hybrid gasoline fuel type and specifically looking for the GLB model?"
   ],
-  "byFilterFacetsComplete": [
-  ],
+  "byFilterFacetsComplete": [],
   "noBrandModel": [
     "I'm in the market for a vehicle that combines impressive fuel efficiency with advanced safety features.",
     "Get me vehicles that have a sleek design and cutting-edge technology features to enhance my driving experience."
