@@ -69,9 +69,9 @@ export async function processAndLogResult({
   testDescribe: string;
   testTitle: string;
   customEval?: (resultText: string) => Promise<string>;
-}) {
+}): Promise<any> {
   const actualInput = query?.value ?? query;
-  const smartSearchMessage = results.results;
+  const smartSearchMessage = results.results.resultText;
   let openaiEvaluation: string;
   let passed: boolean;
   openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
@@ -98,15 +98,55 @@ export async function processAndLogResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
+  let queryEn = actualInput;
+  let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
-    const queryEn = await fetchTranslation(actualInput, "en");
-    const smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");
+    queryEn = await fetchTranslation(actualInput, "en");
+    smartSearchMessageEn = await fetchTranslation(
+      smartSearchMessage,
+      "en"
+    );
     console.log(`Query (EN):    '${queryEn}'`);
     console.log(`Response (EN): '${smartSearchMessageEn}'`);
   }
   console.log("\n");
 
-  return entry;
+  return {
+    timestamp: new Date().toISOString(),
+    timestampSG: new Date().toLocaleString("en-SG", {
+      timeZone: "Asia/Singapore",
+    }),
+    testMode: "ui",    
+    testDescribe,
+    testTitle,
+    query: {
+      [`${lang}`]: actualInput,
+      "en": queryEn,
+    },
+    response: {
+      [`${lang}`]: smartSearchMessage,
+      "en": smartSearchMessageEn,
+    },
+    resultText: smartSearchMessage,
+    smartSearchMessage,
+    openaiEvaluation,
+    facets: (() => {
+      const params = results.results.apiResponse?.data?.smartSearch?.parameters || {};
+      const excludeKeys = [
+        "contextType",
+        "isUcos",
+        "limit",
+        "sortingType",
+        "language",
+        "profileId",
+        "vehicleCategory",
+        "__typename"
+      ];
+      return Object.fromEntries(
+        Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
+      );
+    })(),
+  };
 }
 
 export async function generateOpenAIQuery(
@@ -347,7 +387,8 @@ export async function performUISmartSearchAndGetResults(
   page: Page,
   query: any = "",
   submitDisabled: boolean = false
-): Promise<UiSearchResult> {
+): Promise<any> {
+  const env = process.env.ENVIRONMENT || "INT";
   const searchButton = page.locator(
     ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button"
   );
@@ -400,6 +441,27 @@ export async function performUISmartSearchAndGetResults(
     }
   }
 
+  const endpoint =
+    process.env.API_ENDPOINT_LOCAL === "true"
+      ? "http://localhost:8080/api/v2/search"
+      : env?.toUpperCase() === "PROD"
+      ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+      : env?.toUpperCase() === "INT"
+      ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
+      : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+
+  let apiResponsePayload: any[] = [];
+  const responseListener = async (response: any) => {
+    try {
+      if (response.url().includes(endpoint)) {
+        apiResponsePayload = await response.json();
+      }
+    } catch (e) {
+      console.warn("[DEBUG] Failed to capture API response payload:", e);
+    }
+  };
+  page.on("response", responseListener);
+
   if (await searchButton.isVisible()) await searchButton.click();
 
   let retries = 0;
@@ -442,8 +504,12 @@ export async function performUISmartSearchAndGetResults(
   const responseTime = Date.now() - startTime;
   return {
     query: query,
-    results: resultText,
+    results: {
+      resultText,
+      apiResponsePayload,
+    },
     responseTime,
     error: retries === 3 ? "Failed to retrieve results after 3 attempts" : undefined,
+    apiResponse: apiResponsePayload,
   };
 }

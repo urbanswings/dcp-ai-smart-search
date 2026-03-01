@@ -158,7 +158,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("by-filter-facets-complete");
+    const outputFileName = getOutputFileName("by-fixed-query");
     await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
       outputFileName,
@@ -633,13 +633,13 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           });
 
           // Add filter widget validation to the entry
-          entry.filterValidation = {
-            filterText,
-            filterValue,
-            smartSearchPassed,
-            filterWidgetFound,
-            filterWidgetText,
-          };
+          // entry.filterValidation = {
+          //   filterText,
+          //   filterValue,
+          //   smartSearchPassed,
+          //   filterWidgetFound,
+          //   filterWidgetText,
+          // };
 
           uiResults.push(entry);
 
