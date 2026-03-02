@@ -9,6 +9,8 @@ import {
   evaluateSearchResult,
   getRandomVehicleCombinations,
   logTestContext,
+  generateUniqueQueries,
+  generateMultipleQueries,
 } from "./utils/testHelpers";
 import {
   processAndLogUiResult,
@@ -31,12 +33,19 @@ import {
   getOutputFileName,
   combineResults,
   ensureDirectoryExists,
+  isFixedQueriesOnly,
+  getProject,
+  getLanguageLocale,
+  ENVIRONMENT,
+  COUNTRY,
+  PRODUCT,
+  LANGUAGE,
+  runTestsAndSaveResults,
+  mergeQueries,
 } from "./utils/shared";
 
 // Load fixed queries from JSON file based on LANGUAGE
-const language = process.env.LANGUAGE
-  ? process.env.LANGUAGE.toLowerCase()
-  : "en";
+const language = LANGUAGE?.toLowerCase() || "en";
 const fixedQueriesFile =
   language !== "en" ? `fixed-queries-${language}.json` : "fixed-queries.json";
 const fixedQueriesPath = path.join(__dirname, `data/${fixedQueriesFile}`);
@@ -68,10 +77,10 @@ test.beforeAll(async () => {
 test.describe("AI Smart Search - Sanity Test", () => {
   const describeName = "Vehicles MB";
   test.beforeEach(async ({}, testInfo) => {
-    const env = process.env.ENVIRONMENT;
-    const country = process.env.COUNTRY;
-    const product = process.env.PRODUCT;
-    const project = process.env.PROJECT;
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
     await logTestContext({
@@ -110,73 +119,41 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // Fetch facets dynamically from API based on environment settings
-    const project = process.env.PROJECT || "DCP";
+    const project = getProject();
     const fixedQueries = fixedQueriesData.byFixedQuery;
     const facets = await fetchAndConvertFacets(
       emhApiResponse,
       dcpApiResponse,
       project
     );
-    const queries =
-      process.env.FIXED_QUERIES_ONLY === "true"
+    const queries = isFixedQueriesOnly()
         ? []
         : await generateQueriesFromFacets(facets, generateOpenAIQuery);
 
-    const uiResults = [];
-    const apiResults = [];
-    let allQueries = [...fixedQueries, ...queries];
-    if (process.env.FIXED_QUERIES_ONLY === "true") {
-      allQueries = [...fixedQueries];
-    }
+    const allQueries = mergeQueries(fixedQueries, queries);
 
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("by-fixed-query");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
-    );
-  });
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "by-fixed-query",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  }); 
 });
 
 test.describe("AI Smart Search - Vehicles MB", () => {
   const describeName = "Vehicles MB";
   test.beforeEach(async ({}, testInfo) => {
-    const env = process.env.ENVIRONMENT;
-    const country = process.env.COUNTRY;
-    const product = process.env.PRODUCT;
-    const project = process.env.PROJECT;
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
     await logTestContext({
@@ -218,62 +195,28 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     async ({ browser }) => {
       // Generate test queries
       const fixedQueries = fixedQueriesData.byBrandModel;
-      const genericQueries: string[] = [];
-      for (let i = 0; i < 8; i++) {
-        const query = await generateOpenAIQuery(
-          "You are a qurious car shopper. Generate a natural, human-like sentence that mentions specifically Mercedes-Benz and a random model. Only return the sentence.",
-          `Generate a unique, varied car buyer interest search sentence. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          50,
-          "I am looking for Mercedes-Benz C-Class."
-        );
-        if (query) genericQueries.push(query);
-      }
-      let allQueries = [...fixedQueries, ...genericQueries];
-      if (process.env.FIXED_QUERIES_ONLY === "true") {
-        allQueries = [...fixedQueries];
-      }
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("sentence-by-brand-model");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const genericQueries = await generateMultipleQueries(
+        8,
+        "You are a qurious car shopper. Generate a natural, human-like sentence that mentions specifically Mercedes-Benz and a random model. Only return the sentence.",
+        `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
+        50,
+        "I am looking for Mercedes-Benz C-Class."
       );
+      
+      const allQueries = mergeQueries(fixedQueries, genericQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "sentence-by-brand-model",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -282,77 +225,28 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.bySpecs;
-      const buyerQueries: string[] = [];
-      const seenQueries = new Set<string>();
-      let attempts = 0;
-      while (buyerQueries.length < 8 && attempts < 10) {
-        attempts++;
-        try {
-          let query = await generateOpenAIQuery(
-            "You are a creative car shopper. Generate a car buyer interest search sentence about preferences, engine, exterior, interior, etc. Do NOT mention any car brand or model. Each sentence should be unique, use a different sentence structure, and avoid starting with 'I am looking for', 'I am interested in', or similar. Vary the tone and perspective. Only return the sentence.",
-            `Generate a unique, varied car buyer interest search sentence. Do not start with 'I am looking for' or 'I am interested in'. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-            50,
-            "I am interested in buying a new car."
-          );
-          query = query.replace(/^"|"$/g, "");
-          const normalized = query.toLowerCase();
-          if (query && !seenQueries.has(normalized)) {
-            buyerQueries.push(query);
-            seenQueries.add(normalized);
-          }
-        } catch (err) {
-          if (!seenQueries.has("I am interested in buying a new car.")) {
-            buyerQueries.push("I am interested in buying a new car.");
-            seenQueries.add("i am interested in buying a new car.");
-          }
-        }
-      }
-      let allQueries = [...fixedQueries, ...buyerQueries];
-      if (process.env.FIXED_QUERIES_ONLY === "true") {
-        allQueries = [...fixedQueries];
-      }
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("buyer-sentence-by-specs");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const buyerQueries = await generateUniqueQueries(
+        8,
+        "You are a creative car shopper. Generate a car buyer interest search sentence about preferences, engine, exterior, interior, etc. Do NOT mention any car brand or model. Each sentence should be unique, use a different sentence structure, and avoid starting with 'I am looking for', 'I am interested in', or similar. Vary the tone and perspective. Only return the sentence.",
+        `Generate a unique, varied car buyer interest search sentence. Do not start with 'I am looking for' or 'I am interested in'. Generate in '${getLanguageLocale()}' language only.`,
+        50,
+        "I am interested in buying a new car."
       );
+      
+      const allQueries = mergeQueries(fixedQueries, buyerQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "buyer-sentence-by-specs",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -406,62 +300,31 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         const comboText = combo
           .map(({ facet, value }) => `${facet}: ${value}`)
           .join(", ");
-        const prompt = `Facet(s): ${comboText}. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`;
+        const prompt = `Facet(s): ${comboText}. Generate in '${getLanguageLocale()}' language only.`;
         const fallback = `Show me Mercedes-Benz vehicles with ${comboText}`;
         const query = await generateOpenAIQuery(
           "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
-          `${prompt}. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
+          `${prompt}. Generate in '${getLanguageLocale()}' language only.`,
           50,
           fallback
         );
         generatedQueries.push(query);
       }
-      let allQueries = [...fixedQueries, ...generatedQueries];
-      if (process.env.FIXED_QUERIES_ONLY === "true") {
-        allQueries = [...fixedQueries];
-      }
+      
+      const allQueries = mergeQueries(fixedQueries, generatedQueries);
 
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("sentence-by-filter-options");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "sentence-by-filter-options",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -470,7 +333,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
-      const project = process.env.PROJECT || "DCP";
+      const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete;
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
@@ -678,69 +541,38 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
-    const genericQueries: string[] = [];
-    for (let i = 0; i < 10; i++) {
-      const query = await generateOpenAIQuery(
-        "You are a qurious car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
-        `Generate a unique, varied car buyer interest search sentence. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        50,
-        "I am looking for a family car."
-      );
-      if (query) genericQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...genericQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("sentence-generic");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const genericQueries = await generateMultipleQueries(
+      10,
+      "You are a qurious car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
+      `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
+      50,
+      "I am looking for a family car."
     );
+    
+    const allQueries = mergeQueries(fixedQueries, genericQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "sentence-generic",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 });
 
 test.describe("AI Smart Search - Vehicles Non-MB", () => {
   const describeName = "Vehicles Non-MB";
   test.beforeEach(async ({}, testInfo) => {
-    const env = process.env.ENVIRONMENT;
-    const country = process.env.COUNTRY;
-    const product = process.env.PRODUCT;
-    const project = process.env.PROJECT;
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
     await logTestContext({
@@ -788,55 +620,27 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         const keyword = vehicleBrandsAndModels[i];
         const query = await generateOpenAIQuery(
           "You are a qurious car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
-          `${keyword}. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
+          `${keyword}. Generate in '${getLanguageLocale()}' language only.`,
           50,
           ""
         );
         generatedQueries.push(query);
       }
-      const allQueries = [...fixedQueries, ...generatedQueries];
+      
+      const allQueries = mergeQueries(fixedQueries, generatedQueries);
 
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("sentence-single");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "sentence-single",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -846,52 +650,21 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordMix;
       const combos = await getRandomVehicleCombinations(10, 2, 5);
-      let allQueries = [...fixedQueries, ...combos];
-      if (process.env.FIXED_QUERIES_ONLY === "true") {
-        allQueries = [...fixedQueries];
-      }
+      
+      const allQueries = mergeQueries(fixedQueries, combos);
 
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("keyword-mix");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "keyword-mix",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -902,55 +675,22 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       const fixedQueries = fixedQueriesData.keywordSingle;
       const file = await fs.readFile(queriesPath, "utf-8");
       const vehicleBrandsAndModels: string[] = JSON.parse(file);
-      let allQueries = [
-        ...fixedQueries,
-        ...vehicleBrandsAndModels.slice(0, 10),
-      ];
-      if (process.env.FIXED_QUERIES_ONLY === "true") {
-        allQueries = [...fixedQueries];
-      }
+      const vehicleKeywords = vehicleBrandsAndModels.slice(0, 10);
+      
+      const allQueries = mergeQueries(fixedQueries, vehicleKeywords);
 
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("keyword-single");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "keyword-single",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 });
@@ -958,10 +698,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 test.describe("AI Smart Search - Other Scenarios", () => {
   const describeName = "Other Scenarios";
   test.beforeEach(async ({}, testInfo) => {
-    const env = process.env.ENVIRONMENT;
-    const country = process.env.COUNTRY;
-    const product = process.env.PRODUCT;
-    const project = process.env.PROJECT;
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
     await logTestContext({
@@ -999,62 +739,28 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        "Generate a random search query that is NOT related to vehicles, cars, automotive, or ecommerce. Only return the sentence.",
-        `Generate a random unrelated search query. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        30,
-        "What is the weather today?"
-      );
-      if (query) openaiQueries.push(query);
-    }
-    let allQueries = [...fixedQueries, ...openaiQueries];
-    if (process.env.FIXED_QUERIES_ONLY === "true") {
-      allQueries = [...fixedQueries];
-    }
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("sentence-nonrelated");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      "Generate a random search query that is NOT related to vehicles, cars, automotive, or ecommerce. Only return the sentence.",
+      `Generate a random unrelated search query. Generate in '${getLanguageLocale()}' language only.`,
+      30,
+      "What is the weather today?"
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "sentence-nonrelated",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   test("Edge Case Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
@@ -1135,59 +841,28 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const openaiQueries = [];
-      for (let i = 0; i < 8; i++) {
-        const query = await generateOpenAIQuery(
-          "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
-          `Generate a unique Mercedes-Benz vehicle search sentence with negative or contradictory filters. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          60,
-          `Show me a Mercedes-Benz convertible with diesel engine and manual gearbox registered in 2030.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("negative-contradictory");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        8,
+        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
+        `Generate a unique Mercedes-Benz vehicle search sentence with negative or contradictory filters. Generate in '${getLanguageLocale()}' language only.`,
+        60,
+        `Show me a Mercedes-Benz convertible with diesel engine and manual gearbox registered in 2030.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "negative-contradictory",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1196,59 +871,28 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const openaiQueries = [];
-      for (let i = 0; i < 7; i++) {
-        const query = await generateOpenAIQuery(
-          "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
-          "Generate a unique Mercedes-Benz vehicle search sentence in Korean, English, or mixed language.",
-          60,
-          `2023년 이후 등록된 검정색 벤츠 SUV를 찾아주세요.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("localization");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        7,
+        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
+        "Generate a unique Mercedes-Benz vehicle search sentence in Korean, English, or mixed language.",
+        60,
+        `2023년 이후 등록된 검정색 벤츠 SUV를 찾아주세요.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "localization",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1257,59 +901,28 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const openaiQueries = [];
-      for (let i = 0; i < 7; i++) {
-        const query = await generateOpenAIQuery(
-          "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with intentional misspellings, typos, or fuzzy matching of brand/model/type/color. Only return the sentence.",
-          `Generate a unique Mercedes-Benz vehicle search sentence with misspellings or fuzzy matching. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          60,
-          `Show me a Mercedez-Bens GLB Sedn in Night Blak.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("misspelled-fuzzy");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        7,
+        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with intentional misspellings, typos, or fuzzy matching of brand/model/type/color. Only return the sentence.",
+        `Generate a unique Mercedes-Benz vehicle search sentence with misspellings or fuzzy matching. Generate in '${getLanguageLocale()}' language only.`,
+        60,
+        `Show me a Mercedez-Bens GLB Sedn in Night Blak.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "misspelled-fuzzy",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1318,117 +931,55 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const openaiQueries = [];
-      for (let i = 0; i < 8; i++) {
-        const query = await generateOpenAIQuery(
-          "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
-          `Generate a unique Mercedes-Benz vehicle search sentence using date/numeric filters. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          60,
-          `Show me Mercedes-Benz SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("date-numeric");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        8,
+        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
+        `Generate a unique Mercedes-Benz vehicle search sentence using date/numeric filters. Generate in '${getLanguageLocale()}' language only.`,
+        60,
+        `Show me Mercedes-Benz SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "date-numeric",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
-        `Generate a unique, highly unlikely Mercedes-Benz vehicle search sentence. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        60,
-        `Show me a Mercedes-Benz sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975.`
-      );
-      if (query) openaiQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...openaiQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("no-results");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
+      `Generate a unique, highly unlikely Mercedes-Benz vehicle search sentence. Generate in '${getLanguageLocale()}' language only.`,
+      60,
+      `Show me a Mercedes-Benz sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975.`
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "no-results",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   test(
@@ -1506,173 +1057,80 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        `You are a car shopper in country ${process.env.COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.`,
-        `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        60,
-        `Show me Mercedes-Benz sedans under my name John, born on January 1, 1960, living outside the city.`
-      );
-      if (query) openaiQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...openaiQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("personal-data");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      `You are a car shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.`,
+      `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${getLanguageLocale()}' language only.`,
+      60,
+      `Show me Mercedes-Benz sedans under my name John, born on January 1, 1960, living outside the city.`
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "personal-data",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        `You are a idiotic crazy shopper in country ${process.env.COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.`,
-        `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        60,
-        `Show me Mercedes-Benz cars for sale in adult entertainment venues.`
-      );
-      if (query) openaiQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...openaiQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("personal-data");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      `You are a idiotic crazy shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.`,
+      `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${getLanguageLocale()}' language only.`,
+      60,
+      `Show me Mercedes-Benz cars for sale in adult entertainment venues.`
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "nsfw",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        `You are a malicious hacker. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.`,
-        `Generate a Mercedes-Benz vehicle search sentence and include code or scripts. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        60,
-        `Show me Mercedes-Benz cars for sale with <script>alert('Buy!')</script> in the description.`
-      );
-      if (query) openaiQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...openaiQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("personal-data");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      `You are a malicious hacker. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.`,
+      `Generate a Mercedes-Benz vehicle search sentence and include code or scripts. Generate in '${getLanguageLocale()}' language only.`,
+      60,
+      `Show me Mercedes-Benz cars for sale with <script>alert('Buy!')</script> in the description.`
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "code-and-scripts",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   test(
@@ -1680,59 +1138,28 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const openaiQueries = [];
-      for (let i = 0; i < 8; i++) {
-        const query = await generateOpenAIQuery(
-          `You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in Mercedes-Benz vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.`,
-          `Generate a customer search sentence with biased or opinionated content about Mercedes-Benz. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          60,
-          `I think Mercedes-Benz has better quality than most brands, but I'm concerned about the price.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("personal-data");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        8,
+        `You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in Mercedes-Benz vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.`,
+        `Generate a customer search sentence with biased or opinionated content about Mercedes-Benz. Generate in '${getLanguageLocale()}' language only.`,
+        60,
+        `I think Mercedes-Benz has better quality than most brands, but I'm concerned about the price.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "bias-and-manipulation",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1741,127 +1168,65 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const openaiQueries = [];
-      for (let i = 0; i < 8; i++) {
-        const query = await generateOpenAIQuery(
-          `You are a confused car shopper. Generate a natural, human-like search sentence for Mercedes-Benz vehicles that includes conflicting or impossible filter combinations (e.g., "electric diesel", "convertible SUV", "manual automatic", "2-door 7-seater", "sports car with high fuel efficiency and low power", etc.). Sound like a real customer who is confused or doesn't understand specifications.`,
-          `Generate a Mercedes-Benz search sentence with conflicting or impossible filter facets. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-          70,
-          `Show me a Mercedes-Benz electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people.`
-        );
-        if (query) openaiQueries.push(query);
-      }
-      const allQueries = [...fixedQueries, ...openaiQueries];
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("conflicting-filter-facets");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+      const openaiQueries = await generateMultipleQueries(
+        8,
+        `You are a confused car shopper. Generate a natural, human-like search sentence for Mercedes-Benz vehicles that includes conflicting or impossible filter combinations (e.g., "electric diesel", "convertible SUV", "manual automatic", "2-door 7-seater", "sports car with high fuel efficiency and low power", etc.). Sound like a real customer who is confused or doesn't understand specifications.`,
+        `Generate a Mercedes-Benz search sentence with conflicting or impossible filter facets. Generate in '${getLanguageLocale()}' language only.`,
+        70,
+        `Show me a Mercedes-Benz electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people.`
       );
+      
+      const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "conflicting-filter-facets",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const openaiQueries = [];
-    for (let i = 0; i < 8; i++) {
-      const query = await generateOpenAIQuery(
-        `You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes Mercedes-Benz with other car brands (e.g., "Mercedes-Benz with BMW engine", "AMG Tesla", "Mercedes Toyota hybrid", "Benz Audi design", "Mercedes-Lexus SUV"). Sound like a real customer who is confused about brands and manufacturers.`,
-        `Generate a search sentence mixing Mercedes-Benz with conflicting or incompatible brand names. Generate in '${process.env.LANGUAGE?.toLocaleLowerCase()}-${process.env.COUNTRY?.toUpperCase()}' language only.`,
-        70,
-        `Show me a Mercedes-Benz with BMW M series engine and Audi quattro system in a Tesla style.`
-      );
-      if (query) openaiQueries.push(query);
-    }
-    const allQueries = [...fixedQueries, ...openaiQueries];
-
-    const uiResults = [];
-    const apiResults = [];
-
-    // Run UI tests if enabled
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-
-    // Run API tests if enabled
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-
-    // Combine and save results
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("conflicting-brands");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
+    const openaiQueries = await generateMultipleQueries(
+      8,
+      `You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes Mercedes-Benz with other car brands (e.g., "Mercedes-Benz with BMW engine", "AMG Tesla", "Mercedes Toyota hybrid", "Benz Audi design", "Mercedes-Lexus SUV"). Sound like a real customer who is confused about brands and manufacturers.`,
+      `Generate a search sentence mixing Mercedes-Benz with conflicting or incompatible brand names. Generate in '${getLanguageLocale()}' language only.`,
+      70,
+      `Show me a Mercedes-Benz with BMW M series engine and Audi quattro system in a Tesla style.`
     );
+    
+    const allQueries = mergeQueries(fixedQueries, openaiQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "conflicting-brands",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 });
 
 test.describe("AI Smart Search - Special Scenarios", () => {
   const describeName = "Special Scenarios";
   test.beforeEach(async ({}, testInfo) => {
-    const env = process.env.ENVIRONMENT;
-    const country = process.env.COUNTRY;
-    const product = process.env.PRODUCT;
-    const project = process.env.PROJECT;
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
     await logTestContext({
@@ -1903,42 +1268,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.multiIntent;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("multi-intent");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "multi-intent",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1948,42 +1291,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.clarification;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("clarification");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "clarification",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -1993,42 +1314,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.priceNegotiation;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("price-negotiation");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "price-negotiation",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -2038,84 +1337,40 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.unusualUnits;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("unusual-units");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "unusual-units",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
   // Joke/Humor Queries
   test("Joke/Humor Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.jokeHumor;
-    const allQueries = [...fixedQueries];
-    const uiResults = [];
-    const apiResults = [];
-    if (shouldRunUiTests()) {
-      const page = await setupContextAndPage(browser);
-      for (const query of allQueries) {
-        const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogUiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        uiResults.push(entry);
-      }
-    }
-    if (shouldRunApiTests()) {
-      for (const query of allQueries) {
-        const results = await performApiSmartSearchAndGetResults(query);
-        const entry = await processAndLogApiResult({
-          query,
-          results,
-          testDescribe: describeName,
-          testTitle: test.info().title,
-        });
-        apiResults.push(entry);
-      }
-    }
-    const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName("joke-humor");
-    await ensureDirectoryExists(outputFileName);
-    await fs.writeFile(
-      outputFileName,
-      JSON.stringify(allResults, null, 2),
-      "utf-8"
-    );
+    const allQueries = mergeQueries(fixedQueries, []);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "joke-humor",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
   });
 
   // Repeat/Looping Queries
@@ -2124,42 +1379,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.repeatLooping;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("repeat-looping");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "repeat-looping",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -2169,42 +1402,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.brandLoyaltySwitching;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("brand-loyalty-switching");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "brand-loyalty-switching",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -2214,42 +1425,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.accessibilityNeeds;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("accessibility-needs");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "accessibility-needs",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 
@@ -2258,42 +1447,20 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.environmentalConcerns;
-      const allQueries = [...fixedQueries];
-      const uiResults = [];
-      const apiResults = [];
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of allQueries) {
-          const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          uiResults.push(entry);
-        }
-      }
-      if (shouldRunApiTests()) {
-        for (const query of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("environmental-concerns");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "environmental-concerns",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 });

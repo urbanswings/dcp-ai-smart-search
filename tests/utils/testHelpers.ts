@@ -129,3 +129,85 @@ export async function getRandomVehicleCombinations(
   }
   return combos;
 }
+/**
+ * Generates multiple unique queries using OpenAI with deduplication.
+ * @param count - Number of queries to generate
+ * @param systemPrompt - System prompt for OpenAI
+ * @param userPromptTemplate - User prompt template (can include getLanguageLocale())
+ * @param maxTokens - Maximum tokens for completion
+ * @param fallback - Fallback query if generation fails
+ * @param maxAttempts - Maximum attempts to generate unique queries
+ * @returns Array of unique generated queries
+ */
+export async function generateUniqueQueries(
+  count: number,
+  systemPrompt: string,
+  userPromptTemplate: string,
+  maxTokens: number = 50,
+  fallback: string = "",
+  maxAttempts: number = 10
+): Promise<string[]> {
+  const queries: string[] = [];
+  const seenQueries = new Set<string>();
+  let attempts = 0;
+
+  while (queries.length < count && attempts < maxAttempts) {
+    attempts++;
+    try {
+      let query = await generateOpenAIQuery(
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
+      );
+      // Clean up quotes
+      query = query.replace(/^"|"$/g, "");
+      const normalized = query.toLowerCase();
+      
+      if (query && !seenQueries.has(normalized)) {
+        queries.push(query);
+        seenQueries.add(normalized);
+      }
+    } catch (err) {
+      if (fallback && !seenQueries.has(fallback.toLowerCase())) {
+        queries.push(fallback);
+        seenQueries.add(fallback.toLowerCase());
+      }
+    }
+  }
+
+  return queries;
+}
+
+/**
+ * Generates multiple queries using OpenAI (simple version without deduplication).
+ * @param count - Number of queries to generate
+ * @param systemPrompt - System prompt for OpenAI
+ * @param userPromptTemplate - User prompt template
+ * @param maxTokens - Maximum tokens for completion
+ * @param fallback - Fallback query if generation fails
+ * @returns Array of generated queries
+ */
+export async function generateMultipleQueries(
+  count: number,
+  systemPrompt: string,
+  userPromptTemplate: string,
+  maxTokens: number = 50,
+  fallback: string = ""
+): Promise<string[]> {
+  const queries: string[] = [];
+  
+  for (let i = 0; i < count; i++) {
+    const query = await generateOpenAIQuery(
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
+    );
+    if (query) {
+      queries.push(query);
+    }
+  }
+
+  return queries;
+}

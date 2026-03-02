@@ -1,22 +1,9 @@
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
+import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE } from "./testHelpers";
 
-export interface TestEntry {
-  timestamp: string;
-  testMode: "ui" | "api";
-  testDescribe: string;
-  testTitle: string;
-  query: string;
-  resultCount: number;
-  responseTime?: number;
-  statusCode?: number;
-  hasError: boolean;
-  error?: string;
-  uiResults?: any; // For UI mode
-  apiResults?: any; // For API mode
-  openaiEvaluation: string;
-}
+export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE };
 
 export function getTestMode(): "ui" | "api" | "both" {
   return (process.env.TEST_MODE as "ui" | "api" | "both") || "ui";
@@ -32,6 +19,20 @@ export function shouldRunApiTests(): boolean {
   return mode === "api" || mode === "both";
 }
 
+export function isFixedQueriesOnly(): boolean {
+  return process.env.FIXED_QUERIES_ONLY === "true";
+}
+
+export function getProject(): string {
+  return process.env.PROJECT || "DCP";
+}
+
+export function getLanguageLocale(): string {
+  const lang = LANGUAGE?.toLowerCase() || "en";
+  const country = COUNTRY?.toUpperCase() || "KR";
+  return `${lang}-${country}`;
+}
+
 export async function ensureDirectoryExists(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
   await fs.mkdir(dir, { recursive: true });
@@ -42,9 +43,9 @@ export function getOutputFileName(testType: string): string {
   const dateOnly = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Singapore",
   }).format(new Date(timestamp));
-  const env = process.env.ENVIRONMENT;
-  const country = process.env.COUNTRY;
-  const product = process.env.PRODUCT;
+  const env = ENVIRONMENT;
+  const country = COUNTRY;
+  const product = PRODUCT;
   const mode = getTestMode();
   if (mode === "both") {
     return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-both_${timestamp}.json`;
@@ -71,95 +72,105 @@ export async function combineResults(
   return combined;
 }
 
-export function createApiResultText(
-  results: any,
-  resultCount: number,
-  responseTime?: number,
-  statusCode?: number
-): string {
-  let resultText = `API Search Results:\n`;
+/**
+ * Runs UI and/or API tests for a set of queries and saves results to a file.
+ * This function encapsulates the common pattern of:
+ * 1. Running UI tests (if enabled)
+ * 2. Running API tests (if enabled)
+ * 3. Combining results
+ * 4. Saving to output file
+ */
+export async function runTestsAndSaveResults(params: {
+  queries: any[];
+  testDescribe: string;
+  testTitle: string;
+  testType: string;
+  browser?: any;
+  performUISmartSearchAndGetResults?: (page: any, query: any) => Promise<any>;
+  processAndLogUiResult?: (params: {
+    query: any;
+    results: any;
+    testDescribe: string;
+    testTitle: string;
+  }) => Promise<any>;
+  performApiSmartSearchAndGetResults?: (query: any) => Promise<any>;
+  processAndLogApiResult?: (params: {
+    query: any;
+    results: any;
+    testDescribe: string;
+    testTitle: string;
+  }) => Promise<any>;
+  setupContextAndPage?: (browser: any) => Promise<any>;
+}): Promise<void> {
+  const {
+    queries,
+    testDescribe,
+    testTitle,
+    testType,
+    browser,
+    performUISmartSearchAndGetResults,
+    processAndLogUiResult,
+    performApiSmartSearchAndGetResults,
+    processAndLogApiResult,
+    setupContextAndPage,
+  } = params;
 
-  if (statusCode) {
-    resultText += `Status Code: ${statusCode}\n`;
-  }
+  const uiResults = [];
+  const apiResults = [];
 
-  if (responseTime) {
-    resultText += `Response Time: ${responseTime}ms\n`;
-  }
-
-  // Handle Smart Search response structure
-  if (results?.smartSearchResponse) {
-    resultText += `Smart Search Status: ${
-      results.smartSearchResponse.passed ? "Passed" : "Failed"
-    }\n`;
-    const aiMsg =
-      results.smartSearchResponse.message_to_user ||
-      results.smartSearchResponse.message ||
-      results.message_to_user;
-    if (aiMsg) {
-      resultText += `AI Message: ${aiMsg}\n`;
-    }
-    if (results.smartSearchResponse.reason) {
-      resultText += `Reason: ${results.smartSearchResponse.reason}\n`;
-    }
-  }
-
-  resultText += `Total Results: ${resultCount}\n\n`;
-
-  // Get the actual search results from the nested structure
-  const searchData = results?.searchResults || results;
-
-  if (resultCount > 0 && searchData) {
-    // Handle Mercedes-Benz API response structure
-    const items =
-      searchData.products || searchData.hits || searchData.data || [];
-
-    if (Array.isArray(items)) {
-      items.slice(0, 5).forEach((item: any, index: number) => {
-        resultText += `Result ${index + 1}:\n`;
-
-        // Mercedes-Benz specific fields
-        if (item.shortDisplayName || item.name || item.title) {
-          resultText += `  Name: ${
-            item.shortDisplayName || item.name || item.title
-          }\n`;
-        }
-
-        if (item.price || item.grossPrice) {
-          const price = item.price || item.grossPrice;
-          resultText += `  Price: ${price.value || price} ${
-            price.currency || ""
-          }\n`;
-        }
-
-        if (item.bodyType) {
-          resultText += `  Body Type: ${item.bodyType}\n`;
-        }
-
-        if (item.modelYear || item.year) {
-          resultText += `  Year: ${item.modelYear || item.year}\n`;
-        }
-
-        if (item.mileage) {
-          resultText += `  Mileage: ${item.mileage.value} ${item.mileage.unit}\n`;
-        }
-
-        if (item.id || item.vehicleId) {
-          resultText += `  ID: ${item.id || item.vehicleId}\n`;
-        }
-
-        resultText += "\n";
+  // Run UI tests if enabled
+  if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
+    const page = await setupContextAndPage(browser);
+    for (const query of queries) {
+      const results = await performUISmartSearchAndGetResults(page, query);
+      const entry = await processAndLogUiResult({
+        query,
+        results,
+        testDescribe,
+        testTitle,
       });
-    }
-
-    // Add facet information if available
-    if (searchData.facets && Array.isArray(searchData.facets)) {
-      resultText += `\nAvailable Facets:\n`;
-      searchData.facets.slice(0, 3).forEach((facet: any) => {
-        resultText += `  ${facet.name}: ${facet.values?.length || 0} options\n`;
-      });
+      uiResults.push(entry);
     }
   }
 
-  return resultText;
+  // Run API tests if enabled
+  if (shouldRunApiTests() && performApiSmartSearchAndGetResults && processAndLogApiResult) {
+    for (const query of queries) {
+      const results = await performApiSmartSearchAndGetResults(query);
+      const entry = await processAndLogApiResult({
+        query,
+        results,
+        testDescribe,
+        testTitle,
+      });
+      apiResults.push(entry);
+    }
+  }
+
+  // Combine and save results
+  const allResults = await combineResults(uiResults, apiResults);
+  const outputFileName = getOutputFileName(testType);
+  await ensureDirectoryExists(outputFileName);
+  await fs.writeFile(
+    outputFileName,
+    JSON.stringify(allResults, null, 2),
+    "utf-8"
+  );
 }
+
+/**
+ * Merges fixed queries with generated queries, respecting the FIXED_QUERIES_ONLY setting.
+ * @param fixedQueries - Array of fixed/predefined queries
+ * @param generatedQueries - Array of dynamically generated queries
+ * @returns Combined array of queries
+ */
+export function mergeQueries(
+  fixedQueries: any[],
+  generatedQueries: any[] = []
+): any[] {
+  if (isFixedQueriesOnly()) {
+    return [...fixedQueries];
+  }
+  return [...fixedQueries, ...generatedQueries];
+}
+
