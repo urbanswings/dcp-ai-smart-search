@@ -5,15 +5,17 @@ import path from "path";
 import {
   queriesPath,
   openai,
-  processAndLogUiResult,
   generateOpenAIQuery,
   evaluateSearchResult,
   getRandomVehicleCombinations,
+  logTestContext,
+} from "./utils/testHelpers";
+import {
+  processAndLogUiResult,
   setupContextAndPage,
   handleCookieBanner,
   performUISmartSearchAndGetResults,
-  logTestContext,
-} from "./utils/testHelpers";
+} from "./utils/uiHelpers";
 import {
   performApiSmartSearchAndGetResults,
   processAndLogApiResult,

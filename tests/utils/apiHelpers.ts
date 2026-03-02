@@ -1,9 +1,25 @@
 import axios from "axios";
-import {
-  translateText,
-  translateTextWithOpenAI,
-  fetchTranslation,
-} from "./aiHelpers";
+import { fetchTranslation } from "./aiHelpers";
+
+export const ENVIRONMENT = process.env.ENVIRONMENT;
+export const COUNTRY = process.env.COUNTRY;
+export const LANGUAGE = process.env.LANGUAGE;
+export const PRODUCT = process.env.PRODUCT;
+
+// Helper functions to get common config values
+export function getCountryCode(): string {
+  return process.env.COUNTRY?.toUpperCase() || "KR";
+}
+
+export function getLocale(): string {
+  return (process.env.COUNTRY || "kr").toLowerCase();
+}
+
+export function getSalesChannel(): string {
+  return process.env.PRODUCT?.toUpperCase() === "NCOS"
+    ? "first_hand"
+    : "second_hand";
+}
 
 export interface ApiSearchResult {
   query: string;
@@ -47,12 +63,9 @@ export class SearchApiClient {
   async getSmartSearchQuery(query: string): Promise<ApiSearchResult> {
     const startTime = Date.now();
     try {
-      const countryCode = process.env.COUNTRY?.toUpperCase() || "KR";
-      const locale = (process.env.COUNTRY || "kr").toLowerCase();
-      const salesChannel =
-        process.env.PRODUCT?.toUpperCase() === "NCOS"
-          ? "first_hand"
-          : "second_hand";
+      const countryCode = getCountryCode();
+      const locale = getLocale();
+      const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
 
@@ -113,12 +126,9 @@ export class SearchApiClient {
     }
 
     try {
-      const countryCode = process.env.COUNTRY?.toUpperCase() || "KR";
-      const locale = (process.env.COUNTRY || "kr").toLowerCase();
-      const salesChannel =
-        process.env.PRODUCT?.toUpperCase() === "NCOS"
-          ? "first_hand"
-          : "second_hand";
+      const countryCode = getCountryCode();
+      const locale = getLocale();
+      const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
 
@@ -182,12 +192,9 @@ export class SearchApiClient {
     }
 
     try {
-      const countryCode = process.env.COUNTRY?.toUpperCase() || "KR";
-      const locale = (process.env.COUNTRY || "kr").toLowerCase();
-      const salesChannel =
-        process.env.PRODUCT?.toUpperCase() === "NCOS"
-          ? "first_hand"
-          : "second_hand";
+      const countryCode = getCountryCode();
+      const locale = getLocale();
+      const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
 
@@ -247,11 +254,11 @@ export class SearchApiClient {
   ): Promise<ApiSearchResult> {
     const responseStartTime = startTime || Date.now();
     try {
-      const env = process.env.ENVIRONMENT || "INT";
-      const country = process.env.COUNTRY?.toUpperCase() || "TR";
-      const language = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
-      const product = process.env.PRODUCT?.toUpperCase() || "UCOS";
-      const salesChannel = product === "NCOS" ? "first_hand" : "second_hand";
+      const env = ENVIRONMENT || "INT";
+      const country = getCountryCode();
+      const language = LANGUAGE?.toLocaleLowerCase() || "en";
+      const product = PRODUCT?.toUpperCase() || "UCOS";
+      const salesChannel = getSalesChannel();
       const xApiKey = process.env.X_API_KEY;
 
       const endpoint =
@@ -377,10 +384,10 @@ export async function performApiSmartSearchAndGetResults(
 }
 
 export async function fetchEmhApiResponse(): Promise<any> {
-  const env = process.env.ENVIRONMENT || "INT";
-  const country = process.env.COUNTRY || "KR";
-  const product = process.env.PRODUCT || "UCOS";
-  const language = process.env.LANGUAGE || "tr";
+  const env = ENVIRONMENT || "INT";
+  const country = COUNTRY || "KR";
+  const product = PRODUCT || "UCOS";
+  const language = LANGUAGE || "tr";
 
   try {
     const apiUrl =
@@ -434,9 +441,9 @@ export async function fetchEmhApiResponse(): Promise<any> {
 }
 
 export async function fetchDcpApiResponse(): Promise<any> {
-  const env = process.env.ENVIRONMENT || "INT";
-  const country = process.env.COUNTRY || "KR";
-  const product = process.env.PRODUCT || "UCOS";
+  const env = ENVIRONMENT || "INT";
+  const country = COUNTRY || "KR";
+  const product = PRODUCT || "UCOS";
 
   try {
     const envPrefix = env === "INT" ? "shop-int" : "shop";
@@ -553,7 +560,7 @@ export async function processAndLogApiResult({
 
   // Format output to match UI test format
   const icon = hasError ? "❌" : "✅";
-  const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
+  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const smartSearchMessage = results.results.resultText;;
 
