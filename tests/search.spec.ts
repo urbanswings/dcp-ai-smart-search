@@ -5,7 +5,7 @@ import path from "path";
 import {
   queriesPath,
   openai,
-  processAndLogResult,
+  processAndLogUiResult,
   generateOpenAIQuery,
   evaluateSearchResult,
   getRandomVehicleCombinations,
@@ -132,7 +132,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -145,10 +145,10 @@ test.describe("AI Smart Search - Sanity Test", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -239,7 +239,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -252,10 +252,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -318,7 +318,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -331,10 +331,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -427,7 +427,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -440,10 +440,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -625,7 +625,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             );
           }
 
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -651,10 +651,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const { query } of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -696,7 +696,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -709,10 +709,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -802,7 +802,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -815,10 +815,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -857,7 +857,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -870,10 +870,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -916,7 +916,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -929,10 +929,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1020,7 +1020,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1033,10 +1033,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1089,7 +1089,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
           query,
           submitDisabled
         );
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1104,10 +1104,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       for (const [query, submitDisabled, expectedStatusCode] of edgeQueries) {
         if (!submitDisabled) {
           // Only test valid queries for API
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
             expectedStatusCode,
@@ -1153,7 +1153,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1166,10 +1166,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1214,7 +1214,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1227,10 +1227,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1275,7 +1275,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1288,10 +1288,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1336,7 +1336,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1349,10 +1349,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1394,7 +1394,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1407,10 +1407,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1448,7 +1448,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
               page,
               query
             );
-            const entry = await processAndLogResult({
+            const entry = await processAndLogUiResult({
               query,
               results,
               testDescribe: describeName,
@@ -1470,10 +1470,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         for (const query of queries) {
           const responses: string[] = [];
           for (let i = 0; i < 3; i++) {
-            const result = await performApiSmartSearchAndGetResults(query);
+            const results = await performApiSmartSearchAndGetResults(query);
             const entry = await processAndLogApiResult({
               query,
-              result,
+              results,
               testDescribe: describeName,
               testTitle: test.info().title,
             });
@@ -1524,7 +1524,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1537,10 +1537,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1581,7 +1581,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1594,10 +1594,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1638,7 +1638,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1651,10 +1651,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1698,7 +1698,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1711,10 +1711,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1759,7 +1759,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1772,10 +1772,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       // Run API tests if enabled
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1817,7 +1817,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -1830,10 +1830,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // Run API tests if enabled
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -1908,7 +1908,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1919,10 +1919,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1953,7 +1953,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -1964,10 +1964,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -1998,7 +1998,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2009,10 +2009,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -2043,7 +2043,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2054,10 +2054,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -2085,7 +2085,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       const page = await setupContextAndPage(browser);
       for (const query of allQueries) {
         const results = await performUISmartSearchAndGetResults(page, query);
-        const entry = await processAndLogResult({
+        const entry = await processAndLogUiResult({
           query,
           results,
           testDescribe: describeName,
@@ -2096,10 +2096,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     }
     if (shouldRunApiTests()) {
       for (const query of allQueries) {
-        const result = await performApiSmartSearchAndGetResults(query);
+        const results = await performApiSmartSearchAndGetResults(query);
         const entry = await processAndLogApiResult({
           query,
-          result,
+          results,
           testDescribe: describeName,
           testTitle: test.info().title,
         });
@@ -2129,7 +2129,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2140,10 +2140,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -2174,7 +2174,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2185,10 +2185,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -2219,7 +2219,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2230,10 +2230,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });
@@ -2263,7 +2263,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         const page = await setupContextAndPage(browser);
         for (const query of allQueries) {
           const results = await performUISmartSearchAndGetResults(page, query);
-          const entry = await processAndLogResult({
+          const entry = await processAndLogUiResult({
             query,
             results,
             testDescribe: describeName,
@@ -2274,10 +2274,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       }
       if (shouldRunApiTests()) {
         for (const query of allQueries) {
-          const result = await performApiSmartSearchAndGetResults(query);
+          const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
             query,
-            result,
+            results,
             testDescribe: describeName,
             testTitle: test.info().title,
           });

@@ -79,7 +79,10 @@ export class SearchApiClient {
 
       return {
         query,
-        results: responseData,
+        results: {
+          query,
+          responseData,
+        },
         responseTime,
         statusCode: response.status,
       };
@@ -142,7 +145,10 @@ export class SearchApiClient {
 
       return {
         query,
-        results: responseData,
+        results: {
+          query,
+          responseData,
+        },
         responseTime,
         statusCode: response.status,
       };
@@ -209,7 +215,10 @@ export class SearchApiClient {
 
       return {
         query,
-        results: responseData,
+        results: {
+          query,
+          responseData,
+        },
         responseTime,
         statusCode: response.status,
       };
@@ -317,7 +326,10 @@ export class SearchApiClient {
 
         return {
           query,
-          results: normalizedData,
+          results: { 
+            resultText: responseData.messageToUser,
+            responseData: normalizedData
+          },
           responseTime,
           statusCode: response.status,
         };
@@ -325,10 +337,13 @@ export class SearchApiClient {
 
       return {
         query,
-        results: responseData,
+        results: {
+          resultText: responseData.data?.smartSearch?.message || "No message in response",
+          responseData,
+        },
         responseTime,
         statusCode: response.status,
-      };
+      };   
     } catch (error: any) {
       const responseTime = Date.now() - responseStartTime;
       let errorMessage = error.message || "Unknown API error";
@@ -449,38 +464,38 @@ export async function fetchDcpApiResponse(): Promise<any> {
 
 export async function processAndLogApiResult({
   query,
-  result,
+  results,
   testDescribe,
   testTitle,
   customEval,
   expectedStatusCode,
 }: {
   query: any;
-  result: ApiSearchResult;
+  results: ApiSearchResult;
   testDescribe: string;
   testTitle: string;
   customEval?: (resultData: any) => Promise<string>;
   expectedStatusCode?: number;
 }): Promise<any> {
   const { evaluateSearchResult } = await import("./testHelpers");
-
+  const apiResponse = results.results.apiResponse;
   let evaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
 
   // Check if status code matches expectation (if provided)
-  if (expectedStatusCode && result.statusCode !== expectedStatusCode) {
-    evaluation = `Status Code Mismatch: Expected ${expectedStatusCode}, got ${result.statusCode}`;
+  if (expectedStatusCode && results.statusCode !== expectedStatusCode) {
+    evaluation = `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`;
     hasError = true;
-  } else if (expectedStatusCode && result.statusCode === expectedStatusCode) {
+  } else if (expectedStatusCode && results.statusCode === expectedStatusCode) {
     // If we have an expected status code and it matches, treat as success regardless of error
     evaluation = `Expected status code ${expectedStatusCode} received as expected`;
     hasError = false;
 
     // If there are also results to evaluate, include that information
-    if (result.results) {
-      const searchResults = result.results.searchResults;
-      const smartSearchResponse = result.results.smartSearchResponse;
+    if (results.results) {
+      const searchResults = results.results.searchResults;
+      const smartSearchResponse = results.results.smartSearchResponse;
 
       if (searchResults) {
         resultCount =
@@ -498,24 +513,23 @@ export async function processAndLogApiResult({
           : smartSearchResponse?.message_to_user) || "";
 
       if (customEval) {
-        evaluation = await customEval(result.results);
+        evaluation = await customEval(results.results);
       } else {
         evaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
       }
 
       hasError = evaluation !== "PASS";
     }
-  } else if ((result.error || result.results.errors) && result.statusCode !== 400) {
+  } else if ((results.error || results.results.errors) && results.statusCode !== 400) {
     // Check for non-400 errors (400 is now treated as valid response with message_to_user)
-    // evaluation = `API Error: ${result.error}`;
-    evaluation = `API Error: ${result.results.errors
+    // evaluation = `API Error: ${results.error}`;
+    evaluation = `API Error: ${results.results.errors
       .map((err: any) => err.message)
       .join("; ")}`;
     hasError = true;
-  } else if (result.results) {
+  } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults = result.results.data.smartSearch; //result.results.searchResults;
-    const smartSearchResponse = result.results.data.smartSearch; //result.results.smartSearchResponse;
+    const searchResults = results.results.responseData.data.smartSearch; //results.results.searchResults;
 
     // Extract result count from the actual search results
     if (searchResults) {
@@ -528,14 +542,8 @@ export async function processAndLogApiResult({
       resultCount = 0;
     }
 
-    const projectEnv = process.env.PROJECT?.toUpperCase();
-    const aiMessageForEval =
-      (projectEnv === "EMH"
-        ? smartSearchResponse?.message
-        : smartSearchResponse?.message_to_user) || "";
-
     if (customEval) {
-      evaluation = await customEval(result.results);
+      evaluation = await customEval(results.results);
     } else {
       evaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
     }
@@ -546,16 +554,8 @@ export async function processAndLogApiResult({
   // Format output to match UI test format
   const icon = hasError ? "❌" : "✅";
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
-  const projectEnv = process.env.PROJECT?.toUpperCase();
   const actualInput = query?.value ?? query;
-  const smartSearchMessage =
-    projectEnv === "EMH"
-      ? result.results?.data?.smartSearch?.message ||
-        result.results?.message_to_user ||
-        "No message available"
-      : result.results?.data?.smartSearch?.message ||
-        result.results?.message_to_user ||
-        "No message available";
+  const smartSearchMessage = results.results.resultText;;
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -593,14 +593,14 @@ export async function processAndLogApiResult({
       "en": smartSearchMessageEn,
     },
     resultCount,
-    responseTime: result.responseTime,
-    statusCode: result.statusCode,
+    responseTime: results.responseTime,
+    statusCode: results.statusCode,
     hasError,
-    error: result.error,
-    apiResponse: result.results,
+    error: results.error,
+    apiResponse: results.results,
     openaiEvaluation: evaluation,
     facets: (() => {
-      const params = result.results?.data?.smartSearch?.parameters || {};
+      const params = results.results.responseData?.data?.smartSearch?.parameters || {};
       const excludeKeys = [
         "contextType",
         "isUcos",

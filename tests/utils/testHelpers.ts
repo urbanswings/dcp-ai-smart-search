@@ -57,7 +57,7 @@ export async function logTestContext({
   console.log(`----------------------\n`);
 }
 
-export async function processAndLogResult({
+export async function processAndLogUiResult({
   query,
   results,
   testDescribe,
@@ -72,11 +72,26 @@ export async function processAndLogResult({
 }): Promise<any> {
   const actualInput = query?.value ?? query;
   const smartSearchMessage = results.results.resultText;
-  let openaiEvaluation: string;
-  let passed: boolean;
-  openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
-  passed = openaiEvaluation === "PASS";
+  const apiResponse = results.results.responseData;
+  let openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
+  let resultCount = 0;
+  let hasError = false;
+  let passed = openaiEvaluation === "PASS";
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
+
+  // Handle the new Smart Search + Actual Search response structure
+  const searchResults = apiResponse.data.smartSearch; //results.results.searchResults;
+
+  // Extract result count from the actual search results
+  if (searchResults) {
+    resultCount =
+      searchResults.results?.length ||
+      searchResults.navigation?.totalResults ||
+      0;
+  } else {
+    // If no search results, it means smart search failed or returned no URL
+    resultCount = 0;
+  }  
 
   const icon = passed ? "✅" : "❌";
   const entry: any = {
@@ -127,11 +142,15 @@ export async function processAndLogResult({
       [`${lang}`]: smartSearchMessage,
       "en": smartSearchMessageEn,
     },
-    resultText: smartSearchMessage,
-    smartSearchMessage,
+    resultCount,
+    responseTime: results.responseTime,
+    statusCode: null,
+    hasError: null,
+    error: results.error,
+    apiResponse,
     openaiEvaluation,
     facets: (() => {
-      const params = results.results.apiResponse?.data?.smartSearch?.parameters || {};
+      const params = results.results.responseData?.data?.smartSearch?.parameters || {};
       const excludeKeys = [
         "contextType",
         "isUcos",
@@ -387,7 +406,7 @@ export async function performUISmartSearchAndGetResults(
   page: Page,
   query: any = "",
   submitDisabled: boolean = false
-): Promise<any> {
+): Promise<UiSearchResult> {
   const env = process.env.ENVIRONMENT || "INT";
   const searchButton = page.locator(
     ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button"
@@ -506,10 +525,9 @@ export async function performUISmartSearchAndGetResults(
     query: query,
     results: {
       resultText,
-      apiResponsePayload,
+      responseData: apiResponsePayload,
     },
     responseTime,
     error: retries === 3 ? "Failed to retrieve results after 3 attempts" : undefined,
-    apiResponse: apiResponsePayload,
   };
 }
