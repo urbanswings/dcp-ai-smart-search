@@ -228,6 +228,28 @@
       "aiEvaluationHints": []
     }
   ],
+  "recommendationModel": [
+    "Can you recommend a Mercedes-Benz SUV for a family of five?",
+    "What is the best Mercedes-Benz for city driving?",
+    "Suggest a fuel-efficient Mercedes-Benz sedan.",
+    "Which Mercedes-Benz model is ideal for long road trips?",
+    "Recommend a luxury coupe with advanced safety features.",
+    "What Mercedes-Benz would you suggest for a first-time buyer?",
+    "Can you recommend a car with a panoramic sunroof and leather seats?",
+    "Which model is best for winter driving conditions?",
+    "Suggest a Mercedes-Benz with the latest technology features.",
+    "What’s a good Mercedes-Benz for someone who loves performance cars?",
+    "Recommend a compact SUV for city parking.",
+    "Which Mercedes-Benz is best for highway fuel economy?",
+    "Can you suggest a model with a spacious trunk?",
+    "What’s the best Mercedes-Benz for a small family?",
+    "Recommend a vehicle with hybrid or electric options.",
+    "Which Mercedes-Benz offers the best value for money?",
+    "Can you recommend a model with adaptive cruise control?",
+    "What’s a good Mercedes-Benz for frequent business travel?",
+    "Suggest a car with premium sound system and navigation.",
+    "Which Mercedes-Benz is best for off-road adventures?"
+  ],
   "byBrandModel": [
     "Show me Mercedes-Benz S-Class Sedans",
     "We have been considering Mercedes-Benz EQS in white"

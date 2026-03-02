@@ -129,6 +129,7 @@ export async function getRandomVehicleCombinations(
   }
   return combos;
 }
+
 /**
  * Generates multiple unique queries using OpenAI with deduplication.
  * @param count - Number of queries to generate

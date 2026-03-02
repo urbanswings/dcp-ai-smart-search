@@ -1,62 +1,62 @@
 {
   "multiIntent": [
-    "Show me SUVs and also tell me about financing.",
-    "I want a sedan or a coupe, and do you have any discounts?",
-    "Find me electric cars and compare insurance options.",
-    "Show me hatchbacks and explain the warranty details.",
-    "I need a family car or a compact vehicle, and what are the return policies?",
-    "Show me convertibles and also list the safety features available."
+    "Bana SUV'ları göster, bir de finansman hakkında bilgi ver.",
+    "Sedan ya da coupe istiyorum, indirim var mı?",
+    "Elektrikli arabaları bul, sigorta seçeneklerini de karşılaştır.",
+    "Hatchback modelleri göster, garanti detaylarını da anlatır mısın?",
+    "Aile arabası ya da kompakt bir araç lazım, iade politikası nedir?",
+    "Üstü açılır arabaları göster, güvenlik özelliklerini de listele."
   ],
   "clarification": [
-    "What do you mean by coupe?",
-    "Do you want a new or used vehicle?",
-    "Can you clarify what 'GLB' stands for?",
-    "I want to know what is the return policy?",
-    "Can you explain the warranty options available?",
-    "What financing options do you offer?"
+    "Coupe derken neyi kastediyorsun?",
+    "Yeni mi yoksa ikinci el mi istiyorsun?",
+    "'GLB' ne demek, açıklar mısın?",
+    "İade politikası nedir, öğrenmek istiyorum.",
+    "Garanti seçeneklerini anlatır mısın?",
+    "Hangi finansman imkanlarınız var?"
   ],
   "priceNegotiation": [
-    "Can I get a discount on the GLC?",
-    "Is there any special offer for the EQS?",
-    "Can you match the price of another dealer?",
-    "Are there any discounts available?",
-    "Do you have any special offers?",
-    "What deals are currently running?",
-    "Can I get a rebate on this?",
-    "Are there any ongoing sales?"
+    "GLC'de indirim yapar mısınız?",
+    "EQS için özel bir kampanya var mı?",
+    "Başka bir galerinin fiyatını karşılayabilir misiniz?",
+    "Şu anda indirim var mı?",
+    "Özel bir teklifiniz var mı?",
+    "Şu an hangi kampanyalar var?",
+    "Bunda ekstra indirim alabilir miyim?",
+    "Şu anda devam eden bir satış var mı?"
   ],
   "unusualUnits": [
-    "Show me cars with mileage under 10,000 miles.",
-    "Find vehicles with fuel efficiency above 30 mpg.",
-    "Do you have cars with boot space over 15 cubic feet?",
-    "I want used cars with mileage under 1000 bpm",
-    "Show me cars with fuel efficiency above 150 km/l",
-    "Find vehicles with boot space over 400 liters"
+    "10.000 milin altında kilometresi olan arabaları göster.",
+    "Yakıt tüketimi 30 mpg'nin üstünde olan araçları bul.",
+    "Bagaj hacmi 15 fit küpten fazla olan arabanız var mı?",
+    "1000 bpm'nin altında kilometresi olan ikinci el araba istiyorum.",
+    "Yakıt verimliliği 150 km/l'nin üstünde olan arabaları göster.",
+    "Bagaj hacmi 400 litreden fazla olan araçları bul."
   ],
   "jokeHumor": [
-    "Can I get a car that flies?",
-    "Do you have any invisible cars?",
-    "Show me a car that runs on pizza."
+    "Uçan bir araba alabiliyor muyum?",
+    "Görünmez arabanız var mı?",
+    "Pizza ile çalışan bir araba göster."
   ],
   "repeatLooping": [
-    "Show me SUVs.",
-    "Show me SUVs again.",
-    "Can you show me SUVs one more time?"
+    "SUV'ları göster.",
+    "SUV'ları bir daha göster.",
+    "SUV'ları bir kez daha gösterebilir misin?"
   ],
   "brandLoyaltySwitching": [
-    "I’ve always driven BMW, why should I choose Mercedes-Benz?",
-    "Convince me to switch from Audi to Mercedes-Benz.",
-    "I’m a loyal Mercedes-Benz customer, what’s new for me?"
+    "Hep BMW kullandım, neden Mercedes-Benz seçmeliyim?",
+    "Beni Audi'den Mercedes-Benz'e geçmeye ikna et.",
+    "Ben sadık bir Mercedes-Benz müşterisiyim, bana ne yenilik var?"
   ],
   "accessibilityNeeds": [
-    "Show me cars suitable for wheelchair users.",
-    "Do you have vehicles with hand controls?",
-    "Find me cars with easy access for elderly passengers."
+    "Tekerlekli sandalye kullanıcılarına uygun arabaları göster.",
+    "El kontrolü olan araçlarınız var mı?",
+    "Yaşlılar için kolay binilebilen arabaları bul."
   ],
   "environmentalConcerns": [
-    "Show me eco-friendly vehicles.",
-    "Do you have any low-emission cars?",
-    "Find me sustainable or hybrid Mercedes-Benz models."
+    "Çevre dostu araçları göster.",
+    "Düşük emisyonlu arabanız var mı?",
+    "Sürdürülebilir ya da hibrit Mercedes-Benz modellerini bul."
   ],
   "byFixedQuery": [
     "bana sedan göster",
@@ -89,6 +89,28 @@
     "araba seçeneklerimi konuşmak için beni 123-456-7890 numarasından ara",
     "<p>sipariş vermek istiyorum</p>",
     "CLA 911 GTS hakkında daha fazla bilgi ver"
+  ],
+  "recommendationModel": [
+    "Beş kişilik bir aile için Mercedes-Benz SUV önerir misin?",
+    "Şehirde kullanmak için en iyi Mercedes-Benz hangisi?",
+    "Yakıt tasarruflu bir Mercedes-Benz sedan öner.",
+    "Uzun yolculuklar için hangi Mercedes-Benz modeli ideal?",
+    "Gelişmiş güvenlik özellikli lüks bir coupe öner.",
+    "İlk kez araba alacaklara hangi Mercedes-Benz'i tavsiye edersin?",
+    "Panoramik cam tavanlı ve deri koltuklu bir araba önerir misin?",
+    "Kış şartlarında kullanmak için en iyi model hangisi?",
+    "En yeni teknoloji özelliklerine sahip bir Mercedes-Benz öner.",
+    "Performans arabalarını seven biri için hangi Mercedes-Benz iyi?",
+    "Şehirde park için kompakt bir SUV öner.",
+    "Uzun yolda yakıt tasarrufu için en iyi Mercedes-Benz hangisi?",
+    "Bagajı geniş bir model önerir misin?",
+    "Küçük bir aile için en iyi Mercedes-Benz hangisi?",
+    "Hibrit ya da elektrikli seçenekli bir araç öner.",
+    "Fiyat/performans açısından en iyi Mercedes-Benz hangisi?",
+    "Adaptif hız sabitleyici olan bir model önerir misin?",
+    "Sık iş seyahati yapanlar için iyi bir Mercedes-Benz öner.",
+    "Kaliteli ses sistemi ve navigasyonu olan bir araba öner.",
+    "Arazi macerası için en iyi Mercedes-Benz hangisi?"
   ],
   "byBrandModel": [
     "Mercedes-Benz S-Serisi Sedanları göster",

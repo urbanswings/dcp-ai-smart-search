@@ -145,6 +145,32 @@ test.describe("AI Smart Search - Sanity Test", () => {
       processAndLogApiResult,
     });
   }); 
+
+  test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+    const fixedQueries = fixedQueriesData.recommendationModel;
+    const genericQueries = await generateMultipleQueries(
+        8,
+        "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+        `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
+        50,
+        "I am looking for Mercedes-Benz C-Class."
+      );
+      
+    const allQueries = mergeQueries(fixedQueries, genericQueries);
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "recommendation-model",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  }); 
 });
 
 test.describe("AI Smart Search - Vehicles MB", () => {
