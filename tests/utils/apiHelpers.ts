@@ -1,5 +1,6 @@
 import axios from "axios";
 import { fetchTranslation } from "./aiHelpers";
+import { deepEqual } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -485,18 +486,37 @@ export async function processAndLogApiResult({
   expectedStatusCode?: number;
 }): Promise<any> {
   const { evaluateSearchResult } = await import("./testHelpers");
-  const apiResponse = results.results.apiResponse;
-  let evaluation = "No results to evaluate";
+  const actualInput = query?.value ?? query;
+  const actualFacets = query?.shouldFilter;
+  const smartSearchMessage = results.results.resultText;
+  const apiResponse = results.results.responseData;
+  const facets = (() => {
+    const params = results.results.responseData?.data?.smartSearch?.parameters || {};
+    const excludeKeys = [
+      "contextType",
+      "isUcos",
+      "limit",
+      "sortingType",
+      "language",
+      "profileId",
+      "vehicleCategory",
+      "__typename"
+    ];
+    return Object.fromEntries(
+      Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
+    );
+  })();
+  let openaiEvaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
 
   // Check if status code matches expectation (if provided)
   if (expectedStatusCode && results.statusCode !== expectedStatusCode) {
-    evaluation = `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`;
+    openaiEvaluation = `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`;
     hasError = true;
   } else if (expectedStatusCode && results.statusCode === expectedStatusCode) {
     // If we have an expected status code and it matches, treat as success regardless of error
-    evaluation = `Expected status code ${expectedStatusCode} received as expected`;
+    openaiEvaluation = `Expected status code ${expectedStatusCode} received as expected`;
     hasError = false;
 
     // If there are also results to evaluate, include that information
@@ -520,23 +540,20 @@ export async function processAndLogApiResult({
           : smartSearchResponse?.message_to_user) || "";
 
       if (customEval) {
-        evaluation = await customEval(results.results);
+        openaiEvaluation = await customEval(results.results);
       } else {
-        evaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
-      }
-
-      hasError = evaluation !== "PASS";
+        openaiEvaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
+      }      
     }
-  } else if ((results.error || results.results.errors) && results.statusCode !== 400) {
+  } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
     // Check for non-400 errors (400 is now treated as valid response with message_to_user)
-    // evaluation = `API Error: ${results.error}`;
-    evaluation = `API Error: ${results.results.errors
-      .map((err: any) => err.message)
+    openaiEvaluation = `API Error: ${results.results?.errors
+      ?.map((err: any) => err.message)
       .join("; ")}`;
     hasError = true;
   } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults = results.results.responseData.data.smartSearch; //results.results.searchResults;
+    const searchResults = apiResponse.data.smartSearch; //results.results.searchResults;
 
     // Extract result count from the actual search results
     if (searchResults) {
@@ -550,23 +567,35 @@ export async function processAndLogApiResult({
     }
 
     if (customEval) {
-      evaluation = await customEval(results.results);
+      openaiEvaluation = await customEval(results.results);
     } else {
-      evaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
+      openaiEvaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
     }
 
-    hasError = evaluation !== "PASS";
+    // Facets check
+    if (actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+      openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
+      hasError = true;
+    } else {
+      hasError = openaiEvaluation !== "PASS";
+    }
   }
+
+  // Facets check
+  if (actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
+    hasError = true;
+  } else {
+    hasError = openaiEvaluation !== "PASS";
+  }  
 
   // Format output to match UI test format
   const icon = hasError ? "❌" : "✅";
-  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
-  const actualInput = query?.value ?? query;
-  const smartSearchMessage = results.results.resultText;;
+  const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${icon} ${evaluation} | ${testTitle}`);
+  console.log(`${icon} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
@@ -604,24 +633,9 @@ export async function processAndLogApiResult({
     statusCode: results.statusCode,
     hasError,
     error: results.error,
-    apiResponse: results.results,
-    openaiEvaluation: evaluation,
-    facets: (() => {
-      const params = results.results.responseData?.data?.smartSearch?.parameters || {};
-      const excludeKeys = [
-        "contextType",
-        "isUcos",
-        "limit",
-        "sortingType",
-        "language",
-        "profileId",
-        "vehicleCategory",
-        "__typename"
-      ];
-      return Object.fromEntries(
-        Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
-      );
-    })(),
+    apiResponse,
+    openaiEvaluation: openaiEvaluation,
+    facets,
   };
 }
 

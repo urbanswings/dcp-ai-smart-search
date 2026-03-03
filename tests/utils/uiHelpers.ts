@@ -33,6 +33,22 @@ export async function processAndLogUiResult({
   const actualInput = query?.value ?? query;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
+  const facets = (() => {
+    const params = results.results.responseData?.data?.smartSearch?.parameters || {};
+    const excludeKeys = [
+      "contextType",
+      "isUcos",
+      "limit",
+      "sortingType",
+      "language",
+      "profileId",
+      "vehicleCategory",
+      "__typename"
+    ];
+    return Object.fromEntries(
+      Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
+    );
+  })();
   let openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
   let resultCount = 0;
   let hasError = false;
@@ -109,22 +125,7 @@ export async function processAndLogUiResult({
     error: results.error,
     apiResponse,
     openaiEvaluation,
-    facets: (() => {
-      const params = results.results.responseData?.data?.smartSearch?.parameters || {};
-      const excludeKeys = [
-        "contextType",
-        "isUcos",
-        "limit",
-        "sortingType",
-        "language",
-        "profileId",
-        "vehicleCategory",
-        "__typename"
-      ];
-      return Object.fromEntries(
-        Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
-      );
-    })(),
+    facets,
   };
 }
 
@@ -343,10 +344,22 @@ export async function performUISmartSearchAndGetResults(
       : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
 
   let apiResponsePayload: any[] = [];
+  let responseCaptured = false;
+  let responseCapturedPromiseResolve: (() => void) | null = null;
+  const responseCapturedPromise = new Promise<void>((resolve) => {
+    responseCapturedPromiseResolve = resolve;
+  });
   const responseListener = async (response: any) => {
     try {
-      if (response.url().includes(endpoint)) {
+      if (
+        response.url().includes(endpoint) &&
+        response.request().method() === "POST"
+      ) {
+        console.info("[DEBUG] API response received from endpoint:", endpoint);
         apiResponsePayload = await response.json();
+        responseCaptured = true;
+        if (responseCapturedPromiseResolve) responseCapturedPromiseResolve();
+        console.info("[DEBUG] API response payload:", apiResponsePayload.length);
       }
     } catch (e) {
       console.warn("[DEBUG] Failed to capture API response payload:", e);
@@ -394,6 +407,25 @@ export async function performUISmartSearchAndGetResults(
   }
 
   const responseTime = Date.now() - startTime;
+  // Wait for responseListener to capture a response (max 30s)
+  if (!responseCaptured) {
+    try {
+      await Promise.race([
+        responseCapturedPromise,
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out waiting for API response")), 30000)),
+      ]);
+    } catch (e) {
+      return {
+        query: query,
+        results: {
+          resultText,
+          responseData: null,
+        },
+        responseTime,
+        error: "Failed to capture API response within timeout",
+      };
+    }
+  }
   return {
     query: query,
     results: {

@@ -5,6 +5,33 @@ import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE } from "./testHelpers";
 
 export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE };
 
+export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
+  if (a === b) return true;
+  if (typeof a !== typeof b) return false;
+  if (a == null || b == null) return a === b;
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    // Compare arrays ignoring order
+    const aSorted = [...a].sort();
+    const bSorted = [...b].sort();
+    for (let i = 0; i < aSorted.length; i++) {
+      if (!deepEqual(aSorted[i], bSorted[i], ignoreKeys)) return false;
+    }
+    return true;
+  }
+  if (typeof a === 'object' && typeof b === 'object') {
+    const aKeys = Object.keys(a).filter(k => !ignoreKeys.includes(k));
+    const bKeys = Object.keys(b).filter(k => !ignoreKeys.includes(k));
+    if (aKeys.length !== bKeys.length) return false;
+    for (const key of aKeys) {
+      if (!bKeys.includes(key)) return false;
+      if (!deepEqual(a[key], b[key], ignoreKeys)) return false;
+    }
+    return true;
+  }
+  return false;
+}
+
 export function getTestMode(): "ui" | "api" | "both" {
   return (process.env.TEST_MODE as "ui" | "api" | "both") || "ui";
 }
