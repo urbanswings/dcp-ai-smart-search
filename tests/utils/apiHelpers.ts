@@ -509,6 +509,7 @@ export async function processAndLogApiResult({
   let openaiEvaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
+  const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
 
   // Check if status code matches expectation (if provided)
   if (expectedStatusCode && results.statusCode !== expectedStatusCode) {
@@ -591,7 +592,6 @@ export async function processAndLogApiResult({
 
   // Format output to match UI test format
   const icon = hasError ? "❌" : "✅";
-  const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

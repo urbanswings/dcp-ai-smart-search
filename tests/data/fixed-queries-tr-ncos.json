@@ -59,36 +59,321 @@
     "Sürdürülebilir ya da hibrit Mercedes modelleri arıyorum."
   ],
   "byFixedQuery": [
-    "bana sedan göster",
-    "cla 200",
-    "bütçem 10.000.321 liranın altında",
-    "coupe var mı? iki kapılı bir arabadır",
-    "aile arabası arıyorum",
-    "hızlı bir spor araba bul",
-    "sadece mor renkli arabalar",
-    "elektrikli bir araç istiyorum",
-    "güzel ve şık bir kompakt araç istiyorum",
-    "2020 model veya gümüş renkli bir arabanız var mı?",
-    "2020 model veya beyaz renkli bir arabanız var mı?",
-    "öneri verebilir misin?",
-    "üstü açılır araçlarla ilgileniyorum",
-    "en iyi otomobil üreticileri kimler?",
-    "araçlarda iade politikanız nedir?",
-    "finansman seçenekleri sunuyor musunuz?",
-    "test sürüşü planlayabilir miyim?",
-    "bir promosyon var mı?",
-    "yeni araçlarda hangi garantileri sağlıyorsunuz?",
-    "dizel veya hibrit olmayan, yakıt tasarruflu arabaları kısa listele",
-    "ileri güvenlik özelliklerine ve düşük kilometreye sahip arabaları bul",
-    "bana bmw x5'i listeleyebilir misin?",
-    "listeyi tekrar göster",
-    "siparişim nerede? geçen hafta satın aldım ama hiçbir güncelleme almadım",
-    "henüz benimle iletişime geçilmedi",
-    "yakındaki en iyi pizza restoranlarını öner",
-    "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
-    "araba seçeneklerimi konuşmak için beni 123-456-7890 numarasından ara",
-    "<p>sipariş vermek istiyorum</p>",
-    "CLA 911 GTS hakkında daha fazla bilgi ver"
+    {
+      "value": "bana sedan göster",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "bodyType": [
+          "LIMOUSINE"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "cla 200",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "CLA"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "bütçem 10.000.321 liranın altında",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "EQA"
+        ],
+        "brand": [
+          "Mercedes-Benz"
+        ],
+        "fuelType": [
+          "ELECTRIC"
+        ],
+        "bodyType": [
+          "SUV_OFFROADER",
+          "SUV"
+        ],
+        "motorization": [
+          "EQA 250+"
+        ],
+        "price": {
+          "min": 3263131,
+          "max": 10000000
+        }
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "coupe var mı? iki kapılı bir arabadır",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "bodyType": [
+          "COUPE"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "aile arabası arıyorum",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "EQA"
+        ],
+        "brand": [
+          "Mercedes-Benz"
+        ],
+        "fuelType": [
+          "ELECTRIC"
+        ],
+        "bodyType": [
+          "SUV_OFFROADER",
+          "SUV"
+        ],
+        "motorization": [
+          "EQA 250+"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "hızlı bir spor araba bul",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "CLA"
+        ],
+        "brand": [
+          "Mercedes-AMG"
+        ],
+        "fuelType": [
+          "PETROL"
+        ],
+        "bodyType": [
+          "COUPE"
+        ],
+        "motorization": [
+          "CLA 45 S 4MATIC+"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "sadece mor renkli arabalar",
+      "shouldRecommend": true,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "elektrikli bir araç istiyorum",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "fuelType": [
+          "ELECTRIC"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "güzel ve şık bir kompakt araç istiyorum",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "EQE"
+        ],
+        "brand": [
+          "Mercedes-AMG"
+        ],
+        "fuelType": [
+          "ELECTRIC"
+        ],
+        "bodyType": [
+          "LIMOUSINE"
+        ],
+        "motorization": [
+          "EQE 53 4MATIC+"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "2020 model veya gümüş renkli bir arabanız var mı?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "color": [
+          "PAINT_COLOR_SILVER"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "2020 model veya beyaz renkli bir arabanız var mı?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "color": [
+          "PAINT_COLOR_WHITE"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "öneri verebilir misin?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "EQE"
+        ],
+        "brand": [
+          "Mercedes-AMG"
+        ],
+        "fuelType": [
+          "ELECTRIC"
+        ],
+        "bodyType": [
+          "LIMOUSINE"
+        ],
+        "motorization": [
+          "EQE 53 4MATIC+"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "üstü açılır araçlarla ilgileniyorum",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "bodyType": [
+          "CABRIO_ROADSTER"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "en iyi otomobil üreticileri kimler?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "araçlarda iade politikanız nedir?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "finansman seçenekleri sunuyor musunuz?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "test sürüşü planlayabilir miyim?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "bir promosyon var mı?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "yeni araçlarda hangi garantileri sağlıyorsunuz?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "dizel veya hibrit olmayan, yakıt tasarruflu arabaları kısa listele",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "fuelType": [
+          "PETROL",
+          "ELECTRIC"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "ileri güvenlik özelliklerine ve düşük kilometreye sahip arabaları bul",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "bana bmw x5'i listeleyebilir misin?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "listeyi tekrar göster",
+      "shouldRecommend": true,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "siparişim nerede? geçen hafta satın aldım ama hiçbir güncelleme almadım",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "henüz benimle iletişime geçilmedi",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "yakındaki en iyi pizza restoranlarını öner",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "modelIdentifier": [
+          "EQS"
+        ],
+        "brand": [
+          "Mercedes-Benz"
+        ],
+        "fuelType": [
+          "ELECTRIC"
+        ],
+        "bodyType": [
+          "LIMOUSINE"
+        ],
+        "motorization": [
+          "EQS 450 4MATIC"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "araba seçeneklerimi konuşmak için beni 123-456-7890 numarasından ara",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "<p>sipariş vermek istiyorum</p>",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "CLA 911 GTS hakkında daha fazla bilgi ver",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    }
   ],
   "recommendationModel": [
     "Beş kişilik aileye uygun Mercedes SUV var mı?",

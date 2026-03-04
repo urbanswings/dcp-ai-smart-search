@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import {
   fetchTranslation,
 } from "./aiHelpers";
+import { deepEqual } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -31,6 +32,7 @@ export async function processAndLogUiResult({
   customEval?: (resultText: string) => Promise<string>;
 }): Promise<any> {
   const actualInput = query?.value ?? query;
+  const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
   const facets = (() => {
@@ -52,7 +54,6 @@ export async function processAndLogUiResult({
   let openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
   let resultCount = 0;
   let hasError = false;
-  let passed = openaiEvaluation === "PASS";
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
 
   // Handle the new Smart Search + Actual Search response structure
@@ -69,20 +70,16 @@ export async function processAndLogUiResult({
     resultCount = 0;
   }  
 
-  const icon = passed ? "✅" : "❌";
-  const entry: any = {
-    timestamp: new Date().toISOString(),
-    timestampSG: new Date().toLocaleString("en-SG", {
-      timeZone: "Asia/Singapore",
-    }),
-    testMode: "ui",    
-    testDescribe,
-    testTitle,
-    query,
-    resultText: smartSearchMessage,
-    smartSearchMessage,
-    openaiEvaluation
-  };
+  // Facets check
+  if (actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
+    hasError = true;
+  } else {
+    hasError = openaiEvaluation !== "PASS";
+  }    
+
+  const icon = hasError ? "❌" : "✅";
+
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${icon} ${openaiEvaluation} | ${testTitle}`);
@@ -355,11 +352,10 @@ export async function performUISmartSearchAndGetResults(
         response.url().includes(endpoint) &&
         response.request().method() === "POST"
       ) {
-        console.info("[DEBUG] API response received from endpoint:", endpoint);
+        // console.info("[DEBUG] API response received from endpoint:", endpoint);
         apiResponsePayload = await response.json();
         responseCaptured = true;
         if (responseCapturedPromiseResolve) responseCapturedPromiseResolve();
-        console.info("[DEBUG] API response payload:", apiResponsePayload.length);
       }
     } catch (e) {
       console.warn("[DEBUG] Failed to capture API response payload:", e);

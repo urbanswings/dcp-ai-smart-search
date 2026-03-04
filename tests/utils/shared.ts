@@ -11,11 +11,18 @@ export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   if (a == null || b == null) return a === b;
   if (Array.isArray(a) && Array.isArray(b)) {
     if (a.length !== b.length) return false;
-    // Compare arrays ignoring order
-    const aSorted = [...a].sort();
-    const bSorted = [...b].sort();
-    for (let i = 0; i < aSorted.length; i++) {
-      if (!deepEqual(aSorted[i], bSorted[i], ignoreKeys)) return false;
+    // Compare arrays deeply, ignoring order, by matching each element in a to one in b
+    const bUsed = new Array(b.length).fill(false);
+    for (let i = 0; i < a.length; i++) {
+      let found = false;
+      for (let j = 0; j < b.length; j++) {
+        if (!bUsed[j] && deepEqual(a[i], b[j], ignoreKeys)) {
+          bUsed[j] = true;
+          found = true;
+          break;
+        }
+      }
+      if (!found) return false;
     }
     return true;
   }

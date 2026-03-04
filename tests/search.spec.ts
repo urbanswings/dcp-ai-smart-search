@@ -46,8 +46,9 @@ import {
 
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
+const product = PRODUCT?.toLowerCase() || "ncos";
 const fixedQueriesFile =
-  language !== "en" ? `fixed-queries-${language}.json` : "fixed-queries.json";
+  language !== "en" ? `fixed-queries-${language}-${product}.json` : `fixed-queries-en-ncos.json`;
 const fixedQueriesPath = path.join(__dirname, `data/${fixedQueriesFile}`);
 let fixedQueriesData: any = {};
 let emhApiResponse: any = null;
@@ -354,10 +355,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test(
-    "By Filter Facets (complete)",
-    { tag: ["@ui", "@api"] },
-    async ({ browser }) => {
+  test("By Filter Facets (complete)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete;
