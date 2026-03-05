@@ -21,38 +21,42 @@ export async function fetchAndConvertFacets(
 ): Promise<SimplifiedFacet[]> {
   let facets: SimplifiedFacet[] = [];
 
+  // List of facet codes to skip/ignore
+  const skipFacetCodes = ["driveType", "stockType", "generation"];
+
   try {
     let rawFacets = [];
+
     if (project === "EMH") {
       // EMH GraphQL response structure: data.search.facets
       rawFacets = emhApiResponse.data?.search?.facets || {};
 
       // Convert EMH GraphQL facets to array format
-      rawFacets = Object.entries(rawFacets).map(
-        ([key, value]: [string, any]) => {
+      rawFacets = Object.entries(rawFacets)
+        .filter(([key]) => !skipFacetCodes.includes(key))
+        .map(([key, value]: [string, any]) => {
           const facetData: any = { code: key };
 
           // Check facet type based on the structure
-          if (value?.facetType === "RANGE" && value?.values?.[0]) {
+          if (value?.facetType === "RANGE" && value?.values) {
             facetData.facetDisplayType = "SLIDER";
-            facetData.min = value.values[0].min;
-            facetData.max = value.values[0].max;
+            facetData.min = value.values.min;
+            facetData.max = value.values.max;
             facetData.displayName = key;
           } else if (value?.values && Array.isArray(value.values)) {
             facetData.facetDisplayType = "LIST";
             facetData.values = value.values.map((v: any) => ({
               code: v.value || v.formattedValue,
-              name: v.label || v.formattedValue || v.value,
+              name: v.formattedValue || v.value || v.label,
             }));
             facetData.displayName = key;
           }
 
           return facetData;
-        }
-      );
+        });
     } else {
       // DCP response structure: data.facets
-      rawFacets = dcpApiResponse.data.facets || [];
+      rawFacets = (dcpApiResponse.data.facets || []).filter((facet: any) => !skipFacetCodes.includes(facet.code));
     }
 
     console.log(`Successfully fetched ${rawFacets.length} raw facets from API`);
@@ -218,7 +222,7 @@ export async function generateQueriesFromFacets(
     const prompt = `Car specifications: ${filterText}. Generate in '${process.env.LANGUAGE}' language only.`;
     const fallback = `Show me vehicles with ${filterText}`;
     const query = await generateOpenAIQuery(
-      "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet and value in context. Only return the sentence.",
+      "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
       prompt,
       50,
       fallback
