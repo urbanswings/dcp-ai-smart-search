@@ -1,9 +1,12 @@
+import { isSemanticallySimilarOpenAI } from "./aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
 import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE } from "./testHelpers";
 
 export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE };
+
+const REPEAT_COUNT = 10;
 
 export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   if (a === b) return true;
@@ -74,9 +77,7 @@ export async function ensureDirectoryExists(filePath: string): Promise<void> {
 
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
-  const dateOnly = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Singapore",
-  }).format(new Date(timestamp));
+  const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
   const env = ENVIRONMENT;
   const country = COUNTRY;
   const product = PRODUCT;
@@ -104,6 +105,213 @@ export async function combineResults(
   }
 
   return combined;
+}
+
+/**
+ * Runs UI and/or API tests repeatedly for a set of queries and saves results to a file.
+ * This function encapsulates the common pattern of:
+ * 1. Running UI tests (if enabled)
+ * 2. Running API tests (if enabled)
+ * 3. Combining results
+ * 4. Saving to output file
+ */
+export async function runTestsRepeatedAndSaveResults(params: {
+  queries: any[];
+  testDescribe: string;
+  testTitle: string;
+  testType: string;
+  browser?: any;
+  performUISmartSearchAndGetResults?: (page: any, query: any) => Promise<any>;
+  processAndLogUiResult?: (params: {
+    query: any;
+    results: any;
+    testDescribe: string;
+    testTitle: string;
+  }) => Promise<any>;
+  performApiSmartSearchAndGetResults?: (query: any) => Promise<any>;
+  processAndLogApiResult?: (params: {
+    query: any;
+    results: any;
+    testDescribe: string;
+    testTitle: string;
+  }) => Promise<any>;
+  setupContextAndPage?: (browser: any) => Promise<any>;
+}): Promise<void> {
+  const {
+    queries,
+    testDescribe,
+    testTitle,
+    testType,
+    browser,
+    performUISmartSearchAndGetResults,
+    processAndLogUiResult,
+    performApiSmartSearchAndGetResults,
+    processAndLogApiResult,
+    setupContextAndPage,
+  } = params;
+
+  const lang = LANGUAGE?.toLowerCase() || "en";  
+  const uiResults: any[][] = [];
+  const apiResults: any[][] = [];
+
+  // Run UI tests if enabled
+  if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
+    const page = await setupContextAndPage(browser);
+    for (const query of queries) {
+      const resultsForQuery = [];
+      for (let i = 0; i < REPEAT_COUNT; i++) {
+        const results = await performUISmartSearchAndGetResults(page, query);
+        const entry = await processAndLogUiResult({
+          query,
+          results,
+          testDescribe,
+          testTitle,
+        });
+        resultsForQuery.push(entry);
+      }
+      // Consistency check for UI results (response[LANGUAGE] and facets)
+      const firstResult = resultsForQuery[0];
+      const firstString = firstResult?.response?.[lang];
+      const firstFacets = firstResult?.facets;
+      const line = '────────────────────────────────────────────────────────────';
+      let matchCount = 0;
+      console.info(`\n${line}`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query.value}\x1b[0m`);
+      console.info(`${line}`);
+      // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
+      console.info(`  ${firstString}`);
+      for (let i = 1; i < resultsForQuery.length; i++) {
+        const compareString = resultsForQuery[i]?.response?.[lang];
+        const compareFacets = resultsForQuery[i]?.facets;
+        let stringMatch = firstString === compareString;
+        let semanticMatch = false;
+        if (!stringMatch && firstString && compareString) {
+          // Use OpenAI to check semantic similarity
+          try {
+            semanticMatch = await isSemanticallySimilarOpenAI(firstString, compareString);
+          } catch (e) {
+            console.warn('⚠️  OpenAI semantic check failed:', e);
+          }
+        }
+        const facetsMatch = deepEqual(firstFacets, compareFacets);
+        if (stringMatch || semanticMatch) matchCount++;
+        console.info(`\n${line}`);
+        console.info(`• \x1b[1mRun #${i + 1}:\x1b[0m`);
+        if (stringMatch) {
+          console.info('  ✅ Response string matches');
+        } else if (semanticMatch) {
+          console.info('  ✅ Response string semantically matches');
+        } else {
+          console.info('  ❌ Response string does NOT match');
+          console.info('    • Different response string:');
+          console.info(`      ${compareString}`);
+        }
+        if (facetsMatch) {
+          console.info('  ✅ Facets matches');
+        } else {
+          console.info('  ❌ Facets do NOT match');
+          console.info('    • Different facets:');
+          console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
+        }
+      }
+      const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      // Add consistencyRating to each result in resultsForQuery
+      for (const result of resultsForQuery) {
+        result.consistencyRating = Number(percent);
+      }
+      const icon = percent === '100' ? '✅' : '❌';
+      console.info(`\n${line}`);      
+      console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
+      console.info(`${line}\n`);
+      uiResults.push(resultsForQuery);
+    }
+  }
+
+  // Run API tests if enabled
+  if (shouldRunApiTests() && performApiSmartSearchAndGetResults && processAndLogApiResult) {
+    for (const query of queries) {
+      const resultsForQuery = [];
+      for (let i = 0; i < REPEAT_COUNT; i++) {
+        const results = await performApiSmartSearchAndGetResults(query);
+        const entry = await processAndLogApiResult({
+          query,
+          results,
+          testDescribe,
+          testTitle,
+        });
+        resultsForQuery.push(entry);
+      }
+      // Consistency check for API results (response[LANGUAGE] and facets)
+      const firstResult = resultsForQuery[0];
+      const firstString = firstResult?.response?.[lang];
+      const firstFacets = firstResult?.facets;
+      const line = '────────────────────────────────────────────────────────────';
+      let matchCount = 0;
+      console.info(`\n${line}`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query.value}\x1b[0m`);
+      console.info(`${line}`);
+      // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
+      console.info(`  ${firstString}`);
+      for (let i = 1; i < resultsForQuery.length; i++) {
+        const compareString = resultsForQuery[i]?.response?.[lang];
+        const compareFacets = resultsForQuery[i]?.facets;
+        let stringMatch = firstString === compareString;
+        let semanticMatch = false;
+        if (!stringMatch && firstString && compareString) {
+          // Use OpenAI to check semantic similarity
+          try {
+            semanticMatch = await isSemanticallySimilarOpenAI(firstString, compareString);
+          } catch (e) {
+            console.warn('⚠️  OpenAI semantic check failed:', e);
+          }
+        }
+        const facetsMatch = deepEqual(firstFacets, compareFacets);
+        if (stringMatch || semanticMatch) matchCount++;
+        console.info(`\n${line}`);
+        console.info(`• \x1b[1mRun #${i + 1}:\x1b[0m`);
+        if (stringMatch) {
+          console.info('  ✅ Response string matches');
+        } else if (semanticMatch) {
+          console.info('  ✅ Response string semantically matches');
+        } else {
+          console.info('  ❌ Response string does NOT match');
+          console.info('    • Different response string:');
+          console.info(`      ${compareString}`);
+        }
+        if (facetsMatch) {
+          console.info('  ✅ Facets matches');
+        } else {
+          console.info('  ❌ Facets do NOT match');
+          console.info('    • Different facets:');
+          console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
+        }
+      }
+      const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      // Add consistencyRating to each result in resultsForQuery
+      for (const result of resultsForQuery) {
+        result.consistencyRating = Number(percent);
+      }
+      const icon = percent === '100' ? '✅' : '❌';
+      console.info(`\n${line}`);      
+      console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
+      console.info(`${line}\n`);
+      apiResults.push(resultsForQuery);
+    }
+  }
+
+  // Flatten results for saving
+  const flatUiResults = uiResults.flat();
+  const flatApiResults = apiResults.flat();
+
+  // Combine and save results
+  const allResults = await combineResults(flatUiResults, flatApiResults);
+  const outputFileName = getOutputFileName(testType);
+  await ensureDirectoryExists(outputFileName);
+  await fs.writeFile(
+    outputFileName,
+    JSON.stringify(allResults, null, 2),
+    "utf-8"
+  );
 }
 
 /**

@@ -3,14 +3,16 @@ import { test, Page } from "@playwright/test";
 import fs from "fs/promises";
 import path from "path";
 import {
-  queriesPath,
   openai,
   generateOpenAIQuery,
   evaluateSearchResult,
-  getRandomVehicleCombinations,
-  logTestContext,
   generateUniqueQueries,
   generateMultipleQueries,
+} from "./utils/aiHelpers";
+import {
+  queriesPath,
+  getRandomVehicleCombinations,
+  logTestContext
 } from "./utils/testHelpers";
 import {
   processAndLogUiResult,
@@ -42,6 +44,7 @@ import {
   LANGUAGE,
   runTestsAndSaveResults,
   mergeQueries,
+  runTestsRepeatedAndSaveResults,
 } from "./utils/shared";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -121,16 +124,14 @@ test.describe("AI Smart Search - Sanity Test", () => {
   });
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-    // Fetch facets dynamically from API based on environment settings
-    const project = getProject();
     const fixedQueries = fixedQueriesData.byFixedQuery;
-    const facets = await fetchAndConvertFacets(
-      emhApiResponse,
-      dcpApiResponse,
-      project
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
+      8,
+      "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+      `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
+      50,
+      "I am looking for an affordable car with good fuel efficiency and a spacious interior."
     );
-
-    const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, generateOpenAIQuery);
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -978,73 +979,31 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     });
   });
 
-  test("AI Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const queries = fixedQueriesData.consistency;
-
-      const uiResults = [];
-      const apiResults = [];
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const query of queries) {
-          const responses: string[] = [];
-          for (let i = 0; i < 3; i++) {
-            const results = await performUISmartSearchAndGetResults(
-              page,
-              query
-            );
-            const entry = await processAndLogUiResult({
-              query,
-              results,
-              testDescribe: describeName,
-              testTitle: test.info().title,
-            });
-            responses.push(entry.openaiEvaluation);
-            uiResults.push(entry);
-          }
-          // Compare all 3 responses for consistency
-          if (!responses.every((r) => r === responses[0])) {
-            console.warn(`Inconsistent OpenAI responses for query: '${query}'`);
-            console.warn(responses);
-          }
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const query of queries) {
-          const responses: string[] = [];
-          for (let i = 0; i < 3; i++) {
-            const results = await performApiSmartSearchAndGetResults(query);
             const entry = await processAndLogApiResult({
-              query,
-              results,
-              testDescribe: describeName,
-              testTitle: test.info().title,
-            });
-            responses.push(entry.openaiEvaluation);
-            apiResults.push(entry);
-          }
-          // Compare all 3 responses for consistency
-          if (!responses.every((r) => r === responses[0])) {
-            console.warn(
-              `Inconsistent API OpenAI responses for query: '${query}'`
-            );
-            console.warn(responses);
-          }
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("consistency");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
+  test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+    // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
+      const fixedQueries = fixedQueriesData.byFixedQuery;
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
+        8,
+        "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+        `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
+        50,
+        "I am looking for an affordable car with good fuel efficiency and a spacious interior."
       );
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsRepeatedAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "response-consistency",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
 

@@ -485,7 +485,7 @@ export async function processAndLogApiResult({
   customEval?: (resultData: any) => Promise<string>;
   expectedStatusCode?: number;
 }): Promise<any> {
-  const { evaluateSearchResult } = await import("./testHelpers");
+  const { evaluateSearchResult } = await import("./aiHelpers");
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results.resultText;
@@ -633,7 +633,7 @@ export async function processAndLogApiResult({
     statusCode: results.statusCode,
     hasError,
     error: results.error,
-    apiResponse,
+    // apiResponse,
     openaiEvaluation: openaiEvaluation,
     facets,
   };

@@ -120,7 +120,7 @@ export async function processAndLogUiResult({
     statusCode: null,
     hasError: null,
     error: results.error,
-    apiResponse,
+    // apiResponse,
     openaiEvaluation,
     facets,
   };

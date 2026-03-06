@@ -83,26 +83,12 @@
       "value": "bütçem 10.000.321 liranın altında",
       "shouldRecommend": true,
       "shouldFilter": {
-        "modelIdentifier": [
-          "EQA"
-        ],
-        "brand": [
-          "Mercedes-Benz"
-        ],
-        "fuelType": [
-          "ELECTRIC"
-        ],
-        "bodyType": [
-          "SUV_OFFROADER",
-          "SUV"
-        ],
-        "motorization": [
-          "EQA 250+"
-        ],
-        "price": {
-          "min": 3263131,
-          "max": 10000000
-        }
+        "modelIdentifier":["EQA"],
+        "brand":["Mercedes-Benz"],
+        "fuelType":["ELECTRIC"],
+        "bodyType":["SUV_OFFROADER","SUV"],
+        "motorization":["EQA 250+"],
+        "price":{"min":3263131,"max":10000000}
       },
       "aiEvaluationHints": []
     },
@@ -223,21 +209,11 @@
       "value": "öneri verebilir misin?",
       "shouldRecommend": true,
       "shouldFilter": {
-        "modelIdentifier": [
-          "EQE"
-        ],
-        "brand": [
-          "Mercedes-AMG"
-        ],
-        "fuelType": [
-          "ELECTRIC"
-        ],
-        "bodyType": [
-          "LIMOUSINE"
-        ],
-        "motorization": [
-          "EQE 53 4MATIC+"
-        ]
+        "modelIdentifier":["EQS"],
+        "brand":["Mercedes-Benz"],
+        "fuelType":["ELECTRIC"],
+        "bodyType":["LIMOUSINE"],
+        "motorization":["EQS 450 4MATIC"]
       },
       "aiEvaluationHints": []
     },
@@ -278,7 +254,13 @@
     {
       "value": "bir promosyon var mı?",
       "shouldRecommend": false,
-      "shouldFilter": {},
+      "shouldFilter": {
+        "modelIdentifier":["EQS"],
+        "brand":["Mercedes-Benz"],
+        "fuelType":["ELECTRIC"],
+        "bodyType":["LIMOUSINE"],
+        "motorization":["EQS 450 4MATIC"]
+      },
       "aiEvaluationHints": []
     },
     {
@@ -370,6 +352,12 @@
     },
     {
       "value": "CLA 911 GTS hakkında daha fazla bilgi ver",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "35 yaşındaki evli bir kadın olan Sally Jackson için uygun bir araba",
       "shouldRecommend": false,
       "shouldFilter": {},
       "aiEvaluationHints": []

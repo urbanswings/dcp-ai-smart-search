@@ -291,6 +291,12 @@
       "shouldRecommend": false,
       "shouldFilter": {},
       "aiEvaluationHints": []
+    },
+    {
+      "value": "35 yaşındaki evli bir kadın olan Sally Jackson için uygun bir araba",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": []
     }
   ],
   "recommendationModel": [
