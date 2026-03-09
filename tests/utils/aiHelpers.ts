@@ -1,5 +1,6 @@
-import axios from 'axios';
 
+import axios from 'axios';
+import { COUNTRY, LANGUAGE } from './testHelpers';
 import { OpenAI } from 'openai/client';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -200,13 +201,15 @@ export async function generateOpenAIQuery(
   maxTokens: number = 40,
   fallback: string = ""
 ): Promise<string> {
+  systemPrompt = systemPrompt.replace(/\{LANGUAGE\}/g, LANGUAGE).replace(/\{COUNTRY\}/g, COUNTRY);
+  userPrompt = userPrompt.replace(/\{LANGUAGE\}/g, LANGUAGE).replace(/\{COUNTRY\}/g, COUNTRY);
   try {
     const completion = await openaiChatCompletion([
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ], {
       temperature: OPENAI_DEFAULT_TEMPERATURE,
-      max_completion_tokens: maxTokens,
+      max_tokens: maxTokens,
     });
     return completion.choices[0].message.content?.trim() ?? fallback;
   } catch (err) {
@@ -244,8 +247,7 @@ export async function generateUniqueQueries(
         userPromptTemplate,
         maxTokens,
         fallback
-      );
-      // Clean up quotes
+      );      
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();
       

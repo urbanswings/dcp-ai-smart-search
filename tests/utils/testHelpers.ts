@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 
-export const ENVIRONMENT = process.env.ENVIRONMENT;
-export const COUNTRY = process.env.COUNTRY;
-export const LANGUAGE = process.env.LANGUAGE;
-export const PRODUCT = process.env.PRODUCT;
+export const ENVIRONMENT = process.env.ENVIRONMENT || "PROD";
+export const COUNTRY = process.env.COUNTRY || "AU";
+export const LANGUAGE = process.env.LANGUAGE || "EN";
+export const PRODUCT = process.env.PRODUCT || "EMH";
 
 export const queriesPath = "./tests/data/search-queries.json";
 

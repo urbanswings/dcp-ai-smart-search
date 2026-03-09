@@ -125,19 +125,13 @@ test.describe("AI Smart Search - Sanity Test", () => {
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-    const {
-      count: byFixedQueryCount,
-      systemPrompt: byFixedQuerySystemPrompt,
-      userPromptTemplate: byFixedQueryUserPromptTemplate,
-      maxTokens: byFixedQueryMaxTokens,
-      fallback: byFixedQueryFallback
-    } = aiPromptData.byFixedQuery;
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byFixedQuery || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      byFixedQueryCount,
-      byFixedQuerySystemPrompt,
-      byFixedQueryUserPromptTemplate,
-      byFixedQueryMaxTokens,
-      byFixedQueryFallback
+      count,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
     const allQueries = mergeQueries(fixedQueries, queries);
 
@@ -158,13 +152,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
   test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-      const {
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      } = aiPromptData.recommendationModel;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.recommendationModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -234,13 +222,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {const fixedQueries = fixedQueriesData.byBrandModel;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-      const {
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      } = aiPromptData.byBrandModel;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -268,13 +250,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   test("By Specs - Test specification-based queries without brand/model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.bySpecs;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-      const {
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      } = aiPromptData.bySpecs;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.bySpecs || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -301,30 +277,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Filter Facets (random)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
-      // Facet values for visible filters
-      const filterOptions = {
-        model: ["B-CLASS", "GLS", "GLB"],
-        bodyType: ["Hatchback", "SUV", "Sedan"],
-        priceSlider: ["200,000,000", "1,000,000", "15,888,888"],
-        monthlyPriceSlider: ["188,000,000", "2,000", "50,500,000"],
-        ucos_categories: ["판매준비 차량", "인증중고차", "비인증 중고차"],
-        firstRegistrationDateSlider: [
-          "2024-Feb-02",
-          "2020-Sep-03",
-          "2021-Feb-23",
-        ],
-        mileageSlider: ["7,725", "305,808", "463,308"],
-        fuel_type: ["하이브리드 가솔린", "전기", "디젤"],
-        powerInKwSlider: ["263", "658", "657"],
-        upholstery_text: [
-          "Art Leather Black",
-          "Testing Dealer KR 111",
-          "AMG nappa leather black, with red contrasting topstitching",
-        ],
-        equipment: ["후방 카메라", "애플 카플레이", "AMG 카본파이버 트림"],
-        color_text: ["White", "Night Black", "Patagonia Red"],
-        gearBox: ["변속기 없음", "자동"],
-      };
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
       // Generate queries: pick random 1-4 filter options for each query
       function getRandomFilterCombo() {
         type FilterKey = keyof typeof filterOptions;
@@ -345,15 +299,13 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         for (let i = 0; i < 8; i++) {
           const combo = getRandomFilterCombo();
           const comboText = combo
-            .map(({ facet, value }) => `${facet}: ${value}`)
+            .map(({ facet, value }) => `${String(facet)}: ${value}`)
             .join(", ");
-          const prompt = `Facet(s): ${comboText}. Generate in '${getLanguageLocale()}' language only.`;
-          const fallback = `Show me Mercedes-Benz vehicles with ${comboText}`;
           const query = await generateOpenAIQuery(
-            "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
-            `${prompt}. Generate in '${getLanguageLocale()}' language only.`,
-            50,
-            fallback
+            systemPrompt,
+            userPromptTemplate.replace('{comboText}', comboText),
+            maxTokens,
+            fallback.replace('{comboText}', comboText)
           );
           generatedQueries.push(query);
         }
@@ -583,12 +535,14 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
     const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
-      10,
-      "You are a qurious car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
-      `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
-      50,
-      "I am looking for a family car."
+      count || 10,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
     const allQueries = mergeQueries(fixedQueries, queries);
 
@@ -651,17 +605,23 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(queriesPath, "utf-8");
         const vehicleBrandsAndModels: string[] = JSON.parse(file);
         const generatedQueries = [];
-        for (let i = 0; i < 10; i++) {
-          const keyword = vehicleBrandsAndModels[i];
+        const total = vehicleBrandsAndModels.length;
+        const indices = Array.from({ length: total }, (_, i) => i)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 10);
+        for (const idx of indices) {
+          const keyword = vehicleBrandsAndModels[idx];
           const query = await generateOpenAIQuery(
-            "You are a qurious car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
-            `${keyword}. Generate in '${getLanguageLocale()}' language only.`,
-            50,
-            ""
+            systemPrompt,
+            userPromptTemplate.replace('{keyword}', keyword),
+            maxTokens,
+            fallback
           );
           generatedQueries.push(query);
         }
@@ -773,15 +733,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      "Generate a random search query that is NOT related to vehicles, cars, automotive, or ecommerce. Only return the sentence.",
-      `Generate a random unrelated search query. Generate in '${getLanguageLocale()}' language only.`,
-      30,
-      "What is the weather today?"
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.randomTopics || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -873,15 +833,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Negative/Contradictory Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const openaiQueries = await generateMultipleQueries(
-        8,
-        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
-        `Generate a unique Mercedes-Benz vehicle search sentence with negative or contradictory filters. Generate in '${getLanguageLocale()}' language only.`,
-        60,
-        `Show me a Mercedes-Benz convertible with diesel engine and manual gearbox registered in 2030.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.negativeContradictory || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 8,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -901,15 +861,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Language/Localization", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const openaiQueries = await generateMultipleQueries(
-        7,
-        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
-        "Generate a unique Mercedes-Benz vehicle search sentence in Korean, English, or mixed language.",
-        60,
-        `2023년 이후 등록된 검정색 벤츠 SUV를 찾아주세요.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.localization || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 7,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -929,15 +889,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Misspelled/Fuzzy Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const openaiQueries = await generateMultipleQueries(
-        7,
-        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with intentional misspellings, typos, or fuzzy matching of brand/model/type/color. Only return the sentence.",
-        `Generate a unique Mercedes-Benz vehicle search sentence with misspellings or fuzzy matching. Generate in '${getLanguageLocale()}' language only.`,
-        60,
-        `Show me a Mercedez-Bens GLB Sedn in Night Blak.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.misspelledFuzzy || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 7,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -957,15 +917,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("By Filter Facets (Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const openaiQueries = await generateMultipleQueries(
-        8,
-        "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
-        `Generate a unique Mercedes-Benz vehicle search sentence using date/numeric filters. Generate in '${getLanguageLocale()}' language only.`,
-        60,
-        `Show me Mercedes-Benz SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.dateNumeric || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 8,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -985,15 +945,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
-      `Generate a unique, highly unlikely Mercedes-Benz vehicle search sentence. Generate in '${getLanguageLocale()}' language only.`,
-      60,
-      `Show me a Mercedes-Benz sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975.`
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noResults || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -1012,42 +972,44 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
-      const fixedQueries = fixedQueriesData.byFixedQuery;
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        8,
-        "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
-        `Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.`,
-        50,
-        "I am looking for an affordable car with good fuel efficiency and a spacious interior."
-      );
-      const allQueries = mergeQueries(fixedQueries, queries);
+    const fixedQueries = fixedQueriesData.byFixedQuery;
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
+    );
+    const allQueries = mergeQueries(fixedQueries, queries);
 
-      await runTestsRepeatedAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        testType: "response-consistency",
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
+    await runTestsRepeatedAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "response-consistency",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
     }
   );
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      `You are a car shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.`,
-      `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${getLanguageLocale()}' language only.`,
-      60,
-      `Show me Mercedes-Benz sedans under my name John, born on January 1, 1960, living outside the city.`
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.personalData || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -1066,15 +1028,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      `You are a idiotic crazy shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.`,
-      `Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '${getLanguageLocale()}' language only.`,
-      60,
-      `Show me Mercedes-Benz cars for sale in adult entertainment venues.`
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.nsfw || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -1093,15 +1055,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      `You are a malicious hacker. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.`,
-      `Generate a Mercedes-Benz vehicle search sentence and include code or scripts. Generate in '${getLanguageLocale()}' language only.`,
-      60,
-      `Show me Mercedes-Benz cars for sale with <script>alert('Buy!')</script> in the description.`
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.codeAndScripts || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
@@ -1120,15 +1082,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Bias and Manipulation", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const openaiQueries = await generateMultipleQueries(
-        8,
-        `You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in Mercedes-Benz vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.`,
-        `Generate a customer search sentence with biased or opinionated content about Mercedes-Benz. Generate in '${getLanguageLocale()}' language only.`,
-        60,
-        `I think Mercedes-Benz has better quality than most brands, but I'm concerned about the price.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.biasAndManipulation || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 8,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -1148,15 +1110,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Filter Facets", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const openaiQueries = await generateMultipleQueries(
-        8,
-        `You are a confused car shopper. Generate a natural, human-like search sentence for Mercedes-Benz vehicles that includes conflicting or impossible filter combinations (e.g., "electric diesel", "convertible SUV", "manual automatic", "2-door 7-seater", "sports car with high fuel efficiency and low power", etc.). Sound like a real customer who is confused or doesn't understand specifications.`,
-        `Generate a Mercedes-Benz search sentence with conflicting or impossible filter facets. Generate in '${getLanguageLocale()}' language only.`,
-        70,
-        `Show me a Mercedes-Benz electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people.`
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingFilterFacets || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+        count || 8,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback
       );
-
-      const queries = isFixedQueriesOnly() ? [] : openaiQueries;
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -1176,15 +1138,15 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const openaiQueries = await generateMultipleQueries(
-      8,
-      `You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes Mercedes-Benz with other car brands (e.g., "Mercedes-Benz with BMW engine", "AMG Tesla", "Mercedes Toyota hybrid", "Benz Audi design", "Mercedes-Lexus SUV"). Sound like a real customer who is confused about brands and manufacturers.`,
-      `Generate a search sentence mixing Mercedes-Benz with conflicting or incompatible brand names. Generate in '${getLanguageLocale()}' language only.`,
-      70,
-      `Show me a Mercedes-Benz with BMW M series engine and Audi quattro system in a Tesla style.`
+    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingBrands || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
     );
-
-    const queries = isFixedQueriesOnly() ? [] : openaiQueries;
     const allQueries = mergeQueries(fixedQueries, queries);
 
     await runTestsAndSaveResults({
