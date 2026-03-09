@@ -1,7 +1,8 @@
-
 import axios from 'axios';
 import { COUNTRY, LANGUAGE } from './testHelpers';
 import { OpenAI } from 'openai/client';
+import fs from 'fs';
+import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -10,6 +11,35 @@ const OPENAI_CHAT_MODEL = "gpt-4.1-mini";
 const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 const TRANSLATE_API_URL = 'https://api.mymemory.translated.net/get';
+
+export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
+  try {
+    const response = await axios.get('https://translate.google.com/translate_a/single', {
+      params: {
+        client: 'gtx',
+        sl: 'auto', // Source language auto-detection
+        tl: targetLang, // Target language
+        dt: 't',
+        q: text, // Text to translate
+      },
+    });
+
+    // Extracting the translated text from the response
+    const combinedResults = combineResults(response.data[0].map((item: any) => item[0].trim() || ''));
+    return combinedResults.trim();
+  } catch (error) {
+    console.warn('Error fetching translation:', error);
+    return '';
+  }
+}
+
+export function combineResults(results: string[], separator: string = ' '): string {
+  if (!Array.isArray(results)) {
+    throw new Error('Input must be an array of strings');
+  }
+
+  return results.join(separator);
+}
 
 /**
  * Helper for OpenAI chat completion calls.
@@ -57,88 +87,34 @@ export async function translateText(text: string, langCodeFrom: string, langCode
     }
 }
 
-export async function translateTextWithOpenAI(text: string, langCodeTo: string = 'en'): Promise<string> {
-    if (!text || !langCodeTo || langCodeTo.length !== 2) {
-      console.warn('Invalid input for translateTextWithOpenAI');
-      return '';
-    }
-
-    const prompt = `Translate the following text to ${langCodeTo}:\n\n${text}`;
-
-    try {
-      const response = await openaiChatCompletion([
-        { role: 'system', content: `You are a helpful translator. Translate the text to ${langCodeTo}.` },
-        { role: 'user', content: text }
-      ]);
-      const translatedText = response.choices[0].message?.content;
-      if (!translatedText) {
-        console.warn('Translation failed: No response from OpenAI');
-        return '';
-      }
-      return translatedText.trim();
-    } catch (error) {
-      if (error instanceof Error) {
-        console.warn('Translation failed:', error.message);
-      } else {
-        console.warn('Translation failed: Unknown error');
-      }
-      return '';
-    }
-}
-
-export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
-  try {
-    const response = await axios.get('https://translate.google.com/translate_a/single', {
-      params: {
-        client: 'gtx',
-        sl: 'auto', // Source language auto-detection
-        tl: targetLang, // Target language
-        dt: 't',
-        q: text, // Text to translate
-      },
-    });
-
-    // Extracting the translated text from the response
-    const combinedResults = combineResults(response.data[0].map((item: any) => item[0].trim() || ''));
-    return combinedResults.trim();
-  } catch (error) {
-    console.warn('Error fetching translation:', error);
-    return '';
-  }
-}
-
-export function combineResults(results: string[], separator: string = ' '): string {
-  if (!Array.isArray(results)) {
-    throw new Error('Input must be an array of strings');
-  }
-
-  return results.join(separator);
-}
-
 /**
  * Uses OpenAI API to determine if two strings are semantically similar (paraphrases).
  * Returns true if similar, false otherwise.
  */
 export async function isSemanticallySimilarOpenAI(str1: string, str2: string): Promise<boolean> {
+  // Load evaluation rules
+  const evaluationRulesPath = path.resolve(process.cwd(), 'tests/data/ai-evaluation-rules.json');
+  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));  
+
+  const { systemPrompt: systemPromptArray, userPromptTemplate: userPromptTemplateArray, maxTokens, temperature } = evaluationRules.semanticsSimilarity;
+  const systemPrompt = Array.isArray(systemPromptArray) ? systemPromptArray.map(line => line.trim()).join('\n') : systemPromptArray;
+  const userPromptTemplate = Array.isArray(userPromptTemplateArray) ? userPromptTemplateArray.map(line => line.trim()).join('\n') : userPromptTemplateArray;
+
   try {
-    const prompt = `
-      Are the following two sentences equivalent in content for a Mercedes-Benz car search assistant?
-      - Consider them equivalent if they would lead to the same search results on an e-commerce site, even if phrased differently.
-      - It is OK if one sentence includes a polite greeting, closing statement, or extra details about features, as long as the main product(s), model(s), and key facets (like fuel, transmission, power, etc.) match.
-      - Minor differences in phrasing, order, or extra polite language should be ignored.
-      - If both sentences are polite refusals (e.g., cannot provide a specific recommendation but offer to help with Mercedes-Benz options), and the intent is the same, consider them equivalent even if the wording is different.
-      - If both sentences mention the same main car(s) and core features, but one adds a greeting or a few extra features, consider them equivalent.
-      - Only answer 'Yes' if the main car(s) and their key features/facets match, or if both are polite refusals with the same intent; otherwise, explain why not.
-      \n\nSentence 1: "${str1}"\nSentence 2: "${str2}"`;
+    const userPrompt = userPromptTemplate
+      .replace('{str1}', str1)
+      .replace('{str2}', str2);
+
     const completion = await openaiChatCompletion([
-      { role: "system", content: "You are a helpful assistant for language semantic similarity." },
-      { role: "user", content: prompt }
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt }
     ], {
-      max_tokens: 3,
-      temperature: 0.0
+      max_tokens: maxTokens,
+      temperature: temperature
     });
-    const answer = completion.choices?.[0]?.message?.content?.toLowerCase() || "";
-    return answer.includes("yes");
+
+    const answer = completion.choices?.[0]?.message?.content || "";
+    return answer.includes("YES");
   } catch (error) {
     if (error instanceof Error) {
       console.warn("OpenAI API error:", error.message);
@@ -152,45 +128,35 @@ export async function isSemanticallySimilarOpenAI(str1: string, str2: string): P
 export async function evaluateSearchResult(
   resultText: string
 ): Promise<string> {
+  // Load evaluation rules
+  const evaluationRulesPath = path.resolve(process.cwd(), 'tests/data/ai-evaluation-rules.json');
+  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));  
+
+  const { systemPrompt: systemPromptArray, maxTokens, temperature } = evaluationRules.resultsEvaluation;
+  const systemPrompt = Array.isArray(systemPromptArray)
+  ? systemPromptArray.map(line => line.trim()).join('\n')
+  : systemPromptArray;
+
   try {
     const completion = await openaiChatCompletion([
-      {
-        role: "system",
-        content: `
-          RULES: 
-          (1) If YES - respond ONLY with: "PASS".
-          (2) Otherwise - respond the reason. 
-          If YES, evaluate message correctness based on these criteria: 
-          (A) The response should directly address the search query or give suggestions. 
-          (B) The response should provide relevant and accurate information related to the query. 
-          (C) The response should be coherent and contextually appropriate. 
-          (D) The response should not be vague or off-topic. 
-          (E) The response should demonstrate an understanding of the user's intent behind the query.
-          (F) The response only suggests Mercedes-Benz cars or related services/products.
-          (G) The response maintains a polite/luxury tone, being un-biased, transparent and non-technical.
-          (H) The response should focus on Mercedes-Benz vehicles, but polite acknowledgments of topics like financing are allowed as long as the main advice is about Mercedes-Benz vehicles.
-          (I) The response should not directly schedule any appointments, make reservations, make calls, or ask for customer's contact/personal information. However, it is allowed to mention that another employee can assist with scheduling, arranging, or next steps, as long as the response itself does not directly schedule or request contact details. If the user provides contact information or requests a call, a polite refusal while offering alternative assistance is acceptable and should be marked as PASS.
-          (J) If the user requests a feature, brand, policy, or service not available in Mercedes-Benz, a polite, brand-appropriate acknowledgment, refusal, or redirection to Mercedes-Benz offerings or even offering help and suggestion is acceptable and should be marked as PASS. This includes scenarios where the response transparently states something is not available while redirecting to available options.
-          (K) The response should follow a structured format: opening with acknowledgment/appreciation of the customer's query, body providing the main information or explanation, and closing with an invitation, offer to help, or redirection to Mercedes-Benz options. Single-sentence responses are acceptable if they are complete and professional`,
-      },
-      {
-        role: "user",
-        content: resultText,
-      },
+      { role: "system", content: systemPrompt },
+      { role: "user", content: resultText }
     ], {
-      max_completion_tokens: 20,
-    });
+      max_tokens: maxTokens,
+      temperature: temperature
+    });    
 
-    if (!completion.choices[0].message.content?.includes("PASS")) {
-      console.warn(
-        `[WARN] OpenAI Evaluation indicates failure: ${completion.choices[0].message.content}`
-      );
+    const answer = completion.choices?.[0]?.message?.content || "";
+    if (!answer.includes("PASS")) {
+      console.warn(`[WARN] OpenAI Evaluation indicates failure: ${completion.choices[0].message.content}`);
     }
-    return completion.choices[0].message.content ?? "No response from OpenAI.";
-  } catch (err: any) {
-    console.warn(
-        `[WARN] OpenAI Evaluation indicates failure: ${err.message}`
-      );
+    return answer ?? "No response from OpenAI."; 
+  } catch (error) {
+    if (error instanceof Error) {
+      console.warn("OpenAI API error:", error.message);
+    } else {
+      console.warn("OpenAI API error: Unknown error");
+    }      
     return "Error from OpenAI.";
   }
 }

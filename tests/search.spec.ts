@@ -4,7 +4,6 @@ import fs from "fs/promises";
 import path from "path";
 import {
   generateOpenAIQuery,
-  evaluateSearchResult,
   generateUniqueQueries,
   generateMultipleQueries,
 } from "./utils/aiHelpers";

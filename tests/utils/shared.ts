@@ -176,7 +176,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
       const line = '────────────────────────────────────────────────────────────';
       let matchCount = 0;
       console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query.value}\x1b[0m`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
       console.info(`${line}`);
       // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
       console.info(`  ${firstString}`);
@@ -248,7 +248,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
       const line = '────────────────────────────────────────────────────────────';
       let matchCount = 0;
       console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query.value}\x1b[0m`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
       console.info(`${line}`);
       // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
       console.info(`  ${firstString}`);

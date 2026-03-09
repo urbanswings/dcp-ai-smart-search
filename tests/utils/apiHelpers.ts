@@ -520,8 +520,8 @@ export async function processAndLogApiResult({
 
     // If there are also results to evaluate, include that information
     if (results.results) {
-      const searchResults = results.results.searchResults;
-      const smartSearchResponse = results.results.smartSearchResponse;
+      const searchResults = apiResponse.data.smartSearch;
+      const smartSearchResponse = results.results.resultText;
 
       if (searchResults) {
         resultCount =
@@ -532,16 +532,10 @@ export async function processAndLogApiResult({
           0;
       }
 
-      const projectEnv = process.env.PROJECT?.toUpperCase();
-      const aiMessageForEval =
-        (projectEnv === "EMH"
-          ? smartSearchResponse?.message
-          : smartSearchResponse?.message_to_user) || "";
-
       if (customEval) {
         openaiEvaluation = await customEval(results.results);
       } else {
-        openaiEvaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
+        openaiEvaluation = await evaluateSearchResult(smartSearchResponse);
       }      
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
@@ -552,23 +546,22 @@ export async function processAndLogApiResult({
     hasError = true;
   } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults = apiResponse.data.smartSearch; //results.results.searchResults;
+    const searchResults = apiResponse.data.smartSearch;
+    const smartSearchResponse = results.results.resultText;
 
-    // Extract result count from the actual search results
     if (searchResults) {
       resultCount =
-        searchResults.results?.length ||
-        searchResults.navigation?.totalResults ||
+        searchResults.products?.length ||
+        searchResults.pagination?.totalNumberOfResults ||
+        searchResults.hits?.length ||
+        searchResults.data?.length ||
         0;
-    } else {
-      // If no search results, it means smart search failed or returned no URL
-      resultCount = 0;
     }
 
     if (customEval) {
       openaiEvaluation = await customEval(results.results);
     } else {
-      openaiEvaluation = "PASS"; //await evaluateSearchResult(aiMessageForEval);
+      openaiEvaluation = await evaluateSearchResult(smartSearchResponse);
     }
 
     // Facets check

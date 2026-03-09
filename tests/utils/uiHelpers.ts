@@ -31,6 +31,7 @@ export async function processAndLogUiResult({
   testTitle: string;
   customEval?: (resultText: string) => Promise<string>;
 }): Promise<any> {
+  const { evaluateSearchResult } = await import("./aiHelpers");
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results.resultText;
@@ -51,7 +52,7 @@ export async function processAndLogUiResult({
       Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
     );
   })();
-  let openaiEvaluation = "PASS"; //customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
+  let openaiEvaluation = customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
   let resultCount = 0;
   let hasError = false;
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";

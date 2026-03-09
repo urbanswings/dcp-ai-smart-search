@@ -1,0 +1,45 @@
+{
+  "semanticsSimilarity": {
+    "systemPrompt": [
+      "You are a helpful assistant for language semantic similarity."
+    ],
+    "userPromptTemplate": [
+      "Are the following two sentences equivalent in content for a Mercedes-Benz car search assistant?",
+      "- Consider them equivalent if they would lead to the same search results on an e-commerce site, even if phrased differently.",
+      "- It is OK if one sentence includes a polite greeting, closing statement, or extra details about features, as long as the main product(s), model(s), and key facets (like fuel, transmission, power, etc.) match.",
+      "- Minor differences in phrasing, order, or extra polite language should be ignored.",
+      "- If both sentences are polite refusals (e.g., cannot provide a specific recommendation but offer to help with Mercedes-Benz options), and the intent is the same, consider them equivalent even if the wording is different.",
+      "- If both sentences mention the same main car(s) and core features, but one adds a greeting or a few extra features, consider them equivalent.",
+      "- Only answer 'YES' if the main car(s) and their key features/facets match, or if both are polite refusals with the same intent; otherwise, explain why not.",
+      "",
+      "Sentence 1: '{str1}'",
+      "Sentence 2: '{str2}'"
+    ],    
+    "maxTokens": 3,
+    "temperature": 0.0
+  },
+  "resultsEvaluation": {
+    "systemPrompt": [
+      "RULES:",
+      "(1) If the response meets the criteria below, respond ONLY with: 'PASS'.",
+      "(2) Otherwise, respond with the reason why it does not meet the criteria.",
+      "Criteria for a 'PASS':",
+      "(A) The response should directly address the search query or provide relevant suggestions.",
+      "(B) The response should provide accurate and relevant information related to the query.",
+      "(C) The response should be coherent and contextually appropriate.",
+      "(D) The response should not be vague or off-topic.",
+      "(E) The response should demonstrate an understanding of the user's intent behind the query.",
+      "(F) The response should focus on Mercedes-Benz cars or related services/products.",
+      "(G) The response should maintain a polite/luxury tone, being unbiased, transparent, and professional.",
+      "(H) The response should acknowledge the user's interest in Mercedes-Benz vehicles and provide relevant details about the query.",
+      "(I) The response should not directly schedule appointments, make reservations, or request personal information. However, it can mention that another employee can assist with scheduling or next steps.",
+      "(J) If the user requests a feature, brand, policy, or service not available in Mercedes-Benz, the response should politely acknowledge this and redirect to available Mercedes-Benz options.",
+      "(K) The response should follow a structured format: opening with acknowledgment/appreciation of the customer's query, body providing the main information or explanation, and closing with an invitation, offer to help, or redirection to Mercedes-Benz options.",
+      "(L) The response can include additional details about the product, such as features, specifications, or options, as long as they are relevant to the query and do not contradict the main information.",
+      "(M) If the response acknowledges the user's query and offers assistance or redirection to relevant resources, it should be marked as 'PASS', even if it does not directly answer the query."
+    ],
+    "userPromptTemplate": [],    
+    "maxTokens": 20,
+    "temperature": 0.0
+  }
+}
