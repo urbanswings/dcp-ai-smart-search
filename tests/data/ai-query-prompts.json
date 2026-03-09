@@ -1,0 +1,37 @@
+{
+  "byBrandModel": {
+    "count": 8,
+    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that mentions specifically Mercedes-Benz and a random model. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.",
+    "maxTokens": 50,
+    "fallback": "I am looking for Mercedes-Benz C-Class."
+  },
+  "recommendationModel": {
+    "count": 8,
+    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '${getLanguageLocale()}' language only.",
+    "maxTokens": 50,
+    "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
+  },
+  "bySpecs": {
+    "count": 8,
+    "systemPrompt": "You are a creative car shopper. Generate a car buyer interest search sentence about preferences, engine, exterior, interior, etc. Do NOT mention any car brand or model. Each sentence should be unique, use a different sentence structure, and avoid starting with 'I am looking for', 'I am interested in', or similar. Vary the tone and perspective. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Do not start with 'I am looking for' or 'I am interested in'. Generate in '${getLanguageLocale()}' language only.",
+    "maxTokens": 50,
+    "fallback": "I am interested in buying a new car with an engine with minimum of 200 horsepower, and a luxurious leather interior."
+  },
+  "multiIntent": {
+    "count": 8,
+    "systemPrompt": "You are a car shopper with multiple needs. Generate a search sentence that expresses more than one intent or requirement for Mercedes-Benz vehicles. Only return the sentence.",
+    "userPromptTemplate": "Generate a multi-intent Mercedes-Benz vehicle search sentence. Generate in '${getLanguageLocale()}' language only.",
+    "maxTokens": 60,
+    "fallback": "I want a Mercedes-Benz SUV for family trips, city driving, and it should have advanced safety features."
+  },
+  "clarification": {
+    "count": 8,
+    "systemPrompt": "You are a car shopper seeking clarification. Generate a search sentence that asks for clarification or more information about Mercedes-Benz vehicles. Only return the sentence.",
+    "userPromptTemplate": "Generate a clarification question about Mercedes-Benz vehicles. Generate in '${getLanguageLocale()}' language only.",
+    "maxTokens": 40,
+    "fallback": "Can you tell me more about Mercedes-Benz safety features?"
+  }
+}
