@@ -979,7 +979,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     });
   });
 
-            const entry = await processAndLogApiResult({
   test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
       const fixedQueries = fixedQueriesData.byFixedQuery;

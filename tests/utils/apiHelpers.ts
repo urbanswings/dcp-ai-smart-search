@@ -426,9 +426,8 @@ export async function fetchEmhApiResponse(): Promise<any> {
     });
 
     if (response.data.errors?.length > 0) {
-      throw new Error(
-        `EMH API responded with status ${response.data.errors[0].message}`
-      );
+      console.warn(`EMH API responded with status ${response.data.errors[0].message}`);
+      return null;
     }
 
     console.log("Successfully fetched EMH API response");
@@ -436,8 +435,8 @@ export async function fetchEmhApiResponse(): Promise<any> {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.error("Failed to fetch EMH API response:", errorMessage);
-    throw error;
+    console.warn("Failed to fetch EMH API response:", errorMessage);
+    return null;
   }
 }
 
@@ -455,9 +454,8 @@ export async function fetchDcpApiResponse(): Promise<any> {
     const response = await axios.get(apiUrl);
 
     if (response.data.errors?.length > 0) {
-      throw new Error(
-        `DCP API responded with status ${response.data.errors[0].message}`
-      );
+      console.warn(`DCP API responded with status ${response.data.errors[0].message}`);
+      return null;
     }
 
     console.log("Successfully fetched DCP API response");
@@ -465,8 +463,8 @@ export async function fetchDcpApiResponse(): Promise<any> {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.error("Failed to fetch DCP API response:", errorMessage);
-    throw error;
+    console.warn("Failed to fetch DCP API response:", errorMessage);
+    return null;
   }
 }
 
@@ -647,7 +645,7 @@ export function addResponseListener(
     try {
       callback(response);
     } catch (error) {
-      console.error("Error in response listener:", error);
+      console.warn("Error in response listener:", error);
     }
   });
 }
