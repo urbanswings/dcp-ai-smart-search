@@ -581,12 +581,9 @@ export async function processAndLogApiResult({
     hasError = openaiEvaluation !== "PASS";
   }  
 
-  // Format output to match UI test format
-  const icon = hasError ? "❌" : "✅";
-
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${icon} ${openaiEvaluation} | ${testTitle}`);
+  console.log(`${hasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);

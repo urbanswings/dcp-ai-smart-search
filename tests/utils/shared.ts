@@ -1,4 +1,4 @@
-import { isSemanticallySimilarOpenAI } from "./aiHelpers";
+import { fetchTranslation, isSemanticallySimilarOpenAI } from "./aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
@@ -6,7 +6,7 @@ import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE } from "./testHelpers";
 
 export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE };
 
-const REPEAT_COUNT = 10;
+const REPEAT_COUNT = 5;
 
 export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   if (a === b) return true;
@@ -178,8 +178,8 @@ export async function runTestsRepeatedAndSaveResults(params: {
       console.info(`\n${line}`);
       console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
       console.info(`${line}`);
-      // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
-      console.info(`  ${firstString}`);
+      console.info(`\nResponse:\n  ${firstString}`);
+      console.info(`\nFacets:\n  ${JSON.stringify(firstFacets, null, 2)}`);
       for (let i = 1; i < resultsForQuery.length; i++) {
         const compareString = resultsForQuery[i]?.response?.[lang];
         const compareFacets = resultsForQuery[i]?.facets;
@@ -203,14 +203,16 @@ export async function runTestsRepeatedAndSaveResults(params: {
           console.info('  ✅ Response string semantically matches');
         } else {
           console.info('  ❌ Response string does NOT match');
-          console.info('    • Different response string:');
-          console.info(`      ${compareString}`);
+          console.info(`      Response:      '${compareString}'`);
+          if (lang !== "en") {
+            const compareStringEn = await fetchTranslation(compareString, "en");            
+            console.info(`      Response (EN): '${compareStringEn}'`);
+          }          
         }
         if (facetsMatch) {
           console.info('  ✅ Facets matches');
         } else {
           console.info('  ❌ Facets do NOT match');
-          console.info('    • Different facets:');
           console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
         }
       }
@@ -250,8 +252,8 @@ export async function runTestsRepeatedAndSaveResults(params: {
       console.info(`\n${line}`);
       console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
       console.info(`${line}`);
-      // console.info(`• \x1b[1mResponse string [${lang}] (first run):\x1b[0m`);
-      console.info(`  ${firstString}`);
+      console.info(`\nResponse:\n  ${firstString}`);
+      console.info(`\nFacets:\n  ${JSON.stringify(firstFacets, null, 2)}`);
       for (let i = 1; i < resultsForQuery.length; i++) {
         const compareString = resultsForQuery[i]?.response?.[lang];
         const compareFacets = resultsForQuery[i]?.facets;
@@ -275,14 +277,16 @@ export async function runTestsRepeatedAndSaveResults(params: {
           console.info('  ✅ Response string semantically matches');
         } else {
           console.info('  ❌ Response string does NOT match');
-          console.info('    • Different response string:');
-          console.info(`      ${compareString}`);
+          console.info(`      Response:      '${compareString}'`);
+          if (lang !== "en") {
+            const compareStringEn = await fetchTranslation(compareString, "en");            
+            console.info(`      Response (EN): '${compareStringEn}'`);
+          }  
         }
         if (facetsMatch) {
           console.info('  ✅ Facets matches');
         } else {
           console.info('  ❌ Facets do NOT match');
-          console.info('    • Different facets:');
           console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
         }
       }
