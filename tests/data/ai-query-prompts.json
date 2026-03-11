@@ -1,7 +1,7 @@
 {
   "byFilterFacetsRandom": {
     "count": 8,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
     "userPromptTemplate": "Facet(s): {comboText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "Show me Mercedes-Benz vehicles with {comboText}",
