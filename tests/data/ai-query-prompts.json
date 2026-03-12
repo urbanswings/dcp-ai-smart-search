@@ -1,7 +1,7 @@
 {
   "byFilterFacetsRandom": {
-    "count": 8,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
+    "count": 1,
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
     "userPromptTemplate": "Facet(s): {comboText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "Show me Mercedes-Benz vehicles with {comboText}",
@@ -72,23 +72,37 @@
       ]
     }
   },
-  "sentenceSingle": {
+  "byFilterFacetsComplete": {
     "count": 10,
-    "systemPrompt": "You are a qurious car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that mentions two filter facets and values using 'and'/'or' logic. Only return the sentence.",
+    "userPromptTemplate": "Facet(s): {comboText}, {comboText}. Generate in '{LANGUAGE}' language only.",
+    "maxTokens": 50,
+    "fallback": "Show me list of cars in white and black color only."
+  },
+  "byFilterFacetsAndOr": {
+    "count": 10,
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
+    "userPromptTemplate": "Car specifications: ${filterText}. Generate in '{LANGUAGE}' language only.",
+    "maxTokens": 50,
+    "fallback": "Show me vehicles with ${filterText}"
+  },
+  "sentenceSingle": {
+    "count": 1,
+    "systemPrompt": "You are a curious( car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
     "userPromptTemplate": "{keyword}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": ""
   },
   "byBrandModel": {
     "count": 8,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that mentions specifically Mercedes-Benz and a random model. Only return the sentence.",
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that mentions specifically Mercedes-Benz and a random model. Only return the sentence.",
     "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "I am looking for Mercedes-Benz C-Class."
   },
   "recommendationModel": {
     "count": 8,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
     "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
@@ -123,7 +137,7 @@
   },
   "noBrandModel": {
     "count": 10,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
     "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "I am looking for a family car."
@@ -214,7 +228,7 @@
   },
   "responseConsistency": {
     "count": 8,
-    "systemPrompt": "You are a qurious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+    "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
     "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,
     "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
