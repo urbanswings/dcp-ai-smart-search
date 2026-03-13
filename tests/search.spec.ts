@@ -3,9 +3,7 @@ import { test, Page } from "@playwright/test";
 import fs from "fs/promises";
 import path from "path";
 import {
-  generateOpenAIQuery,
   generateUniqueQueries,
-  generateMultipleQueries,
 } from "./utils/aiHelpers";
 import {
   queriesPath,
@@ -277,7 +275,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   test("By Filter Facets (random)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-      const { systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
       // Generate queries: pick random 1-4 filter options for each query
       function getRandomFilterCombo() {
         type FilterKey = keyof typeof filterOptions;
@@ -300,7 +298,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           const comboText = combo
             .map(({ facet, value }) => `${String(facet)}: ${value}`)
             .join(", ");
-          const query = await generateOpenAIQuery(
+          const query = await generateUniqueQueries(
+            count,
             systemPrompt,
             userPromptTemplate.replace('{comboText}', comboText),
             maxTokens,
@@ -308,7 +307,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           );
           generatedQueries.push(query);
         }
-        return generatedQueries;
+        return generatedQueries.flat();
       })();
       const allQueries = mergeQueries(fixedQueries, queries);
 
@@ -331,212 +330,63 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete;
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
         project
       );
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, generateOpenAIQuery);
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsComplete);
       const allQueries = mergeQueries(fixedQueries, queries);
 
-      const uiResults = [];
-      const apiResults = [];      
-
-      // Run UI tests if enabled
-      if (shouldRunUiTests()) {
-        const page = await setupContextAndPage(browser);
-        for (const { query, facet, filterText, filterValue } of allQueries) {
-          // Set up network listener to capture the API response
-          let smartSearchPassed = false;
-          page.on("response", async (response) => {
-            if (response.url().includes("/getSmartSearchQuery")) {
-              try {
-                const responseText = await response.text();
-
-                // The response might be a JSON string wrapped in quotes, parse it
-                let responseBody;
-                try {
-                  // First, try to parse as-is
-                  responseBody = JSON.parse(responseText);
-
-                  // If the result is still a string (double-encoded JSON), parse again
-                  if (typeof responseBody === "string") {
-                    console.log(
-                      `• Response is a JSON string, parsing again...`
-                    );
-                    responseBody = JSON.parse(responseBody);
-                  }
-                } catch (parseError) {
-                  console.log(`• Failed to parse JSON response: ${parseError}`);
-                  responseBody = null;
-                }
-
-                if (responseBody) {
-                  console.log(
-                    `• Parsed response - passed: ${
-                      responseBody.passed
-                    }, http_status_code: ${
-                      responseBody.http_status_code
-                    }, reason: ${responseBody.reason || "none"}`
-                  );
-
-                  if (responseBody.passed === true) {
-                    smartSearchPassed = true;
-                    console.log(`• ✓ API response: passed = true`);
-                  } else {
-                    console.log(
-                      `• ✗ API response: passed = ${responseBody.passed}, reason: ${responseBody.reason}`
-                    );
-                  }
-                }
-              } catch (error) {
-                console.log(`• Error reading/parsing API response: ${error}`);
-              }
-            }
-          });
-
-          const results = await performUISmartSearchAndGetResults(page, query);
-
-          // Only check filter widgets if the API returned passed: true
-          let filterWidgetFound = false;
-          let filterWidgetText = "";
-
-          if (smartSearchPassed) {
-            // Only validate filter widgets for specific facets
-            const includeFacets = ["bodyType", "color_text", "model"];
-            let icon = "✅";
-            if (!includeFacets.includes(facet)) {
-              console.log(
-                `• ⊘ Skipping filter widget validation for facet: ${facet}`
-              );
-              filterWidgetFound = true; // Mark as found to avoid false negative
-            } else {
-              try {
-                const filterWidgets = page.locator(
-                  '[data-test-id="dcp-selected-filters-widget-tag"]'
-                );
-                const count = await filterWidgets.count();
-                console.log(`• Found ${count} filter widget(s)`);
-
-                // Helper function to format number with commas
-                const formatNumberWithCommas = (
-                  value: string | number
-                ): string => {
-                  const numStr = value.toString().replace(/,/g, "");
-                  return numStr.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-                };
-
-                for (let i = 0; i < count; i++) {
-                  const widgetText = await filterWidgets.nth(i).innerText();
-                  // Remove the close button "x" from the text and trim
-                  const cleanedWidgetText = widgetText
-                    .replace(/\s*x\s*$/i, "")
-                    .trim();
-
-                  filterWidgetText += (i > 0 ? ", " : "") + cleanedWidgetText;
-
-                  // Format the filter value with commas for comparison
-                  const filterValueStr = filterValue.toString();
-                  const formattedFilterValue =
-                    formatNumberWithCommas(filterValueStr);
-
-                  // Check if the filter value (with or without commas) appears in the cleaned widget text
-                  if (
-                    cleanedWidgetText
-                      .toLowerCase()
-                      .includes(filterValueStr.toLowerCase()) ||
-                    cleanedWidgetText
-                      .toLowerCase()
-                      .includes(formattedFilterValue.toLowerCase())
-                  ) {
-                    filterWidgetFound = true;
-                    console.log(
-                      `• ✓ Filter widget matched: "${cleanedWidgetText}" contains "${filterValueStr}" (formatted: "${formattedFilterValue}")`
-                    );
-                  }
-                }
-
-                if (!filterWidgetFound && count > 0) {
-                  console.log(
-                    `• ✗ Filter value "${filterValue}" not found in widgets: ${filterWidgetText}`
-                  );
-                  icon = "❌";
-                } else if (count === 0) {
-                  console.log(
-                    `• ✗ No filter widgets found for query: "${query}"`
-                  );
-                }
-
-                console.log(`\n----- Filter Widget (${icon}) -----`);
-                console.log(`Facet: "${facet}"`);
-                console.log(`Text:  "${filterText}"`);
-                console.log(`Value: "${filterValue}"`);
-                console.log(`Widgets: [${filterWidgetText}]`);
-                console.log(`----------------------------\n`);
-              } catch (error) {
-                console.log(`• ✗ Error checking filter widgets: ${error}`);
-              }
-            }
-          } else {
-            console.log(
-              `• ⊘ Skipping filter widget check - API did not return passed: true`
-            );
-          }
-
-          const entry = await processAndLogUiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-
-          // Add filter widget validation to the entry
-          // entry.filterValidation = {
-          //   filterText,
-          //   filterValue,
-          //   smartSearchPassed,
-          //   filterWidgetFound,
-          //   filterWidgetText,
-          // };
-
-          uiResults.push(entry);
-
-          // Remove the response listener to avoid memory leaks
-          page.removeAllListeners("response");
-        }
-      }
-
-      // Run API tests if enabled
-      if (shouldRunApiTests()) {
-        for (const { query } of allQueries) {
-          const results = await performApiSmartSearchAndGetResults(query);
-          const entry = await processAndLogApiResult({
-            query,
-            results,
-            testDescribe: describeName,
-            testTitle: test.info().title,
-          });
-          apiResults.push(entry);
-        }
-      }
-
-      // Combine and save results
-      const allResults = await combineResults(uiResults, apiResults);
-      const outputFileName = getOutputFileName("by-filter-facets-complete");
-      await ensureDirectoryExists(outputFileName);
-      await fs.writeFile(
-        outputFileName,
-        JSON.stringify(allResults, null, 2),
-        "utf-8"
-      );
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "sentence-by-filter-options",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
     }
   );
+
+  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      // Fetch facets dynamically from API based on environment settings
+      const project = getProject();
+      const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsAndOr);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "negative-contradictory",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );  
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 10,
       systemPrompt,
       userPromptTemplate,
@@ -605,7 +455,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
-      const { systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(queriesPath, "utf-8");
         const vehicleBrandsAndModels: string[] = JSON.parse(file);
@@ -616,7 +466,8 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
           .slice(0, 10);
         for (const idx of indices) {
           const keyword = vehicleBrandsAndModels[idx];
-          const query = await generateOpenAIQuery(
+          const query = await generateUniqueQueries(
+            count,
             systemPrompt,
             userPromptTemplate.replace('{keyword}', keyword),
             maxTokens,
@@ -624,7 +475,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
           );
           generatedQueries.push(query);
         }
-        return generatedQueries;
+        return generatedQueries.flat();
       })();
       const allQueries = mergeQueries(fixedQueries, queries);
 
@@ -734,7 +585,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.randomTopics;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.randomTopics || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -834,7 +685,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.negativeContradictory || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
         userPromptTemplate,
@@ -862,7 +713,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const fixedQueries = fixedQueriesData.localization;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.localization || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
         systemPrompt,
         userPromptTemplate,
@@ -890,7 +741,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.misspelledFuzzy || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
         systemPrompt,
         userPromptTemplate,
@@ -914,11 +765,11 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     }
   );
 
-  test("By Filter Facets (Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.dateNumeric || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
         userPromptTemplate,
@@ -946,7 +797,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.noResults;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noResults || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -974,7 +825,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -1002,7 +853,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.personalData;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.personalData || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -1029,7 +880,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.nsfw;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.nsfw || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -1056,7 +907,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.codeAndScripts || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,
@@ -1083,7 +934,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.biasAndManipulation || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
         userPromptTemplate,
@@ -1098,7 +949,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         testTitle: test.info().title,
         testType: "bias-and-manipulation",
         browser,
-        setupContextAndPage,
+       
         performUISmartSearchAndGetResults,
         processAndLogUiResult,
         performApiSmartSearchAndGetResults,
@@ -1111,7 +962,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
       const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingFilterFacets || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
         userPromptTemplate,
@@ -1139,7 +990,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingBrands || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateMultipleQueries(
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
       userPromptTemplate,

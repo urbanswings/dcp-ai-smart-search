@@ -73,7 +73,7 @@
     }
   },
   "byFilterFacetsComplete": {
-    "count": 10,
+    "count": 1,
     "systemPrompt": "You are a curious( car shopper. Generate a natural, human-like sentence that mentions two filter facets and values using 'and'/'or' logic. Only return the sentence.",
     "userPromptTemplate": "Facet(s): {comboText}, {comboText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 50,

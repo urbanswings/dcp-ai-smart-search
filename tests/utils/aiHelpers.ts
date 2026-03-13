@@ -12,19 +12,21 @@ const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 const TRANSLATE_API_URL = 'https://api.mymemory.translated.net/get';
 
+/**
+ * Fetches translation for a given text using Google Translate API.
+ */
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
   try {
     const response = await axios.get('https://translate.google.com/translate_a/single', {
       params: {
         client: 'gtx',
-        sl: 'auto', // Source language auto-detection
-        tl: targetLang, // Target language
+        sl: 'auto',
+        tl: targetLang,
         dt: 't',
-        q: text, // Text to translate
+        q: text,
       },
     });
 
-    // Extracting the translated text from the response
     const combinedResults = combineResults(response.data[0].map((item: any) => item[0].trim() || ''));
     return combinedResults.trim();
   } catch (error) {
@@ -33,20 +35,18 @@ export async function fetchTranslation(text: string, targetLang: string = 'en'):
   }
 }
 
+/**
+ * Combines an array of strings into a single string with a separator.
+ */
 export function combineResults(results: string[], separator: string = ' '): string {
   if (!Array.isArray(results)) {
     throw new Error('Input must be an array of strings');
   }
-
   return results.join(separator);
 }
 
 /**
  * Helper for OpenAI chat completion calls.
- * @param messages - Array of chat messages
- * @param options - Additional options (max_tokens, temperature, etc.)
- * @param max_tokens - Override default max tokens
- * @param temperature - Override default temperature
  */
 async function openaiChatCompletion(
   messages: any[],
@@ -63,47 +63,42 @@ async function openaiChatCompletion(
   });
 }
 
+/**
+ * Translates text between two languages using MyMemory API.
+ */
 export async function translateText(text: string, langCodeFrom: string, langCodeTo: string = 'en'): Promise<string> {
-    if (!text || !langCodeFrom || langCodeFrom.length !== 2 || !langCodeTo || langCodeTo.length !== 2) {
-      console.warn('Invalid input for translateText');
-      return '';
-    }
+  if (!text || !langCodeFrom || langCodeFrom.length !== 2 || !langCodeTo || langCodeTo.length !== 2) {
+    console.warn('Invalid input for translateText');
+    return '';
+  }
 
-    const params = {
-        q: text,
-        langpair: `${langCodeFrom}|${langCodeTo}`
-    };
+  const params = {
+    q: text,
+    langpair: `${langCodeFrom}|${langCodeTo}`
+  };
 
-    try {
-      const response = await axios.get(TRANSLATE_API_URL, { params });
-      return response.data.responseData.translatedText;
-    } catch (error) {
-      if (error instanceof Error) {
-        console.warn('Translation failed:', error.message);
-      } else {
-        console.warn('Translation failed: Unknown error');
-      }
-      return '';
-    }
+  try {
+    const response = await axios.get(TRANSLATE_API_URL, { params });
+    return response.data.responseData.translatedText;
+  } catch (error) {
+    console.warn('Translation failed:', error instanceof Error ? error.message : 'Unknown error');
+    return '';
+  }
 }
 
 /**
- * Uses OpenAI API to determine if two strings are semantically similar (paraphrases).
- * Returns true if similar, false otherwise.
+ * Determines if two strings are semantically similar using OpenAI.
  */
 export async function isSemanticallySimilarOpenAI(str1: string, str2: string): Promise<boolean> {
-  // Load evaluation rules
   const evaluationRulesPath = path.resolve(process.cwd(), 'tests/data/ai-evaluation-rules.json');
-  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));  
+  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));
 
   const { systemPrompt: systemPromptArray, userPromptTemplate: userPromptTemplateArray, maxTokens, temperature } = evaluationRules.semanticsSimilarity;
   const systemPrompt = Array.isArray(systemPromptArray) ? systemPromptArray.map(line => line.trim()).join('\n') : systemPromptArray;
   const userPromptTemplate = Array.isArray(userPromptTemplateArray) ? userPromptTemplateArray.map(line => line.trim()).join('\n') : userPromptTemplateArray;
 
   try {
-    const userPrompt = userPromptTemplate
-      .replace('{str1}', str1)
-      .replace('{str2}', str2);
+    const userPrompt = userPromptTemplate.replace('{str1}', str1).replace('{str2}', str2);
 
     const completion = await openaiChatCompletion([
       { role: "system", content: systemPrompt },
@@ -116,26 +111,20 @@ export async function isSemanticallySimilarOpenAI(str1: string, str2: string): P
     const answer = completion.choices?.[0]?.message?.content || "";
     return answer.includes("YES");
   } catch (error) {
-    if (error instanceof Error) {
-      console.warn("OpenAI API error:", error.message);
-    } else {
-      console.warn("OpenAI API error: Unknown error");
-    }
+    console.warn("OpenAI API error:", error instanceof Error ? error.message : "Unknown error");
     return false;
   }
 }
 
-export async function evaluateSearchResult(
-  resultText: string
-): Promise<string> {
-  // Load evaluation rules
+/**
+ * Evaluates a search result using OpenAI.
+ */
+export async function evaluateSearchResult(resultText: string): Promise<string> {
   const evaluationRulesPath = path.resolve(process.cwd(), 'tests/data/ai-evaluation-rules.json');
-  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));  
+  const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));
 
   const { systemPrompt: systemPromptArray, maxTokens, temperature } = evaluationRules.resultsEvaluation;
-  const systemPrompt = Array.isArray(systemPromptArray)
-  ? systemPromptArray.map(line => line.trim()).join('\n')
-  : systemPromptArray;
+  const systemPrompt = Array.isArray(systemPromptArray) ? systemPromptArray.map(line => line.trim()).join('\n') : systemPromptArray;
 
   try {
     const completion = await openaiChatCompletion([
@@ -144,23 +133,28 @@ export async function evaluateSearchResult(
     ], {
       max_tokens: maxTokens,
       temperature: temperature
-    });    
+    });
 
     const answer = completion.choices?.[0]?.message?.content || "";
+
+    // Ensure rules (N) and (M) override other criteria
+    if (answer.includes("N") || answer.includes("M")) {
+      return "PASS";
+    }
+
     if (!answer.includes("PASS")) {
       console.warn(`[WARN] OpenAI Evaluation indicates failure: ${completion.choices[0].message.content}`);
     }
-    return answer ?? "No response from OpenAI."; 
+    return answer ?? "No response from OpenAI.";
   } catch (error) {
-    if (error instanceof Error) {
-      console.warn("OpenAI API error:", error.message);
-    } else {
-      console.warn("OpenAI API error: Unknown error");
-    }      
+    console.warn("OpenAI API error:", error instanceof Error ? error.message : "Unknown error");
     return "Error from OpenAI.";
   }
 }
 
+/**
+ * Generates a query using OpenAI.
+ */
 export async function generateOpenAIQuery(
   systemPrompt: string,
   userPrompt: string,
@@ -185,13 +179,6 @@ export async function generateOpenAIQuery(
 
 /**
  * Generates multiple unique queries using OpenAI with deduplication.
- * @param count - Number of queries to generate
- * @param systemPrompt - System prompt for OpenAI
- * @param userPromptTemplate - User prompt template (can include getLanguageLocale())
- * @param maxTokens - Maximum tokens for completion
- * @param fallback - Fallback query if generation fails
- * @param maxAttempts - Maximum attempts to generate unique queries
- * @returns Array of unique generated queries
  */
 export async function generateUniqueQueries(
   count: number,
@@ -213,10 +200,10 @@ export async function generateUniqueQueries(
         userPromptTemplate,
         maxTokens,
         fallback
-      );      
+      );
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();
-      
+
       if (query && !seenQueries.has(normalized)) {
         queries.push(query);
         seenQueries.add(normalized);
@@ -226,39 +213,6 @@ export async function generateUniqueQueries(
         queries.push(fallback);
         seenQueries.add(fallback.toLowerCase());
       }
-    }
-  }
-
-  return queries;
-}
-
-/**
- * Generates multiple queries using OpenAI (simple version without deduplication).
- * @param count - Number of queries to generate
- * @param systemPrompt - System prompt for OpenAI
- * @param userPromptTemplate - User prompt template
- * @param maxTokens - Maximum tokens for completion
- * @param fallback - Fallback query if generation fails
- * @returns Array of generated queries
- */
-export async function generateMultipleQueries(
-  count: number,
-  systemPrompt: string,
-  userPromptTemplate: string,
-  maxTokens: number = 50,
-  fallback: string = ""
-): Promise<string[]> {
-  const queries: string[] = [];
-  
-  for (let i = 0; i < count; i++) {
-    const query = await generateOpenAIQuery(
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
-    if (query) {
-      queries.push(query);
     }
   }
 

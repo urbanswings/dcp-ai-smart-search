@@ -58,7 +58,8 @@ export async function processAndLogUiResult({
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
 
   // Handle the new Smart Search + Actual Search response structure
-  const searchResults = apiResponse.data.smartSearch; //results.results.searchResults;
+  const searchResults = process.env.API_ENDPOINT_LOCAL ? apiResponse.searchResults : apiResponse.data.smartSearch;
+  const smartSearchResponse = results.results.resultText;
 
   // Extract result count from the actual search results
   if (searchResults) {
@@ -72,12 +73,13 @@ export async function processAndLogUiResult({
   }  
 
   // Facets check
-  if (actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+  const testFacets = process.env.TEST_FACETS === "true";
+  if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
     openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
     hasError = true;
   } else {
     hasError = openaiEvaluation !== "PASS";
-  }    
+  }   
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");

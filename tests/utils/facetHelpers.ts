@@ -1,3 +1,7 @@
+import fs from "fs/promises";
+import path from "path";
+import { generateOpenAIQuery } from "./aiHelpers";
+
 export interface SimplifiedFacet {
   code: string;
   type: "range" | "list";
@@ -118,17 +122,18 @@ export async function fetchAndConvertFacets(
 /**
  * Generates search queries from facets
  * @param facets - Array of simplified facets
- * @param generateOpenAIQuery - Function to generate queries using OpenAI
+ * @param aiPromptData - AI prompt configuration data
  * @returns Array of query objects with query, facet code, filterText, and filterValue
  */
 export async function generateQueriesFromFacets(
   facets: SimplifiedFacet[],
-  generateOpenAIQuery: (
-    systemPrompt: string,
-    userPrompt: string,
-    maxTokens: number,
-    fallback: string
-  ) => Promise<string>
+  aiPromptData: {
+    count: number;
+    systemPrompt: string;
+    userPromptTemplate: string;
+    maxTokens: number;
+    fallback: string;
+  }
 ): Promise<
   Array<{
     query: string;
@@ -141,7 +146,6 @@ export async function generateQueriesFromFacets(
     let filterValue, filterText;
     // Special handling for firstRegistrationDateSlider as date type
     if (facet.code === "firstRegistrationDateSlider") {
-      // Ensure min/max are valid years, fallback to defaults if not
       let minYear = 2000;
       let maxYear = new Date().getFullYear();
       if (
@@ -158,7 +162,6 @@ export async function generateQueriesFromFacets(
       ) {
         maxYear = Math.floor(facet.max);
       }
-      // If minYear >= maxYear, fallback to defaults
       if (minYear >= maxYear) {
         minYear = 2000;
         maxYear = new Date().getFullYear();
@@ -173,8 +176,7 @@ export async function generateQueriesFromFacets(
       if (useRange) {
         const date1 = randomDateYYYYMM(minYear, maxYear);
         const date2 = randomDateYYYYMM(minYear, maxYear);
-        // Sort dates
-        const d1 = new Date(date1.replace("/", "-")); // yyyy-mm
+        const d1 = new Date(date1.replace("/", "-"));
         const d2 = new Date(date2.replace("/", "-"));
         const fromDate = d1 < d2 ? date1 : date2;
         const toDate = d1 < d2 ? date2 : date1;
@@ -182,14 +184,11 @@ export async function generateQueriesFromFacets(
       } else {
         filterValue = randomDateYYYYMM(minYear, maxYear);
       }
-      // filterText = `${facet.displayName || facet.code} ${filterValue}`;
     } else if (facet.type === "range") {
       const min = Number(facet.min);
       const max = Number(facet.max);
-      // Randomize whether to use a single value or a range
       const useRange = Math.random() > 0.5;
       if (useRange) {
-        // Generate a random range within min and max
         const value1 = Math.random() * (max - min) + min;
         const value2 = Math.random() * (max - min) + min;
         const rangeMin = Math.round(Math.min(value1, value2));
@@ -202,7 +201,6 @@ export async function generateQueriesFromFacets(
         let displayName = facet.displayName || facet.code;
         filterText = `${displayName}`;
       }
-      // filterText = `${facet.displayName || facet.code} ${filterValue}`;
     } else if (
       facet.type === "list" &&
       Array.isArray(facet.values) &&
@@ -211,21 +209,18 @@ export async function generateQueriesFromFacets(
       const randomValue =
         facet.values[Math.floor(Math.random() * facet.values.length)];
       filterValue = randomValue.name || randomValue.code;
-      // filterText = `${facet.displayName || facet.code} ${filterValue}`;
     } else {
       return null;
     }
-    // Use OpenAI to generate a natural query
+
     filterText = `filter is of category '${
       facet.displayName || facet.code
     }' with value of '${filterValue}'`;
-    const prompt = `Car specifications: ${filterText}. Generate in '${process.env.LANGUAGE}' language only.`;
-    const fallback = `Show me vehicles with ${filterText}`;
     const query = await generateOpenAIQuery(
-      "You are a qurious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
-      prompt,
-      50,
-      fallback
+      aiPromptData.systemPrompt,
+      aiPromptData.userPromptTemplate,
+      aiPromptData.maxTokens,
+      aiPromptData.fallback
     );
 
     console.log("\n");

@@ -452,6 +452,13 @@
     "Hibrit benzinli yakıt tipine sahip ve özellikle GLB modeli olan araçlar var mı?"
   ],
   "byFilterFacetsComplete": [],
+  "byFilterFacetsAndOr": [
+    "Bana sadece sedan ve coupe'yi göster",
+    "Benzinli veya elektrikli yakıt tipine sahip ve özellikle GLC modeli olan araçlar var mı?",
+    "SUV veya coupe gövde tipine sahip ve özellikle EQE modeli olan araçlar var mı?",
+    "Beyaz veya siyah renkte SUV var mı?",
+    "Sadece benzinli ve dizel motorlu araçları görmek istiyorum"
+  ],
   "noBrandModel": [
     "Yüksek yakıt verimliliği ile gelişmiş güvenlik özelliklerini birleştiren bir araç arıyorum.",
     "Sürüş deneyimimi geliştirecek şık tasarıma ve son teknoloji özelliklere sahip araçlar bul."
