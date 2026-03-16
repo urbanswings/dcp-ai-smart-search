@@ -58,7 +58,7 @@ export async function processAndLogUiResult({
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
 
   // Handle the new Smart Search + Actual Search response structure
-  const searchResults = process.env.API_ENDPOINT_LOCAL ? apiResponse.searchResults : apiResponse.data.smartSearch;
+  const searchResults = process.env.API_ENDPOINT_LOCAL === 'true' ? apiResponse.searchResults : apiResponse.data.smartSearch;
   const smartSearchResponse = results.results.resultText;
 
   // Extract result count from the actual search results

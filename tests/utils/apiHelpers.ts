@@ -358,11 +358,27 @@ export class SearchApiClient {
           statusCode: response.status,
         };
       } else {
+        const normalizedData = {
+          smartSearchResponse: {
+            message: responseData.data.smartSearch.message,
+            request_id: null,
+          },
+          data: {
+            smartSearch: {
+              parameters: responseData.data.smartSearch.parameters,
+              message: responseData.data.smartSearch.message,
+              facets: responseData.data.smartSearch.facets,
+              navigation: responseData.data.smartSearch.navigation,
+              results: responseData.data.smartSearch.results,
+            },
+          }
+        };
+
         return {
           query,
           results: {
-            query,
-            responseData,
+            resultText: responseData.data.smartSearch.message,
+            responseData: normalizedData,
           },
           responseTime,
           statusCode: response.status,
@@ -601,7 +617,7 @@ export async function processAndLogApiResult({
     hasError = true;
   } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults = process.env.API_ENDPOINT_LOCAL ? apiResponse.searchResults : apiResponse.data.smartSearch;
+    const searchResults = process.env.API_ENDPOINT_LOCAL === 'true' ? apiResponse.searchResults : apiResponse.data.smartSearch;
     const smartSearchResponse = results.results.resultText;
 
     if (searchResults) {

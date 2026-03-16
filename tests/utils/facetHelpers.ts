@@ -136,7 +136,7 @@ export async function generateQueriesFromFacets(
   }
 ): Promise<
   Array<{
-    query: string;
+    value: string;
     facet: string;
     filterText: string;
     filterValue: string;
@@ -218,7 +218,7 @@ export async function generateQueriesFromFacets(
     }' with value of '${filterValue}'`;
     const query = await generateOpenAIQuery(
       aiPromptData.systemPrompt,
-      aiPromptData.userPromptTemplate,
+      aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, filterText),
       aiPromptData.maxTokens,
       aiPromptData.fallback
     );
@@ -232,12 +232,12 @@ export async function generateQueriesFromFacets(
     console.log(`filterText:  '${filterText}'`);
     console.log("\n");
 
-    return { query, facet: facet.code, filterText, filterValue };
+    return { value: query, facet: facet.code, filterText, filterValue };
   });
 
   const queries = (await Promise.all(queryPromises)).filter(Boolean);
   return queries as Array<{
-    query: string;
+    value: string;
     facet: string;
     filterText: string;
     filterValue: string;
