@@ -260,6 +260,7 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   }
   await page.goto(url);
   await handleCookieBanner(page);
+  await handlePostalCodePopUp(page);
   return page;
 }
 
@@ -267,10 +268,65 @@ export async function handleCookieBanner(page: Page): Promise<void> {
   try {
     await page
       .locator(".cmm-cookie-banner__content")
-      .waitFor({ state: "visible", timeout: 6000 });
+      .waitFor({ state: "visible", timeout: 60000 });
     await page.click(".button--accept-all");
   } catch (e) {
     console.debug("[DEBUG] Cookie banner not visible, continuing execution...");
+  }
+}
+
+export async function handlePostalCodePopUp(page: Page): Promise<void> {
+  try {
+    const trigger = page.locator(
+      '[data-test-id="header-integration-item-emh-region-picker"]'
+    );
+    const popup = page.locator('[data-test-id="region-picker-module-flyout"]');
+    const regionPicker = popup.locator("dh-io-emh-region-picker");
+
+    const country = COUNTRY || "KR";
+    const addressesFile = await fs.readFile(
+      "./tests/data/emh-addresses.json",
+      "utf-8"
+    );
+    const addresses = JSON.parse(addressesFile);
+    const postalCode = addresses[country]?.postalCode;
+
+    if (!postalCode) {
+      console.debug(
+        `[DEBUG] No postal code configured for country '${country}', skipping region picker submission.`
+      );
+      return;
+    }
+
+    const postalCodeInput = popup
+      .getByRole("textbox")
+      .or(popup.getByRole("spinbutton"))
+      .or(
+        popup.locator(
+          'input[aria-invalid], input[inputmode], input[type="text"], input[type="number"]'
+        )
+      )
+      .first();
+    const submitButton = popup.locator(".region-picker-content__submit-button");
+
+    if (await trigger.isVisible({ timeout: 10000 }).catch(() => false)) {
+      const isExpanded = await trigger.getAttribute("aria-expanded");
+      if (isExpanded !== "true") {
+        await trigger.click();
+      }
+    }
+
+    await popup.waitFor({ state: "visible", timeout: 10000 });
+    await regionPicker.waitFor({ state: "attached", timeout: 10000 });
+    await postalCodeInput.waitFor({ state: "visible", timeout: 10000 });
+    await postalCodeInput.fill("");
+    await postalCodeInput.fill(postalCode);
+    await submitButton.waitFor({ state: "visible", timeout: 10000 });
+    await submitButton.click();
+  } catch (e) {
+    console.debug(
+      `[DEBUG] Postal code pop-up handling skipped: ${e instanceof Error ? e.message : e}`
+    );
   }
 }
 

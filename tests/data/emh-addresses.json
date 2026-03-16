@@ -1,0 +1,17 @@
+{
+  "AU": { "postalCode": "2000" },
+  "BR": { "postalCode": "01000-000" },
+  "EG": { "postalCode": "11511" },
+  "ID": { "postalCode": "10110" },
+  "IN": { "postalCode": "110001" },
+  "JP": { "postalCode": "100-0001" },
+  "KR": { "postalCode": "04524" },
+  "MX": { "postalCode": "06000" },
+  "MY": { "postalCode": "50050" },
+  "NZ": { "postalCode": "6011" },
+  "SG": { "postalCode": "018956" },
+  "TH": { "postalCode": "10330" },
+  "TR": { "postalCode": "34000" },
+  "VN": { "postalCode": "700000" },
+  "ZA": { "postalCode": "2000" }
+}
