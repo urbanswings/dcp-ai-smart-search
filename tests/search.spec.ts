@@ -41,21 +41,25 @@ import {
   runTestsAndSaveResults,
   mergeQueries,
   runTestsRepeatedAndSaveResults,
+  resolveFixedQueriesFilePath,
 } from "./utils/shared";
 
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
-const product = PRODUCT?.toLowerCase() || "ncos";
-const fixedQueriesFile =
-  language !== "en"
-    ? `fixed-queries-${language}-${product}.json`
-    : `fixed-queries-en-ncos.json`;
-const fixedQueriesPath = path.join(__dirname, `data/${fixedQueriesFile}`);
 let fixedQueriesData: any = {};
 let emhApiResponse: any = null;
 let dcpApiResponse: any = null;
 
 test.beforeAll(async () => {
+  const { fixedQueriesFile, fixedQueriesPath, usedFallback } =
+    await resolveFixedQueriesFilePath(path.join(__dirname, "data"));
+
+  if (usedFallback) {
+    console.warn(
+      `Fixed queries file not found for current country/language/product. Falling back to ${fixedQueriesFile}`
+    );
+  }
+
   const data = await fs.readFile(fixedQueriesPath, "utf-8");
   fixedQueriesData = JSON.parse(data);
 

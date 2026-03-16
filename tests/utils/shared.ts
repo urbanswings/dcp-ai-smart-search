@@ -70,6 +70,40 @@ export function getLanguageLocale(): string {
   return `${lang}-${country}`;
 }
 
+export async function resolveFixedQueriesFilePath(dataDir: string): Promise<{
+  fixedQueriesFile: string;
+  fixedQueriesPath: string;
+  usedFallback: boolean;
+}> {
+  const country = COUNTRY?.toLowerCase() || "kr";
+  const language = LANGUAGE?.toLowerCase() || "en";
+  const product = PRODUCT?.toLowerCase() || "ncos";
+
+  const fixedQueriesFile = `fixed-queries-${country}-${language}-${product}.json`;
+  const fixedQueriesPath = path.join(dataDir, fixedQueriesFile);
+
+  try {
+    await fs.access(fixedQueriesPath);
+    return { fixedQueriesFile, fixedQueriesPath, usedFallback: false };
+  } catch (error) {
+    const isFileNotFound =
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === "ENOENT";
+
+    if (!isFileNotFound) {
+      throw error;
+    }
+
+    return {
+      fixedQueriesFile: "fixed-queries-en-ncos.json",
+      fixedQueriesPath: path.join(dataDir, "fixed-queries-en-ncos.json"),
+      usedFallback: true,
+    };
+  }
+}
+
 export async function ensureDirectoryExists(filePath: string): Promise<void> {
   const dir = path.dirname(filePath);
   await fs.mkdir(dir, { recursive: true });
