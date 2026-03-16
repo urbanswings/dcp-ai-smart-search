@@ -305,7 +305,7 @@ export class SearchApiClient {
         }
       }
 
-      // Handle different response structures based on endpoint
+      // Handle different response structures for local endpoint
       if (process.env.API_ENDPOINT_LOCAL === "true") {
         const endpoint = "http://localhost:8080/api/v2/search/proxy";
         const payload = {
@@ -337,7 +337,15 @@ export class SearchApiClient {
             message: responseData.messageToUser,
             request_id: responseData.request_id,
           },
-          searchResults: process.env.API_ENDPOINT_LOCAL ? response.data.data.search : responseData.search,
+          data: {
+            smartSearch: {
+              parameters: responseData.search.variables,
+              message: responseData.messageToUser,
+              facets: data.data.search.facets,
+              navigation: data.data.search.navigation,
+              results: data.data.search.results,
+            },
+          }
         };
 
         return {
@@ -349,17 +357,17 @@ export class SearchApiClient {
           responseTime,
           statusCode: response.status,
         };
-      }
-
-      return {
-        query,
-        results: {
-          resultText: responseData.data?.smartSearch?.message || "No message in response",
-          responseData,
-        },
-        responseTime,
-        statusCode: response.status,
-      };   
+      } else {
+        return {
+          query,
+          results: {
+            query,
+            responseData,
+          },
+          responseTime,
+          statusCode: response.status,
+        };
+      }        
     } catch (error: any) {
       const responseTime = Date.now() - responseStartTime;
       let errorMessage = error.message || "Unknown API error";
@@ -536,19 +544,19 @@ export async function processAndLogApiResult({
   const smartSearchMessage = results.results?.resultText;
   const apiResponse = results.results?.responseData;
   const facets = (() => {
-    const params = results.results.responseData?.data?.smartSearch?.parameters || {};
-    const excludeKeys = [
-      "contextType",
-      "isUcos",
-      "limit",
-      "sortingType",
-      "language",
-      "profileId",
-      "vehicleCategory",
-      "__typename"
+    const params = results.results.responseData.data?.smartSearch?.parameters;
+    const includeKeys = [
+      "modelIdentifier",
+      "fuelType",
+      "bodyType",
+      "brand",
+      "motorization",
+      "price",
+      "modelYear"
     ];
     return Object.fromEntries(
-      Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
+      Object.entries(params)
+        .filter(([key, value]) => includeKeys.includes(key) && value != null)
     );
   })();
   let openaiEvaluation = "No results to evaluate";
