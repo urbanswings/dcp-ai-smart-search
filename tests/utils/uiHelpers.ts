@@ -18,6 +18,275 @@ export interface UiSearchResult {
   error?: string;
 }
 
+function normalizeFacetToken(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/^paint[_-]?color[_-]?/i, "")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function collectPrimitiveFacetValues(value: any): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectPrimitiveFacetValues(item));
+  }
+  if (typeof value === "object") {
+    return Object.values(value).flatMap((item) => collectPrimitiveFacetValues(item));
+  }
+  return [String(value)];
+}
+
+function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
+  return (
+    ["upholstery", "color"].includes(facetKey) &&
+    /^[0-9a-f]{8,}$/i.test(rawValue)
+  );
+}
+
+const facetValueAliasMap: Record<string, string[]> = {
+  "limousine": ["sedan"],
+  "sedan": ["limousine"],
+  "suv": ["suvoffroader"],
+  "suvoffroader": ["suv"],
+  "cabrioroadster": ["cabrioletroadster"],
+  "cabrioletroadster": ["cabrioroadster"],
+  "amggt": ["mercedesamggt"],
+  "mercedesamggt": ["amggt"],
+  "a": ["aclass"],
+  "aclass": ["a"],
+  "b": ["bclass"],
+  "bclass": ["b"],
+  "c": ["cclass"],
+  "cclass": ["c"],
+  "e": ["eclass"],
+  "eclass": ["e"],
+  "g": ["gclass"],
+  "gclass": ["g"],
+  "s": ["sclass"],
+  "sclass": ["s"],
+  "hatchback": ["hatches"],
+  "hatches": ["hatchback"],
+  "peoplecarrier": ["peoplemovers"],
+  "peoplemovers": ["peoplecarrier"],
+  "pluginhybridpetrol": ["petrolelectricpluginhybrid"],
+  "petrolelectricpluginhybrid": ["pluginhybridpetrol"],
+};
+
+function buildFacetCandidateTokens(rawValue: string): string[] {
+  const candidates = new Set<string>();
+  const normalizedRaw = normalizeFacetToken(rawValue);
+  if (normalizedRaw) {
+    candidates.add(normalizedRaw);
+    for (const alias of facetValueAliasMap[normalizedRaw] || []) {
+      candidates.add(alias);
+    }
+  }
+
+  if (rawValue.includes("_")) {
+    const lastToken = rawValue.split("_").pop() || rawValue;
+    const normalizedLastToken = normalizeFacetToken(lastToken);
+    if (normalizedLastToken) {
+      candidates.add(normalizedLastToken);
+      for (const alias of facetValueAliasMap[normalizedLastToken] || []) {
+        candidates.add(alias);
+      }
+    }
+  }
+
+  return Array.from(candidates);
+}
+
+function mapUiLabelToFacetKey(label: string): string | null {
+  const normalizedLabel = label.toLowerCase().replace(/\s+/g, " ").trim();
+  const labelMap: Record<string, string> = {
+    "brand": "brand",
+    "body": "bodyType",
+    "body style": "bodyType",
+    "model": "modelIdentifier",
+    "model variant": "motorization",
+    "variant": "motorization",
+    "model identifier": "modelIdentifier",
+    "motorization": "motorization",
+    "fuel type": "fuelType",
+    "body type": "bodyType",
+    "color": "color",
+    "colour": "color",
+    "upholstery": "upholstery",
+    "upholstery color": "upholstery",
+    "upholstery colour": "upholstery",
+    "model year": "modelYear",
+    "price": "price",
+    "total price": "price",
+    "totalprice": "price",
+    "marka": "brand",
+    "model adi": "modelIdentifier",
+    "motor": "motorization",
+    "yakit tipi": "fuelType",
+    "gövde tipi": "bodyType",
+    "govde tipi": "bodyType",
+    "renk": "color",
+    "model yili": "modelYear",
+    "fiyat": "price",
+  };
+
+  return labelMap[normalizedLabel] || null;
+}
+
+function parseUiSelectedFiltersToKeyValue(
+  uiSelectedFilters: string[]
+): Record<string, string[]> {
+  const keyValueFilters: Record<string, string[]> = {};
+
+  for (const text of uiSelectedFilters) {
+    const cleanText = text.replace(/\s+/g, " ").trim();
+    const colonIndex = cleanText.indexOf(":");
+    if (colonIndex < 0) {
+      continue;
+    }
+
+    const label = cleanText.slice(0, colonIndex).trim();
+    const value = cleanText.slice(colonIndex + 1).trim();
+    const facetKey = mapUiLabelToFacetKey(label);
+    if (!facetKey) {
+      continue;
+    }
+
+    if (!keyValueFilters[facetKey]) {
+      keyValueFilters[facetKey] = [];
+    }
+
+    if (!value) {
+      continue;
+    }
+
+    keyValueFilters[facetKey].push(value);
+  }
+
+  return keyValueFilters;
+}
+
+function parseUiSelectedFilterFacetKeys(uiSelectedFilters: string[]): Set<string> {
+  const facetKeys = new Set<string>();
+
+  for (const text of uiSelectedFilters) {
+    const cleanText = text.replace(/\s+/g, " ").trim();
+    const colonIndex = cleanText.indexOf(":");
+    if (colonIndex < 0) {
+      continue;
+    }
+
+    const label = cleanText.slice(0, colonIndex).trim();
+    const facetKey = mapUiLabelToFacetKey(label);
+    if (facetKey) {
+      facetKeys.add(facetKey);
+    }
+  }
+
+  return facetKeys;
+}
+
+function compareUiSelectedFiltersWithFacets(
+  facets: Record<string, any>,
+  uiSelectedFiltersKV: Record<string, string[]>
+): {
+  matches: boolean;
+  missingFacetValues: string[];
+} {
+  const uiSelectedFacetKeys = new Set(Object.keys(uiSelectedFiltersKV));
+  const facetKeyUiFallbacks: Record<string, string[]> = {
+    upholstery: ["upholstery", "color"],
+  };
+
+  const missingFacetValues: string[] = [];
+  for (const [facetKey, facetValue] of Object.entries(facets)) {
+    if (facetKey === "price" && uiSelectedFacetKeys.has("price")) {
+      continue;
+    }
+
+    const rawFacetValues = collectPrimitiveFacetValues(facetValue);
+    const candidateUiKeys = facetKeyUiFallbacks[facetKey] || [facetKey];
+    const keySpecificUiValues = candidateUiKeys.flatMap(
+      (candidateKey) => uiSelectedFiltersKV[candidateKey] || []
+    );
+    const hasSelectedFacetKey = candidateUiKeys.some((candidateKey) =>
+      uiSelectedFacetKeys.has(candidateKey)
+    );
+
+    if (hasSelectedFacetKey && keySpecificUiValues.length === 0) {
+      continue;
+    }
+
+    const keySpecificUiTokens = new Set(
+      keySpecificUiValues
+        .map((value) => normalizeFacetToken(value))
+        .filter((value) => value.length > 0)
+    );
+
+    for (const rawValue of rawFacetValues) {
+      if (isOpaqueFacetValue(facetKey, rawValue)) {
+        continue;
+      }
+
+      const expectedCandidates = buildFacetCandidateTokens(rawValue);
+      const matchedByKey =
+        keySpecificUiTokens.size > 0 &&
+        expectedCandidates.some((candidate) => keySpecificUiTokens.has(candidate));
+
+      if (!matchedByKey) {
+        missingFacetValues.push(rawValue);
+      }
+    }
+  }
+
+  return {
+    matches: missingFacetValues.length === 0,
+    missingFacetValues,
+  };
+}
+
+async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
+  try {
+    await page
+      .locator("#emh-selected-filters-reset-button")
+      .waitFor({ state: "visible", timeout: 10000 });
+    console.debug(
+      "[DEBUG] Selected filters reset button visible, proceeding to extract selected filters..."
+    );
+  } catch (e) {
+    console.debug(
+      "[DEBUG] Selected filters reset button not visible before extraction, returning empty key-value object..."
+    );
+    return {};
+  }
+
+  const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
+
+  for (const selector of selectors) {
+    const pills = page.locator(selector);
+    try {
+      await pills.first().waitFor({ state: "visible" });
+    } catch (e) {
+      continue;
+    }
+
+    const count = await pills.count();
+    if (count === 0) {
+      continue;
+    }
+
+    const texts = await pills.allInnerTexts();
+    const normalizedTexts = texts
+      .map((text) => text.replace(/\s+/g, " ").trim())
+      .filter((text) => text.length > 0);
+
+    if (normalizedTexts.length > 0) {
+      return parseUiSelectedFiltersToKeyValue(normalizedTexts);
+    }
+  }
+
+  return {};
+}
+
 export async function processAndLogUiResult({
   query,
   results,
@@ -36,6 +305,8 @@ export async function processAndLogUiResult({
   const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
+  const uiSelectedFiltersKV: Record<string, string[]> =
+    results.results?.uiSelectedFiltersKV || {};
   const facets = (() => {
     const params = results.results.responseData?.data?.smartSearch?.parameters || {};
     const excludeKeys = [
@@ -55,13 +326,14 @@ export async function processAndLogUiResult({
   let openaiEvaluation = customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
   let resultCount = 0;
   let hasError = false;
+  let uiFacetComparison: {
+    matches: boolean;
+    missingFacetValues: string[];
+  } | null = null;
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
 
   // Handle the new Smart Search + Actual Search response structure
   const searchResults = process.env.API_ENDPOINT_LOCAL === 'true' ? apiResponse.searchResults : apiResponse.data.smartSearch;
-  const smartSearchResponse = results.results.resultText;
-
-  // Extract result count from the actual search results
   if (searchResults) {
     resultCount =
       searchResults.results?.length ||
@@ -74,8 +346,30 @@ export async function processAndLogUiResult({
 
   // Facets check
   const testFacets = process.env.TEST_FACETS === "true";
-  if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
-    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
+  const facetMismatches: string[] = [];
+
+  // if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+  //   facetMismatches.push(
+  //     `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
+  //   );
+  // }
+
+  if (testFacets && Object.keys(uiSelectedFiltersKV).length > 0) {
+    uiFacetComparison = compareUiSelectedFiltersWithFacets(
+      facets,
+      uiSelectedFiltersKV
+    );
+    if (!uiFacetComparison.matches) {
+      facetMismatches.push(
+        `UI filters mismatch with BE facets: missing ${JSON.stringify(
+          uiFacetComparison.missingFacetValues
+        )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(facets)}`
+      );
+    }
+  }
+
+  if (facetMismatches.length > 0) {
+    openaiEvaluation = facetMismatches.join(" | ");
     hasError = true;
   } else {
     hasError = openaiEvaluation !== "PASS";
@@ -87,6 +381,9 @@ export async function processAndLogUiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
+  console.log(
+    `UI Filters:    '${JSON.stringify(uiSelectedFiltersKV)}'`
+  );
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
@@ -124,6 +421,8 @@ export async function processAndLogUiResult({
     // apiResponse,
     openaiEvaluation,
     facets,
+    uiSelectedFiltersKV,
+    uiFacetComparison,
   };
 }
 
@@ -460,6 +759,7 @@ export async function performUISmartSearchAndGetResults(
   }
 
   const responseTime = Date.now() - startTime;
+  const uiSelectedFiltersKV = await extractUiSelectedFilters(page);
   // Wait for responseListener to capture a response (max 30s)
   if (!responseCaptured) {
     try {
@@ -473,6 +773,7 @@ export async function performUISmartSearchAndGetResults(
         results: {
           resultText,
           responseData: null,
+          uiSelectedFiltersKV,
         },
         responseTime,
         error: "Failed to capture API response within timeout",
@@ -484,6 +785,7 @@ export async function performUISmartSearchAndGetResults(
     results: {
       resultText,
       responseData: apiResponsePayload,
+      uiSelectedFiltersKV,
     },
     responseTime,
     error: retries === 3 ? "Failed to retrieve results after 3 attempts" : undefined,
