@@ -42,6 +42,7 @@ import {
   mergeQueries,
   runTestsRepeatedAndSaveResults,
   resolveFixedQueriesFilePath,
+  cleanOldScreenshots,
 } from "./utils/shared";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -62,6 +63,9 @@ test.beforeAll(async () => {
 
   const data = await fs.readFile(fixedQueriesPath, "utf-8");
   fixedQueriesData = JSON.parse(data);
+
+  // Clean up old screenshots (keep last 3 date folders)
+  await cleanOldScreenshots(3);
 
   // Fetch EMH GraphQL API response and save to file
   try {

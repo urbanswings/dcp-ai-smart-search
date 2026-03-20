@@ -109,6 +109,59 @@ export async function ensureDirectoryExists(filePath: string): Promise<void> {
   await fs.mkdir(dir, { recursive: true });
 }
 
+/**
+ * Clean up old screenshot folders, keeping only the most recent ones
+ * @param keepCount Number of most recent date folders to keep (default: 3)
+ */
+export async function cleanOldScreenshots(keepCount: number = 3): Promise<void> {
+  const screenshotsDir = "./results/screenshots";
+  
+  try {
+    // Check if screenshots directory exists
+    await fs.access(screenshotsDir);
+    
+    // Get all date folders (format: YYYY-MM-DD_ENV)
+    const entries = await fs.readdir(screenshotsDir, { withFileTypes: true });
+    const dateFolders = entries
+      .filter(entry => entry.isDirectory())
+      .map(entry => ({
+        name: entry.name,
+        path: path.join(screenshotsDir, entry.name)
+      }));
+    
+    if (dateFolders.length <= keepCount) {
+      return; // Nothing to clean
+    }
+    
+    // Get folder stats and sort by modification time (newest first)
+    const foldersWithStats = await Promise.all(
+      dateFolders.map(async folder => ({
+        ...folder,
+        mtime: (await fs.stat(folder.path)).mtime
+      }))
+    );
+    
+    foldersWithStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
+    
+    // Remove old folders (keep only the most recent)
+    const foldersToRemove = foldersWithStats.slice(keepCount);
+    
+    for (const folder of foldersToRemove) {
+      await fs.rm(folder.path, { recursive: true, force: true });
+      console.log(`🗑️  Removed old screenshot folder: ${folder.name}`);
+    }
+    
+    if (foldersToRemove.length > 0) {
+      console.log(`✅ Cleaned up ${foldersToRemove.length} old screenshot folder(s)`);
+    }
+  } catch (error) {
+    // Silently fail if screenshots directory doesn't exist
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      console.warn('Warning: Failed to clean old screenshots:', error);
+    }
+  }
+}
+
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
@@ -120,6 +173,20 @@ export function getOutputFileName(testType: string): string {
     return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-both_${timestamp}.json`;
   }
   return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${timestamp}.json`;
+}
+
+export function getScreenshotPath(testType: string, queryIndex: number, query: string, runTimestamp: string): string {
+  const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(runTimestamp));
+  const env = ENVIRONMENT;
+  const country = COUNTRY;
+  const product = PRODUCT;
+  
+  // Sanitize query for filename (remove special characters, limit length)
+  const sanitizedQuery = query
+    .replace(/[^a-zA-Z0-9]/g, '_')
+    .substring(0, 50);
+  
+  return `./results/screenshots/${dateOnly}_${env}/${runTimestamp}/${country}_${product}_${testType}_query-${queryIndex + 1}_${sanitizedQuery}.png`;
 }
 
 export async function combineResults(
@@ -397,11 +464,13 @@ export async function runTestsAndSaveResults(params: {
 
   const uiResults = [];
   const apiResults = [];
+  const runTimestamp = new Date().toISOString();
 
   // Run UI tests if enabled
   if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
     const page = await setupContextAndPage(browser);
-    for (const query of queries) {
+    for (let i = 0; i < queries.length; i++) {
+      const query = queries[i];
       const results = await performUISmartSearchAndGetResults(page, query);
       const entry = await processAndLogUiResult({
         query,
@@ -410,6 +479,13 @@ export async function runTestsAndSaveResults(params: {
         testTitle,
       });
       uiResults.push(entry);
+      
+      // Take screenshot after each query (viewport only)
+      const actualQuery = query?.value ?? query;
+      const screenshotPath = getScreenshotPath(testType, i, actualQuery, runTimestamp);
+      await ensureDirectoryExists(screenshotPath);
+      await page.screenshot({ path: screenshotPath });
+      console.log(`📸 Screenshot saved: ${screenshotPath}`);
     }
   }
 
