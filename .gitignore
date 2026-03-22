@@ -6,8 +6,7 @@ node_modules/
 
 # Test results
 test-results/
-results/json/
-results/html/
+results/
 
 # Playwright cache and temp
 .playwright-cache/
