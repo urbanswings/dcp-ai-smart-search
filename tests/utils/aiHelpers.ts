@@ -48,7 +48,7 @@ export function combineResults(results: string[], separator: string = ' '): stri
 /**
  * Helper for OpenAI chat completion calls.
  */
-async function openaiChatCompletion(
+export async function openaiChatCompletion(
   messages: any[],
   options: Record<string, any> = {},
   max_tokens?: number,

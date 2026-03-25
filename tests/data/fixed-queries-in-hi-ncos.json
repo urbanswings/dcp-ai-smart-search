@@ -59,309 +59,37 @@
     "मैं सस्टेनेबल या हाइब्रिड Mercedes मॉडल ढूंढ रहा हूँ।"
   ],
   "byFixedQuery": [
-    {
-      "value": "मुझे सेडान दिखाओ",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "bodyType": [
-          "LIMOUSINE"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "cla 200",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": [
-          "CLA"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मेरा बजट 10,000,321 लीरा से कम है",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": ["EQA"],
-        "brand": ["Mercedes-Benz"],
-        "fuelType": ["ELECTRIC"],
-        "bodyType": ["SUV_OFFROADER","SUV"],
-        "motorization": ["EQA 250+"],
-        "price": { "min": 3263131, "max": 10000000 }
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "कूपे है क्या? यानी दो दरवाज़ों वाली कार",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "bodyType": [
-          "COUPE"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मैं फैमिली कार खोज रहा हूँ",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": [
-          "EQA"
-        ],
-        "brand": [
-          "Mercedes-Benz"
-        ],
-        "fuelType": [
-          "ELECTRIC"
-        ],
-        "bodyType": [
-          "SUV_OFFROADER",
-          "SUV"
-        ],
-        "motorization": [
-          "EQA 250+"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "एक तेज़ स्पोर्ट्स कार ढूँढो",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": [
-          "CLA"
-        ],
-        "brand": [
-          "Mercedes-AMG"
-        ],
-        "fuelType": [
-          "PETROL"
-        ],
-        "bodyType": [
-          "COUPE"
-        ],
-        "motorization": [
-          "CLA 45 S 4MATIC+"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "सिर्फ बैंगनी रंग की कारें",
-      "shouldRecommend": true,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मुझे एक इलेक्ट्रिक वाहन चाहिए",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "fuelType": [
-          "ELECTRIC"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मुझे एक सुंदर और स्टाइलिश कॉम्पैक्ट कार चाहिए",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": [
-          "EQE"
-        ],
-        "brand": [
-          "Mercedes-AMG"
-        ],
-        "fuelType": [
-          "ELECTRIC"
-        ],
-        "bodyType": [
-          "LIMOUSINE"
-        ],
-        "motorization": [
-          "EQE 53 4MATIC+"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या आपके पास 2020 मॉडल या सिल्वर रंग की कार है?",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "color": [
-          "PAINT_COLOR_SILVER"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या आपके पास 2020 मॉडल या सफेद रंग की कार है?",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "color": [
-          "PAINT_COLOR_WHITE"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या आप कोई सुझाव दे सकते हैं?",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier":["EQS"],
-        "brand":["Mercedes-Benz"],
-        "fuelType":["ELECTRIC"],
-        "bodyType":["LIMOUSINE"],
-        "motorization":["EQS 450 4MATIC"]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मैं कन्वर्टिबल वाहनों में रुचि रखता हूँ",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "bodyType": [
-          "CABRIO_ROADSTER"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "सबसे अच्छे ऑटोमोबाइल निर्माता कौन हैं?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "वाहनों के लिए आपकी रिटर्न पॉलिसी क्या है?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या आप फाइनेंसिंग विकल्प प्रदान करते हैं?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या मैं एक टेस्ट ड्राइव शेड्यूल कर सकता हूँ?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या कोई प्रमोशन है?",
-      "shouldRecommend": false,
-      "shouldFilter": {
-        "modelIdentifier":["EQS"],
-        "brand":["Mercedes-Benz"],
-        "fuelType":["ELECTRIC"],
-        "bodyType":["LIMOUSINE"],
-        "motorization":["EQS 450 4MATIC"]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "नए वाहनों पर आप कौन‑कौन सी वारंटियाँ देते हैं?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "डीज़ल या हाइब्रिड नहीं — फ़्यूल‑इफ़िशिएंट कारों की शॉर्टलिस्ट बनाओ",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "fuelType": [
-          "PETROL",
-          "ELECTRIC"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "एडवांस्ड सेफ़्टी फीचर्स और कम माइलेज वाली कारें ढूँढो",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "क्या आप मेरे लिए BMW X5 लिस्ट कर सकते हैं?",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "लिस्ट फिर से दिखाओ",
-      "shouldRecommend": true,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मेरा ऑर्डर कहाँ है? पिछले हफ्ते खरीदा था लेकिन कोई अपडेट नहीं मिला।",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "अभी तक मुझसे संपर्क नहीं किया गया है।",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "पास के सबसे अच्छे पिज़्ज़ा रेस्टोरेंट सुझाओ",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "modelIdentifier": [
-          "EQS"
-        ],
-        "brand": [
-          "Mercedes-Benz"
-        ],
-        "fuelType": [
-          "ELECTRIC"
-        ],
-        "bodyType": [
-          "LIMOUSINE"
-        ],
-        "motorization": [
-          "EQS 450 4MATIC"
-        ]
-      },
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "मेरे कार विकल्पों पर बात करने के लिए मुझे 123-456-7890 पर कॉल करो",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "&lt;p&gt;मैं ऑर्डर देना चाहता हूँ&lt;/p&gt;",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "CLA 911 GTS के बारे में और जानकारी दो",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    },
-    {
-      "value": "35 साल की शादीशुदा Sally Jackson के लिए उपयुक्त कार",
-      "shouldRecommend": false,
-      "shouldFilter": {},
-      "aiEvaluationHints": []
-    }
+    "मुझे सेडान दिखाओ",
+    "cla 200",
+    "मेरा बजट 10,000,321 लीरा से कम है",
+    "कूपे है क्या? यानी दो दरवाज़ों वाली कार",
+    "मैं फैमिली कार खोज रहा हूँ",
+    "एक तेज़ स्पोर्ट्स कार ढूँढो",
+    "सिर्फ बैंगनी रंग की कारें",
+    "मुझे एक इलेक्ट्रिक वाहन चाहिए",
+    "मुझे एक सुंदर और स्टाइलिश कॉम्पैक्ट कार चाहिए",
+    "क्या आपके पास 2020 मॉडल या सिल्वर रंग की कार है?",
+    "क्या आपके पास 2020 मॉडल या सफेद रंग की कार है?",
+    "क्या आप कोई सुझाव दे सकते हैं?",
+    "मैं कन्वर्टिबल वाहनों में रुचि रखता हूँ",
+    "सबसे अच्छे ऑटोमोबाइल निर्माता कौन हैं?",
+    "वाहनों के लिए आपकी रिटर्न पॉलिसी क्या है?",
+    "क्या आप फाइनेंसिंग विकल्प प्रदान करते हैं?",
+    "क्या मैं एक टेस्ट ड्राइव शेड्यूल कर सकता हूँ?",
+    "क्या कोई प्रमोशन है?",
+    "नए वाहनों पर आप कौन‑कौन सी वारंटियाँ देते हैं?",
+    "डीज़ल या हाइब्रिड नहीं — फ़्यूल‑इफ़िशिएंट कारों की शॉर्टलिस्ट बनाओ",
+    "एडवांस्ड सेफ़्टी फीचर्स और कम माइलेज वाली कारें ढूँढो",
+    "क्या आप मेरे लिए BMW X5 लिस्ट कर सकते हैं?",
+    "लिस्ट फिर से दिखाओ",
+    "मेरा ऑर्डर कहाँ है? पिछले हफ्ते खरीदा था लेकिन कोई अपडेट नहीं मिला।",
+    "अभी तक मुझसे संपर्क नहीं किया गया है।",
+    "पास के सबसे अच्छे पिज़्ज़ा रेस्टोरेंट सुझाओ",
+    "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+    "मेरे कार विकल्पों पर बात करने के लिए मुझे 123-456-7890 पर कॉल करो",
+    "&lt;p&gt;मैं ऑर्डर देना चाहता हूँ&lt;/p&gt;",
+    "CLA 911 GTS के बारे में और जानकारी दो",
+    "35 साल की शादीशुदा Sally Jackson के लिए उपयुक्त कार"
   ],
   "recommendationModel": [
     "पाँच लोगों के परिवार के लिए उपयुक्त Mercedes SUV है क्या?",

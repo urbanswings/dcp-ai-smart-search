@@ -3,6 +3,7 @@ import { chromium } from "playwright";
 import fs from "fs/promises";
 import {
   fetchTranslation,
+  openaiChatCompletion,
 } from "./aiHelpers";
 import { deepEqual } from "./shared";
 
@@ -195,6 +196,7 @@ function compareUiSelectedFiltersWithFacets(
   const uiSelectedFacetKeys = new Set(Object.keys(uiSelectedFiltersKV));
   const facetKeyUiFallbacks: Record<string, string[]> = {
     upholstery: ["upholstery", "color"],
+    fuelType: ["fuelType", "motorization"],
   };
 
   const missingFacetValues: string[] = [];
@@ -301,6 +303,7 @@ export async function processAndLogUiResult({
   customEval?: (resultText: string) => Promise<string>;
 }): Promise<any> {
   const { evaluateSearchResult } = await import("./aiHelpers");
+  const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results.resultText;
@@ -344,16 +347,14 @@ export async function processAndLogUiResult({
     resultCount = 0;
   }  
 
-  // Facets check
-  const testFacets = process.env.TEST_FACETS === "true";
+  // Facets check (test-data vs BE)  
+  if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
+    hasError = true;
+  }
+
+  // Facets check (UI vs BE)
   const facetMismatches: string[] = [];
-
-  // if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
-  //   facetMismatches.push(
-  //     `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
-  //   );
-  // }
-
   if (testFacets && Object.keys(uiSelectedFiltersKV).length > 0) {
     uiFacetComparison = compareUiSelectedFiltersWithFacets(
       facets,
@@ -367,13 +368,25 @@ export async function processAndLogUiResult({
       );
     }
   }
-
   if (facetMismatches.length > 0) {
     openaiEvaluation = facetMismatches.join(" | ");
     hasError = true;
-  } else {
-    hasError = openaiEvaluation !== "PASS";
-  }   
+  }
+
+  // Validate language consistency between query and response using OpenAI
+  const langCompletion = await openaiChatCompletion([
+    { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+    { role: "user", content: `Text 1: '${actualInput}'\nText 2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with the 2-digit ISO language code of "Text 2".` }
+  ], {
+    max_tokens: 10,
+    temperature: 0.2
+  });
+  const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  if (langCheckResult !== "YES") {
+    console.debug("[DEBUG] Language consistency check: FAIL");
+    openaiEvaluation = `Language Inconsistency. Response is in '${langCheckResult}'`;
+    hasError = true;
+  }
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -723,8 +736,13 @@ export async function performUISmartSearchAndGetResults(
 
   let retries = 0;
   let resultText = "";
-  const loader = page.locator(".dcp-loader");
   const startTime = Date.now();
+  const successResultLocator = page.locator(".smart-search__bubble p").first();
+  const errorResultLocator = page
+    .locator(
+      ".smart-search__notification.wbx-notification--error .wbx-notification__content"
+    )
+    .first();
   while (retries < 3) {
     try {
       console.debug(
@@ -732,8 +750,20 @@ export async function performUISmartSearchAndGetResults(
           retries + 1
         }/3)...`
       );
-      const results = page.locator(".smart-search__bubble p");
-      resultText = await results.innerText();
+      await successResultLocator
+        .or(errorResultLocator)
+        .first()
+        .waitFor();
+
+      const errorVisible = await errorResultLocator
+        .isVisible()
+        .catch(() => false);
+      if (errorVisible) {
+        resultText = await errorResultLocator.innerText();
+        break;
+      }
+
+      resultText = await successResultLocator.innerText();
 
       const rateLimitMatch = resultText.match(
         /검색 제한을 초과했습니다\. (\d+)초 후에 다시 시도해 주세요/
@@ -755,6 +785,9 @@ export async function performUISmartSearchAndGetResults(
       console.debug(
         `[DEBUG] Retrying search button click (attempt ${retries + 1}/3)...`
       );
+      if (await searchButton.isVisible().catch(() => false)) {
+        await searchButton.click();
+      }
     }
   }
 

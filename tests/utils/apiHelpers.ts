@@ -1,5 +1,5 @@
 import axios from "axios";
-import { fetchTranslation } from "./aiHelpers";
+import { fetchTranslation, openaiChatCompletion } from "./aiHelpers";
 import { deepEqual } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
@@ -242,7 +242,7 @@ export class SearchApiClient {
     try {
       const env = ENVIRONMENT || "INT";
       const country = getCountryCode();
-      const language = LANGUAGE?.toLocaleLowerCase() || "en";
+      const language = country === "IN" ? "en" : LANGUAGE?.toLocaleLowerCase() || "en";
       const product = PRODUCT?.toUpperCase() || "UCOS";
       const salesChannel = getSalesChannel();
       const xApiKey = process.env.X_API_KEY;
@@ -430,9 +430,9 @@ export async function performApiSmartSearchAndGetResults(
 
 export async function fetchEmhApiResponse(): Promise<any> {
   const env = ENVIRONMENT || "INT";
-  const country = COUNTRY || "KR";
-  const product = PRODUCT || "UCOS";
-  const language = LANGUAGE || "tr";
+  const country = COUNTRY || "TR";
+  const product = PRODUCT || "NCOS";
+  const language = country === "IN" ? "EN" : LANGUAGE || "TR";
 
   try {
     const apiUrl =
@@ -555,6 +555,7 @@ export async function processAndLogApiResult({
   expectedStatusCode?: number;
 }): Promise<any> {
   const { evaluateSearchResult } = await import("./aiHelpers");
+  const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   const smartSearchMessage = results.results?.resultText;
@@ -636,14 +637,26 @@ export async function processAndLogApiResult({
     }    
   }
 
-  // Facets check
-  const testFacets = process.env.TEST_FACETS === "true";
+  // Facets check (BE vs test-data)
   if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
     openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
     hasError = true;
-  } else {
-    hasError = openaiEvaluation !== "PASS";
-  }  
+  }
+
+  // Validate language consistency between query and response using OpenAI
+  const langCompletion = await openaiChatCompletion([
+    { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+    { role: "user", content: `Text 1: '${actualInput}'\nText 2: '${smartSearchMessage}'\nAnswer with YES if they are the same language, otherwise the 2-digit ISO language code of the second text.` }
+  ], {
+    max_tokens: 10,
+    temperature: 0.2
+  });
+  const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  if (langCheckResult !== "YES") {
+    console.debug("[DEBUG] Language consistency check: FAIL");
+    openaiEvaluation = `Language inconsistency. Response is in '${langCheckResult}'`;
+    hasError = true;
+  }
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
