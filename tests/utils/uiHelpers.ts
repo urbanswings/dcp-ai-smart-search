@@ -376,7 +376,7 @@ export async function processAndLogUiResult({
   // Validate language consistency between query and response using OpenAI
   const langCompletion = await openaiChatCompletion([
     { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
-    { role: "user", content: `Text 1: '${actualInput}'\nText 2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with the 2-digit ISO language code of "Text 2".` }
+    { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
   ], {
     max_tokens: 10,
     temperature: 0.2
@@ -384,7 +384,7 @@ export async function processAndLogUiResult({
   const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
   if (langCheckResult !== "YES") {
     console.debug("[DEBUG] Language consistency check: FAIL");
-    openaiEvaluation = `Language Inconsistency. Response is in '${langCheckResult}'`;
+    openaiEvaluation = `Language Inconsistency - '${langCheckResult}'`;
     hasError = true;
   }
 
