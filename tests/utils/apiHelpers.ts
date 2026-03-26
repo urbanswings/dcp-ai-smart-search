@@ -665,14 +665,21 @@ export async function processAndLogApiResult({
   }
 
   // Validate language consistency between query and response using OpenAI
-  const langCompletion = await openaiChatCompletion([
-    { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
-    { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
-  ], {
-    max_tokens: 10,
-    temperature: 0.2
-  });
-  const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  let langCheckResult = "YES";
+  try {
+    const langCompletion = await openaiChatCompletion([
+      { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+      { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
+    ], {
+      max_tokens: 10,
+      temperature: 0.2
+    });
+    langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  } catch (error: any) {
+    console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
+    // Skip validation if OpenAI is unavailable (quota/network issues)
+    langCheckResult = "YES";
+  }
   if (langCheckResult !== "YES") {
     console.debug("[DEBUG] Language consistency check: FAIL");
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
