@@ -558,10 +558,10 @@ export async function processAndLogApiResult({
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
-  const smartSearchMessage = results.results?.resultText;
+  const smartSearchMessage = results.results?.resultText || "";
   const apiResponse = results.results?.responseData;
   const facets = (() => {
-    const params = results.results.responseData.data?.smartSearch?.parameters;
+    const params = results.results?.responseData?.data?.smartSearch?.parameters || {};
     const includeKeys = [
       "modelIdentifier",
       "fuelType",
@@ -580,11 +580,21 @@ export async function processAndLogApiResult({
   let resultCount = 0;
   let hasError = false;
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
+  const addFailureReason = (reason: string) => {
+    const normalizedEvaluation = (openaiEvaluation || "").trim();
+    if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
+      openaiEvaluation = reason;
+    } else if (!normalizedEvaluation.includes(reason)) {
+      openaiEvaluation = `${normalizedEvaluation} | ${reason}`;
+    }
+    hasError = true;
+  };
 
   // Check if status code matches expectation (if provided)
   if (expectedStatusCode && results.statusCode !== expectedStatusCode) {
-    openaiEvaluation = `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`;
-    hasError = true;
+    addFailureReason(
+      `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`
+    );
   } else if (expectedStatusCode && results.statusCode === expectedStatusCode) {
     // If we have an expected status code and it matches, treat as success regardless of error
     openaiEvaluation = `Expected status code ${expectedStatusCode} received as expected`;
@@ -597,11 +607,14 @@ export async function processAndLogApiResult({
 
       if (searchResults) {
         resultCount =
-          searchResults.products?.length ||
-          searchResults.pagination?.totalNumberOfResults ||
-          searchResults.hits?.length ||
-          searchResults.data?.length ||
+          searchResults.results?.length ||
+          searchResults.navigation?.totalResults ||
           0;
+      }
+
+      // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
+      if (resultCount === 0) {
+        addFailureReason("Payload is zero");
       }
 
       if (customEval) {
@@ -612,22 +625,29 @@ export async function processAndLogApiResult({
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
     // Check for non-400 errors (400 is now treated as valid response with message_to_user)
-    openaiEvaluation = `API Error: ${results.results?.errors
-      ?.map((err: any) => err.message)
-      .join("; ")}`;
-    hasError = true;
+    addFailureReason(
+      `API Error: ${results.results?.errors
+        ?.map((err: any) => err.message)
+        .join("; ")}`
+    );
   } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults = process.env.API_ENDPOINT_LOCAL === 'true' ? apiResponse.searchResults : apiResponse.data.smartSearch;
+    const searchResults =
+      process.env.API_ENDPOINT_LOCAL === "true"
+        ? apiResponse?.searchResults
+        : apiResponse?.data?.smartSearch;
     const smartSearchResponse = results.results.resultText;
 
     if (searchResults) {
       resultCount =
-        searchResults.products?.length ||
-        searchResults.pagination?.totalNumberOfResults ||
-        searchResults.hits?.length ||
-        searchResults.data?.length ||
+        searchResults.results?.length ||
+        searchResults.navigation?.totalResults ||
         0;
+    }
+
+    // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
+    if (resultCount === 0) {
+      addFailureReason("Payload is zero");
     }
 
     if (customEval) {
@@ -639,8 +659,9 @@ export async function processAndLogApiResult({
 
   // Facets check (BE vs test-data)
   if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
-    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
-    hasError = true;
+    addFailureReason(
+      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
+    );
   }
 
   // Validate language consistency between query and response using OpenAI
@@ -654,8 +675,7 @@ export async function processAndLogApiResult({
   const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
   if (langCheckResult !== "YES") {
     console.debug("[DEBUG] Language consistency check: FAIL");
-    openaiEvaluation = `Language Inconsistency - '${langCheckResult}'`;
-    hasError = true;
+    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
   console.log("\n");

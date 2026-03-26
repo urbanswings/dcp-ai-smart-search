@@ -295,12 +295,14 @@ export async function processAndLogUiResult({
   testDescribe,
   testTitle,
   customEval,
+  page,
 }: {
   query: any;
   results: UiSearchResult;
   testDescribe: string;
   testTitle: string;
   customEval?: (resultText: string) => Promise<string>;
+  page?: Page;
 }): Promise<any> {
   const { evaluateSearchResult } = await import("./aiHelpers");
   const testFacets = process.env.TEST_FACETS === "true";
@@ -326,7 +328,11 @@ export async function processAndLogUiResult({
       Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
     );
   })();
-  let openaiEvaluation = customEval ? await customEval(smartSearchMessage) : await evaluateSearchResult(smartSearchMessage);
+  let openaiEvaluation = (
+    customEval
+      ? await customEval(smartSearchMessage)
+      : await evaluateSearchResult(smartSearchMessage)
+  )?.trim();
   let resultCount = 0;
   let hasError = false;
   let uiFacetComparison: {
@@ -334,23 +340,56 @@ export async function processAndLogUiResult({
     missingFacetValues: string[];
   } | null = null;
   const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
+  const addFailureReason = (reason: string) => {
+    const normalizedEvaluation = (openaiEvaluation || "").trim();
+    if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
+      openaiEvaluation = reason;
+    } else if (!normalizedEvaluation.includes(reason)) {
+      openaiEvaluation = `${normalizedEvaluation} | ${reason}`;
+    }
+    hasError = true;
+  };
 
   // Handle the new Smart Search + Actual Search response structure
-  const searchResults = process.env.API_ENDPOINT_LOCAL === 'true' ? apiResponse.searchResults : apiResponse.data.smartSearch;
+  const searchResults =
+    process.env.API_ENDPOINT_LOCAL === "true"
+      ? apiResponse?.searchResults
+      : apiResponse?.data?.smartSearch;
   if (searchResults) {
     resultCount =
       searchResults.results?.length ||
       searchResults.navigation?.totalResults ||
       0;
-  } else {
-    // If no search results, it means smart search failed or returned no URL
-    resultCount = 0;
-  }  
+  } 
+
+  // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
+  if (resultCount === 0) {
+    addFailureReason("Payload is zero");
+  }
+
+  // Extract UI vehicle count if page is provided
+  let uiVehicleCount: number | null = null;
+  if (page) {
+    try {
+      const uiCountElement = page.locator('[data-test-id="srp__header-results__result-amount__number"]');
+      const uiCountText = await uiCountElement.innerText();
+      uiVehicleCount = parseInt(uiCountText.replace(/[^0-9]/g, ''), 10);
+      if (isNaN(uiVehicleCount)) {
+        uiVehicleCount = null;
+      }
+    } catch (e) {
+      console.debug("[DEBUG] Could not extract UI vehicle count:", e);
+    }
+  }
+  if (uiVehicleCount === 0 && resultCount > 0) {
+    addFailureReason("UI is zero");
+  }
 
   // Facets check (test-data vs BE)  
   if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
-    openaiEvaluation = `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`;
-    hasError = true;
+    addFailureReason(
+      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
+    );
   }
 
   // Facets check (UI vs BE)
@@ -369,8 +408,7 @@ export async function processAndLogUiResult({
     }
   }
   if (facetMismatches.length > 0) {
-    openaiEvaluation = facetMismatches.join(" | ");
-    hasError = true;
+    addFailureReason(facetMismatches.join(" | "));
   }
 
   // Validate language consistency between query and response using OpenAI
@@ -384,8 +422,7 @@ export async function processAndLogUiResult({
   const langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
   if (langCheckResult !== "YES") {
     console.debug("[DEBUG] Language consistency check: FAIL");
-    openaiEvaluation = `Language Inconsistency - '${langCheckResult}'`;
-    hasError = true;
+    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
   console.log("\n");
@@ -427,6 +464,7 @@ export async function processAndLogUiResult({
       "en": smartSearchMessageEn,
     },
     resultCount,
+    uiVehicleCount,
     responseTime: results.responseTime,
     statusCode: null,
     hasError: null,
@@ -493,8 +531,10 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
         "Browser fixture is required when PLAYWRIGHT_CDP_URL is not set."
       );
     }
+    const isHeadlessMode =
+      process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS === "true";
     context = await browser.newContext({
-      viewport: null,
+      viewport: isHeadlessMode ? { width: 1920, height: 1080 } : null,
       deviceScaleFactor: undefined,
       ...(httpCredentials ? { httpCredentials } : {}),
     });
