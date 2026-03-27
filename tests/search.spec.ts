@@ -520,7 +520,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         processAndLogApiResult,
       });
     }
-  );
+  );  
 
   test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
@@ -536,6 +536,25 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         testDescribe: describeName,
         testTitle: test.info().title,
         testType: "keyword-single",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Non-MB Features", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.nonMbFeatures;
+      const allQueries = mergeQueries(fixedQueries, []);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "non-mb-features",
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -655,9 +674,11 @@ test.describe("AI Smart Search - Other Scenarios", () => {
           results,
           testDescribe: describeName,
           testTitle: test.info().title,
+          page,
         });
         uiResults.push(entry);
       }
+      await page.close();
     }
 
     // Run API tests if enabled
@@ -830,7 +851,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
-    const fixedQueries = fixedQueriesData.byFixedQuery;
+    const fixedQueries = fixedQueriesData.forRegression;
     const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(

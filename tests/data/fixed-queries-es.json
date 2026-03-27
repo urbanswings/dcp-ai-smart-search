@@ -80,6 +80,13 @@
     "tesla model x",
     "ford mustang"
   ],
+  "nonMbFeatures": [
+    "Quiero modelos que tengan motor VTEC",
+    "Muestrame coches con motor boxer",
+    "¿Tienen vehículos con tracción total quattro?",
+    "Busco modelos con tecnología i-VTEC",
+    "Encuentra coches que vengan con asistencia EyeSight"
+  ],
   "randomTopics": [
     "What are the health benefits of drinking green tea daily?",
     "I had Hawaiian Pizza for lunch. What about you?"

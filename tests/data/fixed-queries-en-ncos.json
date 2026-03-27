@@ -1,4 +1,20 @@
 {
+  "forRegression": [
+    "मैं फैमिली कार खोज रहा हूँ",
+    "एक तेज़ स्पोर्ट्स कार ढूँढो",
+    "CLA 911 GTS के बारे में और जानकारी दो",
+    "find a fast sports car",
+    "I'm looking for a spacious vehicle with excellent fuel efficiency and the latest safety features",
+    "Do you have a model with adaptive cruise control?",
+    "Which Mercedes is best for someone who loves performance cars?",
+    "Recommend a hybrid or electric vehicle",
+    "Which Mercedes is best for city driving?",
+    "Do you have vehicles with SUV or coupe body type, especially the EQE model?",
+    "aile arabası arıyorum",
+    "güzel ve şık bir kompakt araç istiyorum",
+    "Which Mercedes is suitable for a small family?",
+    "Küçük aileye uygun Mercedes hangisi?"
+  ],
   "multiIntent": [
     "Show me SUVs, and we can also look at financing.",
     "I'm looking at sedans or coupes, are there any discounts?",
@@ -512,6 +528,13 @@
   "keywordSingle": [
     "tesla model x",
     "ford mustang"
+  ],
+  "nonMbFeatures": [
+    "I want models that has VTEC engine",
+    "Show cars with boxer engine",
+    "Do you have vehicles with quattro all-wheel drive?",
+    "I'm looking for models with i-VTEC technology",
+    "Find cars that come with EyeSight driver assist"
   ],
   "randomTopics": [
     "What are the health benefits of drinking green tea every day?",

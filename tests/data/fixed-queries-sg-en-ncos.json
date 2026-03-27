@@ -207,6 +207,13 @@
     "tesla model x",
     "ford mustang"
   ],
+  "nonMbFeatures": [
+    "I want models that has VTEC engine",
+    "Show cars with boxer engine",
+    "Do you have vehicles with quattro all-wheel drive?",
+    "I'm looking for models with i-VTEC technology",
+    "Find cars that come with EyeSight driver assist"
+  ],
   "randomTopics": [
     "What are the health benefits of drinking green tea every day?",
     "I had Hawaiian pizza for lunch. What about you?"
