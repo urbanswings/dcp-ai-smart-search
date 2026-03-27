@@ -5,7 +5,7 @@ import {
   fetchTranslation,
   openaiChatCompletion,
 } from "./aiHelpers";
-import { deepEqual } from "./shared";
+import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -394,7 +394,7 @@ export async function processAndLogUiResult({
 
   // Facets check (UI vs BE)
   const facetMismatches: string[] = [];
-  if (testFacets && Object.keys(uiSelectedFiltersKV).length > 0) {
+  if (Object.keys(uiSelectedFiltersKV).length > 0) {
     uiFacetComparison = compareUiSelectedFiltersWithFacets(
       facets,
       uiSelectedFiltersKV
@@ -428,7 +428,7 @@ export async function processAndLogUiResult({
     langCheckResult = "YES";
   }
   
-  if (langCheckResult !== "YES") {
+  if (!isLanguageConsistencyAccepted(langCheckResult)) {
     console.debug("[DEBUG] Language consistency check: FAIL");
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
@@ -808,6 +808,9 @@ export async function performUISmartSearchAndGetResults(
         .catch(() => false);
       if (errorVisible) {
         resultText = await errorResultLocator.innerText();
+        console.warn(
+          `[DEBUG] UI showing internal error message: '${resultText}'`
+        );
         break;
       }
 

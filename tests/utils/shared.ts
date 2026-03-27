@@ -42,6 +42,17 @@ export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   return false;
 }
 
+export function isLanguageConsistencyAccepted(result: string): boolean {
+  const normalized = (result || "").trim().toUpperCase();
+  if (!normalized) return false;
+  if (normalized === "YES") return true;
+
+  const codes = normalized.match(/[A-Z]{2}/g);
+  if (!codes || codes.length < 2) return false;
+
+  return codes[0] === codes[1];
+}
+
 export function getTestMode(): "ui" | "api" | "both" {
   return (process.env.TEST_MODE as "ui" | "api" | "both") || "ui";
 }

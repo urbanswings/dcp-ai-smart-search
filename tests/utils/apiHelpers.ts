@@ -1,6 +1,6 @@
 import axios from "axios";
 import { fetchTranslation, openaiChatCompletion } from "./aiHelpers";
-import { deepEqual } from "./shared";
+import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -680,7 +680,7 @@ export async function processAndLogApiResult({
     // Skip validation if OpenAI is unavailable (quota/network issues)
     langCheckResult = "YES";
   }
-  if (langCheckResult !== "YES") {
+  if (!isLanguageConsistencyAccepted(langCheckResult)) {
     console.debug("[DEBUG] Language consistency check: FAIL");
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
