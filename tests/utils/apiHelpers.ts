@@ -558,6 +558,7 @@ export async function processAndLogApiResult({
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results?.resultText || "";
   const apiResponse = results.results?.responseData;
   const facets = (() => {
@@ -620,7 +621,11 @@ export async function processAndLogApiResult({
       if (customEval) {
         openaiEvaluation = await customEval(results.results);
       } else {
-        openaiEvaluation = await evaluateSearchResult(smartSearchResponse);
+        openaiEvaluation = await evaluateSearchResult(
+          smartSearchResponse,
+          aiEvaluationHints,
+          query?.value ?? query
+        );
       }      
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
@@ -653,7 +658,11 @@ export async function processAndLogApiResult({
     if (customEval) {
       openaiEvaluation = await customEval(results.results);
     } else {
-      openaiEvaluation = await evaluateSearchResult(smartSearchResponse);
+      openaiEvaluation = await evaluateSearchResult(
+        smartSearchResponse,
+        aiEvaluationHints,
+        query?.value ?? query
+      );
     }    
   }
 
@@ -685,9 +694,15 @@ export async function processAndLogApiResult({
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
+  const normalizedEvaluation = (openaiEvaluation || "").trim();
+  const evaluationPassed =
+    normalizedEvaluation.toUpperCase() === "PASS" ||
+    normalizedEvaluation.startsWith("Expected status code ");
+  const displayHasError = hasError || !evaluationPassed;
+
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${hasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
+  console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
@@ -723,7 +738,7 @@ export async function processAndLogApiResult({
     resultCount,
     responseTime: results.responseTime,
     statusCode: results.statusCode,
-    hasError,
+    hasError: displayHasError,
     error: results.error,
     // apiResponse,
     openaiEvaluation: openaiEvaluation,

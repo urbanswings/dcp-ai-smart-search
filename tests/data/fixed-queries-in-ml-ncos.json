@@ -191,11 +191,246 @@
     "ford mustang"
   ],
   "nonMbFeatures": [
-    "എനിക്ക് VTEC എഞ്ചിൻ ഉള്ള മോഡലുകൾ വേണം.",
-    "ബോക്സർ എഞ്ചിൻ ഉള്ള കാറുകൾ കാണിക്കൂ.",
-    "quattro ഓൾ-വീൽ ഡ്രൈവ് ഉള്ള വാഹനങ്ങളുണ്ടോ?",
-    "i-VTEC സാങ്കേതികവിദ്യയുള്ള മോഡലുകൾ ഞാൻ അന്വേഷിക്കുന്നു.",
-    "EyeSight ഡ്രൈവർ-അസിസ്റ്റ് ഉള്ള കാറുകൾ കണ്ടെത്തൂ."
+    {
+      "value": "എനിക്ക് VTEC എഞ്ചിൻ ഉള്ള മോഡലുകൾ വേണം.",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ബോക്സർ എഞ്ചിൻ ഉള്ള കാറുകൾ കാണിക്കൂ.",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "quattro ഓൾ-വീൽ ഡ്രൈവ് ഉള്ള വാഹനങ്ങളുണ്ടോ?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "i-VTEC സാങ്കേതികവിദ്യയുള്ള മോഡലുകൾ ഞാൻ അന്വേഷിക്കുന്നു.",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "EyeSight ഡ്രൈവർ-അസിസ്റ്റ് ഉള്ള കാറുകൾ കണ്ടെത്തൂ.",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Show cars with xDrive all-wheel drive",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Find models with Hybrid Synergy Drive",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "I'm looking for cars that use SKYACTIV technology",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Do you have vehicles with e-POWER?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Show me cars with Pilot Assist",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ProPILOT",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "BlueCruise",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Super Cruise",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "SH-AWD",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "S-AWC",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "i-MMD",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "e:HEV",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "xMode",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "G-Vectoring Control",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "VC-Turbo",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+        ],
+        "overwrite": true
+      }
+    }
   ],
   "randomTopics": [
     "നിത്യ പച്ച ചായ കുടിക്കുന്ന ആരോഗ്യ നിരഷ്ട എന്തെത്?",

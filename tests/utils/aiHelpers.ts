@@ -119,29 +119,45 @@ export async function isSemanticallySimilarOpenAI(str1: string, str2: string): P
 /**
  * Evaluates a search result using OpenAI.
  */
-export async function evaluateSearchResult(resultText: string): Promise<string> {
+export async function evaluateSearchResult(
+  resultText: string,
+  aiEvaluationHints?: { value: string[]; overwrite: boolean },
+  queryText?: string
+): Promise<string> {
   const evaluationRulesPath = path.resolve(process.cwd(), 'tests/data/ai-evaluation-rules.json');
   const evaluationRules = JSON.parse(fs.readFileSync(evaluationRulesPath, 'utf-8'));
 
   const { systemPrompt: systemPromptArray, maxTokens, temperature } = evaluationRules.resultsEvaluation;
-  const systemPrompt = Array.isArray(systemPromptArray) ? systemPromptArray.map(line => line.trim()).join('\n') : systemPromptArray;
+  let systemPrompt = Array.isArray(systemPromptArray) ? systemPromptArray.map(line => line.trim()).join('\n') : systemPromptArray;
+  let userPrompt = resultText;
+
+  // Handle aiEvaluationHints if provided
+  if (aiEvaluationHints && aiEvaluationHints.value && aiEvaluationHints.value.length > 0) {
+    const hintsText = aiEvaluationHints.value.map(line => (typeof line === 'string' ? line.trim() : '')).filter(Boolean).join('\n');
+
+    if (aiEvaluationHints.overwrite === true) {
+      // Use only the hints as system prompt
+      systemPrompt = hintsText;
+    } else {
+      // Append hints to existing system prompt
+      systemPrompt = systemPrompt + '\n\n' + hintsText;
+    }
+
+    userPrompt = queryText
+      ? `User query:\n${queryText}\n\nResponse to evaluate:\n${resultText}`
+      : resultText;
+  }
 
   try {
     const completion = await openaiChatCompletion([
       { role: "system", content: systemPrompt },
-      { role: "user", content: resultText }
+      { role: "user", content: userPrompt }
     ], {
       max_tokens: maxTokens,
       temperature: temperature
     });
 
     const answer = completion.choices?.[0]?.message?.content || "";
-
-    // Ensure rules (N) and (M) override other criteria
-    if (answer.includes("N") || answer.includes("M")) {
-      return "PASS";
-    }
-
     if (!answer.includes("PASS")) {
       console.warn(`[WARN] OpenAI Evaluation indicates failure: ${completion.choices[0].message.content}`);
     }

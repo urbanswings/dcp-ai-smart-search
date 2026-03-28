@@ -308,6 +308,7 @@ export async function processAndLogUiResult({
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
   const uiSelectedFiltersKV: Record<string, string[]> =
@@ -331,7 +332,7 @@ export async function processAndLogUiResult({
   let openaiEvaluation = (
     customEval
       ? await customEval(smartSearchMessage)
-      : await evaluateSearchResult(smartSearchMessage)
+      : await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
   )?.trim();
   let resultCount = 0;
   let hasError = false;
@@ -433,9 +434,13 @@ export async function processAndLogUiResult({
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
+  const normalizedEvaluation = (openaiEvaluation || "").trim();
+  const evaluationPassed = normalizedEvaluation.toUpperCase() === "PASS";
+  const displayHasError = hasError || !evaluationPassed;
+
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${hasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
+  console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
@@ -475,7 +480,7 @@ export async function processAndLogUiResult({
     uiVehicleCount,
     responseTime: results.responseTime,
     statusCode: null,
-    hasError: null,
+    hasError: displayHasError,
     error: results.error,
     // apiResponse,
     openaiEvaluation,
