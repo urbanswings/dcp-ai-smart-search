@@ -85,7 +85,7 @@ test.beforeAll(async () => {
 });
 
 test.describe("AI Smart Search - Sanity Test", () => {
-  const describeName = "Vehicles MB";
+  const describeName = "Sanity Test";
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
     const country = COUNTRY;

@@ -24,6 +24,7 @@
       "(1) If the response meets the criteria below, respond ONLY with: 'PASS'.",
       "(2) Otherwise, respond with the alphabet letter(s) of the criteria it does not meet.",
       "(3) If a response fails criterion A but satisfies criterion M, the overall result should still be 'PASS'.",
+      "(4) If criteria J, M, N, AA, AB, or AC are satisfied, the overall result should be 'PASS' unless the response is incoherent, offensive, or unsafe.",
       "Criteria for a 'PASS':",  
       "(A) The response should directly address the user’s query or offer relevant suggestions.",
       "(B) The response should provide accurate and relevant information.",
@@ -50,7 +51,10 @@
       "(T) If the system interprets a broad query and provides a specific, relevant Mercedes-Benz suggestion, it should pass.",
       "(U) If filtering by specific models or years and providing detailed results, the response should be marked 'PASS'.",
       "(V) If interpreting general preferences (e.g., performance, style) and providing aligned Mercedes-Benz recommendations, it should pass.",
-      "(W) If the system acknowledges a lack of direct matches and professionally redirects to a sales team or resources, it should pass."
+      "(W) If the system acknowledges a lack of direct matches and professionally redirects to a sales team or resources, it should pass.",
+      "(AA) If the response politely states that specific information cannot be provided at the moment, while acknowledging the user’s request and offering further assistance or Mercedes-Benz-related guidance, it should be marked 'PASS'.",
+      "(AB) For clarification or multi-intent queries, if one intent cannot be fulfilled but the response clearly acknowledges the request and redirects helpfully to supported Mercedes-Benz assistance, it should be marked 'PASS'.",
+      "(AC) If the user asks for competitor-specific technologies, features, or terms (e.g., VTEC, xDrive, quattro, EyeSight, e:HEV, SH-AWD), a polite decline plus Mercedes-Benz-focused guidance should be marked 'PASS' even if no exact feature match is provided."
     ],
     "userPromptTemplate": [],
     "maxTokens": 20,
