@@ -539,6 +539,74 @@ export async function fetchDcpApiResponse(): Promise<any> {
   }
 }
 
+function normalizeFacetToken(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ı/g, "i")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function buildFacetCandidateTokens(rawValue: string): string[] {
+  const normalizedRaw = normalizeFacetToken(rawValue || "");
+  const candidates = new Set<string>();
+  if (normalizedRaw) {
+    candidates.add(normalizedRaw);
+  }
+
+  if (rawValue?.includes("_")) {
+    const lastToken = rawValue.split("_").pop() || rawValue;
+    const normalizedLastToken = normalizeFacetToken(lastToken);
+    if (normalizedLastToken) {
+      candidates.add(normalizedLastToken);
+    }
+  }
+
+  return Array.from(candidates);
+}
+
+function compareSelectedFiltersWithFacetsByExpectedValue(
+  expectedValue: string,
+  facets: Record<string, any>
+): {
+  matches: boolean;
+  missingFacetValues: string[];
+} {
+  const normalizedExpected = normalizeFacetToken(expectedValue || "");
+  if (!normalizedExpected) {
+    return {
+      matches: false,
+      missingFacetValues: ["empty-expected-filter-value"],
+    };
+  }
+
+  const expectedCandidates = buildFacetCandidateTokens(expectedValue);
+  const backendEquipmentValues = Array.isArray(facets?.equipment)
+    ? facets.equipment.map((value: any) => String(value))
+    : [];
+  const backendTokens = new Set(
+    backendEquipmentValues.flatMap((value: string) =>
+      buildFacetCandidateTokens(value)
+    )
+  );
+
+  const matchesBackend = expectedCandidates.some(
+    (candidate) =>
+      backendTokens.has(candidate) ||
+      Array.from(backendTokens).some(
+        (token) => token.length >= 10 && candidate.startsWith(token)
+      )
+  );
+
+  return {
+    matches: matchesBackend,
+    missingFacetValues: matchesBackend
+      ? []
+      : [`be:equipment missing '${expectedValue}'`],
+  };
+}
+
 export async function processAndLogApiResult({
   query,
   results,
@@ -561,25 +629,29 @@ export async function processAndLogApiResult({
   const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results?.resultText || "";
   const apiResponse = results.results?.responseData;
-  const facets = (() => {
-    const params = results.results?.responseData?.data?.smartSearch?.parameters || {};
-    const includeKeys = [
-      "modelIdentifier",
-      "fuelType",
-      "bodyType",
-      "brand",
-      "motorization",
-      "price",
-      "modelYear"
+  const resultsFacets = (() => {
+    const params = results.results.responseData?.data?.smartSearch?.parameters || {};
+    const excludeKeys = [
+      "contextType",
+      "isUcos",
+      "limit",
+      "sortingType",
+      "language",
+      "profileId",
+      "vehicleCategory",
+      "__typename"
     ];
     return Object.fromEntries(
-      Object.entries(params)
-        .filter(([key, value]) => includeKeys.includes(key) && value != null)
+      Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
     );
   })();
   let openaiEvaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
+  let uiFacetComparison: {
+    matches: boolean;
+    missingFacetValues: string[];
+  } | null = null;
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
@@ -667,10 +739,41 @@ export async function processAndLogApiResult({
   }
 
   // Facets check (BE vs test-data)
-  if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+  if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
     addFailureReason(
-      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
+      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(resultsFacets)}`
     );
+  }
+
+  // Facets check (Query vs UI vs BE)
+  const facetMismatches: string[] = [];
+  const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
+  if (isFacetEquipmentOnly) {
+    const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
+      apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
+    const equipmentCodeToName = new Map<string, string>(
+      apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
+    );
+    const resolvedEquipment = (resultsFacets.equipment as string[]).map(
+      (code: string) => equipmentCodeToName.get(code) ?? code
+    );
+    resultsFacets.equipment = resolvedEquipment;
+  }
+  if (query?.facet === 'equipment') {
+    uiFacetComparison = compareSelectedFiltersWithFacetsByExpectedValue(
+      query.filterValue,
+      resultsFacets
+    );
+  }
+  if (uiFacetComparison && !uiFacetComparison.matches) {
+    facetMismatches.push(
+      `Filters Mismatch: missing ${JSON.stringify(
+        uiFacetComparison.missingFacetValues
+      )}, beFacets ${JSON.stringify(resultsFacets)}`
+    );
+  }
+  if (facetMismatches.length > 0) {
+    addFailureReason(facetMismatches.join(" | "));
   }
 
   // Validate language consistency between query and response using OpenAI
@@ -742,7 +845,7 @@ export async function processAndLogApiResult({
     error: results.error,
     // apiResponse,
     openaiEvaluation: openaiEvaluation,
-    facets,
+    facets: resultsFacets,
   };
 }
 

@@ -368,6 +368,59 @@ function compareUiSelectedFiltersWithFacets(
   };
 }
 
+function compareUiSelectedFiltersWithFacetsByExpectedValue(
+  expectedValue: string,
+  facets: Record<string, any>,
+  uiSelectedFiltersKV: Record<string, string[]>
+): {
+  matches: boolean;
+  missingFacetValues: string[];
+} {
+  const normalizedExpected = normalizeFacetToken(expectedValue || "");
+  if (!normalizedExpected) {
+    return {
+      matches: false,
+      missingFacetValues: ["empty-expected-filter-value"],
+    };
+  }
+
+  const backendEquipmentValues = collectPrimitiveFacetValues(facets?.equipment);
+  const uiEquipmentValues = uiSelectedFiltersKV?.equipment || [];
+
+  const expectedCandidates = buildFacetCandidateTokens(expectedValue);
+  const backendTokens = new Set(
+    backendEquipmentValues.flatMap((value) => buildFacetCandidateTokens(value))
+  );
+  const uiTokens = new Set(
+    uiEquipmentValues.flatMap((value) => buildFacetCandidateTokens(value))
+  );
+
+  const matchesTokenSet = (tokens: Set<string>): boolean =>
+    expectedCandidates.some(
+      (candidate) =>
+        tokens.has(candidate) ||
+        Array.from(tokens).some(
+          (token) => token.length >= 10 && candidate.startsWith(token)
+        )
+    );
+
+  const matchesBackend = matchesTokenSet(backendTokens);
+  const matchesUi = matchesTokenSet(uiTokens);
+
+  const missingFacetValues: string[] = [];
+  if (!matchesBackend) {
+    missingFacetValues.push(`be:equipment missing '${expectedValue}'`);
+  }
+  if (!matchesUi) {
+    missingFacetValues.push(`ui:equipment missing '${expectedValue}'`);
+  }
+
+  return {
+    matches: missingFacetValues.length === 0,
+    missingFacetValues,
+  };
+}
+
 async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
   try {
     await page
@@ -514,9 +567,6 @@ export async function processAndLogUiResult({
       ? await customEval(smartSearchMessage)
       : await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
   )?.trim();
-  const isNonMercedesRedirectScenario =
-    isLikelyNonMercedesQuery(String(actualInput || "")) &&
-    hasValidMercedesRedirectResponse(smartSearchMessage);
   let resultCount = 0;
   let hasError = false;
   let uiFacetComparison: {
@@ -571,33 +621,37 @@ export async function processAndLogUiResult({
     );
   }
 
-  // Facets check (UI vs BE)
+  // Facets check (Query vs UI vs BE)
   const facetMismatches: string[] = [];
-  if (!isNonMercedesRedirectScenario && Object.keys(uiSelectedFiltersKV).length > 0) {
-    const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
-    if (isFacetEquipmentOnly) {
-      const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
-        apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
-      const equipmentCodeToName = new Map<string, string>(
-        apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
-      );
-      const resolvedEquipment = (resultsFacets.equipment as string[]).map(
-        (code: string) => equipmentCodeToName.get(code) ?? code
-      );
-      resultsFacets.equipment = resolvedEquipment;
-    }
-
-    uiFacetComparison = compareUiSelectedFiltersWithFacets(
+  const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
+  if (isFacetEquipmentOnly) {
+    const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
+      apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
+    const equipmentCodeToName = new Map<string, string>(
+      apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
+    );
+    const resolvedEquipment = (resultsFacets.equipment as string[]).map(
+      (code: string) => equipmentCodeToName.get(code) ?? code
+    );
+    resultsFacets.equipment = resolvedEquipment;
+  }
+  uiFacetComparison = compareUiSelectedFiltersWithFacets(
+    resultsFacets,
+    uiSelectedFiltersKV
+  );
+  if (query?.facet === 'equipment') {
+    uiFacetComparison = compareUiSelectedFiltersWithFacetsByExpectedValue(
+      query.filterValue,
       resultsFacets,
       uiSelectedFiltersKV
     );
-    if (!uiFacetComparison.matches) {
-      facetMismatches.push(
-        `UI filters mismatch with BE facets: missing ${JSON.stringify(
-          uiFacetComparison.missingFacetValues
-        )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`
-      );
-    }
+  }
+  if (!uiFacetComparison.matches) {
+    facetMismatches.push(
+      `Filters Mismatch: missing ${JSON.stringify(
+        uiFacetComparison.missingFacetValues
+      )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`
+    );
   }
   if (facetMismatches.length > 0) {
     addFailureReason(facetMismatches.join(" | "));
@@ -605,8 +659,7 @@ export async function processAndLogUiResult({
 
   // Validate language consistency between query and response using OpenAI
   let langCheckResult = "YES";
-  if (!isNonMercedesRedirectScenario) {
-    try {
+  try {
     const langCompletion = await openaiChatCompletion([
       { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
       { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
@@ -615,16 +668,14 @@ export async function processAndLogUiResult({
       temperature: 0.2
     });
     langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
-    } catch (error: any) {
-      console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
-      // Skip validation if OpenAI is unavailable (quota/network issues)
-      langCheckResult = "YES";
-    }
-
-    if (!isLanguageConsistencyAccepted(langCheckResult)) {
-      console.debug("[DEBUG] Language consistency check: FAIL");
-      addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
-    }
+  } catch (error: any) {
+    console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
+    // Skip validation if OpenAI is unavailable (quota/network issues)
+    langCheckResult = "YES";
+  }
+  if (!isLanguageConsistencyAccepted(langCheckResult)) {
+    console.debug("[DEBUG] Language consistency check: FAIL");
+    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();

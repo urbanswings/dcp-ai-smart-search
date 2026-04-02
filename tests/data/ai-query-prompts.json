@@ -86,6 +86,13 @@
     "maxTokens": 50,
     "fallback": "Show me vehicles with {filterText}"
   },
+  "byFilterFacetsCompleteEquipment": {
+    "count": 1,
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search short sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter name. Only return the sentence.",
+    "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
+    "maxTokens": 50,
+    "fallback": "Show me vehicles with {filterText}"
+  },
   "sentenceSingle": {
     "count": 1,
     "systemPrompt": "You are a curious car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
