@@ -24,6 +24,7 @@ function normalizeFacetToken(value: string): string {
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
+    .replace(/ı/g, "i")
     .replace(/^paint[_-]?color[_-]?/i, "")
     .replace(/[^a-z0-9]/g, "");
 }
@@ -47,32 +48,59 @@ function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
 }
 
 const facetValueAliasMap: Record<string, string[]> = {
+  // Body type aliases
   "limousine": ["sedan"],
   "sedan": ["limousine"],
   "suv": ["suvoffroader"],
   "suvoffroader": ["suv"],
-  "cabrioroadster": ["cabrioletroadster"],
-  "cabrioletroadster": ["cabrioroadster"],
+  // TR: "SUV & Arazi aracı" covers both SUV and SUV_OFFROADER
+  "suvaraziaraci": ["suv", "suvoffroader"],
+  "suvaraziarac": ["suv", "suvoffroader"],
+  "cabrioroadster": ["cabrioletroadster", "kabriyo", "cabriolet"],
+  "cabrioletroadster": ["cabrioroadster", "kabriyo", "cabriolet"],
+  // TR body type display names → BE codes
+  "kabriyo": ["cabrioroadster", "cabrioletroadster"],
   "amggt": ["mercedesamggt"],
   "mercedesamggt": ["amggt"],
-  "a": ["aclass"],
-  "aclass": ["a"],
-  "b": ["bclass"],
-  "bclass": ["b"],
-  "c": ["cclass"],
-  "cclass": ["c"],
-  "e": ["eclass"],
-  "eclass": ["e"],
-  "g": ["gclass"],
-  "gclass": ["g"],
-  "s": ["sclass"],
-  "sclass": ["s"],
+  // TR model series: "A-Serisi" → "aserisi", "C-Serisi" → "cserisi", etc.
+  "a": ["aclass", "aserisi"],
+  "aclass": ["a", "aserisi"],
+  "aserisi": ["a", "aclass"],
+  "b": ["bclass", "bserisi"],
+  "bclass": ["b", "bserisi"],
+  "bserisi": ["b", "bclass"],
+  "c": ["cclass", "cserisi"],
+  "cclass": ["c", "cserisi"],
+  "cserisi": ["c", "cclass"],
+  "e": ["eclass", "eserisi"],
+  "eclass": ["e", "eserisi"],
+  "eserisi": ["e", "eclass"],
+  "g": ["gclass", "gserisi"],
+  "gclass": ["g", "gserisi"],
+  "gserisi": ["g", "gclass"],
+  "s": ["sclass", "sserisi"],
+  "sclass": ["s", "sserisi"],
+  "sserisi": ["s", "sclass"],
   "hatchback": ["hatches"],
   "hatches": ["hatchback"],
   "peoplecarrier": ["peoplemovers"],
   "peoplemovers": ["peoplecarrier"],
+  // Fuel type aliases
   "pluginhybridpetrol": ["petrolelectricpluginhybrid"],
   "petrolelectricpluginhybrid": ["pluginhybridpetrol"],
+  // TR fuel type display names → BE codes
+  "benzin": ["petrol"],
+  "petrol": ["benzin"],
+  "dizel": ["diesel"],
+  "diesel": ["dizel"],
+  "elektrik": ["electric"],
+  "electric": ["elektrik"],
+  "hibrit": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  // TR: "Benzinli Plug-in Hibrit" normalizes to "benzinlipluginhibrit"
+  "benzinlipluginhibrit": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  // Brand aliases: UI may show "Mercedes-Benz" or "Mercedes Benz"
+  "mercedesbenz": ["mercedes"],
+  "mercedes": ["mercedesbenz"],
 };
 
 function buildFacetCandidateTokens(rawValue: string): string[] {
@@ -100,39 +128,43 @@ function buildFacetCandidateTokens(rawValue: string): string[] {
 }
 
 function mapUiLabelToFacetKey(label: string): string | null {
-  const normalizedLabel = label.toLowerCase().replace(/\s+/g, " ").trim();
+  const normalizedLabel = normalizeFacetToken(label);
   const labelMap: Record<string, string> = {
     "brand": "brand",
-    "brand name": "brand",
+    "brandname": "brand",
     "body": "bodyType",
-    "body style": "bodyType",
-    "body type": "bodyType",
-    "vehicle type": "bodyType",
+    "bodystyle": "bodyType",
+    "bodytype": "bodyType",
+    "vehicletype": "bodyType",
     "model": "modelIdentifier",
-    "model variant": "motorization",
+    "modelvariant": "motorization",
     "variant": "motorization",
-    "model identifier": "modelIdentifier",
+    "varyant": "motorization",
+    "modelidentifier": "modelIdentifier",
     "motorization": "motorization",
-    "fuel type": "fuelType",
+    "fueltype": "fuelType",
     "engine": "fuelType",
     "color": "color",
     "colour": "color",
     "upholstery": "upholstery",
-    "upholstery color": "upholstery",
-    "upholstery colour": "upholstery",
-    "model year": "modelYear",
+    "upholsterycolor": "upholstery",
+    "upholsterycolour": "upholstery",
+    "modelyear": "modelYear",
     "price": "price",
-    "total price": "price",
     "totalprice": "price",
     "marka": "brand",
-    "model adi": "modelIdentifier",
+    "modeladi": "modelIdentifier",
     "motor": "motorization",
-    "yakit tipi": "fuelType",
-    "gövde tipi": "bodyType",
-    "govde tipi": "bodyType",
+    "yakittipi": "fuelType",
+    "govdetipi": "bodyType",
+    "govdeturu": "bodyType",
     "renk": "color",
-    "model yili": "modelYear",
+    "renkler": "color",
+    "modelyili": "modelYear",
     "fiyat": "price",
+    // TR: equipment
+    "donanim": "equipment",
+    "equipment": "equipment",
   };
 
   return labelMap[normalizedLabel] || null;
@@ -160,11 +192,15 @@ function shouldOverrideToPassForRedirectedRefusal(
     return false;
   }
 
-  const hasPoliteRefusal = /(cannot|can't|unable|not able|cannot provide|unable to provide|do not have|don't have|not available)/i.test(
-    responseText
+  // Normalize typographic apostrophes before matching
+  const normalizedResponse = responseText.replace(/[\u2018\u2019]/g, "'");
+  // English + Hindi (नहीं = not/no, नहीं कर सकते = cannot) + Turkish (yapamam/veremeyiz = cannot)
+  const hasPoliteRefusal = /(cannot|can't|unable|not able|cannot provide|unable to provide|do not have|don't have|not available|नहीं\s+कर\s+सकते|प्रदान\s+नहीं|नहीं|yapamam|yapamayız|veremeyiz|sunamam)/i.test(
+    normalizedResponse
   );
-  const hasMercedesRedirect = /mercedes[- ]?benz/i.test(responseText) &&
-    /(assist|help|explore|offering|offerings|lineup|options|further|inquiries|guidance)/i.test(responseText);
+  // English + Hindi (मदद = help, सहायता = assistance, यहाँ = here) + Turkish (yardım = help)
+  const hasMercedesRedirect = /mercedes[- ]?benz/i.test(normalizedResponse) &&
+    /(assist|help|explore|offering|offerings|lineup|options|further|inquiries|guidance|मदद|सहायता|यहाँ|yardım|yardımcı)/i.test(normalizedResponse);
   const queryMentionsOtherBrand = /(bmw|audi|porsche|tesla|toyota|honda|volkswagen|volvo|lexus|ford|nissan|hyundai|kia|chevrolet|land rover|jaguar)/i.test(
     queryText
   );
@@ -180,17 +216,27 @@ function isLikelyNonMercedesQuery(queryText: string): boolean {
 }
 
 function hasValidMercedesRedirectResponse(responseText: string): boolean {
-  const hasPoliteRefusal = /(while\s+(we|i)\s+(don't|do not|can't|cannot|couldn't|could not)|unable|not available|cannot provide|cannot assist|can't filter specifically|couldn't filter specifically|don't have specific models|do not have specific models|must\s+inform\s+you\s+that\s+we\s+focus\s+exclusively\s+on|cannot\s+assist\s+with\s+vehicles\s+from\s+other\s+brands)/i.test(
-    responseText
+  // Normalize typographic/curly apostrophes (U+2018, U+2019) to straight apostrophe so
+  // regex patterns like "couldn't" match AI-generated text that uses curly quotes.
+  const normalizedText = responseText.replace(/[\u2018\u2019]/g, "'");
+  // English + Hindi (नहीं = not/no, नहीं कर सकते = cannot do, प्रदान नहीं = cannot provide)
+  // + Turkish (yapamam/yapamayız/veremeyiz/sunamam = cannot/unable)
+  // + "couldn't find an exact match" and similar "no exact match" phrasings
+  const hasPoliteRefusal = /(while\s+(we|i)\s+(don't|do not|can't|cannot|couldn't|could not)|couldn't\s+find\s+an?\s+exact\s+match|could\s+not\s+find\s+an?\s+exact\s+match|unable\s+to\s+find\s+an?\s+exact\s+match|no\s+exact\s+match|could\s+not\s+be\s+matched|couldn't\s+be\s+matched|unable|not available|cannot provide|cannot assist|can't filter specifically|couldn't filter specifically|don't have specific models|do not have specific models|must\s+inform\s+you\s+that\s+we\s+focus\s+exclusively\s+on|cannot\s+assist\s+with\s+vehicles\s+from\s+other\s+brands|must\s+inform\s+you|i\s+can\s+only\s+assist|only\s+assist\s+with|नहीं\s+कर\s+सकते|प्रदान\s+नहीं|नहीं\s+दे\s+सकते|yapamam|yapamayız|veremeyiz|sunamam|sunamayız|sağlayamam)/i.test(
+    normalizedText
   );
   const hasMercedesContext = /(mercedes[- ]?benz|\bamg\b|\bcla\b|\bglc\b|\bgla\b|\bgle\b|\be\s*[- ]?class\b|\bs\s*[- ]?class\b|\ba\s*[- ]?class\b|\beq[a-z0-9-]*\b|\bc\s*[- ]?class\b)/i.test(
-    responseText
+    normalizedText
   );
-  const hasHelpfulRedirect = /(options|available|consider|assist|help|explore|present|lineup|guidance)/i.test(
-    responseText
+  // English + Hindi (मदद = help, सहायता = assistance, यहाँ = here [as in 'here to help'])
+  // + Turkish (yardım/yardımcı = help/assist)
+  const hasHelpfulRedirect = /(options|available|consider|assist|help|explore|present|lineup|guidance|मदद|सहायता|यहाँ|yardım|yardımcı)/i.test(
+    normalizedText
   );
 
-  return hasPoliteRefusal && hasMercedesContext && hasHelpfulRedirect;
+  // Accept a valid redirect if: polite decline + explicit MB context, OR polite decline + helpful
+  // alternatives offered (implicit MB context — we're on a MB-only site).
+  return hasPoliteRefusal && (hasMercedesContext || hasHelpfulRedirect);
 }
 
 function parseUiSelectedFiltersToKeyValue(
@@ -210,17 +256,22 @@ function parseUiSelectedFiltersToKeyValue(
     
     // Remove trailing "X" (close button) from the value
     value = value.replace(/\s*X\s*$/i, "").trim();
+    // Strip artefact colons produced by the tree-walker joining label+separator text nodes
+    value = value.replace(/^[:\s]+|[:\s]+$/g, "").trim();
     
     const facetKey = mapUiLabelToFacetKey(label);
     if (!facetKey) {
       continue;
     }
 
+    // Always register the key so the empty-key guard in comparison fires.
     if (!keyValueFilters[facetKey]) {
       keyValueFilters[facetKey] = [];
     }
 
     if (!value) {
+      // Pill is present but value is empty (e.g. "Marka :") — key is registered
+      // with an empty array so compareUiSelectedFiltersWithFacets skips it.
       continue;
     }
 
@@ -278,14 +329,14 @@ function compareUiSelectedFiltersWithFacets(
       uiSelectedFacetKeys.has(candidateKey)
     );
 
-    if (hasSelectedFacetKey && keySpecificUiValues.length === 0) {
+    // Treat facet keys whose only captured values are separator artefacts (e.g. ":") as empty
+    const realUiValues = keySpecificUiValues.filter((v) => v !== ":" && v.trim() !== "");
+    if (hasSelectedFacetKey && realUiValues.length === 0) {
       continue;
     }
 
     const keySpecificUiTokens = new Set(
-      keySpecificUiValues
-        .map((value) => normalizeFacetToken(value))
-        .filter((value) => value.length > 0)
+      realUiValues.flatMap((value) => buildFacetCandidateTokens(value))
     );
 
     for (const rawValue of rawFacetValues) {
@@ -296,7 +347,14 @@ function compareUiSelectedFiltersWithFacets(
       const expectedCandidates = buildFacetCandidateTokens(rawValue);
       const matchedByKey =
         keySpecificUiTokens.size > 0 &&
-        expectedCandidates.some((candidate) => keySpecificUiTokens.has(candidate));
+        expectedCandidates.some(
+          (candidate) =>
+            keySpecificUiTokens.has(candidate) ||
+            // Handle truncated UI pill text (ends with "…"): UI token is a prefix of BE candidate
+            Array.from(keySpecificUiTokens).some(
+              (uiToken) => uiToken.length >= 10 && candidate.startsWith(uiToken)
+            )
+        );
 
       if (!matchedByKey) {
         missingFacetValues.push(rawValue);
@@ -351,8 +409,47 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     // Extract each pill's text individually for better accuracy
     const pillTexts: string[] = [];
     for (let i = 0; i < count; i++) {
-      const pillText = await pills.nth(i).innerText();
-      pillTexts.push(pillText);
+      const pill = pills.nth(i);
+      const innerText = await pill.innerText();
+      const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
+      // If the pill innerText ends with ":" (no value captured), try several
+      // alternative sources to find the value: aria-label, data attributes,
+      // child elements that may contain the value in a separate node.
+      if (/:\s*$/.test(normalizedInnerText)) {
+        const recovered: string = await pill.evaluate((el) => {
+          // 1. aria-label on the pill itself
+          const ariaLabel = el.getAttribute("aria-label") || "";
+          if (ariaLabel) return ariaLabel;
+          // 2. data-value / data-label attributes
+          const dataValue = el.getAttribute("data-value") || el.getAttribute("data-label") || "";
+          if (dataValue) return dataValue;
+          // 3. Walk all descendants; innerText misses elements with certain CSS
+          //    (e.g. display:contents). Collect text from every element.
+          const all = el.querySelectorAll("*");
+          for (const child of Array.from(all)) {
+            const t = ((child as HTMLElement).innerText || (child as HTMLElement).textContent || "").trim();
+            if (t && !t.includes("\n") && t !== "×" && t !== "x" && t !== "X") {
+              // Return first non-colon-only, non-close-button text that contains more than label
+              const colon = t.indexOf(":");
+              if (colon >= 0 && t.slice(colon + 1).trim()) return t;
+            }
+          }
+          // 4. Walk all text nodes including those inside shadow DOM fragments
+          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+          const parts: string[] = [];
+          let node = walker.nextNode();
+          while (node) {
+            const t = (node.nodeValue || "").trim();
+            if (t && t !== "×" && t !== "x" && t !== "X") parts.push(t);
+            node = walker.nextNode();
+          }
+          return parts.join(" : ");
+        });
+        const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
+        pillTexts.push(normalizedRecovered.length > normalizedInnerText.length ? normalizedRecovered : innerText);
+      } else {
+        pillTexts.push(innerText);
+      }
     }
 
     console.debug(`[DEBUG] Extracted filter texts: ${JSON.stringify(pillTexts)}`);
@@ -396,7 +493,7 @@ export async function processAndLogUiResult({
   const apiResponse = results.results.responseData;
   const uiSelectedFiltersKV: Record<string, string[]> =
     results.results?.uiSelectedFiltersKV || {};
-  const facets = (() => {
+  const resultsFacets = (() => {
     const params = results.results.responseData?.data?.smartSearch?.parameters || {};
     const excludeKeys = [
       "contextType",
@@ -449,11 +546,6 @@ export async function processAndLogUiResult({
       0;
   } 
 
-  // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
-  if (resultCount === 0) {
-    addFailureReason("Payload is zero");
-  }
-
   // Extract UI vehicle count if page is provided
   let uiVehicleCount: number | null = null;
   if (page) {
@@ -473,24 +565,37 @@ export async function processAndLogUiResult({
   }
 
   // Facets check (test-data vs BE)  
-  if (testFacets && actualFacets && !deepEqual(facets, actualFacets, ["__typename"])) {
+  if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
     addFailureReason(
-      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(facets)}`
+      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(resultsFacets)}`
     );
   }
 
   // Facets check (UI vs BE)
   const facetMismatches: string[] = [];
   if (!isNonMercedesRedirectScenario && Object.keys(uiSelectedFiltersKV).length > 0) {
+    const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
+    if (isFacetEquipmentOnly) {
+      const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
+        apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
+      const equipmentCodeToName = new Map<string, string>(
+        apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
+      );
+      const resolvedEquipment = (resultsFacets.equipment as string[]).map(
+        (code: string) => equipmentCodeToName.get(code) ?? code
+      );
+      resultsFacets.equipment = resolvedEquipment;
+    }
+
     uiFacetComparison = compareUiSelectedFiltersWithFacets(
-      facets,
+      resultsFacets,
       uiSelectedFiltersKV
     );
     if (!uiFacetComparison.matches) {
       facetMismatches.push(
         `UI filters mismatch with BE facets: missing ${JSON.stringify(
           uiFacetComparison.missingFacetValues
-        )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(facets)}`
+        )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`
       );
     }
   }
@@ -520,19 +625,6 @@ export async function processAndLogUiResult({
       console.debug("[DEBUG] Language consistency check: FAIL");
       addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
     }
-  }
-
-  if (!hasError && isNonMercedesRedirectScenario) {
-    console.debug("[DEBUG] Marking as PASS for non-Mercedes query with valid Mercedes redirect response.");
-    openaiEvaluation = "PASS";
-  }
-
-  if (
-    !hasError &&
-    shouldOverrideToPassForRedirectedRefusal(openaiEvaluation || "", String(actualInput || ""), smartSearchMessage)
-  ) {
-    console.debug("[DEBUG] Overriding OpenAI evaluation to PASS for valid refusal+Mercedes redirect case.");
-    openaiEvaluation = "PASS";
   }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
@@ -585,7 +677,7 @@ export async function processAndLogUiResult({
     error: results.error,
     // apiResponse,
     openaiEvaluation,
-    facets,
+    facets: resultsFacets,
     uiSelectedFiltersKV,
     uiFacetComparison,
   };

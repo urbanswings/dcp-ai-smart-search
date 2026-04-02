@@ -362,6 +362,39 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
+  test("By Filter Facets ('Equipment')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      // Fetch facets dynamically from API based on environment settings
+      const project = getProject();
+      const fixedQueries: string[] = [];
+      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const equipmentFacet = facets.find(f => f.code === "equipment");
+      const queriesOnlyEquipment = equipmentFacet?.values?.map(v => ({
+        ...equipmentFacet,
+        values: [v],
+      })) ?? [];
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyEquipment, aiPromptData.byFilterFacetsComplete);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "by-filter-equipment",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
