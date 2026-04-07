@@ -523,6 +523,20 @@ export async function runTestsAndSaveResults(params: {
     JSON.stringify(allResults, null, 2),
     "utf-8"
   );
+
+  // Fail the test if any result has an error
+  const failedResults = allResults.filter((r: any) => r.hasError === true);
+  if (failedResults.length > 0) {
+    const failSummary = failedResults
+      .map((r: any) => {
+        const query = r.query ? (Object.values(r.query)[0] ?? "") : "";
+        return `  - [${r.testMode?.toUpperCase() ?? "?"}] "${query}": ${r.openaiEvaluation ?? r.error ?? "unknown error"}`;
+      })
+      .join("\n");
+    throw new Error(
+      `${failedResults.length} of ${allResults.length} test(s) failed:\n${failSummary}`
+    );
+  }
 }
 
 /**

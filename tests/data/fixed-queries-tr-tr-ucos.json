@@ -382,6 +382,51 @@
       "shouldRecommend": false,
       "shouldFilter": {},
       "aiEvaluationHints": []
+    },
+    {
+      "value": "yakıt tasarruflu arabalar istiyorum",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "fuelType": [
+          "ELECTRIC",
+          "HYBRID_PETROL"
+        ]
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents fuel-efficient vehicles — such as electric, hybrid, or low-emission models — and applies a relevant fuel type filter (e.g., ELECTRIC, HYBRID_PETROL, or similar).",
+          "Do NOT fail if the exact fuel type label differs slightly (e.g., HYBRID vs HYBRID_PETROL) — pass as long as the response clearly targets fuel efficiency and presents relevant vehicle listings. FAIL only if the response presents no fuel-efficient options or completely ignores the fuel efficiency intent."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "A-Class dışındaki tüm sedanları listele",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "bodyType": [
+          "LIMOUSINE"
+        ]
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by sedan/Limousine body type AND explicitly excludes or omits the A-Class model from the results.",
+          "Do NOT fail if A-Class vehicles happen to be absent from inventory — pass as long as the sedan/Limousine filter is correctly applied and the response does not include or recommend A-Class vehicles. FAIL if A-Class vehicles are prominently presented in the results without acknowledgment of the exclusion."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "dahili navigasyon sistemiyle donatılmış arabalar var mı?",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
+          "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
+        ],
+        "overwrite": true
+      }
     }
   ],
   "recommendationModel": [
