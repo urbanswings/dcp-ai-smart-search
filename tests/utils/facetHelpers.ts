@@ -232,7 +232,7 @@ export async function generateQueriesFromFacets(
     console.log(`filterText:  '${filterText}'`);
     console.log("\n");
 
-    return { value: query, facet: facet.code, filterText, filterValue: filterValue.toUpperCase() };
+    return { value: query, facet: facet.code, filterText, filterValue: filterValue.toString().toUpperCase() };
   });
 
   const queries = (await Promise.all(queryPromises)).filter(Boolean);
