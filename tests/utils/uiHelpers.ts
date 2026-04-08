@@ -101,6 +101,22 @@ const facetValueAliasMap: Record<string, string[]> = {
   // Brand aliases: UI may show "Mercedes-Benz" or "Mercedes Benz"
   "mercedesbenz": ["mercedes"],
   "mercedes": ["mercedesbenz"],
+  // TR color display names → BE codes (PAINT_COLOR_ prefix is stripped by normalizeFacetToken)
+  "siyah": ["black"],
+  "black": ["siyah"],
+  "beyaz": ["white"],
+  "white": ["beyaz"],
+  "gumus": ["silver", "grey", "gray"],
+  "silver": ["gumus"],
+  "gri": ["grey", "gray", "silver"],
+  "grey": ["gri", "gray"],
+  "gray": ["gri", "grey"],
+  "kirmizi": ["red"],
+  "red": ["kirmizi"],
+  "mavi": ["blue"],
+  "blue": ["mavi"],
+  "yesil": ["green"],
+  "green": ["yesil"],
 };
 
 function buildFacetCandidateTokens(rawValue: string): string[] {

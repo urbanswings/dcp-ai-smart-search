@@ -180,10 +180,12 @@ export function getOutputFileName(testType: string): string {
   const country = COUNTRY;
   const product = PRODUCT;
   const mode = getTestMode();
+  let filename = `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${timestamp}.json`;
   if (mode === "both") {
     return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-both_${timestamp}.json`;
   }
-  return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${timestamp}.json`;
+  console.log(`Results File: ${filename}`);
+  return filename;
 }
 
 export function getScreenshotPath(testType: string, queryIndex: number, query: string, runTimestamp: string): string {

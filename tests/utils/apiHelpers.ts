@@ -432,7 +432,7 @@ export async function fetchEmhApiResponse(): Promise<any> {
   const env = ENVIRONMENT || "INT";
   const country = COUNTRY || "TR";
   const product = PRODUCT || "NCOS";
-  const language = country === "IN" ? "EN" : LANGUAGE || "TR";
+  const language = country === "IN" ? "EN" : country === "TR" ? "TR" : LANGUAGE || "TR";
 
   try {
     const apiUrl =

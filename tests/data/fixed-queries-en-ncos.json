@@ -507,18 +507,6 @@
       }
     },
     {
-      "value": "show the list again",
-      "shouldRecommend": true,
-      "shouldFilter": {},
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response presents a vehicle listing in response to the repeat/refresh request, even if no specific filter is applied.",
-          "Do NOT fail if no filter is applied — 'show the list again' is a list-refresh intent and presenting available vehicles without a new filter is the correct behavior."
-        ],
-        "overwrite": true
-      }
-    },
-    {
       "value": "where is my order? I bought it last week but received no updates",
       "shouldRecommend": false,
       "shouldFilter": {},

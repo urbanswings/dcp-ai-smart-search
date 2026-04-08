@@ -481,18 +481,6 @@
       }
     },
     {
-      "value": "listeyi tekrar göster",
-      "shouldRecommend": true,
-      "shouldFilter": {},
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response presents a vehicle listing in response to the repeat/refresh request, even if no specific filter is applied.",
-          "Do NOT fail if no filter is applied — 'show the list again' is a list-refresh intent and presenting available vehicles without a new filter is the correct behavior."
-        ],
-        "overwrite": true
-      }
-    },
-    {
       "value": "siparişim nerede? geçen hafta satın aldım ama hiçbir güncelleme almadım",
       "shouldRecommend": false,
       "shouldFilter": {},
@@ -763,8 +751,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -775,8 +764,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -787,8 +777,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -799,8 +790,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -811,8 +803,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -823,8 +816,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -835,8 +829,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -847,8 +842,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -859,8 +855,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -871,8 +868,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -883,8 +881,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -895,8 +894,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -907,8 +907,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -919,8 +920,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -931,8 +933,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -943,8 +946,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -955,8 +959,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -967,8 +972,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -979,8 +985,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
@@ -991,8 +998,9 @@
       "shouldFilter": {},
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response either (a) clearly declines/cannot assist with the requested unsupported or non-Mercedes feature, or (b) states it cannot specifically filter/find that feature, and then redirects to Mercedes-Benz options, models, listings, or related resources.",
-          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight). Fail only if it directly assists that unsupported feature request or offers alternatives without any decline/cannot-filter statement."
+          "Respond ONLY with: \"PASS\" if ALL of the following conditions are met: (1) the response EXPLICITLY states it cannot assist with, filter for, find, or support the specific non-Mercedes-Benz feature or technology that was requested (it must use language such as \"cannot\", \"unable\", \"do not support\", \"not available\", \"cannot filter\", \"cannot find\", or similar phrasing), AND (2) the response then redirects the user toward Mercedes-Benz models, listings, or related resources.",
+          "Respond with \"FAIL\" if the response presents a list of results, says it is pleased to present options, or shows vehicles WITHOUT first explicitly declining or stating it cannot support the specific non-Mercedes-Benz feature. Simply presenting general Mercedes-Benz results without a clear prior decline/inability statement is NOT sufficient for PASS.",
+          "Do NOT fail only because the response mentions the requested feature name (for example EyeSight, e:HEV, e-POWER). Fail only if the response does not explicitly decline/state inability AND instead presents results or assists with the request."
         ],
         "overwrite": true
       }
