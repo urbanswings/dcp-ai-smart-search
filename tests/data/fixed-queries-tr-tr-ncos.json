@@ -70,6 +70,26 @@
       "aiEvaluationHints": []
     },
     {
+      "value": "mevcut araçları göster",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "stockType": [
+          "AVAILABLE"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
+      "value": "yakında gelecek araçları göster",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "stockType": [
+          "IN_PIPELINE"
+        ]
+      },
+      "aiEvaluationHints": []
+    },
+    {
       "value": "cla 200",
       "shouldRecommend": true,
       "shouldFilter": {

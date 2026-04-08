@@ -76,6 +76,38 @@
       }
     },
     {
+      "value": "show me available vehicles",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "stockType": [
+          "AVAILABLE"
+        ]
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",
+          "Do NOT fail if the exact vehicle count varies — pass as long as the AVAILABLE stockType filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "show me coming soon vehicles",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "stockType": [
+          "IN_PIPELINE"
+        ]
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by IN_PIPELINE stock type and presents vehicles that are coming soon or in the pipeline.",
+          "Do NOT fail if the exact vehicle count varies or is low — pass as long as the IN_PIPELINE stockType filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "cla 200",
       "shouldRecommend": true,
       "shouldFilter": {
