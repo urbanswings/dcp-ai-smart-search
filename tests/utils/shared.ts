@@ -490,15 +490,17 @@ export async function runTestsAndSaveResults(params: {
         results,
         testDescribe,
         testTitle,
-      });
-      uiResults.push(entry);
+      });      
       
       // Take screenshot after each query (viewport only)
       const actualQuery = query?.value ?? query;
       const screenshotPath = getScreenshotPath(testType, i, actualQuery, runTimestamp);
       await ensureDirectoryExists(screenshotPath);
       await page.screenshot({ path: screenshotPath });
-      console.log(`📸 Screenshot saved: ${screenshotPath}`);
+      console.log(`📸 Screenshot: ${screenshotPath}`);
+
+      entry.screenshotPath = screenshotPath;
+      uiResults.push(entry);
     }
   }
 

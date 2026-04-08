@@ -2,6 +2,7 @@ import { Browser, Page } from "@playwright/test";
 import { chromium } from "playwright";
 import fs from "fs/promises";
 import {
+  evaluateSearchResult,
   fetchTranslation,
   openaiChatCompletion,
 } from "./aiHelpers";
@@ -553,7 +554,6 @@ export async function processAndLogUiResult({
   customEval?: (resultText: string) => Promise<string>;
   page?: Page;
 }): Promise<any> {
-  const { evaluateSearchResult } = await import("./aiHelpers");
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
