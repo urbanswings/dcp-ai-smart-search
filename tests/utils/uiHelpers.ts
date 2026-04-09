@@ -84,8 +84,11 @@ const facetValueAliasMap: Record<string, string[]> = {
   "sserisi": ["s", "sclass"],
   "hatchback": ["hatches"],
   "hatches": ["hatchback"],
-  "peoplecarrier": ["peoplemovers"],
-  "peoplemovers": ["peoplecarrier"],
+  "peoplecarrier": ["peoplemovers", "mpvs"],
+  "peoplemovers": ["peoplecarrier", "mpvs"],
+  "mpvs": ["peoplecarrier", "peoplemovers"],
+  "station": ["estate"],
+  "estate": ["station"],
   // Fuel type aliases
   "pluginhybridpetrol": ["petrolelectricpluginhybrid"],
   "petrolelectricpluginhybrid": ["pluginhybridpetrol"],
@@ -631,7 +634,19 @@ export async function processAndLogUiResult({
   }
 
   // Facets check (test-data vs BE)  
-  if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
+  if (actualFacets === false) {
+    // shouldFilter: false — assert no filters were applied
+    if (Object.keys(resultsFacets).length > 0) {
+      addFailureReason(
+        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`
+      );
+    }
+  } else if (actualFacets === true) {
+    // shouldFilter: true — assert at least one filter was applied
+    if (Object.keys(resultsFacets).length === 0) {
+      addFailureReason(`Expected at least one filter to be applied, but got none`);
+    }
+  } else if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
     addFailureReason(
       `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(resultsFacets)}`
     );

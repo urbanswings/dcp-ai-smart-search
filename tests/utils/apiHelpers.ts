@@ -1,5 +1,5 @@
 import axios from "axios";
-import { fetchTranslation, openaiChatCompletion } from "./aiHelpers";
+import { evaluateSearchResult, fetchTranslation, openaiChatCompletion } from "./aiHelpers";
 import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
@@ -622,7 +622,6 @@ export async function processAndLogApiResult({
   customEval?: (resultData: any) => Promise<string>;
   expectedStatusCode?: number;
 }): Promise<any> {
-  const { evaluateSearchResult } = await import("./aiHelpers");
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
@@ -739,7 +738,19 @@ export async function processAndLogApiResult({
   }
 
   // Facets check (BE vs test-data)
-  if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
+  if (actualFacets === false) {
+    // shouldFilter: false — assert no filters were applied
+    if (Object.keys(resultsFacets).length > 0) {
+      addFailureReason(
+        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`
+      );
+    }
+  } else if (actualFacets === true) {
+    // shouldFilter: true — assert at least one filter was applied
+    if (Object.keys(resultsFacets).length === 0) {
+      addFailureReason(`Expected at least one filter to be applied, but got none`);
+    }
+  } else if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
     addFailureReason(
       `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(resultsFacets)}`
     );
