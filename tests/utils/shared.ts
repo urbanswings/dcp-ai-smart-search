@@ -199,6 +199,7 @@ export function getScreenshotPath(testType: string, queryIndex: number, query: s
     .replace(/[^a-zA-Z0-9]/g, '_')
     .substring(0, 50);
   
+  // Use runTimestamp as folder - each test run gets its own folder
   return `./results/screenshots/${dateOnly}_${env}/${runTimestamp}/${country}_${product}_${testType}_query-${queryIndex + 1}_${sanitizedQuery}.png`;
 }
 
@@ -500,6 +501,16 @@ export async function runTestsAndSaveResults(params: {
       console.log(`📸 Screenshot: ${screenshotPath}`);
 
       entry.screenshotPath = screenshotPath;
+      
+      // Annotate screenshot immediately with English translations
+      try {
+        const { annotateSingleScreenshot } = require('../../annotate-screenshot.js');
+        await annotateSingleScreenshot(screenshotPath, entry);
+        console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);
+      } catch (error) {
+        console.warn(`⚠️  Annotation skipped: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+      
       uiResults.push(entry);
     }
   }

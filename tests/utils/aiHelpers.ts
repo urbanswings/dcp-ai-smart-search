@@ -16,22 +16,30 @@ const TRANSLATE_API_URL = 'https://api.mymemory.translated.net/get';
  * Fetches translation for a given text using Google Translate API.
  */
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
+  if (!text || !text.trim()) {
+    return '';
+  }
+
   try {
-    const response = await axios.get('https://translate.google.com/translate_a/single', {
-      params: {
-        client: 'gtx',
-        sl: 'auto',
-        tl: targetLang,
-        dt: 't',
-        q: text,
+    const completion = await openaiChatCompletion([
+      { 
+        role: "system", 
+        content: `You are a professional translator. Translate the given text to ${targetLang === 'en' ? 'English' : targetLang} language. Return ONLY the translated text, nothing else.` 
       },
+      { 
+        role: "user", 
+        content: text 
+      }
+    ], {
+      max_tokens: 500,
+      temperature: 0.3
     });
 
-    const combinedResults = combineResults(response.data[0].map((item: any) => item[0].trim() || ''));
-    return combinedResults.trim();
+    const translation = completion.choices?.[0]?.message?.content?.trim() || '';
+    return translation;
   } catch (error) {
     console.warn('Error fetching translation:', error);
-    return '';
+    return text; // Return original text if translation fails
   }
 }
 
