@@ -679,8 +679,8 @@ export async function processAndLogApiResult({
 
       if (searchResults) {
         resultCount =
-          searchResults.results?.length ||
           searchResults.navigation?.totalResults ||
+          searchResults.results?.length ||
           0;
       }
 
@@ -716,8 +716,8 @@ export async function processAndLogApiResult({
 
     if (searchResults) {
       resultCount =
-        searchResults.results?.length ||
         searchResults.navigation?.totalResults ||
+        searchResults.results?.length ||
         0;
     }
 

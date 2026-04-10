@@ -610,8 +610,8 @@ export async function processAndLogUiResult({
       : apiResponse?.data?.smartSearch;
   if (searchResults) {
     resultCount =
-      searchResults.results?.length ||
       searchResults.navigation?.totalResults ||
+      searchResults.results?.length ||
       0;
   } 
 

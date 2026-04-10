@@ -98,11 +98,11 @@ async function annotateSingleScreenshot(screenshotPath, entry) {
 
     // Draw query
     let yPosition = imgHeight + padding + lineHeight;
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.fillText('English Query:', padding, yPosition);
     
     yPosition += lineHeight;
-    ctx.font = '16px Arial';
+    ctx.font = '20px Arial';
     const queryLines = wrapText(queryEn, imgWidth - (padding * 2));
     queryLines.forEach(line => {
       ctx.fillText(line, padding, yPosition);
@@ -111,11 +111,11 @@ async function annotateSingleScreenshot(screenshotPath, entry) {
 
     // Draw response
     yPosition += 5;
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.fillText('English Response:', padding, yPosition);
     
     yPosition += lineHeight;
-    ctx.font = '16px Arial';
+    ctx.font = '20px Arial';
     const responseLines = wrapText(responseEn, imgWidth - (padding * 2));
     responseLines.slice(0, 2).forEach(line => {
       ctx.fillText(line, padding, yPosition);
@@ -123,7 +123,7 @@ async function annotateSingleScreenshot(screenshotPath, entry) {
     });
 
     // Add metadata
-    ctx.font = '14px Arial';
+    ctx.font = '18px Arial';
     ctx.fillStyle = '#666666';
     const resultCount = entry.resultCount || entry.uiVehicleCount || 0;
     const responseTime = entry.responseTime || 0;

@@ -87,7 +87,7 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
 
     // Set text style
     ctx.fillStyle = '#333333';
-    ctx.font = 'bold 14px Arial';
+    ctx.font = 'bold 16px Arial';
 
     // Helper function to wrap text
     function wrapText(text, maxWidth) {
@@ -111,11 +111,11 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
 
     // Draw query
     let yPosition = imgHeight + padding + lineHeight;
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.fillText('English Query:', padding, yPosition);
     
     yPosition += lineHeight;
-    ctx.font = '16px Arial';
+    ctx.font = '20px Arial';
     const queryLines = wrapText(queryEn, imgWidth - (padding * 2));
     queryLines.forEach(line => {
       ctx.fillText(line, padding, yPosition);
@@ -124,11 +124,11 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
 
     // Draw response
     yPosition += 5;
-    ctx.font = 'bold 18px Arial';
+    ctx.font = 'bold 24px Arial';
     ctx.fillText('English Response:', padding, yPosition);
     
     yPosition += lineHeight;
-    ctx.font = '16px Arial';
+    ctx.font = '20px Arial';
     const responseLines = wrapText(responseEn, imgWidth - (padding * 2));
     responseLines.slice(0, 2).forEach(line => { // Limit to 2 lines for response
       ctx.fillText(line, padding, yPosition);
@@ -136,7 +136,7 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
     });
 
     // Add metadata
-    ctx.font = '14px Arial';
+    ctx.font = '18px Arial';
     ctx.fillStyle = '#666666';
     const metadata = `Result Count: ${entry.resultCount} | Response Time: ${entry.responseTime}ms | ${entry.hasError ? '❌ Has Error' : '✓ Success'}`;
     ctx.fillText(metadata, padding, imgHeight + captionHeight - 10);
