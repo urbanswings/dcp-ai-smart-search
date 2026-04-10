@@ -58,8 +58,10 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
     }
 
     // Calculate caption height based on text length
-    const queryText = `Query: ${entry.query.en}`;
-    const responseText = `Response: ${entry.response.en}`;
+    const queryEn = entry.query?.en || '[Translation not available]';
+    const responseEn = entry.response?.en || '[Translation not available]';
+    const queryText = `Query: ${queryEn}`;
+    const responseText = `Response: ${responseEn}`;
     const captionHeight = 200; // Height for caption area
     const padding = 20;
     const lineHeight = 24;
@@ -114,7 +116,7 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
     
     yPosition += lineHeight;
     ctx.font = '16px Arial';
-    const queryLines = wrapText(entry.query.en, imgWidth - (padding * 2));
+    const queryLines = wrapText(queryEn, imgWidth - (padding * 2));
     queryLines.forEach(line => {
       ctx.fillText(line, padding, yPosition);
       yPosition += lineHeight;
@@ -127,7 +129,7 @@ async function addTranslationsToScreenshot(jsonPath, screenshotPath, outputPath)
     
     yPosition += lineHeight;
     ctx.font = '16px Arial';
-    const responseLines = wrapText(entry.response.en, imgWidth - (padding * 2));
+    const responseLines = wrapText(responseEn, imgWidth - (padding * 2));
     responseLines.slice(0, 2).forEach(line => { // Limit to 2 lines for response
       ctx.fillText(line, padding, yPosition);
       yPosition += lineHeight;

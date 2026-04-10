@@ -1,43 +1,30 @@
+import axios from 'axios';
 import { COUNTRY, LANGUAGE } from './testHelpers';
 import { OpenAI } from 'openai/client';
 import fs from 'fs';
 import path from 'path';
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-// OpenAI model and default options constants
-const OPENAI_CHAT_MODEL = "gpt-4.1-mini";
+const OPENAI_CHAT_MODEL = "gpt-4o-mini";
 const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
-/**
- * Fetches translation for a given text using OpenAI.
- */
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
-  if (!text || !text.trim()) {
-    return '';
-  }
+  if (!text?.trim()) return '';
 
   try {
-    const completion = await openaiChatCompletion([
-      { 
-        role: "system", 
-        content: `You are a professional translator. Translate the given text to ${targetLang === 'en' ? 'English' : targetLang} language. Return ONLY the translated text, nothing else.` 
-      },
-      { 
-        role: "user", 
-        content: text 
-      }
-    ], {
-      max_tokens: 500,
-      temperature: 0.3
+    const response = await axios.get('https://translate.googleapis.com/translate_a/single', {
+      params: { client: 'gtx', sl: 'auto', tl: targetLang, dt: 't', q: text },
+      timeout: 10000,
     });
 
-    const translation = completion.choices?.[0]?.message?.content?.trim() || '';
-    return translation;
+    if (response.data?.[0]) {
+      return response.data[0].map((item: any) => item[0]).filter(Boolean).join(' ').trim();
+    }
+    return '';
   } catch (error) {
-    console.warn('Error fetching translation:', error);
-    return text; // Return original text if translation fails
+    console.warn('Translation failed:', error instanceof Error ? error.message : 'Unknown error');
+    return '';
   }
 }
 
@@ -53,8 +40,8 @@ export async function openaiChatCompletion(
   return openai.chat.completions.create({
     model: OPENAI_CHAT_MODEL,
     messages,
-    max_tokens: typeof max_tokens === 'number' ? max_tokens : OPENAI_DEFAULT_MAX_TOKENS,
-    temperature: typeof temperature === 'number' ? temperature : OPENAI_DEFAULT_TEMPERATURE,
+    max_tokens: max_tokens ?? OPENAI_DEFAULT_MAX_TOKENS,
+    temperature: temperature ?? OPENAI_DEFAULT_TEMPERATURE,
     ...options,
   });
 }
