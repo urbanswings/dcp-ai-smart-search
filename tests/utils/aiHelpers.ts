@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { COUNTRY, LANGUAGE } from './testHelpers';
 import { OpenAI } from 'openai/client';
 import fs from 'fs';
@@ -10,10 +9,9 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const OPENAI_CHAT_MODEL = "gpt-4.1-mini";
 const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
-const TRANSLATE_API_URL = 'https://api.mymemory.translated.net/get';
 
 /**
- * Fetches translation for a given text using Google Translate API.
+ * Fetches translation for a given text using OpenAI.
  */
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
   if (!text || !text.trim()) {
@@ -44,16 +42,6 @@ export async function fetchTranslation(text: string, targetLang: string = 'en'):
 }
 
 /**
- * Combines an array of strings into a single string with a separator.
- */
-export function combineResults(results: string[], separator: string = ' '): string {
-  if (!Array.isArray(results)) {
-    throw new Error('Input must be an array of strings');
-  }
-  return results.join(separator);
-}
-
-/**
  * Helper for OpenAI chat completion calls.
  */
 export async function openaiChatCompletion(
@@ -69,29 +57,6 @@ export async function openaiChatCompletion(
     temperature: typeof temperature === 'number' ? temperature : OPENAI_DEFAULT_TEMPERATURE,
     ...options,
   });
-}
-
-/**
- * Translates text between two languages using MyMemory API.
- */
-export async function translateText(text: string, langCodeFrom: string, langCodeTo: string = 'en'): Promise<string> {
-  if (!text || !langCodeFrom || langCodeFrom.length !== 2 || !langCodeTo || langCodeTo.length !== 2) {
-    console.warn('Invalid input for translateText');
-    return '';
-  }
-
-  const params = {
-    q: text,
-    langpair: `${langCodeFrom}|${langCodeTo}`
-  };
-
-  try {
-    const response = await axios.get(TRANSLATE_API_URL, { params });
-    return response.data.responseData.translatedText;
-  } catch (error) {
-    console.warn('Translation failed:', error instanceof Error ? error.message : 'Unknown error');
-    return '';
-  }
 }
 
 /**
