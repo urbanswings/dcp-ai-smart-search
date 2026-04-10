@@ -13,11 +13,11 @@ cd results/json
 ls -t | tail -n +11 | xargs -I {} rm -v {}
 cd ../..
 
-# Clean old screenshot folders (keep last 3 date folders)
+# Clean old screenshot folders (keep last 2 weeks)
 if [ -d "results/screenshots" ]; then
   cd results/screenshots
-  # Find and remove old date folders, keeping only the 3 most recent
-  ls -dt */ 2>/dev/null | tail -n +4 | xargs -I {} rm -rfv {}
+  # Find and remove folders older than 14 days
+  find . -maxdepth 1 -type d -mtime +14 -exec rm -rfv {} \;
   cd ../..
 fi
 

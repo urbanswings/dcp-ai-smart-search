@@ -124,14 +124,12 @@ export async function ensureDirectoryExists(filePath: string): Promise<void> {
  * Clean up old screenshot folders, keeping only the most recent ones
  * @param keepCount Number of most recent date folders to keep (default: 3)
  */
-export async function cleanOldScreenshots(keepCount: number = 3): Promise<void> {
+export async function cleanOldScreenshots(keepDays: number = 14): Promise<void> {
   const screenshotsDir = "./results/screenshots";
   
   try {
-    // Check if screenshots directory exists
     await fs.access(screenshotsDir);
     
-    // Get all date folders (format: YYYY-MM-DD_ENV)
     const entries = await fs.readdir(screenshotsDir, { withFileTypes: true });
     const dateFolders = entries
       .filter(entry => entry.isDirectory())
@@ -140,11 +138,13 @@ export async function cleanOldScreenshots(keepCount: number = 3): Promise<void> 
         path: path.join(screenshotsDir, entry.name)
       }));
     
-    if (dateFolders.length <= keepCount) {
-      return; // Nothing to clean
+    if (dateFolders.length === 0) {
+      return;
     }
     
-    // Get folder stats and sort by modification time (newest first)
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - keepDays);
+    
     const foldersWithStats = await Promise.all(
       dateFolders.map(async folder => ({
         ...folder,
@@ -152,10 +152,7 @@ export async function cleanOldScreenshots(keepCount: number = 3): Promise<void> 
       }))
     );
     
-    foldersWithStats.sort((a, b) => b.mtime.getTime() - a.mtime.getTime());
-    
-    // Remove old folders (keep only the most recent)
-    const foldersToRemove = foldersWithStats.slice(keepCount);
+    const foldersToRemove = foldersWithStats.filter(folder => folder.mtime < cutoffDate);
     
     for (const folder of foldersToRemove) {
       await fs.rm(folder.path, { recursive: true, force: true });
@@ -163,10 +160,9 @@ export async function cleanOldScreenshots(keepCount: number = 3): Promise<void> 
     }
     
     if (foldersToRemove.length > 0) {
-      console.log(`✅ Cleaned up ${foldersToRemove.length} old screenshot folder(s)`);
+      console.log(`✅ Cleaned up ${foldersToRemove.length} old screenshot folder(s) (older than ${keepDays} days)`);
     }
   } catch (error) {
-    // Silently fail if screenshots directory doesn't exist
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.warn('Warning: Failed to clean old screenshots:', error);
     }

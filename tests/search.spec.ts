@@ -64,8 +64,8 @@ test.beforeAll(async () => {
   const data = await fs.readFile(fixedQueriesPath, "utf-8");
   fixedQueriesData = JSON.parse(data);
 
-  // Clean up old screenshots (keep last 3 date folders)
-  await cleanOldScreenshots(3);
+  // Clean up old screenshots (keep last 2 weeks)
+  await cleanOldScreenshots(14);
 
   // Fetch EMH GraphQL API response and save to file
   try {
