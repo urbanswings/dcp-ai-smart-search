@@ -180,6 +180,10 @@ function mapUiLabelToFacetKey(label: string): string | null {
     "govdeturu": "bodyType",
     "renk": "color",
     "renkler": "color",
+    "doseme": "upholstery",
+    "dosemerenk": "upholstery",
+    "icdoseme": "upholstery",
+    "icdosemerenk": "upholstery",
     "modelyili": "modelYear",
     "fiyat": "price",
     // TR: equipment
@@ -451,9 +455,8 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     );
   } catch (e) {
     console.debug(
-      "[DEBUG] Selected filters reset button not visible before extraction, returning empty key-value object..."
+      "[DEBUG] Selected filters reset button not visible before extraction, continuing with pill-based extraction..."
     );
-    return {};
   }
 
   // Small delay to ensure all filter pills have time to render
@@ -464,9 +467,9 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
   for (const selector of selectors) {
     const pills = page.locator(selector);
     try {
-      await pills.first().waitFor({ state: "visible" });
+      await pills.first().waitFor({ state: "visible", timeout: 10000 });
     } catch (e) {
-      continue;
+      break;
     }
 
     // Wait for pills to stabilize (all rendered)

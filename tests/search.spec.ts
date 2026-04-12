@@ -557,11 +557,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
-      const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(queriesPath, "utf-8");
-        const vehicleBrandsAndModels: string[] = JSON.parse(file);
-        return vehicleBrandsAndModels.slice(0, 10);
-      })();
+      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinations(10, 2, 5);
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({

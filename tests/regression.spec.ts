@@ -18,7 +18,9 @@ const regressionQueryValues = [
   "white cars",
   "black suvs",
   "show all except sedan",
-  "show all body types except sedan"
+  "show all body types except sedan",
+  "petrol cars",
+  "petrol car"
 ];
 
 const shouldFilterMap: Record<string, any> = {
@@ -30,6 +32,8 @@ const shouldFilterMap: Record<string, any> = {
   "black suvs": { bodyType: ["SUV_OFFROADER"], color: ["PAINT_COLOR_BLACK"] },
   "show all except sedan": { bodyType: ["STATION","SUV_OFFROADER","HATCHBACK","CABRIO_ROADSTER","PEOPLE_CARRIER","COUPE"] },
   "show all body types except sedan": { bodyType: ["STATION","SUV_OFFROADER","HATCHBACK","CABRIO_ROADSTER","PEOPLE_CARRIER","COUPE"] },
+  "petrol cars": { fuelType: ["PETROL"] },
+  "petrol car": { fuelType: ["PETROL"] },
 };
 
 test.describe("Regression Tests", () => {
