@@ -103,5 +103,14 @@
       "Do not fail only because result lists or counts appear in the UI. Evaluate the response text intent and policy behavior only."
     ],
     "overwrite": true
+  },
+  "byFilterFacetsComplete": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response correctly filter facets in Mercedes-Benz Smart Search.",
+      "PASS if the response accurately reflects the selected filter facets and their values.",
+      "FAIL if the response omits or misrepresents any selected filter facets or their values.",
+      "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the selected filter facets."
+    ],
+    "overwrite": true
   }
 }
