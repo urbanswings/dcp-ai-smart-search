@@ -59,6 +59,39 @@
     "userPromptTemplate": [],
     "maxTokens": 20,
     "temperature": 0.0
+  },  
+  "nonMbFeatures": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant handles a non-Mercedes feature or competitor-technology request appropriately for Mercedes-Benz Smart Search.",
+      "PASS if the response either: (1) clearly says it cannot assist with the exact non-Mercedes feature/technology and redirects to Mercedes-Benz options, OR (2) offers Mercedes-Benz vehicles or alternatives without claiming the exact competitor-specific feature is supported.",
+      "PASS if the response stays focused on Mercedes-Benz vehicles, models, or relevant alternatives, even when the exact requested feature is not available.",
+      "FAIL if the response falsely states or strongly implies that Mercedes-Benz directly supports the exact competitor-specific technology or feature by name when that support is not established in the response.",
+      "FAIL if the response is off-topic, unsafe, incoherent, offensive, or gives competitor-brand recommendations instead of Mercedes-Benz-focused assistance.",
+      "Do not fail only because the system returns Mercedes-Benz search results, inferred alternatives, or generalized model suggestions. Variations in polite wording are acceptable."
+    ],
+    "overwrite": false
+  },
+  "keywordSingle": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a non-Mercedes keyword brand/model query in Mercedes-Benz Smart Search.",
+      "PASS if the response clearly states it cannot assist with non-Mercedes brand/model searches and redirects or offers help with Mercedes-Benz vehicles, models, or recommendations.",
+      "PASS if the response remains Mercedes-Benz-focused and professional even when the query contains multiple non-Mercedes keywords or mixed brand/model terms.",
+      "FAIL if the response provides competitor-brand search help, competitor-specific recommendations, or treats the non-Mercedes query as supported without a clear Mercedes-Benz redirect.",
+      "FAIL if the response is incoherent, unsafe, offensive, or unrelated to automotive assistance.",
+      "Do not fail only because the response wording varies. Evaluate the behavioral intent: decline unsupported non-Mercedes search and guide the user toward Mercedes-Benz."
+    ],
+    "overwrite": true
+  },
+  "keywordMix": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a mixed keyword query containing non-Mercedes brands/models in Mercedes-Benz Smart Search.",
+      "PASS if the response clearly states it cannot assist with other-brand searches or mixed non-Mercedes brand/model requests and redirects to Mercedes-Benz vehicles, lineup, or recommendations.",
+      "PASS even when the query includes one Mercedes-Benz term among multiple competitor terms, as long as the response still appropriately refuses unsupported other-brand search behavior and keeps the guidance Mercedes-Benz-focused.",
+      "FAIL if the response provides competitor-brand search assistance, comparisons, or recommendations as if those brands are supported, or if it omits the Mercedes-Benz redirection.",
+      "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the query.",
+      "Do not fail only because tone, phrasing, or closings differ. Evaluate whether the assistant correctly refuses non-Mercedes search support and guides the user back to Mercedes-Benz."
+    ],
+    "overwrite": true
   },
   "sentenceSingle": {
     "value": [
@@ -70,16 +103,5 @@
       "Do not fail only because result lists or counts appear in the UI. Evaluate the response text intent and policy behavior only."
     ],
     "overwrite": true
-  },
-  "nonMbFeatures": {
-    "value": [
-      "Respond ONLY with: PASS if the assistant handles a non-Mercedes feature or competitor-technology request appropriately for Mercedes-Benz Smart Search.",
-      "PASS if the response either: (1) clearly says it cannot assist with the exact non-Mercedes feature/technology and redirects to Mercedes-Benz options, OR (2) offers Mercedes-Benz vehicles or alternatives without claiming the exact competitor-specific feature is supported.",
-      "PASS if the response stays focused on Mercedes-Benz vehicles, models, or relevant alternatives, even when the exact requested feature is not available.",
-      "FAIL if the response falsely states or strongly implies that Mercedes-Benz directly supports the exact competitor-specific technology or feature by name when that support is not established in the response.",
-      "FAIL if the response is off-topic, unsafe, incoherent, offensive, or gives competitor-brand recommendations instead of Mercedes-Benz-focused assistance.",
-      "Do not fail only because the system returns Mercedes-Benz search results, inferred alternatives, or generalized model suggestions. Variations in polite wording are acceptable."
-    ],
-    "overwrite": false
   }
 }

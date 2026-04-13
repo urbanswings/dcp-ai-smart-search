@@ -194,75 +194,6 @@ function mapUiLabelToFacetKey(label: string): string | null {
   return labelMap[normalizedLabel] || null;
 }
 
-function shouldOverrideToPassForRedirectedRefusal(
-  openaiEvaluation: string,
-  queryText: string,
-  responseText: string
-): boolean {
-  const normalizedEval = (openaiEvaluation || "").trim().toUpperCase();
-  if (!normalizedEval || normalizedEval === "PASS") {
-    return false;
-  }
-
-  const mentionsOnlySoftCriteria = /^([A-Z]{1,2})(\s*[|,]\s*[A-Z]{1,2})*$/.test(normalizedEval);
-  if (!mentionsOnlySoftCriteria) {
-    return false;
-  }
-
-  const includesRedirectCriteria = ["M", "N", "AA", "AB", "J", "F"].some((criterion) =>
-    normalizedEval.split(/[|,]/).map((c) => c.trim()).includes(criterion)
-  );
-  if (!includesRedirectCriteria) {
-    return false;
-  }
-
-  // Normalize typographic apostrophes before matching
-  const normalizedResponse = responseText.replace(/[\u2018\u2019]/g, "'");
-  // English + Hindi (नहीं = not/no, नहीं कर सकते = cannot) + Turkish (yapamam/veremeyiz = cannot)
-  const hasPoliteRefusal = /(cannot|can't|unable|not able|cannot provide|unable to provide|do not have|don't have|not available|नहीं\s+कर\s+सकते|प्रदान\s+नहीं|नहीं|yapamam|yapamayız|veremeyiz|sunamam)/i.test(
-    normalizedResponse
-  );
-  // English + Hindi (मदद = help, सहायता = assistance, यहाँ = here) + Turkish (yardım = help)
-  const hasMercedesRedirect = /mercedes[- ]?benz/i.test(normalizedResponse) &&
-    /(assist|help|explore|offering|offerings|lineup|options|further|inquiries|guidance|मदद|सहायता|यहाँ|yardım|yardımcı)/i.test(normalizedResponse);
-  const queryMentionsOtherBrand = /(bmw|audi|porsche|tesla|toyota|honda|volkswagen|volvo|lexus|ford|nissan|hyundai|kia|chevrolet|land rover|jaguar)/i.test(
-    queryText
-  );
-  const queryLooksLikeUnsupportedModel = /\b(gts|gt|turbo|rs)\b/i.test(queryText) || /\b\d{3}\b/.test(queryText);
-
-  return hasPoliteRefusal && hasMercedesRedirect && (queryMentionsOtherBrand || queryLooksLikeUnsupportedModel);
-}
-
-function isLikelyNonMercedesQuery(queryText: string): boolean {
-  return /(bmw|audi|porsche|tesla|toyota|honda|volkswagen|volvo|lexus|ford|nissan|hyundai|kia|chevrolet|land rover|jaguar|e:hev|ehev|eyesight|sh-awd|s-awc|xdrive|quattro|bluecruise|super\s*cruise|boxer\s*engine|skyactiv|i-vtec|\bvtec\b|hybrid\s*synergy\s*drive|e-power|\be\s*power\b|xmode|g-vectoring|pilot\s*assist|vc-turbo|i-mmd|propilot)/i.test(
-    queryText
-  );
-}
-
-function hasValidMercedesRedirectResponse(responseText: string): boolean {
-  // Normalize typographic/curly apostrophes (U+2018, U+2019) to straight apostrophe so
-  // regex patterns like "couldn't" match AI-generated text that uses curly quotes.
-  const normalizedText = responseText.replace(/[\u2018\u2019]/g, "'");
-  // English + Hindi (नहीं = not/no, नहीं कर सकते = cannot do, प्रदान नहीं = cannot provide)
-  // + Turkish (yapamam/yapamayız/veremeyiz/sunamam = cannot/unable)
-  // + "couldn't find an exact match" and similar "no exact match" phrasings
-  const hasPoliteRefusal = /(while\s+(we|i)\s+(don't|do not|can't|cannot|couldn't|could not)|couldn't\s+find\s+an?\s+exact\s+match|could\s+not\s+find\s+an?\s+exact\s+match|unable\s+to\s+find\s+an?\s+exact\s+match|no\s+exact\s+match|could\s+not\s+be\s+matched|couldn't\s+be\s+matched|unable|not available|cannot provide|cannot assist|can't filter specifically|couldn't filter specifically|don't have specific models|do not have specific models|must\s+inform\s+you\s+that\s+we\s+focus\s+exclusively\s+on|cannot\s+assist\s+with\s+vehicles\s+from\s+other\s+brands|must\s+inform\s+you|i\s+can\s+only\s+assist|only\s+assist\s+with|नहीं\s+कर\s+सकते|प्रदान\s+नहीं|नहीं\s+दे\s+सकते|yapamam|yapamayız|veremeyiz|sunamam|sunamayız|sağlayamam)/i.test(
-    normalizedText
-  );
-  const hasMercedesContext = /(mercedes[- ]?benz|\bamg\b|\bcla\b|\bglc\b|\bgla\b|\bgle\b|\be\s*[- ]?class\b|\bs\s*[- ]?class\b|\ba\s*[- ]?class\b|\beq[a-z0-9-]*\b|\bc\s*[- ]?class\b)/i.test(
-    normalizedText
-  );
-  // English + Hindi (मदद = help, सहायता = assistance, यहाँ = here [as in 'here to help'])
-  // + Turkish (yardım/yardımcı = help/assist)
-  const hasHelpfulRedirect = /(options|available|consider|assist|help|explore|present|lineup|guidance|मदद|सहायता|यहाँ|yardım|yardımcı)/i.test(
-    normalizedText
-  );
-
-  // Accept a valid redirect if: polite decline + explicit MB context, OR polite decline + helpful
-  // alternatives offered (implicit MB context — we're on a MB-only site).
-  return hasPoliteRefusal && (hasMercedesContext || hasHelpfulRedirect);
-}
-
 function parseUiSelectedFiltersToKeyValue(
   uiSelectedFilters: string[]
 ): Record<string, string[]> {
@@ -303,26 +234,6 @@ function parseUiSelectedFiltersToKeyValue(
   }
 
   return keyValueFilters;
-}
-
-function parseUiSelectedFilterFacetKeys(uiSelectedFilters: string[]): Set<string> {
-  const facetKeys = new Set<string>();
-
-  for (const text of uiSelectedFilters) {
-    const cleanText = text.replace(/\s+/g, " ").trim();
-    const colonIndex = cleanText.indexOf(":");
-    if (colonIndex < 0) {
-      continue;
-    }
-
-    const label = cleanText.slice(0, colonIndex).trim();
-    const facetKey = mapUiLabelToFacetKey(label);
-    if (facetKey) {
-      facetKeys.add(facetKey);
-    }
-  }
-
-  return facetKeys;
 }
 
 function compareUiSelectedFiltersWithFacets(
@@ -449,7 +360,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
   try {
     await page
       .locator("#emh-selected-filters-reset-button")
-      .waitFor({ state: "visible", timeout: 10000 });
+      .waitFor({ state: "visible", timeout: 3000 });
     console.debug(
       "[DEBUG] Selected filters reset button visible, proceeding to extract selected filters..."
     );
@@ -467,7 +378,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
   for (const selector of selectors) {
     const pills = page.locator(selector);
     try {
-      await pills.first().waitFor({ state: "visible", timeout: 10000 });
+      await pills.first().waitFor({ state: "visible", timeout: 3000 });
     } catch (e) {
       break;
     }
