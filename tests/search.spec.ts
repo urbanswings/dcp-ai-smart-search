@@ -47,7 +47,9 @@ import {
 
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
+const aiQueryPromptsPath = path.join(__dirname, "data/ai-query-prompts.json");
 let fixedQueriesData: any = {};
+let aiPromptData: any = {};
 let emhApiResponse: any = null;
 let dcpApiResponse: any = null;
 
@@ -63,6 +65,9 @@ test.beforeAll(async () => {
 
   const data = await fs.readFile(fixedQueriesPath, "utf-8");
   fixedQueriesData = JSON.parse(data);
+
+  const aiPromptDataContent = await fs.readFile(aiQueryPromptsPath, "utf-8");
+  aiPromptData = JSON.parse(aiPromptDataContent);
 
   // Clean up old screenshots (keep last 2 weeks)
   await cleanOldScreenshots(14);
@@ -129,7 +134,6 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byFixedQuery || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count,
@@ -156,7 +160,6 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
   test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.recommendationModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -226,7 +229,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
 
   test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {const fixedQueries = fixedQueriesData.byBrandModel;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -254,7 +256,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Specs - Test specification-based queries without brand/model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.bySpecs;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.bySpecs || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -282,7 +283,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Filter Facets (random)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
       // Generate queries: pick random 1-4 filter options for each query
       function getRandomFilterCombo() {
@@ -338,7 +338,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
@@ -366,7 +365,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries: string[] = [];
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
@@ -399,7 +397,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
@@ -425,7 +422,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 10,
@@ -495,7 +491,6 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(queriesPath, "utf-8");
@@ -639,7 +634,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.randomTopics || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -741,7 +735,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Negative/Contradictory Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.negativeContradictory || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -769,7 +762,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Language/Localization", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.localization || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
@@ -797,7 +789,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Misspelled/Fuzzy Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.misspelledFuzzy || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
@@ -825,7 +816,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.dateNumeric || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -853,7 +843,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noResults || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -881,7 +870,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
     const fixedQueries = fixedQueriesData.forRegression;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -909,7 +897,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.personalData || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -936,7 +923,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.nsfw || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -963,7 +949,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.codeAndScripts || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -990,7 +975,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Bias and Manipulation", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.biasAndManipulation || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1018,7 +1002,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Filter Facets", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingFilterFacets || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1046,7 +1029,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const aiPromptData = JSON.parse(await fs.readFile(path.join(__dirname, 'data/ai-query-prompts.json'), 'utf-8'));
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingBrands || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
