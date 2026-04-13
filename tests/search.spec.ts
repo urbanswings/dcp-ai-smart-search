@@ -48,8 +48,10 @@ import {
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
 const aiQueryPromptsPath = path.join(__dirname, "data/ai-query-prompts.json");
+const aiEvaluationRulesPath = path.join(__dirname, "data/ai-evaluation-rules.json");
 let fixedQueriesData: any = {};
 let aiPromptData: any = {};
+let aiEvaluationRulesData: any = {};
 let emhApiResponse: any = null;
 let dcpApiResponse: any = null;
 
@@ -63,11 +65,14 @@ test.beforeAll(async () => {
     );
   }
 
-  const data = await fs.readFile(fixedQueriesPath, "utf-8");
-  fixedQueriesData = JSON.parse(data);
+  const fixedQueriesContent = await fs.readFile(fixedQueriesPath, "utf-8");
+  fixedQueriesData = JSON.parse(fixedQueriesContent);
 
   const aiPromptDataContent = await fs.readFile(aiQueryPromptsPath, "utf-8");
   aiPromptData = JSON.parse(aiPromptDataContent);
+
+  const aiEvaluationRulesDataContent = await fs.readFile(aiEvaluationRulesPath, "utf-8");
+  aiEvaluationRulesData = JSON.parse(aiEvaluationRulesDataContent);
 
   // Clean up old screenshots (keep last 2 weeks)
   await cleanOldScreenshots(14);
@@ -135,6 +140,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byFixedQuery || {};
+    const aiEvaluationRules = aiEvaluationRulesData.byFixedQuery || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count,
       systemPrompt,
@@ -142,7 +148,20 @@ test.describe("AI Smart Search - Sanity Test", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -161,6 +180,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
   test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.recommendationModel || {};
+      const aiEvaluationRules = aiEvaluationRulesData.recommendationModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -168,7 +188,20 @@ test.describe("AI Smart Search - Sanity Test", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -230,6 +263,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {const fixedQueries = fixedQueriesData.byBrandModel;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
+      const aiEvaluationRules = aiEvaluationRulesData.byBrandModel || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -237,7 +271,20 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -257,6 +304,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   test("By Specs - Test specification-based queries without brand/model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.bySpecs;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.bySpecs || {};
+      const aiEvaluationRules = aiEvaluationRulesData.bySpecs || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
         systemPrompt,
@@ -264,7 +312,20 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -284,6 +345,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   test("By Filter Facets (random)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
       const { count, systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsRandom || {};
       // Generate queries: pick random 1-4 filter options for each query
       function getRandomFilterCombo() {
         type FilterKey = keyof typeof filterOptions;
@@ -306,18 +368,31 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           const comboText = combo
             .map(({ facet, value }) => `${String(facet)}: ${value}`)
             .join(", ");
-          const query = await generateUniqueQueries(
+          const queryValues = await generateUniqueQueries(
             count,
             systemPrompt,
             userPromptTemplate.replace('{comboText}', comboText),
             maxTokens,
             fallback.replace('{comboText}', comboText)
           );
-          generatedQueries.push(query);
+          generatedQueries.push(queryValues);
         }
         return generatedQueries.flat();
       })();
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -344,7 +419,21 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         project
       );
       const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsComplete);
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -376,7 +465,21 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         values: [v],
       })) ?? [];
       const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyEquipment, aiPromptData.byFilterFacetsComplete);
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -403,7 +506,21 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         project
       );
       const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsAndOr);
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsAndOr || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -423,6 +540,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
+    const aiEvaluationRules = aiEvaluationRulesData.noBrandModel || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 10,
       systemPrompt,
@@ -430,7 +548,20 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -492,6 +623,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
+      const aiEvaluationRules = aiEvaluationRulesData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(queriesPath, "utf-8");
         const vehicleBrandsAndModels: string[] = JSON.parse(file);
@@ -502,18 +634,32 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
           .slice(0, 10);
         for (const idx of indices) {
           const keyword = vehicleBrandsAndModels[idx];
-          const query = await generateUniqueQueries(
+          const queryValues = await generateUniqueQueries(
             count,
             systemPrompt,
             userPromptTemplate.replace('{keyword}', keyword),
             maxTokens,
             fallback
           );
-          generatedQueries.push(query);
+          generatedQueries.push(queryValues);
         }
         return generatedQueries.flat();
       })();
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -532,8 +678,22 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Keyword|Mix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordMix;
+      const aiEvaluationRules = aiEvaluationRulesData.keywordMix || {};
       const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinations(10, 2, 5);
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -552,8 +712,22 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
+      const aiEvaluationRules = aiEvaluationRulesData.keywordSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinations(10, 2, 5);
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -572,7 +746,21 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Non-MB Features", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.nonMbFeatures;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.nonMbFeatures || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -635,6 +823,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.randomTopics || {};
+    const aiEvaluationRules = aiEvaluationRulesData.randomTopics || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -642,7 +831,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -736,6 +938,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Negative/Contradictory Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.negativeContradictory || {};
+      const aiEvaluationRules = aiEvaluationRulesData.negativeContradictory || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
@@ -743,7 +946,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -763,6 +979,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Language/Localization", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.localization || {};
+      const aiEvaluationRules = aiEvaluationRulesData.localization || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
         systemPrompt,
@@ -770,7 +987,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -790,6 +1020,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Misspelled/Fuzzy Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.misspelledFuzzy || {};
+      const aiEvaluationRules = aiEvaluationRulesData.misspelledFuzzy || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
         systemPrompt,
@@ -797,7 +1028,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -817,6 +1061,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.dateNumeric || {};
+      const aiEvaluationRules = aiEvaluationRulesData.dateNumeric || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
@@ -824,7 +1069,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -844,6 +1102,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noResults || {};
+    const aiEvaluationRules = aiEvaluationRulesData.noResults || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -851,7 +1110,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -871,6 +1143,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
     const fixedQueries = fixedQueriesData.forRegression;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
+    const aiEvaluationRules = aiEvaluationRulesData.responseConsistency || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -878,7 +1151,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsRepeatedAndSaveResults({
       queries: allQueries,
@@ -898,6 +1184,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.personalData || {};
+    const aiEvaluationRules = aiEvaluationRulesData.personalData || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -905,7 +1192,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -924,6 +1224,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.nsfw || {};
+    const aiEvaluationRules = aiEvaluationRulesData.nsfw || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -931,7 +1232,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -950,6 +1264,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.codeAndScripts || {};
+    const aiEvaluationRules = aiEvaluationRulesData.codeAndScripts || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -957,7 +1272,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -976,6 +1304,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Bias and Manipulation", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.biasAndManipulation || {};
+      const aiEvaluationRules = aiEvaluationRulesData.biasAndManipulation || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
@@ -983,7 +1312,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1003,6 +1345,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Conflicting Filter Facets", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingFilterFacets || {};
+      const aiEvaluationRules = aiEvaluationRulesData.conflictingFilterFacets || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
         systemPrompt,
@@ -1010,7 +1353,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         maxTokens,
         fallback
       );
-      const allQueries = mergeQueries(fixedQueries, queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1030,6 +1386,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingBrands || {};
+    const aiEvaluationRules = aiEvaluationRulesData.conflictingBrands || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
       systemPrompt,
@@ -1037,7 +1394,20 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       maxTokens,
       fallback
     );
-    const allQueries = mergeQueries(fixedQueries, queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -1055,7 +1425,21 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Random Numbers", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomNumbers;
-    const allQueries = mergeQueries(fixedQueries, []);
+    const aiEvaluationRules = aiEvaluationRulesData.randomNumbers || {};
+    const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -1116,7 +1500,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Multi-Intent Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.multiIntent;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.multiIntent || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1135,7 +1533,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Clarification Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.clarification;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.clarification || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1154,7 +1566,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Price Negotiation Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.priceNegotiation;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.priceNegotiation || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1173,7 +1599,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Unusual Units Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.unusualUnits;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.unusualUnits || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1192,7 +1632,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Joke/Humor Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.jokeHumor;
-    const allQueries = mergeQueries(fixedQueries, []);
+    const aiEvaluationRules = aiEvaluationRulesData.jokeHumor || {};
+    const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
 
     await runTestsAndSaveResults({
       queries: allQueries,
@@ -1210,7 +1664,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Repeat/Looping Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.repeatLooping;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.repeatLooping || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1229,7 +1697,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Brand Loyalty/Switching Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.brandLoyaltySwitching;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.brandLoyaltySwitching || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1248,7 +1730,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Accessibility Needs Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.accessibilityNeeds;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.accessibilityNeeds || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1267,7 +1763,21 @@ test.describe("AI Smart Search - Special Scenarios", () => {
 
   test("Environmental Concerns Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.environmentalConcerns;
-      const allQueries = mergeQueries(fixedQueries, []);
+      const aiEvaluationRules = aiEvaluationRulesData.environmentalConcerns || {};
+      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
 
       await runTestsAndSaveResults({
         queries: allQueries,

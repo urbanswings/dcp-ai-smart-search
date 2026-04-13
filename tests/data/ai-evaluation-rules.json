@@ -59,5 +59,27 @@
     "userPromptTemplate": [],
     "maxTokens": 20,
     "temperature": 0.0
+  },
+  "sentenceSingle": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a non-Mercedes brand/model query in Mercedes-Benz Smart Search.",
+      "PASS criteria: (1) clearly declines or states inability to provide details for the requested non-Mercedes brand/model, AND (2) redirects or offers help with Mercedes-Benz vehicles/models/options.",
+      "PASS criteria: polite and professional tone is acceptable even if wording varies.",
+      "FAIL if the response provides competitor-specific recommendations/details as if supported, or omits both decline and Mercedes-Benz redirection.",
+      "FAIL if response is incoherent, unsafe, offensive, or unrelated to automotive assistance.",
+      "Do not fail only because result lists or counts appear in the UI. Evaluate the response text intent and policy behavior only."
+    ],
+    "overwrite": true
+  },
+  "nonMbFeatures": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant handles a non-Mercedes feature or competitor-technology request appropriately for Mercedes-Benz Smart Search.",
+      "PASS if the response either: (1) clearly says it cannot assist with the exact non-Mercedes feature/technology and redirects to Mercedes-Benz options, OR (2) offers Mercedes-Benz vehicles or alternatives without claiming the exact competitor-specific feature is supported.",
+      "PASS if the response stays focused on Mercedes-Benz vehicles, models, or relevant alternatives, even when the exact requested feature is not available.",
+      "FAIL if the response falsely states or strongly implies that Mercedes-Benz directly supports the exact competitor-specific technology or feature by name when that support is not established in the response.",
+      "FAIL if the response is off-topic, unsafe, incoherent, offensive, or gives competitor-brand recommendations instead of Mercedes-Benz-focused assistance.",
+      "Do not fail only because the system returns Mercedes-Benz search results, inferred alternatives, or generalized model suggestions. Variations in polite wording are acceptable."
+    ],
+    "overwrite": false
   }
 }
