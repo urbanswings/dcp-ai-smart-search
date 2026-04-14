@@ -31,6 +31,7 @@ dcp-ai-smart-search/
 ├── playwright.config.ts           # Playwright configuration
 ├── tsconfig.json                  # TypeScript configuration
 ├── generate-results-html.js       # HTML report generator
+├── generate-results-json.js       # Non-pass results JSON generator
 ├── clean-old-results.sh           # Script to clean old test results
 ├── tests/
 │   ├── search.spec.ts             # Main test suite
@@ -75,11 +76,25 @@ dcp-ai-smart-search/
 
 
 ### 4. `generate-results-html.js`
+
+### 5. `generate-results-json.js`
+- Node.js script to extract non-PASS test results from a given results folder.
+- Reads all JSON result files from the specified run folder, picks the **latest file per test type**, and filters out passing results.
+- Outputs a structured `results/json/results-queries-by-test.json` file matching the `queries-by-test.json` schema.
+- Usage:
+  ```bash
+  node generate-results-json.js [results-folder]
+  ```
+- Example:
+  ```bash
+  node generate-results-json.js results/json/2026-04-14_PREPROD
+  ```
+- Output: `results/json/results-queries-by-test.json` — grouped by test group and title, each entry contains `non_pass_count` and a `non_pass_results` array with query, response, evaluation, timestamp, and screenshot path.
 - Node.js script to aggregate all JSON result files from `results/json/`.
 - Generates a timestamped, interactive HTML report in `results/html/`.
 - Features: Bootstrap UI, sticky headers, dropdown filters, search, export to CSV, horizontal bar charts (Chart.js), pass/fail percentages.
 
-### 5. `tests/utils/facetToJson.js`
+### 6. `tests/utils/facetToJson.js`
 - JavaScript utility to convert API search response format to simplified facets format
 - Features:
   - Handles nested facet values
@@ -298,6 +313,15 @@ node generate-results-html.js
 ```
 
 - Output: `results/html/search-results-all-<timestamp>.html`
+
+### 5. Generate Non-Pass Results JSON
+
+```sh
+node generate-results-json.js results/json/<run-folder>
+```
+
+- Reads result files from the specified run folder, picks the latest run per test type, and writes only non-PASS results to `results/json/results-queries-by-test.json`.
+- If no folder is provided, defaults to `results/json/2026-04-14_PREPROD`.
 
 ---
 
