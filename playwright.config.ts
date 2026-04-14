@@ -8,7 +8,7 @@ process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS = String(isHeadless);
 
 export default defineConfig({
   testDir: './tests',
-  timeout: 100 * 60000,
+  timeout: 5 * 60000,
   retries: 0,
   use: {
     headless: isHeadless,

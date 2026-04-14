@@ -6,7 +6,7 @@ import {
   generateUniqueQueries,
 } from "./utils/aiHelpers";
 import {
-  queriesPath,
+  testDataVehiclesNonMB,
   getRandomVehicleCombinations,
   logTestContext
 } from "./utils/testHelpers";
@@ -625,15 +625,15 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
       const aiEvaluationRules = aiEvaluationRulesData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(queriesPath, "utf-8");
-        const vehicleBrandsAndModels: string[] = JSON.parse(file);
+        const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
+        const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
         const generatedQueries = [];
-        const total = vehicleBrandsAndModels.length;
+        const total = vehicleBrandsAndModels.mb.length;
         const indices = Array.from({ length: total }, (_, i) => i)
           .sort(() => 0.5 - Math.random())
           .slice(0, 10);
         for (const idx of indices) {
-          const keyword = vehicleBrandsAndModels[idx];
+          const keyword = vehicleBrandsAndModels["non-mb"][idx];
           const queryValues = await generateUniqueQueries(
             count,
             systemPrompt,

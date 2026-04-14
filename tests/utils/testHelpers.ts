@@ -5,7 +5,7 @@ export const COUNTRY = process.env.COUNTRY || "AU";
 export const LANGUAGE = process.env.LANGUAGE || "EN";
 export const PRODUCT = process.env.PRODUCT || "EMH";
 
-export const queriesPath = "./tests/data/search-queries.json";
+export const testDataVehiclesNonMB = "./tests/data/vehicles-make-model.json";
 
 export async function logTestContext({
   describeName,
@@ -46,7 +46,7 @@ export async function getRandomVehicleCombinations(
   minLen: number = 2,
   maxLen: number = 5
 ): Promise<string[]> {
-  const file = await fs.readFile(queriesPath, "utf-8");
+  const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
   const vehicleArray: string[] = JSON.parse(file);
   const combos: string[] = [];
   while (combos.length < count) {
