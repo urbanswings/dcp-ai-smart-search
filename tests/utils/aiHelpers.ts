@@ -167,11 +167,12 @@ export async function generateUniqueQueries(
   const queries: string[] = [];
   const seenQueries = new Set<string>();
   let attempts = 0;
+  let query = '';
 
   while (queries.length < count && attempts < maxAttempts) {
     attempts++;
     try {
-      let query = await generateOpenAIQuery(
+      query = await generateOpenAIQuery(
         systemPrompt,
         userPromptTemplate,
         maxTokens,
@@ -192,5 +193,11 @@ export async function generateUniqueQueries(
     }
   }
 
+  console.log("\n");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(`Generated query`);
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(`Query:       '${query}'`);
+  console.log("\n");
   return queries;
 }

@@ -407,29 +407,57 @@ npx playwright test -g "Edge Case|Random Topics"
 
 ### Test Scenarios
 
-All 16 test scenarios are tagged with both `@ui` and `@api`:
+**SMART SEARCH Automation Test Suite**
+Total: ~504 queries (excluding variable facet-based tests)
 
-**Vehicles MB (5 tests):**
-1. By Brand/Model - Test MB-specific brand and model queries
-2. By Specs - Test specification-based queries without brand/model
-3. By Filter Facets (random)
-4. By Filter Facets (complete)
-5. No Brand/Model
+Breakdown Count by category:
 
-**Vehicles Non-MB (3 tests):**
-6. By Brand/Model (Sentence|Single)
-7. By Brand/Model (Keyword|Mix)
-8. By Brand/Model (Keyword|Single)
+Sanity Test (63 queries):
+- By Fixed Query: 35 queries (fixed only)
+- Recommendation Model: 28 queries (20 fixed + 8 AI)
 
-**Other Scenarios (8 tests):**
-9. Random Topics
-10. Edge Case Queries
-11. Negative/Contradictory Queries
-12. Language/Localization
-13. Misspelled/Fuzzy Queries
-14. By Filter Facets (Date Range/Numeric Filters)
-15. No Results Scenario
-16. AI Response Consistency
+Vehicles MB (114 queries + variable):
+- By Brand/Model: 82 queries (2 fixed + 80 AI [10 random MB vehicles × 8 AI each])
+- By Specs: 10 queries (2 fixed + 8 AI)
+- By Filter Facets (random): 10 queries (2 fixed + 8 AI)
+- By Filter Facets (complete): **Variable** (depends on API facets)
+- By Filter Facets (Equipment): **Variable** (depends on equipment facets)
+- By Filter Facets (AND/OR): **Variable** (5 fixed + AI depends on API facets)
+- No Brand/Model: 12 queries (2 fixed + 10 AI)
+
+Vehicles Non-MB (56 queries):
+- By Brand/Model (Sentence|Single): 12 queries (2 fixed + 10 AI)
+- By Brand/Model (Keyword|Mix): 12 queries (2 fixed + 10 random vehicle combos)
+- By Brand/Model (Keyword|Single): 12 queries (2 fixed + 10 random vehicle combos)
+- By Non-MB Features: 20 queries (fixed only)
+
+Other Scenarios (230 queries):
+- Random Topics: 10 queries (2 fixed + 8 AI)
+- Edge Case Queries: 17 queries (hardcoded)
+- Negative/Contradictory: 10 queries (2 fixed + 8 AI)
+- Language/Localization: 10 queries (3 fixed + 7 AI)
+- Misspelled/Fuzzy: 10 queries (3 fixed + 7 AI)
+- Date Range/Numeric: 10 queries (2 fixed + 8 AI)
+- No Results Scenario: 10 queries (2 fixed + 8 AI)
+- Response Consistency: 22 queries (14 fixed + 8 AI)
+- Personal Data: 14 queries (6 fixed + 8 AI)
+- NSFW: 13 queries (5 fixed + 8 AI)
+- Code and Scripts: 13 queries (5 fixed + 8 AI)
+- Bias and Manipulation: 13 queries (5 fixed + 8 AI)
+- Conflicting Filter Facets: 13 queries (5 fixed + 8 AI)
+- Conflicting Brands: 13 queries (5 fixed + 8 AI)
+- Random Numbers: 52 queries (fixed only)
+
+Special Scenarios (41 queries):
+- Multi-Intent: 6 queries (fixed only)
+- Clarification: 6 queries (fixed only)
+- Price Negotiation: 8 queries (fixed only)
+- Unusual Units: 6 queries (fixed only)
+- Joke/Humor: 3 queries (fixed only)
+- Repeat/Looping: 3 queries (fixed only)
+- Brand Loyalty/Switching: 3 queries (fixed only)
+- Accessibility Needs: 3 queries (fixed only)
+- Environmental Concerns: 3 queries (fixed only)
 
 ---
 
@@ -641,3 +669,191 @@ Always commit:
 ---
 
 This documentation provides a complete overview for developers, QA engineers, and stakeholders to understand, run, and extend the AI Smart Search test automation and reporting system.
+
+---
+
+## Fixed Query Template Guide
+
+Fixed queries are defined in `tests/data/fixed-queries-*.json` under the `"byFixedQuery"` array. Each entry follows this template:
+
+```json
+{
+  "value": "your search query",
+  "shouldRecommend": true,
+  "shouldFilter": {},
+  "aiEvaluationHints": {
+    "value": [
+      "Evaluation instruction line 1.",
+      "Evaluation instruction line 2."
+    ],
+    "overwrite": true
+  }
+}
+```
+
+### Fields
+
+#### `value` *(string)*
+The search query that will be sent to the AI Smart Search.
+
+```json
+"value": "show me sedans"
+```
+
+---
+
+#### `shouldRecommend` *(boolean)*
+Whether the AI is expected to present vehicle recommendations.
+
+| Value | Meaning |
+|-------|---------|
+| `true` | The AI should return vehicle listings |
+| `false` | The AI should decline, redirect, or acknowledge a limitation — not present vehicles directly |
+
+---
+
+#### `shouldFilter` *(object \| boolean)*
+Declares the expected backend filter facets applied by the AI. Supports three modes:
+
+| Value | Meaning |
+|-------|---------|
+| `{}` (empty object) | No specific filter expected (e.g. unsupported attribute, no-match fallback) |
+| `{ "bodyType": ["LIMOUSINE"] }` | Exact filter keys/values expected |
+| `false` | Assert that **no filters at all** were applied |
+| `true` | Assert that **at least one filter** was applied (any) |
+
+**Common filter keys:**
+
+| Key | Example values |
+|-----|---------------|
+| `bodyType` | `"LIMOUSINE"`, `"SUV_OFFROADER"`, `"COUPE"`, `"HATCHBACK"`, `"CABRIO_ROADSTER"`, `"STATION"`, `"PEOPLE_CARRIER"` |
+| `fuelType` | `"ELECTRIC"`, `"PETROL"`, `"DIESEL"`, `"HYBRID_PETROL"` |
+| `color` | `"PAINT_COLOR_WHITE"`, `"PAINT_COLOR_BLACK"`, `"PAINT_COLOR_SILVER"` |
+| `brand` | `"Mercedes-Benz"`, `"Mercedes-AMG"` |
+| `modelIdentifier` | `"CLA"`, `"GLC"`, `"EQS"`, `"EQA"` |
+| `motorization` | `"CLA 45 S 4MATIC+"`, `"EQA 250+"` |
+| `stockType` | `"AVAILABLE"`, `"IN_PIPELINE"` |
+| `price` | `{ "min": 0, "max": 10000000 }` |
+
+**Examples:**
+
+```json
+"shouldFilter": { "bodyType": ["LIMOUSINE"] }
+```
+```json
+"shouldFilter": { "bodyType": ["SUV_OFFROADER"], "color": ["PAINT_COLOR_BLACK"] }
+```
+```json
+"shouldFilter": false
+```
+```json
+"shouldFilter": true
+```
+```json
+"shouldFilter": {}
+```
+
+---
+
+#### `aiEvaluationHints` *(object)*
+Instructions passed to the OpenAI evaluator to determine PASS/FAIL. Always use `"overwrite": true` so these hints replace the default evaluation rules for this query.
+
+```json
+"aiEvaluationHints": {
+  "value": [
+    "Respond ONLY with: 'PASS' if ...",
+    "FAIL if ..."
+  ],
+  "overwrite": true
+}
+```
+
+**Writing good hints:**
+- Start with a clear `PASS` condition on the first line.
+- Add `FAIL` conditions on subsequent lines.
+- Use `Do NOT fail if ...` to prevent false negatives for known edge cases (e.g. inventory variation, missing UI labels).
+- Keep each hint to one clear, testable condition.
+
+---
+
+### Full Examples
+
+**Filter by body type:**
+```json
+{
+  "value": "show me sedans",
+  "shouldRecommend": true,
+  "shouldFilter": { "bodyType": ["LIMOUSINE"] },
+  "aiEvaluationHints": {
+    "value": [
+      "Respond ONLY with: 'PASS' if the response presents sedan/Limousine body-type vehicles.",
+      "Do NOT fail if the exact vehicle count varies — pass as long as the Limousine/sedan filter is applied."
+    ],
+    "overwrite": true
+  }
+}
+```
+
+**No filter expected (unsupported attribute):**
+```json
+{
+  "value": "find cars with advanced safety features",
+  "shouldRecommend": false,
+  "shouldFilter": {},
+  "aiEvaluationHints": {
+    "value": [
+      "Respond ONLY with: 'PASS' if the response acknowledges that filtering by safety features is not directly supported and presents general vehicle listings.",
+      "Do NOT fail if no specific safety filter is applied — this is not a filterable attribute."
+    ],
+    "overwrite": true
+  }
+}
+```
+
+**Assert no filters applied:**
+```json
+{
+  "value": "i dont like mercedes-benz",
+  "shouldRecommend": true,
+  "shouldFilter": false,
+  "aiEvaluationHints": {
+    "value": [
+      "Respond ONLY with: 'PASS' if the response presents general Mercedes-Benz vehicle options without applying any specific filter.",
+      "FAIL if the response refuses to show vehicles or applies unrelated filters."
+    ],
+    "overwrite": true
+  }
+}
+```
+
+**Assert at least one filter applied:**
+```json
+{
+  "value": "recommend something for me",
+  "shouldRecommend": true,
+  "shouldFilter": true,
+  "aiEvaluationHints": {
+    "value": [
+      "Respond ONLY with: 'PASS' if the response provides a specific vehicle recommendation with at least one filter applied.",
+      "FAIL if the response shows a completely unfiltered result set without any recommendation logic."
+    ],
+    "overwrite": true
+  }
+}
+```
+
+**Decline request (out-of-scope):**
+```json
+{
+  "value": "who are the best car manufacturers?",
+  "shouldRecommend": false,
+  "shouldFilter": {},
+  "aiEvaluationHints": {
+    "value": [
+      "Respond ONLY with: 'PASS' if the response declines to rank or compare car manufacturers and redirects the user to Mercedes-Benz vehicle information or recommendations.",
+      "FAIL if the response directly ranks or lists car manufacturers without first declining the out-of-scope request."
+    ],
+    "overwrite": true
+  }
+}
+```

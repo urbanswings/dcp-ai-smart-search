@@ -358,102 +358,111 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
 async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
   try {
-    await page
-      .locator("#emh-selected-filters-reset-button")
-      .waitFor({ state: "visible", timeout: 3000 });
-    console.debug(
-      "[DEBUG] Selected filters reset button visible, proceeding to extract selected filters..."
-    );
-  } catch (e) {
-    console.debug(
-      "[DEBUG] Selected filters reset button not visible before extraction, continuing with pill-based extraction..."
-    );
-  }
-
-  // Small delay to ensure all filter pills have time to render
-  await page.waitForTimeout(500);
-
-  const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
-
-  for (const selector of selectors) {
-    const pills = page.locator(selector);
     try {
-      await pills.first().waitFor({ state: "visible", timeout: 3000 });
+      await page
+        .locator("#emh-selected-filters-reset-button")
+        .waitFor({ state: "visible", timeout: 3000 });
+      console.debug(
+        "[DEBUG] Selected filters reset button visible, proceeding to extract selected filters..."
+      );
     } catch (e) {
-      break;
+      console.debug(
+        "[DEBUG] Selected filters reset button not visible before extraction, continuing with pill-based extraction..."
+      );
     }
 
-    // Wait for pills to stabilize (all rendered)
-    await page.waitForTimeout(300);
+    // Small delay to ensure all filter pills have time to render
+    await page.waitForTimeout(500);
 
-    const count = await pills.count();
-    if (count === 0) {
-      continue;
-    }
+    const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
 
-    console.debug(`[DEBUG] Found ${count} filter pills with selector "${selector}"`);
+    for (const selector of selectors) {
+      const pills = page.locator(selector);
+      try {
+        await pills.first().waitFor({ state: "visible", timeout: 3000 });
+      } catch (e) {
+        break;
+      }
 
-    // Extract each pill's text individually for better accuracy
-    const pillTexts: string[] = [];
-    for (let i = 0; i < count; i++) {
-      const pill = pills.nth(i);
-      const innerText = await pill.innerText();
-      const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
-      // If the pill innerText ends with ":" (no value captured), try several
-      // alternative sources to find the value: aria-label, data attributes,
-      // child elements that may contain the value in a separate node.
-      if (/:\s*$/.test(normalizedInnerText)) {
-        const recovered: string = await pill.evaluate((el) => {
-          // 1. aria-label on the pill itself
-          const ariaLabel = el.getAttribute("aria-label") || "";
-          if (ariaLabel) return ariaLabel;
-          // 2. data-value / data-label attributes
-          const dataValue = el.getAttribute("data-value") || el.getAttribute("data-label") || "";
-          if (dataValue) return dataValue;
-          // 3. Walk all descendants; innerText misses elements with certain CSS
-          //    (e.g. display:contents). Collect text from every element.
-          const all = el.querySelectorAll("*");
-          for (const child of Array.from(all)) {
-            const t = ((child as HTMLElement).innerText || (child as HTMLElement).textContent || "").trim();
-            if (t && !t.includes("\n") && t !== "×" && t !== "x" && t !== "X") {
-              // Return first non-colon-only, non-close-button text that contains more than label
-              const colon = t.indexOf(":");
-              if (colon >= 0 && t.slice(colon + 1).trim()) return t;
+      // Wait for pills to stabilize (all rendered)
+      // await page.waitForTimeout(300);
+
+      const count = await pills.count();
+      if (count === 0) {
+        continue;
+      }
+
+      console.debug(`[DEBUG] Found ${count} filter pills with selector "${selector}"`);
+
+      // Extract each pill's text individually for better accuracy
+      const pillTexts: string[] = [];
+      for (let i = 0; i < count; i++) {
+        const pill = pills.nth(i);
+        const innerText = await pill.innerText();
+        const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
+        // If the pill innerText ends with ":" (no value captured), try several
+        // alternative sources to find the value: aria-label, data attributes,
+        // child elements that may contain the value in a separate node.
+        if (/:\s*$/.test(normalizedInnerText)) {
+          const recovered: string = await pill.evaluate((el) => {
+            // 1. aria-label on the pill itself
+            const ariaLabel = el.getAttribute("aria-label") || "";
+            if (ariaLabel) return ariaLabel;
+            // 2. data-value / data-label attributes
+            const dataValue = el.getAttribute("data-value") || el.getAttribute("data-label") || "";
+            if (dataValue) return dataValue;
+            // 3. Walk all descendants; innerText misses elements with certain CSS
+            //    (e.g. display:contents). Collect text from every element.
+            const all = el.querySelectorAll("*");
+            for (const child of Array.from(all)) {
+              const t = ((child as HTMLElement).innerText || (child as HTMLElement).textContent || "").trim();
+              if (t && !t.includes("\n") && t !== "×" && t !== "x" && t !== "X") {
+                // Return first non-colon-only, non-close-button text that contains more than label
+                const colon = t.indexOf(":");
+                if (colon >= 0 && t.slice(colon + 1).trim()) return t;
+              }
             }
-          }
-          // 4. Walk all text nodes including those inside shadow DOM fragments
-          const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-          const parts: string[] = [];
-          let node = walker.nextNode();
-          while (node) {
-            const t = (node.nodeValue || "").trim();
-            if (t && t !== "×" && t !== "x" && t !== "X") parts.push(t);
-            node = walker.nextNode();
-          }
-          return parts.join(" : ");
-        });
-        const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
-        pillTexts.push(normalizedRecovered.length > normalizedInnerText.length ? normalizedRecovered : innerText);
-      } else {
-        pillTexts.push(innerText);
+            // 4. Walk all text nodes including those inside shadow DOM fragments
+            const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+            const parts: string[] = [];
+            let node = walker.nextNode();
+            while (node) {
+              const t = (node.nodeValue || "").trim();
+              if (t && t !== "×" && t !== "x" && t !== "X") parts.push(t);
+              node = walker.nextNode();
+            }
+            return parts.join(" : ");
+          });
+          const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
+          pillTexts.push(normalizedRecovered.length > normalizedInnerText.length ? normalizedRecovered : innerText);
+        } else {
+          pillTexts.push(innerText);
+        }
+      }
+
+      console.debug(`[DEBUG] Extracted filter texts: ${JSON.stringify(pillTexts)}`);
+
+      const normalizedTexts = pillTexts
+        .map((text) => text.replace(/\s+/g, " ").trim())
+        .filter((text) => text.length > 0);
+
+      if (normalizedTexts.length > 0) {
+        console.debug(`[DEBUG] Normalized filter texts: ${JSON.stringify(normalizedTexts)}`);
+        const result = parseUiSelectedFiltersToKeyValue(normalizedTexts);
+        console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(result)}`);
+        return result;
       }
     }
 
-    console.debug(`[DEBUG] Extracted filter texts: ${JSON.stringify(pillTexts)}`);
-    
-    const normalizedTexts = pillTexts
-      .map((text) => text.replace(/\s+/g, " ").trim())
-      .filter((text) => text.length > 0);
-
-    if (normalizedTexts.length > 0) {
-      console.debug(`[DEBUG] Normalized filter texts: ${JSON.stringify(normalizedTexts)}`);
-      const result = parseUiSelectedFiltersToKeyValue(normalizedTexts);
-      console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(result)}`);
-      return result;
+    return {};
+  } catch (e: any) {
+    if (e?.message?.includes("Target page, context or browser has been closed")) {
+      console.debug("[DEBUG] Page closed during filter extraction, returning empty filters");
+    } else {
+      console.warn("[DEBUG] Error extracting UI selected filters:", e);
     }
+    return {};
   }
-
-  return {};
 }
 
 export async function processAndLogUiResult({
@@ -1009,20 +1018,6 @@ export async function performUISmartSearchAndGetResults(
       }
 
       resultText = await successResultLocator.innerText();
-
-      const rateLimitMatch = resultText.match(
-        /검색 제한을 초과했습니다\. (\d+)초 후에 다시 시도해 주세요/
-      );
-      if (rateLimitMatch) {
-        const seconds = parseInt(rateLimitMatch[1], 10);
-        console.info(
-          `[DEBUG] Rate limit hit. Waiting for ${seconds} seconds before retrying...`
-        );
-        await page.waitForTimeout(seconds * 1000);
-        retries++;
-        await searchButton.click();
-        continue;
-      }
       break;
     } catch (e) {
       console.info(`[DEBUG] Error waiting for results: ${e}`);

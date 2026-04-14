@@ -261,16 +261,31 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   });
 
-  test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {const fixedQueries = fixedQueriesData.byBrandModel;
+  test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.byBrandModel;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
       const aiEvaluationRules = aiEvaluationRulesData.byBrandModel || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const queries = isFixedQueriesOnly() ? [] : await (async () => {
+        const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
+        const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
+        const generatedQueries = [];
+        const total = vehicleBrandsAndModels.mb.length;
+        const indices = Array.from({ length: total }, (_, i) => i)
+          .sort(() => 0.5 - Math.random())
+          .slice(0, 10);
+        for (const idx of indices) {
+          const keyword = vehicleBrandsAndModels.mb[idx];
+          const queryValues = await generateUniqueQueries(
+            count,
+            systemPrompt,
+            userPromptTemplate.replace('{keyword}', keyword),
+            maxTokens,
+            fallback
+          );
+          generatedQueries.push(queryValues);
+        }
+        return generatedQueries.flat();
+      })();
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -628,7 +643,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
         const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
         const generatedQueries = [];
-        const total = vehicleBrandsAndModels.mb.length;
+        const total = vehicleBrandsAndModels["non-mb"].length;
         const indices = Array.from({ length: total }, (_, i) => i)
           .sort(() => 0.5 - Math.random())
           .slice(0, 10);
