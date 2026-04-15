@@ -98,6 +98,7 @@
       "Respond ONLY with: PASS if the assistant response is suitable for a non-Mercedes brand/model query in Mercedes-Benz Smart Search.",
       "PASS criteria: (1) clearly declines or states inability to provide details for the requested non-Mercedes brand/model, AND (2) redirects or offers help with Mercedes-Benz vehicles/models/options.",
       "PASS criteria: polite and professional tone is acceptable even if wording varies.",
+      "PASS if the response uses thematic or inspirational language (e.g., 'inspired by', 'reminiscent of', 'in the spirit of') to connect the user's non-MB reference (such as a movie, lifestyle, or cultural reference) to Mercedes-Benz vehicles, even without an explicit decline — as long as the response stays Mercedes-Benz-focused and professional.",
       "FAIL if the response provides competitor-specific recommendations/details as if supported, or omits both decline and Mercedes-Benz redirection.",
       "FAIL if response is incoherent, unsafe, offensive, or unrelated to automotive assistance.",
       "Do not fail only because result lists or counts appear in the UI. Evaluate the response text intent and policy behavior only."
@@ -110,6 +111,88 @@
       "PASS if the response accurately reflects the selected filter facets and their values.",
       "FAIL if the response omits or misrepresents any selected filter facets or their values.",
       "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the selected filter facets."
+    ],
+    "overwrite": true
+  },
+  "bySpecs": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a spec-based (no brand/model) vehicle query in Mercedes-Benz Smart Search.",
+      "PASS if the response presents one or more Mercedes-Benz vehicles that align with the described specs or preferences (engine type, fuel efficiency, exterior style, interior features, performance, etc.), even if not all specs are an exact match.",
+      "PASS if the response acknowledges the user's spec preferences and offers a relevant curated selection of Mercedes-Benz vehicles, even if the match is partial or approximate.",
+      "PASS if no exact match exists and the response clearly says so, then offers alternative Mercedes-Benz options or expanded results that broadly fit the described preferences.",
+      "PASS if the response reports a technical issue or unavailability and provides guidance or redirects to Mercedes-Benz resources.",
+      "PASS if the response uses inspirational or aspirational language to connect the described specs to available Mercedes-Benz vehicles (e.g., 'embodies your vision', 'aligns with your preferences').",
+      "FAIL if the response returns vehicles that clearly contradict all stated specs without any acknowledgment or explanation (e.g., user asks for hybrid and response only shows diesel with no mention of the mismatch).",
+      "FAIL if the response is completely off-topic, does not relate to vehicle specifications, or is incoherent, unsafe, or offensive.",
+      "FAIL if the response provides zero results and no explanation, redirect, or guidance.",
+      "Do not fail only because the result count is unexpectedly high or low, or because the vehicle suggestion includes extra specs beyond what the user requested."
+    ],
+    "overwrite": true
+  },
+  "byBrandModel": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a Mercedes-Benz brand/model query in Mercedes-Benz Smart Search.",
+      "PASS if the response presents one or more Mercedes-Benz vehicles matching the named model (e.g., GLC, GLE, S-Class, EQS), even if the count or variant differs from what the user expected.",
+      "PASS if the response says it could not find an exact match but still offers related or alternative Mercedes-Benz vehicles from the same model family or lineup.",
+      "PASS if the response acknowledges the user's interest in a specific model and provides relevant details (availability, features, variants) even without a direct match.",
+      "PASS if the response reports a technical issue or current unavailability and redirects to Mercedes-Benz resources or assistance.",
+      "FAIL if the response completely ignores the named Mercedes-Benz model and presents unrelated vehicles with no connection to the user's request.",
+      "FAIL if the response is incoherent, off-topic, unsafe, or offensive.",
+      "Do not fail because the response uses conversational or aspirational phrasing, or presents a broader set of models beyond the exact one requested."
+    ],
+    "overwrite": true
+  },
+  "byFilterFacetsRandom": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a facet-filter query (e.g., fuel type, body type, equipment, model combined with one or more filter attributes) in Mercedes-Benz Smart Search.",
+      "PASS if the response presents Mercedes-Benz vehicles that match at least some of the requested filter attributes (fuel type, body type, equipment, model, price range, etc.).",
+      "PASS if no exact combination is available and the response clearly states this while offering the closest available alternatives or an expanded selection.",
+      "PASS if the response reports a limitation or technical issue and redirects to available Mercedes-Benz options.",
+      "FAIL if the response presents vehicles that clearly contradict the primary filter without any acknowledgment (e.g., user asks for diesel, response shows only petrol with no explanation).",
+      "FAIL if the response is incoherent, off-topic, unsafe, or offensive.",
+      "Do not fail only because some secondary filter attributes are not reflected, or because the result count is unexpected — evaluate the overall alignment with the request."
+    ],
+    "overwrite": true
+  },
+  "byFilterFacetsAndOr": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a multi-condition AND/OR filter query (e.g., 'sedans and coupes', 'petrol or electric', 'SUVs in white or black') in Mercedes-Benz Smart Search.",
+      "PASS if the response presents vehicles matching one or both conditions of an OR query, or vehicles satisfying the combined conditions of an AND query.",
+      "PASS if the response acknowledges a limitation (e.g., only one of the conditions could be fulfilled) but still presents the closest available Mercedes-Benz options.",
+      "PASS if the response uses criterion M — acknowledges the query and redirects to supported Mercedes-Benz assistance — even if the exact combination cannot be fulfilled.",
+      "PASS if the response interprets the query broadly and returns a valid Mercedes-Benz selection that aligns with the overall intent.",
+      "FAIL if the response completely ignores the filter conditions and presents unrelated vehicles with no connection to the described attributes.",
+      "FAIL if the response is incoherent, off-topic, unsafe, or offensive.",
+      "Do not fail only because the AND/OR logic is partially satisfied, or because the result set is larger than expected. Evaluate whether the response meaningfully addresses the combined filter intent."
+    ],
+    "overwrite": true
+  },
+  "noBrandModel": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a generic preference query with no specific Mercedes-Benz brand or model mentioned in Mercedes-Benz Smart Search.",
+      "PASS if the response suggests one or more Mercedes-Benz vehicles that broadly match the described general preferences (e.g., fuel efficiency, safety features, design, cargo space, performance).",
+      "PASS if the response presents a curated selection of vehicles even when no exact match for all preferences exists, as long as the suggestion is Mercedes-Benz-focused and relevant.",
+      "PASS if the response states it cannot find a suitable match for the criteria but redirects the user to browse inventory or contact a sales consultant — this is a valid and acceptable handling even when results exist in the background.",
+      "PASS if the response reports a technical issue or lack of exact match and redirects to available Mercedes-Benz options or assistance.",
+      "FAIL if the response returns vehicles that clearly contradict all stated preferences with no acknowledgment or explanation.",
+      "FAIL if the response is incoherent, off-topic, unsafe, offensive, or recommends non-Mercedes-Benz brands.",
+      "Do not fail only because the vehicle count is high or because the suggested model includes features beyond those requested. Evaluate whether the response meaningfully addresses the user's general preferences with Mercedes-Benz vehicles."
+    ],
+    "overwrite": true
+  },
+  "recommendationModel": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a recommendation query (user specifies 2 or more preferences) in Mercedes-Benz Smart Search.",
+      "PASS if the response recommends one or more specific Mercedes-Benz models or vehicle types that align with the user's described preferences (e.g., family size, driving context, fuel efficiency, performance, comfort, technology features, cargo space).",
+      "PASS if the response acknowledges the user's preferences and presents a curated or filtered Mercedes-Benz selection, even when no exact match exists for all stated criteria.",
+      "PASS if the response says it could not find an exact match but still offers the closest available Mercedes-Benz vehicles or an expanded selection aligned with the preferences.",
+      "PASS if the response names a specific Mercedes-Benz model (e.g., GLC, EQS, E-Class, GLE) and explains why it suits the described preferences — even if the reasoning is broad or aspirational.",
+      "PASS if the response addresses the primary vehicle type or category from the query (e.g., sedan, SUV, coupe) and presents a relevant Mercedes-Benz selection, even if not every stated preference (e.g., safety features, fuel efficiency, comfort) is explicitly mentioned in the response text — the presence of a matching selection is sufficient.",
+      "PASS if the response reports a technical issue, unavailability, or lack of match and redirects the user to Mercedes-Benz resources, inventory browsing, or a sales consultant.",
+      "FAIL if the response recommends non-Mercedes-Benz vehicles or competitor brands instead of or alongside MB options.",
+      "FAIL if the response completely ignores the user's stated preferences and presents unrelated vehicles with no connection to what was requested.",
+      "FAIL if the response is incoherent, off-topic, unsafe, or offensive.",
+      "Do not fail only because the recommended model does not perfectly match every stated preference, or because the result count is unexpectedly high or low. Evaluate whether the response meaningfully addresses the user's preferences with Mercedes-Benz vehicles."
     ],
     "overwrite": true
   }
