@@ -286,7 +286,7 @@ AEM_USER_PREPROD=your-username
 AEM_PASS_PREPROD=your-password
 AEM_USER_INT=your-username
 AEM_PASS_INT=your-password
-OPENAI_API_KEY=your-openai-key
+NEXUS_API_KEY=your-openai-key
 
 # Attach to existing browser (optional)
 # One of these can be set to enable CDP attach
@@ -507,7 +507,7 @@ Special Scenarios (41 queries):
 ## Environment
 
 - Requires Node.js (v18+ recommended).
-- Set your OpenAI API key in `.env` or environment variable `OPENAI_API_KEY`.
+- Set your OpenAI API key in `.env` or environment variable `NEXUS_API_KEY`.
 - Other environment variables in `.env` control test context and credentials.
 
 ---
@@ -553,7 +553,7 @@ For issues or feature requests, please contact the project owner or open an issu
 | AEM_PASS_PREPROD   | Password for PREPROD server                 |
 | AEM_USER_INT       | Username for INT server                     |
 | AEM_PASS_INT       | Password for INT server                     |
-| OPENAI_API_KEY     | OpenAI API key                              |
+| NEXUS_API_KEY     | OpenAI API key                              |
 
 ---
 

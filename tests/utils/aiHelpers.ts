@@ -1,13 +1,23 @@
 import axios from 'axios';
 import { COUNTRY, LANGUAGE } from './testHelpers';
-import { OpenAI } from 'openai/client';
+import { AzureOpenAI } from 'openai';
 import fs from 'fs';
 import path from 'path';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const OPENAI_API_VERSION = "2024-08-01-preview";
 const OPENAI_CHAT_MODEL = "gpt-4o-mini";
 const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
+
+// Singleton AzureOpenAI client — created once, reused across all requests.
+// API key and endpoint are loaded from environment variables (secrets).
+// Model name is NOT set here; it is passed per request via OPENAI_CHAT_MODEL.
+const openai = new AzureOpenAI({
+  apiKey: process.env.NEXUS_API_KEY,
+  endpoint: process.env.NEXUS_API_ENDPOINT,
+  apiVersion: process.env.NEXUS_API_VERSION,
+});
+
 
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
   if (!text?.trim()) return '';
@@ -59,16 +69,12 @@ export async function isSemanticallySimilarOpenAI(str1: string, str2: string): P
 
   try {
     const userPrompt = userPromptTemplate.replace('{str1}', str1).replace('{str2}', str2);
-
-    const completion = await openaiChatCompletion([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ], {
-      max_tokens: maxTokens,
-      temperature: temperature
-    });
-
-    const answer = completion.choices?.[0]?.message?.content || "";
+    const answer = await generateOpenAIQuery(
+      systemPrompt,
+      userPrompt,
+      maxTokens,
+      temperature
+    );
     return answer.includes("YES");
   } catch (error) {
     console.warn("OpenAI API error:", error instanceof Error ? error.message : "Unknown error");
@@ -109,17 +115,15 @@ export async function evaluateSearchResult(
   }
 
   try {
-    const completion = await openaiChatCompletion([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt }
-    ], {
-      max_tokens: maxTokens,
-      temperature: temperature
-    });
+    const answer = await generateOpenAIQuery(
+      systemPrompt,
+      userPrompt,
+      maxTokens,
+      temperature
+    );
 
-    const answer = completion.choices?.[0]?.message?.content || "";
     if (!answer.includes("PASS")) {
-      console.warn(`[WARN] OpenAI Evaluation indicates failure: ${completion.choices[0].message.content}`);
+      console.warn(`[WARN] OpenAI Evaluation indicates failure: ${answer}`);
     }
     return answer ?? "No response from OpenAI.";
   } catch (error) {
@@ -135,6 +139,7 @@ export async function generateOpenAIQuery(
   systemPrompt: string,
   userPrompt: string,
   maxTokens: number = 40,
+  temperature: number = OPENAI_DEFAULT_TEMPERATURE,
   fallback: string = ""
 ): Promise<string> {
   systemPrompt = systemPrompt.replace(/\{LANGUAGE\}/g, LANGUAGE).replace(/\{COUNTRY\}/g, COUNTRY);
@@ -144,7 +149,7 @@ export async function generateOpenAIQuery(
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ], {
-      temperature: OPENAI_DEFAULT_TEMPERATURE,
+      temperature: temperature,
       max_tokens: maxTokens,
     });
     return completion.choices[0].message.content?.trim() ?? fallback;
@@ -169,14 +174,15 @@ export async function generateUniqueQueries(
   let attempts = 0;
   let query = '';
 
+  systemPrompt = systemPrompt.replace(/\{LANGUAGE\}/g, LANGUAGE).replace(/\{COUNTRY\}/g, COUNTRY);
+  userPromptTemplate = userPromptTemplate.replace(/\{LANGUAGE\}/g, LANGUAGE).replace(/\{COUNTRY\}/g, COUNTRY);
   while (queries.length < count && attempts < maxAttempts) {
     attempts++;
     try {
       query = await generateOpenAIQuery(
         systemPrompt,
         userPromptTemplate,
-        maxTokens,
-        fallback
+        maxTokens
       );
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();
@@ -184,6 +190,12 @@ export async function generateUniqueQueries(
       if (query && !seenQueries.has(normalized)) {
         queries.push(query);
         seenQueries.add(normalized);
+
+        console.log("\n");
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log(`Generated query`);
+        console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.log(`Query:       '${query}'`);        
       }
     } catch (err) {
       if (fallback && !seenQueries.has(fallback.toLowerCase())) {
@@ -192,12 +204,6 @@ export async function generateUniqueQueries(
       }
     }
   }
-
-  console.log("\n");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Generated query`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Query:       '${query}'`);
-  console.log("\n");
+  
   return queries;
 }

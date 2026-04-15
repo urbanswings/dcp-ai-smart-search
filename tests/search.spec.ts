@@ -6,8 +6,8 @@ import {
   generateUniqueQueries,
 } from "./utils/aiHelpers";
 import {
-  testDataVehiclesNonMB,
-  getRandomVehicleCombinations,
+  testDataVehicles,
+  getRandomVehicleCombinationsNonMB,
   logTestContext
 } from "./utils/testHelpers";
 import {
@@ -266,7 +266,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
       const aiEvaluationRules = aiEvaluationRulesData.byBrandModel || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
+        const file = await fs.readFile(testDataVehicles, "utf-8");
         const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
         const generatedQueries = [];
         const total = vehicleBrandsAndModels.mb.length;
@@ -640,7 +640,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
       const aiEvaluationRules = aiEvaluationRulesData.sentenceSingle || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(testDataVehiclesNonMB, "utf-8");
+        const file = await fs.readFile(testDataVehicles, "utf-8");
         const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
         const generatedQueries = [];
         const total = vehicleBrandsAndModels["non-mb"].length;
@@ -694,7 +694,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Brand/Model (Keyword|Mix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordMix;
       const aiEvaluationRules = aiEvaluationRulesData.keywordMix || {};
-      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinations(10, 2, 5);
+      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(10, 2, 5);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -728,7 +728,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
       const aiEvaluationRules = aiEvaluationRulesData.keywordSingle || {};
-      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinations(10, 2, 5);
+      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(10, 2, 5);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;

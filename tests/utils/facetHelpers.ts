@@ -219,8 +219,7 @@ export async function generateQueriesFromFacets(
     const query = await generateOpenAIQuery(
       aiPromptData.systemPrompt,
       aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, filterText),
-      aiPromptData.maxTokens,
-      aiPromptData.fallback
+      aiPromptData.maxTokens
     );
 
     console.log("\n");
@@ -230,7 +229,6 @@ export async function generateQueriesFromFacets(
     console.log(`Query:       '${query}'`);
     console.log(`filterValue: '${filterValue}'`);
     console.log(`filterText:  '${filterText}'`);
-    console.log("\n");
 
     return { value: query, facet: facet.code, filterText, filterValue: filterValue.toString().toUpperCase() };
   });

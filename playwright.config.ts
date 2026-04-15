@@ -17,8 +17,8 @@ export default defineConfig({
       args: isHeadless ? ['--window-size=1920,1080'] : ['--start-maximized'],
     },
     ignoreHTTPSErrors: true,
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure'
+    screenshot: 'off',
+    video: 'off'
   },
   projects: [
     {
