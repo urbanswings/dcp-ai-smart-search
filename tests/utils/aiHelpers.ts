@@ -169,6 +169,7 @@ export async function generateUniqueQueries(
   fallback: string = "",
   maxAttempts: number = 10
 ): Promise<string[]> {
+  if (!systemPrompt || !userPromptTemplate) return [];
   const queries: string[] = [];
   const seenQueries = new Set<string>();
   let attempts = 0;
