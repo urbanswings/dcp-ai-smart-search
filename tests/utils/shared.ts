@@ -502,10 +502,11 @@ export async function runTestsAndSaveResults(params: {
       try {
         const { annotateSingleScreenshot } = require('../../annotate-screenshot.js');
         await annotateSingleScreenshot(screenshotPath, entry);
-        console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);
+        console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);        
       } catch (error) {
         console.warn(`⚠️  Annotation skipped: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
+      console.log("\n");
       
       uiResults.push(entry);
     }

@@ -358,36 +358,26 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
 async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
   try {
-    try {
-      await page
-        .locator("#emh-selected-filters-reset-button")
-        .waitFor({ state: "visible", timeout: 3000 });
-      console.debug(
-        "[DEBUG] Selected filters reset button visible, proceeding to extract selected filters..."
-      );
-    } catch (e) {
-      console.debug(
-        "[DEBUG] Selected filters reset button not visible before extraction, continuing with pill-based extraction..."
-      );
+    const resetButtonVisible = await page
+      .locator("#emh-selected-filters-reset-button")
+      .isVisible()
+      .catch(() => false);
+    if (resetButtonVisible) {
+      console.debug("[DEBUG] Selected filters reset button visible, proceeding to extract selected filters...");
+    } else {
+      console.debug("[DEBUG] Selected filters reset button not visible, continuing with pill-based extraction...");
     }
-
-    // Small delay to ensure all filter pills have time to render
-    await page.waitForTimeout(500);
 
     const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
 
     for (const selector of selectors) {
       const pills = page.locator(selector);
-      try {
-        await pills.first().waitFor({ state: "visible", timeout: 3000 });
-      } catch (e) {
+      const firstVisible = await pills.first().isVisible().catch(() => false);
+      if (!firstVisible) {
         break;
       }
 
-      // Wait for pills to stabilize (all rendered)
-      // await page.waitForTimeout(300);
-
-      const count = await pills.count();
+      const count = await pills.count().catch(() => 0);
       if (count === 0) {
         continue;
       }
@@ -398,7 +388,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       const pillTexts: string[] = [];
       for (let i = 0; i < count; i++) {
         const pill = pills.nth(i);
-        const innerText = await pill.innerText();
+        const innerText = await pill.innerText().catch(() => "");
         const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
         // If the pill innerText ends with ":" (no value captured), try several
         // alternative sources to find the value: aria-label, data attributes,
@@ -432,7 +422,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
               node = walker.nextNode();
             }
             return parts.join(" : ");
-          });
+          }).catch(() => "");
           const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
           pillTexts.push(normalizedRecovered.length > normalizedInnerText.length ? normalizedRecovered : innerText);
         } else {
