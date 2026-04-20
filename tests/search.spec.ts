@@ -552,6 +552,42 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );  
 
+  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
+      const matrixPath = path.join(__dirname, "data", "generated-facet-matrix-suite.json");
+      const matrixRaw = await fs.readFile(matrixPath, "utf-8");
+      const matrixData = JSON.parse(matrixRaw) as {
+        regressionQueryValues?: string[];
+        shouldFilterMap?: Record<string, any>;
+        informativeHintsByQuery?: Record<string, string[]>;
+      };
+
+      const matrixQueries = (matrixData.regressionQueryValues || []).map((value) => ({
+        value,
+        shouldRecommend: true,
+        shouldFilter: matrixData.shouldFilterMap?.[value] ?? {},
+        aiEvaluationHints: (matrixData.informativeHintsByQuery?.[value] ?? []).length
+          ? { value: matrixData.informativeHintsByQuery?.[value] ?? [], overwrite: true }
+          : {},
+      }));
+
+      const allQueries = mergeQueries(fixedQueries, matrixQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "facet-matrix-suite",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
