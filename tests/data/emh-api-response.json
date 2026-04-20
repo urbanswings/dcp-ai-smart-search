@@ -1,1 +1,2462 @@
-null
+{
+  "data": {
+    "search": {
+      "facets": {
+        "brand": {
+          "values": [
+            {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz",
+              "count": 56
+            },
+            {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Maybach",
+              "value": "Mercedes-Maybach",
+              "count": 8
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "modelIdentifier": {
+          "values": [
+            {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C",
+              "count": 5
+            },
+            {
+              "label": "Model",
+              "formattedValue": "CLE",
+              "value": "CLE",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "E-CLASS",
+              "value": "E",
+              "count": 1
+            },
+            {
+              "label": "Model",
+              "formattedValue": "EQS",
+              "value": "EQS",
+              "count": 12
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLA",
+              "value": "GLA",
+              "count": 3
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC",
+              "count": 7
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLE",
+              "value": "GLE",
+              "count": 11
+            },
+            {
+              "label": "Model",
+              "formattedValue": "GLS",
+              "value": "GLS",
+              "count": 16
+            },
+            {
+              "label": "Model",
+              "formattedValue": "S-CLASS",
+              "value": "S",
+              "count": 8
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "motorization": {
+          "values": [
+            {
+              "value": "CLE 300 4MATIC",
+              "count": 1
+            },
+            {
+              "value": "EQS 580 4MATIC",
+              "count": 5
+            },
+            {
+              "value": "GLC 200 4MATIC",
+              "count": 2
+            },
+            {
+              "value": "GLC 300 4MATIC",
+              "count": 2
+            },
+            {
+              "value": "GLE 300 d 4MATIC",
+              "count": 2
+            },
+            {
+              "value": "GLE 450 4MATIC",
+              "count": 1
+            },
+            {
+              "value": "GLS 450 4MATIC",
+              "count": 4
+            },
+            {
+              "value": "GLS 450 d 4MATIC",
+              "count": 3
+            },
+            {
+              "value": "GLS 600",
+              "count": 3
+            },
+            {
+              "value": "S 350 d",
+              "count": 3
+            },
+            {
+              "value": "S 580",
+              "count": 5
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "bodyType": {
+          "values": [
+            {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE",
+              "count": 14
+            },
+            {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER",
+              "count": 49
+            },
+            {
+              "label": "Body Type",
+              "value": "CABRIO_ROADSTER",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "stockType": {
+          "values": [
+            {
+              "value": "AVAILABLE",
+              "count": 64
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "price": {
+          "values": {
+            "min": 4972413.5,
+            "max": 32656400,
+            "count": 64
+          },
+          "facetType": "RANGE"
+        },
+        "monthlyRate": {
+          "values": {
+            "min": 51531.1,
+            "max": 482119.34,
+            "count": 64
+          },
+          "facetType": "RANGE"
+        },
+        "campaigns": {
+          "values": [
+            {
+              "formattedValue": "RCOC-5067 IN - UAT invisible campaign with FA-3000 Mandatory",
+              "value": "8d6c14c4",
+              "count": 1
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "fuelType": {
+          "values": [
+            {
+              "label": "Fuel Type",
+              "formattedValue": "Diesel",
+              "value": "DIESEL",
+              "count": 18
+            },
+            {
+              "label": "Fuel Type",
+              "formattedValue": "Electric",
+              "value": "ELECTRIC",
+              "count": 12
+            },
+            {
+              "label": "Fuel Type",
+              "formattedValue": "Petrol",
+              "value": "PETROL",
+              "count": 34
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "enginePowerHP": {
+          "values": {
+            "min": 163,
+            "max": 557,
+            "count": 55
+          },
+          "facetType": "RANGE"
+        },
+        "driveType": {
+          "values": [
+            {
+              "label": "Drive type",
+              "formattedValue": "",
+              "value": "UNDEFINED",
+              "count": 64
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "gearbox": {
+          "values": [
+            {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC",
+              "count": 64
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "modelYear": {
+          "facetType": "RANGE"
+        },
+        "upholstery": {
+          "values": [
+            {
+              "value": "17500f9",
+              "count": 1
+            },
+            {
+              "formattedValue": "Beige/Black",
+              "value": "UPHOLSTERY_COLOR_BEIGE_BLACK",
+              "count": 24
+            },
+            {
+              "formattedValue": "Beige/Brown",
+              "value": "UPHOLSTERY_COLOR_BEIGE_BROWN",
+              "count": 2
+            },
+            {
+              "formattedValue": "Beige/Grey",
+              "value": "UPHOLSTERY_COLOR_BEIGE_GREY",
+              "count": 6
+            },
+            {
+              "formattedValue": "Black",
+              "value": "UPHOLSTERY_COLOR_BLACK",
+              "count": 5
+            },
+            {
+              "formattedValue": "Brown",
+              "value": "UPHOLSTERY_COLOR_BROWN",
+              "count": 6
+            },
+            {
+              "formattedValue": "Brown/Black",
+              "value": "UPHOLSTERY_COLOR_BROWN_BLACK",
+              "count": 12
+            },
+            {
+              "formattedValue": "Grey",
+              "value": "UPHOLSTERY_COLOR_GREY",
+              "count": 8
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "packages": {
+          "values": [],
+          "facetType": "MULTI_VALUE"
+        },
+        "lines": {
+          "values": [],
+          "facetType": "MULTI_VALUE"
+        },
+        "equipment": {
+          "values": [],
+          "facetType": "MULTI_VALUE"
+        },
+        "color": {
+          "values": [
+            {
+              "formattedValue": "Black",
+              "value": "PAINT_COLOR_BLACK",
+              "count": 16
+            },
+            {
+              "formattedValue": "Blue",
+              "value": "PAINT_COLOR_BLUE",
+              "count": 11
+            },
+            {
+              "formattedValue": "Green",
+              "value": "PAINT_COLOR_GREEN",
+              "count": 5
+            },
+            {
+              "formattedValue": "Grey",
+              "value": "PAINT_COLOR_GREY",
+              "count": 9
+            },
+            {
+              "formattedValue": "Silver",
+              "value": "PAINT_COLOR_SILVER",
+              "count": 5
+            },
+            {
+              "formattedValue": "White",
+              "value": "PAINT_COLOR_WHITE",
+              "count": 18
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "generation": {
+          "values": [],
+          "facetType": "MULTI_VALUE"
+        },
+        "seats": {
+          "values": [
+            {
+              "value": 4,
+              "count": 1
+            },
+            {
+              "value": 5,
+              "count": 50
+            },
+            {
+              "value": 7,
+              "count": 13
+            }
+          ],
+          "facetType": "MULTI_VALUE"
+        },
+        "payload": {
+          "facetType": "RANGE"
+        },
+        "maximumWeight": {
+          "values": {
+            "min": 2010,
+            "max": 3385,
+            "count": 50
+          },
+          "facetType": "RANGE"
+        }
+      },
+      "navigation": {
+        "currentLimit": 12,
+        "currentPage": 0,
+        "currentSortingCode": "price-asc",
+        "totalPages": 6,
+        "totalResults": 64
+      },
+      "results": [
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "GPS aerial"
+              },
+              {
+                "label": "Apple CarPlay"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "H247-CKD_0582576193_IN_918046",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "191-105-0fbfea8b94c6270bfdad03fcce1c5df6",
+            "vxVehicleId": "918046",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/247787/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZgkfZbMw3SGtGeOtsd2HdcUfp8qXGEubmJ0l3otOB2NMEbApjtwI5ux5xQC31grkzNwtnm7jA7mhKV5XN%25vq4t9yLRgc6YaxPa9rH1ejqn8wsocoiZrb1M4FnKJTg95z36PDCLuSeWzQMtsd8hGcUfiM1XGE4JYJ0lgCVOB2PzFbAp7oMIkbX1ZxWTTg97vY6PD4%25mSeWseMtsdUvTcUfGryXGE09SJ08xLdSQjuROxAwHtlBlYO2EW5WtVt4jU0i3gjaZHpQ6LGy&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-16",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "120 kW (163 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "24778762",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "GLA 200",
+            "typeClass": "H247",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLA",
+              "value": "GLA"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "GPS aerial"
+              },
+              {
+                "label": "Apple CarPlay"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "H247-CKD_0582574642_IN_918004",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "787-105-0fbfea8b94c6270bfdad03fcce1c5df6",
+            "vxVehicleId": "918004",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/247787/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZYZ4ZbMw3SGtGeOtsd2HdcUfp8qXGEubmJ0l3otOB2NMEbApjtwI5ux5xQC31grkzNwtnm7jA7mhKV5XN%25vq4t9yLRgc6YaxPa9rH1ejqn8wsocoiZrb1M4FnKJTg95z36PDCLuSeWzQMtsd8hGcUfiM1XGE4JYJ0lgCVOB2PzFbAp7oMIkbX1ZxWTTg97vY6PD4%25mSeWseMtsdUvTcUfGryXGE09SJ08xLdSQjuROxAwHtlBlYO2EW5WtVt4jU0i3gjaZHpQ6LGy&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-09",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "120 kW (163 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "24778762",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "GLA 200",
+            "typeClass": "H247",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLA",
+              "value": "GLA"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "GPS aerial"
+              },
+              {
+                "label": "Apple CarPlay"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "H247-CKD_0582574590_IN_917950",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "149-105-0fbfea8b94c6270bfdad03fcce1c5df6",
+            "vxVehicleId": "917950",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/247787/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZg9pZbMw3SGtGeOtsd2HdcUfp8qXGEubmJ0l3otOB2NMEbApjtwI5ux5xQC31grkzNwtnm7jA7mhKV5XN%25vq4t9yLRgc6YaxPa9rH1ejqn8wsocoiZrb1M4FnKJTg95z36PDCLuSeWzQMtsd8hGcUfiM1XGE4JYJ0lgCVOB2PzFbAp7oMIkbX1ZxWTTg97vY6PD4%25mSeWseMtsdUvTcUfGryXGE09SJ08xLdSQjuROxAwHtlBlYO2EW5WtVt4jU0i3gjaZHpQ6LGy&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-10-04",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "120 kW (163 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "120 kW",
+                  "value": 120,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "163 HP",
+                  "value": 163,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "24778762",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "GLA 200",
+            "typeClass": "H247",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLA",
+              "value": "GLA"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MEMORY PACKAGE (DRIVER SEAT, STRG. COL., MIRROR)"
+              },
+              {
+                "label": "PRESAFE"
+              },
+              {
+                "label": "RAIN SENSOR"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "W206-CKD_0582581131_IN_917222",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "197-105-2b9a98d9692f6ab9d820db690ab715c8",
+            "vxVehicleId": "917222",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/206004/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZgk4ZbMw3SGtlajtsd2JQcUfpO6XGEunSJ0l36xOB2NbFbApj7oI5uxoNQC31C1kzNwzkm7jZeohKVFsW%25vq9JTyLRzc6Yax7aYrH1Kj1n8wsOfoiZUbXM4FG4fTg90zZ6PDBcpSeWAtutsd5cxcUfS8kXGEvaVJ0lLoZOB2Pr5bApedlI5usKYQC3UvWkzNL6Sm%25kbFDZEttsdHhdcUfa8MXGEsGEJ0lU0xOB2ZWnbAp5AXI5uC4JQC3zs3kze94pOy1qFm9KukSF4NTmj32v2bwbU15zsRG1gdPVyJ4CM&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-12-10",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Diesel",
+                "value": "DIESEL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "147 kW (200 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "20600462",
+            "bodyType": {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "C 220d",
+            "typeClass": "W206",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MEMORY PACKAGE (DRIVER SEAT, STRG. COL., MIRROR)"
+              },
+              {
+                "label": "PRESAFE"
+              },
+              {
+                "label": "RAIN SENSOR"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "W206-CKD_0582581143_IN_917254",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "842-104-2b9a98d9692f6ab9d820db690ab715c8",
+            "vxVehicleId": "917254",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/206004/806/iris.png?q=COSY-EU-100-1713d0VXqaWeqtyO67PobzIr3eWsrrCsdRRzwQZ69RZbMw3SGtlajtsd2JQcUfpO6XGEunSJ0l36xOB2NbFbApj7oI5uxoNQC31C1kzNwzkm7jZeohKVFsW%25vq9JTyLRzc6Yax7aYrH1Kj1n8wsOfoiZUbXM4FG4fTg90zZ6PDBcpSeWAtutsd5cxcUfS8kXGEvaVJ0lLoZOB2Pr5bApedlI5usKYQC3UvWkzNL6Sm%25kbFDZEttsdHhdcUfa8MXGEsGEJ0lU0xOB2ZWnbAp5AXI5uC4JQC3zs3kze94pOy1qFm9KukSF4NTmj32v2bwbU15zsRG1gdPVyJ4CM&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-12-10",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Diesel",
+                "value": "DIESEL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "147 kW (200 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "20600462",
+            "bodyType": {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "C 220d",
+            "typeClass": "W206",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MEMORY PACKAGE (DRIVER SEAT, STRG. COL., MIRROR)"
+              },
+              {
+                "label": "PRESAFE"
+              },
+              {
+                "label": "RAIN SENSOR"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "W206-CKD_0582579857_IN_919138",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "922-101-2ba02254ce7bff7d6a59f40a208c979d",
+            "vxVehicleId": "919138",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/206004/806/iris.png?q=COSY-EU-100-1713d0VXqaWFqtyO67PobzIr3eWsrrCsdRRzwQZUnRZbMw3SGtlajtsd2JQcUfpO6XGEubYJ0l36xOB2NbFbApj7oI5uxoNQC31C1kzNwzkm7jZeohKVFsW%25vq9JTyLRzc6Yax7aYrH1Kj1n8wsOfoiZUbXM4FGCwTg90t26PDBSpSeWAtRtsd5cpcUfS8kXGEvaVJ0lLoZOB2Pr5bApedlI5usKYQC3UvWkzNL6Sm%25kbFDZEttsdHhdcUfa8MXGEsGEJ0lU0xOB2ZWnbAp5AXI5uC4JQC3zs3kze94pOy1qFm9KukSF4NTmj32v2bwbU15zsRG1gdPVyJ4CM&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-11-25",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Diesel",
+                "value": "DIESEL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "147 kW (200 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "147 kW",
+                  "value": 147,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "200 HP",
+                  "value": 200,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "20600462",
+            "bodyType": {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "C 220d",
+            "typeClass": "W206",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MEMORY PACKAGE (DRIVER SEAT, STRG. COL., MIRROR)"
+              },
+              {
+                "label": "PRESAFE"
+              },
+              {
+                "label": "RAIN SENSOR"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "W206-CKD_0582579662_IN_918976",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "885-104-c0c7e2c5a1e0f2063200c6a3fb820f82",
+            "vxVehicleId": "918976",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/206042/806/iris.png?q=COSY-EU-100-1713d0VXqaWeqtyO67PobzIr3eWsrrCsdRRzwQZ6ZHZbMw3SGtlajtsd2JQcUfpO6XGEubYJ0l36xOB2NbFbApj7oI5uxoNQC31C1kzNwzkm7jZeohKVFsW%25vq9JTyLRzc6Yax7aYrH1Kj1n8wsOfoiZUbXM4FG4fTg90zZ6PDBcpSeWAtutsd5cxcUfS8kXGEvaVJ0lLoZOB2Pr5bApedlI5usKYQC3UvWkzNL6Sm%25kbFDZEttsdHhdcUfa8MXGEsGEJ0lU0xOB2ZWnbAp5AXI5uC4JQC3zs3kze94pOy1qFm9KukSV2NTmj32v2bwbU15zsRG1gdPVyJ4CM&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-11-27",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "150 kW (204 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "20604262",
+            "bodyType": {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "C 200",
+            "typeClass": "W206",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "MEMORY PACKAGE (DRIVER SEAT, STRG. COL., MIRROR)"
+              },
+              {
+                "label": "PRESAFE"
+              },
+              {
+                "label": "RAIN SENSOR"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "W206-CKD_0582579680_IN_918985",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "197-105-c0c7e2c5a1e0f2063200c6a3fb820f82",
+            "vxVehicleId": "918985",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/206042/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZgk4ZbMw3SGtlajtsd2JQcUfpO6XGEubYJ0l36xOB2NbFbApj7oI5uxoNQC31C1kzNwzkm7jZeohKVFsW%25vq9JTyLRzc6Yax7aYrH1Kj1n8wsOfoiZUbXM4FG4fTg90zZ6PDBcpSeWAtutsd5cxcUfS8kXGEvaVJ0lLoZOB2Pr5bApedlI5usKYQC3UvWkzNL6Sm%25kbFDZEttsdHhdcUfa8MXGEsGEJ0lU0xOB2ZWnbAp5AXI5uC4JQC3zs3kze94pOy1qFm9KukSV2NTmj32v2bwbU15zsRG1gdPVyJ4CM&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-11-28",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "150 kW (204 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "20604262",
+            "bodyType": {
+              "label": "Body Type",
+              "formattedValue": "Limousine",
+              "value": "LIMOUSINE"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "C 200",
+            "typeClass": "W206",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "C-CLASS",
+              "value": "C"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "Roof liner in black fabric"
+              },
+              {
+                "label": "PRODUCT PROTECTION - PARTI"
+              },
+              {
+                "label": "AMG EXTRA MODEL \"CARBONLOO"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "X254_0582570882_IN_919070",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "197-104-7dc56e57c6e987678a9f6b4d47389ff9",
+            "vxVehicleId": "919070",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/254651/805_055/iris.png?q=COSY-EU-100-1713d0VXqaWeqtyO67PobzIr3eWsrrCsdRRzwQZgk4ZbMw3SGtGyjtsd1JpcUfwFuXGEZT3J0l3YNOB2Ng2bApjPwI5uVmYQC3qhOkzNR%25km7jxcIhKV1XN%25vqwIdyLRZY2YaxF4YrH19gOn8wfOcoiZEb9M4Fl4lTg92gT6PDp7bSeWuKjtsd3vpcUfNOqXGEjnmJ0lVoxOB2qW1bApRd9I5uxQJQC30MrkzNBzkm7jAeohKV50F%25vqCuqyLRzQfYax7rSrH1Knln8wsOfoiZUbXM4FG4fTg90zZ6PDBSpSeWAtRtsd6hDcUfS8kXGEtnQJ0lcCVOB2a8ObApHiwI5u841QC3ivFkzN4obm7j06DhKVBKF%25vqArayLR53VYaxCk8rH1znRn8w7oboiZKeEM4FvsJTg9LUT6PDaGDSeWH0Utsd8BxcUfD%25NXGEWymJ0ldItOB2zr%25bAp7AXI5uK6MQC3vT6khQOZ9wfSSeWamWtsdLHocUfeUfXGEsGRJ0lUIZOB2GQnbAp0TbI5uBMRQC3ALwkzNWTnm7jK6ohKVvKQ%25vqLUkyLRaARYaxH5ErH18Mln8wiQfoiCpBxySfD2MpgFHx3fZbMFwRPRYEY7fHizWKfAN59S%25B8O&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-05-17",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "150 kW (204 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "25465162",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "805",
+            "motorization": "GLC 200 4MATIC",
+            "name": "GLC 200",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "Roof liner in black fabric"
+              },
+              {
+                "label": "PRODUCT PROTECTION - PARTI"
+              },
+              {
+                "label": "AMG EXTRA MODEL \"CARBONLOO"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "X254_0582570855_IN_919068",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "149-105-7dc56e57c6e987678a9f6b4d47389ff9",
+            "vxVehicleId": "919068",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/254651/805_055/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZg9pZbMw3SGtGyjtsd1JpcUfwFuXGEZT3J0l3YNOB2Ng2bApjPwI5uVmYQC3qhOkzNR%25km7jxcIhKV1XN%25vqwIdyLRZY2YaxF4YrH19gOn8wfOcoiZEb9M4Fl4lTg92gT6PDp7bSeWuKjtsd3vpcUfNOqXGEjnmJ0lVoxOB2qW1bApRd9I5uxQJQC30MrkzNBzkm7jAeohKV50F%25vqCuqyLRzQfYax7rSrH1Knln8wsOfoiZUbXM4FG4fTg90zZ6PDBSpSeWAtRtsd6hDcUfS8kXGEtnQJ0lcCVOB2a8ObApHiwI5u841QC3ivFkzN4obm7j06DhKVBKF%25vqArayLR53VYaxCk8rH1znRn8w7oboiZKeEM4FvsJTg9LUT6PDaGDSeWH0Utsd8BxcUfD%25NXGEWymJ0ldItOB2zr%25bAp7AXI5uK6MQC3vT6khQOZ9wfSSeWamWtsdLHocUfeUfXGEsGRJ0lUIZOB2GQnbAp0TbI5uBMRQC3ALwkzNWTnm7jK6ohKVvKQ%25vqLUkyLRaARYaxH5ErH18Mln8wiQfoiCpBxySfD2MpgFHx3fZbMFwRPRYEY7fHizWKfAN59S%25B8O&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-05-12",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "150 kW (204 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "150 kW",
+                  "value": 150,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "204 HP",
+                  "value": 204,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "25465162",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "805",
+            "motorization": "GLC 200 4MATIC",
+            "name": "GLC 200",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "Climatized Front Seats"
+              },
+              {
+                "label": "TRANSPARENT BONNET"
+              },
+              {
+                "label": "SMARTPHONE INTEGRATION PACKAGE"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "X254-CKD_0582575865_IN_917361",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "149-105-cd55f122d62ece854b536d3895b7956b",
+            "vxVehicleId": "917361",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/254647/805_055/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZg9pZbMw3SGtGyjtsd1JpcUfwFuXGEZT3J0l3YNOB2Ng2bApjPwI5uVmYQC3qhOkzNR%25km7jxcIhKV1XN%25vqwIdyLRZY2YaxF4YrH19gOn8wfOcoiZEb9M4Fl4lTg92gT6PDp7bSeWuKjtsd3vpcUfNOqXGEjnmJ0lVoxOB2qW1bApRd9I5uxQJQC30MrkzNBzkm7jAeohKV50F%25vqCuqyLRzQfYax7rSrH1Knln8wsOfoiZUbXM4FG4fTg90zZ6PDBSpSeWAtRtsd6hDcUfS8kXGEtnQJ0lcCVOB2a8ObApHiwI5u841QC3ivFkzN4obm7j06DhKVBKF%25vqArayLR53VYaxCk8rH1znRn8w7oboiZKeEM4FvsJTg9LUT6PDaGDSeWH0Utsd8BxcUfD%25NXGEWymJ0ldItOB2zr%25bAp7AXI5uK6MQC3vT6khQOZ9wfSSeWamWtsdLHocUfeUfXGEsGRJ0lUIZOB2GQnbAp0TbI5uBMRQC3ALwkzNWTnm7jK6ohKVvKQ%25vqLUkyLRaARYaxH5ErH18Mln8wiQfoiCpBxySfD2MpgFHx94ZbMFwRPRYEY7fHizWKfAN59S%25B8O&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-09-03",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "190 kW (258 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "190 kW",
+                  "value": 190,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "258 HP",
+                  "value": 258,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "190 kW",
+                  "value": 190,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "258 HP",
+                  "value": 258,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "25464762",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "805",
+            "motorization": "GLC 300 4MATIC",
+            "name": "GLC 300 4MATIC",
+            "typeClass": "X254",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC"
+            }
+          },
+          "wholesale": false
+        },
+        {
+          "characteristics": {
+            "stockCategories": [],
+            "highlights": [
+              {
+                "label": "Climatized Front Seats"
+              },
+              {
+                "label": "TRANSPARENT BONNET"
+              },
+              {
+                "label": "SMARTPHONE INTEGRATION PACKAGE"
+              }
+            ]
+          },
+          "emissionAndConsumption": {},
+          "identification": {
+            "code": "X254-CKD_0582578457_IN_918827",
+            "dcpProductType": "NCOS_D_STANDARD",
+            "mpcId": "GS0004800",
+            "variantId": "970-105-37497618446574c40d88a45f7944c323",
+            "vxVehicleId": "918827",
+            "allDealers": [
+              "GS0003510",
+              "GS0003514",
+              "GS0003515",
+              "GS00100520",
+              "GS00101210",
+              "GS00104432",
+              "GS00105876",
+              "GS00106951",
+              "GS00106974",
+              "GS00110405",
+              "GS00110454",
+              "GS00110487",
+              "GS00110583",
+              "GS00110593",
+              "GS00110898",
+              "GS00111211",
+              "GS00111218",
+              "GS00111493",
+              "GS00111494",
+              "GS00111495",
+              "GS00112576",
+              "GS00112622",
+              "GS00112849",
+              "GS00113026",
+              "GS00113033",
+              "GS00113143",
+              "GS00113144",
+              "GS00113145",
+              "GS00113190",
+              "GS00113191",
+              "GS00113210",
+              "GS00113215",
+              "GS0012795",
+              "GS0013520",
+              "GS0013523",
+              "GS0014966",
+              "GS0016662",
+              "GS0016773",
+              "GS0022804",
+              "GS0026735",
+              "GS0028183",
+              "GS0028360",
+              "GS0028694",
+              "GS0028759",
+              "GS0029950",
+              "GS0031832",
+              "GS0032835",
+              "GS0033806",
+              "GS0034627",
+              "GS0035386",
+              "GS0035708",
+              "GS0035879",
+              "GS0036196",
+              "GS0038268",
+              "GS0043348",
+              "GS0044979",
+              "GS0045195",
+              "GS0045196",
+              "GS0045198",
+              "GS0046167",
+              "GS0047004",
+              "GS0049232",
+              "GS0049636",
+              "GS0050229",
+              "GS0054571",
+              "GS0061625",
+              "GS0061747",
+              "GS0061761",
+              "GS0089685",
+              "GS0093123",
+              "GS0094439"
+            ]
+          },
+          "images": {
+            "default": "https://media-int.oneweb.mercedes-benz.com/images/dynamic/stage/IN/254647/806/iris.png?q=COSY-EU-100-1713d0VXqaW7qtyO67PobzIr3eWsrrCsdRRzwQZUVvZbMw3SGtxX2tsd1ZpcUfwMuXGEuiEJ0l34xOB2NQ%25bApjkXI5uVmIQC3qSOkzNRtum7jxODhKV1%25E%25vqw8%25yLRZiXYaxWXSrH1dJZn8wf8foiZEioM4FlCJTg92z36PDp7lSeWuXjtsd3YQcUfNrqXGEj9RJ0lVDZOB2qbcbApUnyI5uG5IQC30grkzNBUwm7jA2jhKV5bW%25vqCyTyLRzYfYaxPXWrH1eJtn8ws8WoiZU51M4FGTlTg906V6PDMkFSeWTaItsd6YbcUfSANXGEvaXJ0lLHxOB2a8RbApH7wI5u8rJQC3UM7kzNGzwm7j0yvhKVBpN%25vqAIayLR5YVYaxCrJrH1zgdn8w7PcoiZKeoM4FvsFTg9LUe6PDaGqSeWFmutsd9hQcUfDO6XGE5ymJ0lC0tOB2zMnbAp7oMIkbX1ZxWTTg9vQ96PDKLrSeWgeWtsdPsVcUfeO1XGEsbYJ0lUoJOB2GnVbAp0KxI5u9oYQC3zMrkzN7zbm7jKeIhKVv0V%25vqLBdyLRanfYaxHbWrHAlGqhTWFEnliwLqZ81JnwxV4V%25d%25CWLH59zW0uBZTmGaX&BKGND=9&IMGT=P27&POV=BE030&cp=lNXAeHSGoQ5P9nFlhA8PTA"
+          },
+          "productionDate": "2025-11-14",
+          "preProductionVehicle": false,
+          "stock": {
+            "stockType": "AVAILABLE"
+          },
+          "stockCategory": "MPC_STOCK",
+          "technicalInformation": {
+            "engine": {
+              "fuelType": {
+                "label": "Fuel Type",
+                "formattedValue": "Petrol",
+                "value": "PETROL"
+              },
+              "power": {
+                "label": "Power",
+                "formattedValue": "190 kW (258 HP)",
+                "combustionKw": {
+                  "label": "Power",
+                  "formattedValue": "190 kW",
+                  "value": 190,
+                  "unit": "kW"
+                },
+                "combustionHp": {
+                  "label": "Power in hp",
+                  "formattedValue": "258 HP",
+                  "value": 258,
+                  "unit": "HP"
+                },
+                "combinedKw": {
+                  "label": "System output in kW",
+                  "formattedValue": "190 kW",
+                  "value": 190,
+                  "unit": "kW"
+                },
+                "combinedHp": {
+                  "label": "System output in hp",
+                  "formattedValue": "258 HP",
+                  "value": 258,
+                  "unit": "HP"
+                }
+              }
+            },
+            "transmission": {
+              "label": "Transmission",
+              "formattedValue": "Automatic",
+              "value": "AUTOMATIC"
+            }
+          },
+          "vehicleModel": {
+            "baumuster": "25464762",
+            "bodyType": {
+              "label": "Body Type",
+              "value": "SUV_OFFROADER"
+            },
+            "brand": {
+              "label": "Brand",
+              "formattedValue": "Mercedes-Benz",
+              "value": "Mercedes-Benz"
+            },
+            "category": {
+              "label": "Vehicle Category",
+              "formattedValue": "Passenger Car",
+              "value": "PC"
+            },
+            "modelYearCode": "806",
+            "name": "GLC 300 4MATIC",
+            "typeClass": "X254",
+            "vehicleClass": {
+              "label": "Model",
+              "formattedValue": "GLC",
+              "value": "GLC"
+            }
+          },
+          "wholesale": false
+        }
+      ]
+    }
+  }
+}

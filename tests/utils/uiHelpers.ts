@@ -812,8 +812,10 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
     url = url.replace(/\/new-car\//, "/used-car/");
   }
   await page.goto(url);
-  await handleCookieBanner(page);
-  await handlePostalCodePopUp(page);
+  await Promise.all([
+    handleCookieBanner(page),
+    handlePostalCodePopUp(page)
+  ]);
   return page;
 }
 
@@ -863,23 +865,29 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
     const submitButton = popup.locator(".region-picker-content__submit-button");
 
     if (await trigger.isVisible({ timeout: 10000 }).catch(() => false)) {
-      const isExpanded = await trigger.getAttribute("aria-expanded");
+      const isExpanded = await trigger.getAttribute("aria-expanded").catch(() => null);
       if (isExpanded !== "true") {
-        await trigger.click();
+        await trigger.click().catch((e) => {
+          console.debug(`[DEBUG] Trigger click failed: ${e?.message || e}`);
+        });
       }
     }
 
-    await popup.waitFor({ state: "visible", timeout: 10000 });
-    await regionPicker.waitFor({ state: "attached", timeout: 10000 });
-    await postalCodeInput.waitFor({ state: "visible", timeout: 10000 });
-    await postalCodeInput.fill("");
-    await postalCodeInput.fill(postalCode);
-    await submitButton.waitFor({ state: "visible", timeout: 10000 });
-    await submitButton.click();
-  } catch (e) {
-    console.debug(
-      `[DEBUG] Postal code pop-up handling skipped: ${e instanceof Error ? e.message : e}`
-    );
+    await popup.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+    await regionPicker.waitFor({ state: "attached", timeout: 10000 }).catch(() => {});
+    await postalCodeInput.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+    await postalCodeInput.fill("").catch(() => {});
+    await postalCodeInput.fill(postalCode).catch(() => {});
+    await submitButton.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+    await submitButton.click().catch(() => {});
+  } catch (e: any) {
+    if (e?.message?.includes("Target page, context or browser has been closed")) {
+      console.debug("[DEBUG] Page closed during postal code pop-up handling, continuing...");
+    } else {
+      console.debug(
+        `[DEBUG] Postal code pop-up handling skipped: ${e instanceof Error ? e.message : e}`
+      );
+    }
   }
 }
 
