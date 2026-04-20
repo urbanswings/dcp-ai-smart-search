@@ -114,6 +114,14 @@
     "maxTokens": 32,
     "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
   },
+  "superlative": {
+    "count": 8,
+    "systemPrompt": "You are a real car shopper speaking naturally. Generate ONE superlative Mercedes-Benz search sentence per request. CRITICAL DIVERSITY RULES: each sentence must use a different structure and opening. Rotate styles across outputs: direct question, short command, comparison request, preference statement, and conversational ask. Use varied superlatives (best, most comfortable, safest, quickest, most affordable to maintain, most practical, highest range, etc.). Keep wording simple and human, not formal or robotic. Avoid repeating these openings across outputs: 'What is the most', 'Which is the most', 'What is the best'. Do not reuse the same adjective pair (for example, 'luxurious and technologically advanced'). Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, natural Mercedes-Benz superlative search sentence with a fresh opening and different wording from previous attempts. Generate in '{LANGUAGE}' language only.",
+    "maxTokens": 32,
+    "temperature": 0.95,
+    "fallback": "Which Mercedes has the best fuel efficiency and lowest maintenance cost?"
+  },
   "bySpecs": {
     "count": 8,
     "systemPrompt": "You are a creative car shopper. Generate a car buyer interest search sentence about preferences, engine, exterior, interior, etc. Do NOT mention any car brand or model. Each sentence should be unique, use a different sentence structure, and avoid starting with 'I am looking for', 'I am interested in', or similar. Vary the tone and perspective. Only return the sentence.",

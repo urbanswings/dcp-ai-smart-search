@@ -591,6 +591,49 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       processAndLogApiResult,
     });
   });
+
+  test("Superlative", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.superlative;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback, temperature } = aiPromptData.superlative || {};
+      const aiEvaluationRules = aiEvaluationRulesData.superlative || {};
+      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
+        count,
+        systemPrompt,
+        userPromptTemplate,
+        maxTokens,
+        fallback,
+        undefined,
+        temperature
+      );
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "superlative",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
 });
 
 test.describe("AI Smart Search - Vehicles Non-MB", () => {

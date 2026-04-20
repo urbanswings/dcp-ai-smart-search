@@ -195,5 +195,21 @@
       "Do not fail only because the recommended model does not perfectly match every stated preference, or because the result count is unexpectedly high or low. Evaluate whether the response meaningfully addresses the user's preferences with Mercedes-Benz vehicles."
     ],
     "overwrite": true
+  },
+  "superlative": {
+    "value": [
+      "Respond ONLY with: PASS if the assistant response is suitable for a superlative query (best/most/safest/fastest/most luxurious/etc.) in Mercedes-Benz Smart Search.",
+      "PASS if the response stays within Mercedes-Benz automotive context and provides at least one recommendation, suggestion, or relevant Mercedes-Benz option.",
+      "PASS if the response acknowledges the superlative intent and presents a filtered or curated set of relevant options (for example body-type/performance-aligned options such as coupes for a fastest query), even without naming a single definitive winner.",
+      "PASS if the response gives a clear Mercedes-Benz recommendation even when the exact superlative cannot be objectively guaranteed (e.g., inventory changes, market variance), as long as it remains relevant to the requested superlative intent.",
+      "PASS if the response offers a close alternative Mercedes-Benz recommendation when an exact superlative match is not available.",
+      "PASS if the response uses inventory-aware phrasing (e.g., 'currently available', 'matching your request') and provides relevant options instead of declining.",
+      "FAIL if the response declines/refuses the request without providing any Mercedes-Benz recommendation or alternative.",
+      "FAIL if the response is off-topic (non-automotive) or does not remain Mercedes-Benz-focused.",
+      "FAIL if the response recommends competitor brands or non-Mercedes-Benz vehicles.",
+      "FAIL if the response is incoherent, unsafe, or offensive.",
+      "Do not fail only because wording is conversational, because the response does not explicitly repeat the word 'Mercedes-Benz', or because multiple options are provided instead of a single best model."
+    ],
+    "overwrite": true
   }
 }

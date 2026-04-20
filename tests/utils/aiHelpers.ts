@@ -167,7 +167,8 @@ export async function generateUniqueQueries(
   userPromptTemplate: string,
   maxTokens: number = 50,
   fallback: string = "",
-  maxAttempts: number = 10
+  maxAttempts: number = 10,
+  temperature: number = OPENAI_DEFAULT_TEMPERATURE
 ): Promise<string[]> {
   if (!systemPrompt || !userPromptTemplate) return [];
   const queries: string[] = [];
@@ -180,10 +181,15 @@ export async function generateUniqueQueries(
   while (queries.length < count && attempts < maxAttempts) {
     attempts++;
     try {
+      const previousSamples = queries.slice(-4).map((q) => `- ${q}`).join("\n");
+      const diversityHint = previousSamples
+        ? `\n\nAvoid repeating phrasing similar to these previous outputs:\n${previousSamples}\nUse a different opening and sentence structure.`
+        : "";
       query = await generateOpenAIQuery(
         systemPrompt,
-        userPromptTemplate,
-        maxTokens
+        `${userPromptTemplate}${diversityHint}`,
+        maxTokens,
+        temperature
       );
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();
