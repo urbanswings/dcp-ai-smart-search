@@ -38,3 +38,4 @@ build/
 # Local realtime test data
 tests/data/emh-api-response.json
 tests/data/generated-facet-matrix-suite.json
+tests/data/generated-facet-complete-suite.json

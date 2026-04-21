@@ -4,6 +4,10 @@ const path = require("path");
 const rootDir = process.cwd();
 const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
 const outputPath = path.resolve(rootDir, process.env.MATRIX_OUTPUT || "tests/data/generated-facet-matrix-suite.json");
+const completeOutputPath = path.resolve(
+  rootDir,
+  process.env.COMPLETE_OUTPUT || "tests/data/generated-facet-complete-suite.json"
+);
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
@@ -28,6 +32,187 @@ function getFacetValues(facets, facetKey) {
     .map((entry) => entry?.value)
     .filter((value) => value !== undefined && value !== null && String(value).toUpperCase() !== "UNDEFINED");
   return [...new Set(extracted)];
+}
+
+function isOpaqueValue(value) {
+  const normalized = String(value || "").trim();
+  return /^[0-9a-f]{7,}$/i.test(normalized);
+}
+
+function getFacetListEntries(facets, facetKey) {
+  const values = facets?.[facetKey]?.values;
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  const out = [];
+  const seen = new Set();
+  for (const entry of values) {
+    const rawValue = entry?.value;
+    if (rawValue === undefined || rawValue === null) {
+      continue;
+    }
+    if (String(rawValue).toUpperCase() === "UNDEFINED") {
+      continue;
+    }
+
+    const formattedValue = entry?.formattedValue || String(rawValue);
+    if (!entry?.formattedValue && isOpaqueValue(rawValue)) {
+      continue;
+    }
+
+    const key = `${String(rawValue)}::${String(formattedValue)}`;
+    if (seen.has(key)) {
+      continue;
+    }
+    seen.add(key);
+
+    out.push({
+      rawValue,
+      formattedValue: String(formattedValue).trim(),
+    });
+  }
+  return out;
+}
+
+function getFacetRange(facets, facetKey) {
+  const values = facets?.[facetKey]?.values;
+  if (!values || typeof values !== "object" || Array.isArray(values)) {
+    return null;
+  }
+  const min = Number(values.min);
+  const max = Number(values.max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    return null;
+  }
+  return { min, max };
+}
+
+function formatNumberForQuery(value) {
+  return Math.round(Number(value)).toLocaleString("en-US");
+}
+
+function toCompleteQuery(facetKey, formattedValue, rawValue) {
+  if (facetKey === "modelIdentifier") {
+    return `list me all ${formattedValue}`;
+  }
+  if (facetKey === "upholstery") {
+    return `i'm interested in ${formattedValue} interior`;
+  }
+  if (facetKey === "price") {
+    return `vehicles around price of $${formatNumberForQuery(rawValue)}`;
+  }
+  // if (facetKey === "monthlyRate") {
+  //   return `vehicles around monthly rate of $${formatNumberForQuery(rawValue)}`;
+  // }
+  if (facetKey === "color") {
+    return `show me ${formattedValue.toLowerCase()} cars`;
+  }
+  if (facetKey === "fuelType") {
+    return `show me ${formattedValue.toLowerCase()} cars`;
+  }
+  if (facetKey === "bodyType") {
+    return `show me ${toQueryLabel(facetKey, rawValue)}`;
+  }
+  if (facetKey === "brand") {
+    return `list me all ${formattedValue}`;
+  }
+  // if (facetKey === "seats") {
+  //   return `show me ${formattedValue}-seater vehicles`;
+  // }
+  return `show me vehicles with ${facetDisplayName(facetKey)} ${formattedValue}`;
+}
+
+function addCompleteQuery(queryMap, query, facetKey, filterValue, shouldFilter) {
+  if (queryMap.has(query)) {
+    return;
+  }
+  queryMap.set(query, {
+    value: query,
+    facet: facetKey,
+    filterValue: String(filterValue),
+    shouldRecommend: true,
+    shouldFilter,
+  });
+}
+
+function createCompleteValueHints(facetKey, valueLabel) {
+  const facetName = facetDisplayName(facetKey);
+  return [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
+    `Respond with "PASS" if the response clearly acknowledges or applies the requested ${facetName} value: ${valueLabel}.`,
+    `If the response ignores or contradicts the requested ${facetName} value (${valueLabel}), respond with "FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
+  ];
+}
+
+function toCompleteHintValueLabel(facetKey, formattedValue, rawValue) {
+  if (["bodyType", "fuelType", "color"].includes(facetKey)) {
+    return toHintLabel(facetKey, rawValue);
+  }
+  return String(formattedValue || rawValue);
+}
+
+function createCompleteRangeHints(facetKey, numericValue) {
+  const facetName = facetDisplayName(facetKey);
+  const rounded = Math.round(Number(numericValue));
+  return [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} range intent.`,
+    `Respond with "PASS" if the response references vehicles around ${facetName} ${rounded} (exact number not required).`,
+    `If the response ignores the requested ${facetName} target (${rounded}) or provides clearly unrelated values, respond with "FAIL: missing or incorrect ${facetName} target (${rounded})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
+  ];
+}
+
+function buildComplete(data) {
+  const facets = data?.data?.search?.facets || {};
+  const queryMap = new Map();
+  const informativeHintsByQuery = {};
+
+  for (const facetKey of Object.keys(facets)) {
+    const listEntries = getFacetListEntries(facets, facetKey);
+    for (const entry of listEntries) {
+      const query = toCompleteQuery(facetKey, entry.formattedValue, entry.rawValue);
+      addCompleteQuery(
+        queryMap,
+        query,
+        facetKey,
+        entry.formattedValue || entry.rawValue,
+        { [facetKey]: [entry.rawValue] }
+      );
+      informativeHintsByQuery[query] = createCompleteValueHints(
+        facetKey,
+        toCompleteHintValueLabel(facetKey, entry.formattedValue, entry.rawValue)
+      );
+    }
+
+    const range = getFacetRange(facets, facetKey);
+    if (range) {
+      const points = [range.min, Math.round((range.min + range.max) / 2), range.max];
+      const uniquePoints = [...new Set(points)];
+      for (const value of uniquePoints) {
+        const query = toCompleteQuery(facetKey, String(value), value);
+        addCompleteQuery(
+          queryMap,
+          query,
+          facetKey,
+          value,
+          { [facetKey]: { min: value, max: value } }
+        );
+        informativeHintsByQuery[query] = createCompleteRangeHints(facetKey, value);
+      }
+    }
+  }
+
+  const queries = Array.from(queryMap.values());
+
+  return {
+    generatedAt: new Date().toISOString(),
+    sourcePath: path.relative(rootDir, sourcePath),
+    queryCount: queries.length,
+    regressionQueries: queries,
+    informativeHintsByQuery,
+  };
 }
 
 function toQueryLabel(facetKey, value) {
@@ -206,13 +391,18 @@ function buildMatrix(data) {
 function main() {
   const sourceData = readJson(sourcePath);
   const generated = buildMatrix(sourceData);
+  const generatedComplete = buildComplete(sourceData);
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, `${JSON.stringify(generated, null, 2)}\n`, "utf8");
+  fs.mkdirSync(path.dirname(completeOutputPath), { recursive: true });
+  fs.writeFileSync(completeOutputPath, `${JSON.stringify(generatedComplete, null, 2)}\n`, "utf8");
 
   console.log(`[matrix-generator] source: ${path.relative(rootDir, sourcePath)}`);
   console.log(`[matrix-generator] output: ${path.relative(rootDir, outputPath)}`);
   console.log(`[matrix-generator] queries: ${generated.queryCount}`);
+  console.log(`[complete-generator] output: ${path.relative(rootDir, completeOutputPath)}`);
+  console.log(`[complete-generator] queries: ${generatedComplete.queryCount}`);
 }
 
 main();

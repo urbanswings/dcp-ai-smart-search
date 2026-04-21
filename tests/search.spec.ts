@@ -75,7 +75,7 @@ test.beforeAll(async () => {
   aiEvaluationRulesData = JSON.parse(aiEvaluationRulesDataContent);
 
   // Clean up old screenshots (keep last 2 weeks)
-  await cleanOldScreenshots(14);
+  // await cleanOldScreenshots(14);
 
   // Fetch EMH GraphQL API response and save to file
   try {
@@ -129,9 +129,6 @@ test.describe("AI Smart Search - Sanity Test", () => {
   test.afterEach(async ({}, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       console.error(`Test failed: ${testInfo.title}`);
-      if (testInfo.error) {
-        console.error(testInfo.error);
-      }
     } else {
       console.log(`Test passed: ${testInfo.title}`);
     }
@@ -252,10 +249,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
   test.afterEach(async ({}, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
-      console.error(`Test failed: ${testInfo.title}`);
-      if (testInfo.error) {
-        console.error(testInfo.error);
-      }
+      console.warn(`Test failed: ${testInfo.title}`);
     } else {
       console.log(`Test passed: ${testInfo.title}`);
     }
@@ -425,17 +419,41 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   );
 
   test("By Filter Facets (complete)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      // Fetch facets dynamically from API based on environment settings
-      const project = getProject();
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete;
-      const facets = await fetchAndConvertFacets(
-        emhApiResponse,
-        dcpApiResponse,
-        project
-      );
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsComplete);
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const completePath = path.join(__dirname, "data", "generated-facet-complete-suite.json");
+      const completeRaw = await fs.readFile(completePath, "utf-8");
+      const completeData = JSON.parse(completeRaw) as {
+        regressionQueries?: Array<{
+          value: string;
+          facet?: string;
+          filterValue?: string;
+          shouldFilter?: Record<string, any>;
+          shouldRecommend?: boolean;
+          aiEvaluationHints?: { value: string[]; overwrite: boolean };
+        }>;
+        informativeHintsByQuery?: Record<string, string[]>;
+      };
+
+      const queries = isFixedQueriesOnly() ? [] : (completeData.regressionQueries || []);
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      const allQueries = mergeQueries(fixedQueries, queries).map((query: any) => {
+        const queryValue = typeof query === "string" ? query : query?.value;
+        const generatedHints = queryValue
+          ? completeData.informativeHintsByQuery?.[queryValue] || []
+          : [];
+
+        if (generatedHints.length > 0) {
+          return typeof query === "string"
+            ? {
+                value: query,
+                aiEvaluationHints: { value: generatedHints, overwrite: true },
+              }
+            : {
+                ...query,
+                aiEvaluationHints: { value: generatedHints, overwrite: true },
+              };
+        }
+
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
         }
@@ -706,9 +724,6 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test.afterEach(async ({}, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       console.error(`Test failed: ${testInfo.title}`);
-      if (testInfo.error) {
-        console.error(testInfo.error);
-      }
     } else {
       console.log(`Test passed: ${testInfo.title}`);
     }
@@ -906,9 +921,6 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test.afterEach(async ({}, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       console.error(`Test failed: ${testInfo.title}`);
-      if (testInfo.error) {
-        console.error(testInfo.error);
-      }
     } else {
       console.log(`Test passed: ${testInfo.title}`);
     }
@@ -1584,9 +1596,6 @@ test.describe("AI Smart Search - Special Scenarios", () => {
   test.afterEach(async ({}, testInfo) => {
     if (testInfo.status !== testInfo.expectedStatus) {
       console.error(`Test failed: ${testInfo.title}`);
-      if (testInfo.error) {
-        console.error(testInfo.error);
-      }
     } else {
       console.log(`Test passed: ${testInfo.title}`);
     }
