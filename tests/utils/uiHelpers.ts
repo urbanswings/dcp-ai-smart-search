@@ -836,7 +836,8 @@ export async function handleCookieBanner(page: Page): Promise<void> {
 export async function handlePostalCodePopUp(page: Page): Promise<void> {
   try {
     const trigger = page.locator('[data-test-id="header-integration-item-emh-region-picker"]');
-    if (!await trigger.isVisible({ timeout: 10000 }).catch(() => false)) {
+    await trigger.waitFor({ state: "visible", timeout: 30000 }).catch(() => false);
+    if (!await trigger.isVisible().catch(() => false)) {
       console.debug("[DEBUG] Region picker trigger not visible, skipping postal code pop-up handling.");
       return;
     }

@@ -34,3 +34,7 @@ npm-debug.log*
 # Build output
 dist/
 build/
+
+# Local realtime test data
+tests/data/emh-api-response.json
+tests/data/generated-facet-matrix-suite.json
