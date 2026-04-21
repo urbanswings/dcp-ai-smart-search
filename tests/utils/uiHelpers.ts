@@ -358,9 +358,10 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
 async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
   try {
+    console.debug("[DEBUG] Attempting to extract selected filters from UI...");
     const resetButtonVisible = await page
       .locator("#emh-selected-filters-reset-button")
-      .isVisible()
+      .waitFor({ state: "visible", timeout: 5000 })
       .catch(() => false);
     if (resetButtonVisible) {
       console.debug("[DEBUG] Selected filters reset button visible, proceeding to extract selected filters...");
@@ -371,6 +372,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
 
     for (const selector of selectors) {
+      console.debug(`[DEBUG] Checking for filter pills with selector "${selector}"...`);
       const pills = page.locator(selector);
       const firstVisible = await pills.first().isVisible().catch(() => false);
       if (!firstVisible) {
@@ -597,7 +599,7 @@ export async function processAndLogUiResult({
       )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`
     );
   }
-  if (facetMismatches.length > 0) {
+  if (testFacets && facetMismatches.length > 0) {
     addFailureReason(facetMismatches.join(" | "));
   }
 
@@ -823,8 +825,9 @@ export async function handleCookieBanner(page: Page): Promise<void> {
   try {
     await page
       .locator(".cmm-cookie-banner__content")
-      .waitFor({ state: "visible", timeout: 60000 });
+      .waitFor();
     await page.click(".button--accept-all");
+    console.debug("[DEBUG] Cookie banner accepted.");
   } catch (e) {
     console.debug("[DEBUG] Cookie banner not visible, continuing execution...");
   }
@@ -832,9 +835,12 @@ export async function handleCookieBanner(page: Page): Promise<void> {
 
 export async function handlePostalCodePopUp(page: Page): Promise<void> {
   try {
-    const trigger = page.locator(
-      '[data-test-id="header-integration-item-emh-region-picker"]'
-    );
+    const trigger = page.locator('[data-test-id="header-integration-item-emh-region-picker"]');
+    if (!await trigger.isVisible({ timeout: 10000 }).catch(() => false)) {
+      console.debug("[DEBUG] Region picker trigger not visible, skipping postal code pop-up handling.");
+      return;
+    }
+
     const popup = page.locator('[data-test-id="region-picker-module-flyout"]');
     const regionPicker = popup.locator("dh-io-emh-region-picker");
 
@@ -986,12 +992,8 @@ export async function performUISmartSearchAndGetResults(
   let retries = 0;
   let resultText = "";
   const startTime = Date.now();
-  const successResultLocator = page.locator(".smart-search__bubble p").first();
-  const errorResultLocator = page
-    .locator(
-      ".smart-search__notification.wbx-notification--error .wbx-notification__content"
-    )
-    .first();
+  const successResultLocator = page.locator(".smart-search__bubble p");
+  const errorResultLocator = page.locator(".smart-search__notification.wbx-notification--error .wbx-notification__content");
   while (retries < 3) {
     try {
       console.debug(
@@ -999,24 +1001,20 @@ export async function performUISmartSearchAndGetResults(
           retries + 1
         }/3)...`
       );
-      await successResultLocator
-        .or(errorResultLocator)
-        .first()
-        .waitFor();
+      await successResultLocator.waitFor({ state: "visible", timeout: 10000 }).catch(() => false);
+      if (await successResultLocator.isVisible()) {
+        resultText = await successResultLocator.innerText();
+        break;
+      }
 
       const errorVisible = await errorResultLocator
         .isVisible()
         .catch(() => false);
       if (errorVisible) {
         resultText = await errorResultLocator.innerText();
-        console.warn(
-          `[DEBUG] UI showing internal error message: '${resultText}'`
-        );
+        console.warn(`[DEBUG] UI showing internal error message: '${resultText}'`);
         break;
-      }
-
-      resultText = await successResultLocator.innerText();
-      break;
+      }      
     } catch (e) {
       console.info(`[DEBUG] Error waiting for results: ${e}`);
       retries++;

@@ -26,7 +26,7 @@ function getFacetValues(facets, facetKey) {
   }
   const extracted = values
     .map((entry) => entry?.value)
-    .filter((value) => value !== undefined && value !== null);
+    .filter((value) => value !== undefined && value !== null && String(value).toUpperCase() !== "UNDEFINED");
   return [...new Set(extracted)];
 }
 
@@ -83,10 +83,24 @@ function toHintLabel(facetKey, value) {
     return token.toLowerCase();
   }
   if (facetKey === "fuelType") {
-    return String(value).toLowerCase().replace(/_/g, " ");
+    const map = {
+      DIESEL: "diesel cars",
+      ELECTRIC: "electric cars",
+      PETROL: "petrol cars",
+      PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
+    };
+    return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
   if (facetKey === "bodyType") {
-    return String(value).toLowerCase().replace(/_/g, " ");
+    const map = {
+      LIMOUSINE: "sedans",
+      SUV_OFFROADER: "SUVs",
+      HATCHBACK: "hatchbacks",
+      COUPE: "coupes",
+      CABRIO_ROADSTER: "cabriolets",
+      PEOPLE_CARRIER: "people carriers",
+    };
+    return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
   return String(value);
 }
@@ -111,8 +125,8 @@ function createExclusionHints(facetKey, excludedValue, allowedValues) {
     `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and recommends vehicles for this exclusion intent.`,
     `Respond with \"PASS\" when the requested ${facetName} exclusion is respected: exclude ${excludedText}.`,
     `Respond with \"PASS\" when any mentioned ${facetName} values align with the allowed inventory set: ${allowedText}.`,
-    `Respond with \"FAIL\" if the response is off-topic, unsafe, or refuses without a valid safety reason.`,
-    `Respond with \"FAIL\" if the response includes the excluded ${facetName} value (${excludedText}) as part of recommendations.`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
+    `If the response includes the excluded ${facetName} value (${excludedText}) as part of recommendations, respond with "FAIL: included excluded ${facetName} (${excludedText})".`,
   ];
 }
 
@@ -124,8 +138,8 @@ function createInclusionHints(facetKey, a, b) {
     `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and gives recommendations for this multi-value intent.`,
     `Respond with \"PASS\" if the response addresses both requested ${facetName} values: ${aText} and ${bText}.`,
     `Respond with \"PASS\" if the response is concise but still explicitly references both requested ${facetName} values, optionally with result counts.`,
-    `Respond with \"FAIL\" if one of the requested ${facetName} values is ignored without acknowledgement.`,
-    `Respond with \"FAIL\" if the response is off-topic, unsafe, or refuses without a valid safety reason.`,
+    `If one of the requested ${facetName} values is ignored, respond with "FAIL: missing ${facetName} value" and specify which value (${aText} or ${bText}) was not addressed.`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
   ];
 }
 
