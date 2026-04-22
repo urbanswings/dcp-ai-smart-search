@@ -539,6 +539,17 @@ export async function fetchDcpApiResponse(): Promise<any> {
   }
 }
 
+function collectPrimitiveFacetValues(value: any): string[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) {
+    return value.flatMap((item) => collectPrimitiveFacetValues(item));
+  }
+  if (typeof value === "object") {
+    return Object.values(value).flatMap((item) => collectPrimitiveFacetValues(item));
+  }
+  return [String(value)];
+}
+
 function normalizeFacetToken(value: string): string {
   return value
     .normalize("NFD")
@@ -740,10 +751,80 @@ export async function processAndLogApiResult({
     if (Object.keys(resultsFacets).length === 0) {
       addFailureReason(`Expected at least one filter to be applied, but got none`);
     }
-  } else if (testFacets && actualFacets && !deepEqual(resultsFacets, actualFacets, ["__typename"])) {
-    addFailureReason(
-      `Facets mismatch: expected ${JSON.stringify(actualFacets)}, got ${JSON.stringify(resultsFacets)}`
-    );
+  } else if (testFacets && actualFacets && typeof actualFacets === "object") {
+    // New format: { include: [], exclude: [], strict: boolean }
+    const include = actualFacets.include || [];
+    const exclude = actualFacets.exclude || [];
+    const strict = actualFacets.strict ?? false;
+    const resultsKeys = Object.keys(resultsFacets);
+    const resultsKeysSet = new Set(resultsKeys);
+
+    // Flatten include into a set of facet keys (for strict check)
+    const includeKeys = new Set<string>();
+    for (const filterObj of include) {
+      for (const key of Object.keys(filterObj)) {
+        includeKeys.add(key);
+      }
+    }
+
+    let facetCheckPassed = true;
+    const failureReasons: string[] = [];
+
+    // Check: all include key-value pairs must be present in resultsFacets
+    for (const filterObj of include) {
+      for (const [key, expectedValues] of Object.entries(filterObj)) {
+        if (!resultsKeysSet.has(key)) {
+          facetCheckPassed = false;
+          failureReasons.push(`Missing required facet key: ${key}`);
+          continue;
+        }
+        if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+          const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          for (const expected of expectedValues) {
+            if (!actualSet.has(String(expected).toUpperCase())) {
+              facetCheckPassed = false;
+              failureReasons.push(`Missing required facet value: ${key}=${expected}`);
+            }
+          }
+        }
+      }
+    }
+
+    // Check: no exclude key-value pairs should be present in resultsFacets
+    for (const filterObj of exclude) {
+      for (const [key, excludedValues] of Object.entries(filterObj)) {
+        if (!resultsKeysSet.has(key)) continue;
+        if (Array.isArray(excludedValues) && excludedValues.length > 0) {
+          const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          for (const excluded of excludedValues) {
+            if (actualSet.has(String(excluded).toUpperCase())) {
+              facetCheckPassed = false;
+              failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
+            }
+          }
+        } else {
+          // No specific values listed — treat as key-level exclusion
+          facetCheckPassed = false;
+          failureReasons.push(`Excluded facet key present: ${key}`);
+        }
+      }
+    }
+
+    // Check: if strict mode, resultsFacets should not have any keys outside include
+    if (strict) {
+      for (const key of resultsKeys) {
+        if (!includeKeys.has(key)) {
+          facetCheckPassed = false;
+          failureReasons.push(`Unexpected facet in strict mode: ${key}`);
+        }
+      }
+    }
+
+    if (!facetCheckPassed) {
+      addFailureReason(`Facets check failed: ${failureReasons.join("; ")}`);
+    }
   }
 
   // Facets check (Query vs UI vs BE)

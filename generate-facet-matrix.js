@@ -422,8 +422,7 @@ function pairwise(values) {
 function buildMatrix(data) {
   const facets = data?.data?.search?.facets || {};
 
-  const regressionQueryValues = [];
-  const shouldFilterMap = {};
+  const regressionQueries = [];
   const informativeHintsByQuery = {};
 
   for (const facetKey of FACET_ORDER) {
@@ -438,8 +437,11 @@ function buildMatrix(data) {
         continue;
       }
       const query = `all vehicles except ${toQueryLabel(facetKey, excludedValue)}`;
-      regressionQueryValues.push(query);
-      shouldFilterMap[query] = { [facetKey]: allowedValues };
+      regressionQueries.push({
+        value: query,
+        shouldRecommend: true,
+        shouldFilter: { [facetKey]: allowedValues },
+      });
       informativeHintsByQuery[query] = createExclusionHints(facetKey, excludedValue, allowedValues);
     }
 
@@ -449,22 +451,36 @@ function buildMatrix(data) {
       const andQuery = `show me only ${left} and ${right}`;
       const orQuery = `show me only ${left} or ${right}`;
 
-      regressionQueryValues.push(andQuery, orQuery);
-      shouldFilterMap[andQuery] = { [facetKey]: [a, b] };
-      shouldFilterMap[orQuery] = { [facetKey]: [a, b] };
+      regressionQueries.push(
+        {
+          value: andQuery,
+          shouldRecommend: true,
+          shouldFilter: { [facetKey]: [a, b] },
+        },
+        {
+          value: orQuery,
+          shouldRecommend: true,
+          shouldFilter: { [facetKey]: [a, b] },
+        }
+      );
       informativeHintsByQuery[andQuery] = createInclusionHints(facetKey, a, b);
       informativeHintsByQuery[orQuery] = createInclusionHints(facetKey, a, b);
     }
   }
 
-  const dedupedQueries = [...new Set(regressionQueryValues)];
+  const dedupedMap = new Map();
+  for (const query of regressionQueries) {
+    if (!dedupedMap.has(query.value)) {
+      dedupedMap.set(query.value, query);
+    }
+  }
+  const dedupedQueries = Array.from(dedupedMap.values());
 
   return {
     generatedAt: new Date().toISOString(),
     sourcePath: path.relative(rootDir, sourcePath),
     queryCount: dedupedQueries.length,
-    regressionQueryValues: dedupedQueries,
-    shouldFilterMap,
+    regressionQueries: dedupedQueries,
     informativeHintsByQuery,
   };
 }

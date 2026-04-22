@@ -44,6 +44,13 @@ import {
   resolveFixedQueriesFilePath,
   cleanOldScreenshots,
 } from "./utils/shared";
+import {
+  GeneratedFacetCompleteSuite,
+  GeneratedFacetMatrixSuite,
+  normalizeFixedQueries,
+  normalizeGeneratedFacetCompleteSuite,
+  normalizeGeneratedFacetMatrixSuite,
+} from "./utils/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
@@ -422,51 +429,15 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const completePath = path.join(__dirname, "data", "generated-facet-complete-suite.json");
       const completeRaw = await fs.readFile(completePath, "utf-8");
-      const completeData = JSON.parse(completeRaw) as {
-        regressionQueries?: Array<{
-          value: string;
-          facet?: string;
-          filterValue?: string;
-          shouldFilter?: Record<string, any>;
-          shouldRecommend?: boolean;
-          aiEvaluationHints?: { value: string[]; overwrite: boolean };
-        }>;
-        informativeHintsByQuery?: Record<string, string[]>;
-      };
-
-      const queries = isFixedQueriesOnly() ? [] : (completeData.regressionQueries || []);
+      const completeData = JSON.parse(completeRaw) as GeneratedFacetCompleteSuite;
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query: any) => {
-        const queryValue = typeof query === "string" ? query : query?.value;
-        const generatedHints = queryValue
-          ? completeData.informativeHintsByQuery?.[queryValue] || []
-          : [];
-
-        if (generatedHints.length > 0) {
-          return typeof query === "string"
-            ? {
-                value: query,
-                aiEvaluationHints: { value: generatedHints, overwrite: true },
-              }
-            : {
-                ...query,
-                aiEvaluationHints: { value: generatedHints, overwrite: true },
-              };
-        }
-
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : normalizeGeneratedFacetCompleteSuite(completeData, fallbackHints);
+      const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -574,20 +545,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
       const matrixPath = path.join(__dirname, "data", "generated-facet-matrix-suite.json");
       const matrixRaw = await fs.readFile(matrixPath, "utf-8");
-      const matrixData = JSON.parse(matrixRaw) as {
-        regressionQueryValues?: string[];
-        shouldFilterMap?: Record<string, any>;
-        informativeHintsByQuery?: Record<string, string[]>;
-      };
-
-      const matrixQueries = (matrixData.regressionQueryValues || []).map((value) => ({
-        value,
-        shouldRecommend: true,
-        shouldFilter: matrixData.shouldFilterMap?.[value] ?? {},
-        aiEvaluationHints: (matrixData.informativeHintsByQuery?.[value] ?? []).length
-          ? { value: matrixData.informativeHintsByQuery?.[value] ?? [], overwrite: true }
-          : {},
-      }));
+      const matrixData = JSON.parse(matrixRaw) as GeneratedFacetMatrixSuite;
+      const matrixQueries = normalizeGeneratedFacetMatrixSuite(matrixData);
 
       const allQueries = mergeQueries(fixedQueries, matrixQueries);
 
@@ -856,20 +815,17 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Non-MB Features", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.nonMbFeatures;
       const aiEvaluationRules = aiEvaluationRulesData.nonMbFeatures || {};
-      const allQueries = mergeQueries(fixedQueries, []).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const allQueries = mergeQueries(
+        normalizeFixedQueries(fixedQueries, {
+          shouldRecommend: false,
+          shouldFilter: {},
+          aiEvaluationHints: fallbackHints,
+        }),
+        []
+      );
 
       await runTestsAndSaveResults({
         queries: allQueries,
