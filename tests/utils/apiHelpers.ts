@@ -612,14 +612,12 @@ export async function processAndLogApiResult({
   results,
   testDescribe,
   testTitle,
-  customEval,
   expectedStatusCode,
 }: {
   query: any;
   results: ApiSearchResult;
   testDescribe: string;
   testTitle: string;
-  customEval?: (resultData: any) => Promise<string>;
   expectedStatusCode?: number;
 }): Promise<any> {
   const testFacets = process.env.TEST_FACETS === "true";
@@ -689,15 +687,11 @@ export async function processAndLogApiResult({
         addFailureReason("Payload is zero");
       }
 
-      if (customEval) {
-        openaiEvaluation = await customEval(results.results);
-      } else {
-        openaiEvaluation = await evaluateSearchResult(
-          smartSearchResponse,
-          aiEvaluationHints,
-          query?.value ?? query
-        );
-      }      
+      openaiEvaluation = await evaluateSearchResult(
+        smartSearchResponse,
+        aiEvaluationHints,
+        query?.value ?? query
+      );
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
     // Check for non-400 errors (400 is now treated as valid response with message_to_user)
@@ -726,15 +720,11 @@ export async function processAndLogApiResult({
       addFailureReason("Payload is zero");
     }
 
-    if (customEval) {
-      openaiEvaluation = await customEval(results.results);
-    } else {
-      openaiEvaluation = await evaluateSearchResult(
-        smartSearchResponse,
-        aiEvaluationHints,
-        query?.value ?? query
-      );
-    }    
+    openaiEvaluation = await evaluateSearchResult(
+      smartSearchResponse,
+      aiEvaluationHints,
+      query?.value ?? query
+    );
   }
 
   // Facets check (BE vs test-data)

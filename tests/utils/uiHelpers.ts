@@ -462,15 +462,13 @@ export async function processAndLogUiResult({
   results,
   testDescribe,
   testTitle,
-  customEval,
   page,
 }: {
   query: any;
   results: UiSearchResult;
   testDescribe: string;
   testTitle: string;
-  customEval?: (resultText: string) => Promise<string>;
-  page?: Page;
+  page: Page;
 }): Promise<any> {
   const testFacets = process.env.TEST_FACETS === "true";
   const actualInput = query?.value ?? query;
@@ -497,9 +495,7 @@ export async function processAndLogUiResult({
     );
   })();
   let openaiEvaluation = (
-    customEval
-      ? await customEval(smartSearchMessage)
-      : await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
+    await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
   )?.trim();
   let resultCount = 0;
   let hasError = false;
@@ -532,17 +528,15 @@ export async function processAndLogUiResult({
 
   // Extract UI vehicle count if page is provided
   let uiVehicleCount: number | null = null;
-  if (page) {
-    try {
-      const uiCountElement = page.locator('[data-test-id="srp__header-results__result-amount__number"]');
-      const uiCountText = await uiCountElement.innerText();
-      uiVehicleCount = parseInt(uiCountText.replace(/[^0-9]/g, ''), 10);
-      if (isNaN(uiVehicleCount)) {
-        uiVehicleCount = null;
-      }
-    } catch (e) {
-      console.debug("[DEBUG] Could not extract UI vehicle count:", e);
+  try {
+    const uiCountElement = page.locator('[data-test-id="srp__header-results__result-amount__number"]');
+    const uiCountText = await uiCountElement.innerText();
+    uiVehicleCount = parseInt(uiCountText.replace(/[^0-9]/g, ''), 10);
+    if (isNaN(uiVehicleCount)) {
+      uiVehicleCount = null;
     }
+  } catch (e) {
+    console.debug("[DEBUG] Could not extract UI vehicle count:", e);
   }
   if (uiVehicleCount === 0 && resultCount > 0) {
     addFailureReason("UI is zero");

@@ -238,6 +238,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
     results: any;
     testDescribe: string;
     testTitle: string;
+    page: any;
   }) => Promise<any>;
   performApiSmartSearchAndGetResults?: (query: any) => Promise<any>;
   processAndLogApiResult?: (params: {
@@ -277,6 +278,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
           results,
           testDescribe,
           testTitle,
+          page,
         });
         resultsForQuery.push(entry);
       }
@@ -449,6 +451,7 @@ export async function runTestsAndSaveResults(params: {
     results: any;
     testDescribe: string;
     testTitle: string;
+    page: any;
   }) => Promise<any>;
   performApiSmartSearchAndGetResults?: (query: any) => Promise<any>;
   processAndLogApiResult?: (params: {
@@ -487,6 +490,7 @@ export async function runTestsAndSaveResults(params: {
         results,
         testDescribe,
         testTitle,
+        page,
       });      
       
       // Take screenshot after each query (viewport only)
