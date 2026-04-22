@@ -1,5 +1,9 @@
 const fs = require("fs");
 const path = require("path");
+const dotenv = require("dotenv");
+const { AzureOpenAI } = require("openai");
+
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const rootDir = process.cwd();
 const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
@@ -8,6 +12,7 @@ const completeOutputPath = path.resolve(
   rootDir,
   process.env.COMPLETE_OUTPUT || "tests/data/generated-facet-complete-suite.json"
 );
+const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
@@ -92,7 +97,7 @@ function formatNumberForQuery(value) {
   return Math.round(Number(value)).toLocaleString("en-US");
 }
 
-function toCompleteQuery(facetKey, formattedValue, rawValue) {
+function fallbackCompleteQuery(facetKey, formattedValue, rawValue) {
   if (facetKey === "modelIdentifier") {
     return `list me all ${formattedValue}`;
   }
@@ -102,9 +107,9 @@ function toCompleteQuery(facetKey, formattedValue, rawValue) {
   if (facetKey === "price") {
     return `vehicles around price of $${formatNumberForQuery(rawValue)}`;
   }
-  // if (facetKey === "monthlyRate") {
-  //   return `vehicles around monthly rate of $${formatNumberForQuery(rawValue)}`;
-  // }
+  if (facetKey === "monthlyRate") {
+    return `vehicles around monthly rate of $${formatNumberForQuery(rawValue)}`;
+  }
   if (facetKey === "color") {
     return `show me ${formattedValue.toLowerCase()} cars`;
   }
@@ -117,9 +122,9 @@ function toCompleteQuery(facetKey, formattedValue, rawValue) {
   if (facetKey === "brand") {
     return `list me all ${formattedValue}`;
   }
-  // if (facetKey === "seats") {
-  //   return `show me ${formattedValue}-seater vehicles`;
-  // }
+  if (facetKey === "seats") {
+    return `show me ${formattedValue}-seater vehicles`;
+  }
   return `show me vehicles with ${facetDisplayName(facetKey)} ${formattedValue}`;
 }
 
@@ -134,6 +139,77 @@ function addCompleteQuery(queryMap, query, facetKey, filterValue, shouldFilter) 
     shouldRecommend: true,
     shouldFilter,
   });
+  console.log("===============================");
+  console.log(`[complete-generator] filter: ${facetKey} : ${filterValue}`);
+  console.log(`[complete-generator] query: ${query}`);
+  console.log("===============================");
+}
+
+function getOpenAiClient() {
+  const apiKey = process.env.NEXUS_API_KEY;
+  const endpoint = process.env.NEXUS_API_ENDPOINT;
+  const apiVersion = process.env.NEXUS_API_VERSION || "2024-08-01-preview";
+  if (!apiKey || !endpoint) {
+    return null;
+  }
+  return new AzureOpenAI({
+    apiKey,
+    endpoint,
+    apiVersion,
+  });
+}
+
+function loadCompletePromptConfig() {
+  try {
+    const promptData = JSON.parse(fs.readFileSync(aiPromptsPath, "utf8"));
+    return promptData?.byFilterFacetsComplete || {};
+  } catch {
+    return {};
+  }
+}
+
+function buildCompleteFilterText(facetKey, formattedValue, rawValue) {
+  if (facetKey === "price") {
+    return `filter is of category 'price' with value of '${formatNumberForQuery(rawValue)}'`;
+  }
+  return `filter is of category '${facetDisplayName(facetKey)}' with value of '${formattedValue}'`;
+}
+
+async function generateOpenAiQuery(client, systemPrompt, userPrompt, maxTokens) {
+  const completion = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: userPrompt },
+    ],
+    temperature: 0.7,
+    max_tokens: maxTokens || 32,
+  });
+  return completion?.choices?.[0]?.message?.content?.trim() || "";
+}
+
+async function toCompleteQuery(facetKey, formattedValue, rawValue, aiContext) {
+  const fallback = fallbackCompleteQuery(facetKey, formattedValue, rawValue);
+  if (!aiContext?.client || !aiContext?.promptConfig?.systemPrompt || !aiContext?.promptConfig?.userPromptTemplate) {
+    return fallback;
+  }
+
+  try {
+    const filterText = buildCompleteFilterText(facetKey, formattedValue, rawValue);
+    const systemPrompt = String(aiContext.promptConfig.systemPrompt).replace(/\{LANGUAGE\}/g, aiContext.language);
+    const userPrompt = String(aiContext.promptConfig.userPromptTemplate)
+      .replace(/\{LANGUAGE\}/g, aiContext.language)
+      .replace(/\{filterText\}/g, filterText);
+    const generated = await generateOpenAiQuery(
+      aiContext.client,
+      systemPrompt,
+      userPrompt,
+      aiContext.promptConfig.maxTokens
+    );
+    return generated || fallback;
+  } catch {
+    return fallback;
+  }
 }
 
 function createCompleteValueHints(facetKey, valueLabel) {
@@ -164,15 +240,20 @@ function createCompleteRangeHints(facetKey, numericValue) {
   ];
 }
 
-function buildComplete(data) {
+async function buildComplete(data) {
   const facets = data?.data?.search?.facets || {};
   const queryMap = new Map();
   const informativeHintsByQuery = {};
+  const aiContext = {
+    client: getOpenAiClient(),
+    promptConfig: loadCompletePromptConfig(),
+    language: process.env.LANGUAGE || "en",
+  };
 
   for (const facetKey of Object.keys(facets)) {
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
-      const query = toCompleteQuery(facetKey, entry.formattedValue, entry.rawValue);
+      const query = await toCompleteQuery(facetKey, entry.formattedValue, entry.rawValue, aiContext);
       addCompleteQuery(
         queryMap,
         query,
@@ -191,7 +272,7 @@ function buildComplete(data) {
       const points = [range.min, Math.round((range.min + range.max) / 2), range.max];
       const uniquePoints = [...new Set(points)];
       for (const value of uniquePoints) {
-        const query = toCompleteQuery(facetKey, String(value), value);
+        const query = await toCompleteQuery(facetKey, String(value), value, aiContext);
         addCompleteQuery(
           queryMap,
           query,
@@ -388,10 +469,10 @@ function buildMatrix(data) {
   };
 }
 
-function main() {
+async function main() {
   const sourceData = readJson(sourcePath);
   const generated = buildMatrix(sourceData);
-  const generatedComplete = buildComplete(sourceData);
+  const generatedComplete = await buildComplete(sourceData);
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
   fs.writeFileSync(outputPath, `${JSON.stringify(generated, null, 2)}\n`, "utf8");
@@ -405,4 +486,7 @@ function main() {
   console.log(`[complete-generator] queries: ${generatedComplete.queryCount}`);
 }
 
-main();
+main().catch((error) => {
+  console.error(`[generator] failed: ${error?.message || error}`);
+  process.exitCode = 1;
+});
