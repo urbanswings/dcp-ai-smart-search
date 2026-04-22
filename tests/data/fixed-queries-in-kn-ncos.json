@@ -60,14 +60,359 @@
   ],
   "byFixedQuery": [
     {
-      "value": "ಡೀজಲ್ ಅಥವಾ ಹೈಬ್ರಿಡ್ ಅಲ್ಲ — ಇಂಧನ-ದಕ್ಷ ಕಾರುಗಳ ಪಟ್ಟಿ ರಚಿಸಿ",
+      "value": "ನನಗೆ ಸೆಡಾನ್‌ಗಳನ್ನು ತೋರಿಸು",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response presents sedan/Limousine body-type vehicles or confirms finding sedans matching the request.",
+          "Do NOT fail if the exact vehicle count varies — pass as long as the Limousine/sedan body type filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಲಭ್ಯವಿರುವ ವಾಹನಗಳನ್ನು ನನಗೆ ತೋರಿಸಿ",
+      "shouldRecommend": true,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",
+          "Do NOT fail if the exact vehicle count varies — pass as long as the AVAILABLE stockType filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಶೀಘ್ರದಲ್ಲೇ ಬರುವ ವಾಹನಗಳನ್ನು ನನಗೆ ತೋರಿಸಿ",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "IN_PIPELINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by IN_PIPELINE stock type and presents vehicles that are coming soon or in the pipeline.",
+          "Do NOT fail if the exact vehicle count varies or is low — pass as long as the IN_PIPELINE stockType filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಕ್ಲಾ 200",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "CLA"
+            ],
+            "motorization": [
+              "CLA 200"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents vehicles from the CLA model line in English.",
+          "FAIL if the response maps the query to a completely different model identifier (e.g., A-Class instead of CLA), OR if the response language does not match the expected market locale (English for AU)."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನ್ನ ಬಜೆಟ್ AUD80,000 ಅಡಿಯಲ್ಲಿದೆ",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "price": {
+              "max": 80000
+            }
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of AUD 80,000 and presents available vehicles within that budget.",
+          "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನಿಮ್ಮ ಬಳಿ ಕೂಪ್ ಇದೆಯೇ? ಇದು ಎರಡು ಬಾಗಿಲಿನ ಕಾರು",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "COUPE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response confirms finding coupe (two-door) vehicles and presents results filtered by coupe body type.",
+          "Do NOT fail if the count is low due to limited inventory — pass as long as the coupe filter is correctly applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನಾನು ಕುಟುಂಬ ಕಾರನ್ನು ಹುಡುಕುತ್ತಿದ್ದೇನೆ",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response recommends a spacious, family-suitable vehicle (SUV, MPV, or larger sedan) and presents relevant listings.",
+          "Do NOT fail due to brand value missing from the UI filter display (uiSelectedFiltersKV) — pass if the correct model/body type is applied in background facets even if the brand label is absent in the UI filter."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ವೇಗದ ಸ್ಪೋರ್ಟ್ಸ್ ಕಾರನ್ನು ಹುಡುಕಿ",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents a Mercedes-AMG or high-performance sports car variant.",
+          "Do NOT fail solely because the model identifier differs from the expected (e.g., GLE AMG instead of CLA AMG) — inventory varies. Do NOT fail due to a UI/BE fuel type mismatch (e.g., missing DIESEL in UI filter when PETROL is correctly applied). FAIL only if no AMG or performance variant is recommended."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಕೇವಲ ನೇರಳೆ ಕಾರುಗಳು",
+      "shouldRecommend": true,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges that purple cars are unavailable (or no exact match found) and then redirects to other available vehicle options.",
+          "FAIL if the response claims to have found purple cars with a purple color filter applied, or if it presents no alternative vehicle listing whatsoever."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನಗೆ ಎಲೆಕ್ಟ್ರಿಕ್ ವಾಹನ ಬೇಕು",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response finds and presents electric vehicles filtered by electric fuel type.",
+          "Do NOT fail due to brand value missing from UI filter display (uiSelectedFiltersKV) — pass as long as the ELECTRIC fuel type filter is correctly applied in BE facets and the response highlights electric models."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನಗೆ ಉತ್ತಮ ಮತ್ತು ಸೊಗಸಾದ ಕಾಂಪ್ಯಾಕ್ಟ್ ವಾಹನ ಬೇಕು",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings — acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",
+          "Do NOT fail due to UI brand/model filter mapping discrepancies — pass if the response successfully presents vehicles that reasonably match a 'stylish and compact' description."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನೀವು 2020 ಮಾಡೆಲ್ ಅಥವಾ ಸಿಲ್ವರ್ ಕಾರನ್ನು ಹೊಂದಿದ್ದೀರಾ?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_SILVER"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by silver color and presents available silver vehicles, even if the year (2020) aspect is not separately filterable.",
+          "Do NOT fail if the response addresses only the color (silver) part of the OR query — year-based filtering may not be supported. FAIL only if neither the color nor the year is addressed and no relevant vehicles are shown."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನಿಮ್ಮ ಬಳಿ ಬಿಳಿ ಕಾರು ಇದೆಯೇ?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_WHITE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by white color and presents available white vehicles, even if the 2020 year filter is combined or omitted.",
+          "Do NOT fail if the response focuses primarily on the color (white) aspect of the OR condition — this is acceptable behavior when year filtering is not independently supported."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನೀವು ನನಗೆ ಶಿಫಾರಸು ನೀಡಬಹುದೇ?",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response provides a concrete vehicle recommendation and presents at least one specific Mercedes-Benz model.",
+          "Do NOT fail if the recommended model differs from the expected (e.g., EQB instead of EQS) — inventory may vary. Do NOT fail due to brand value missing from UI filter display. Pass as long as a genuine recommendation is made with listed vehicles."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನಾನು ಕನ್ವರ್ಟಿಬಲ್ ವಾಹನಗಳಲ್ಲಿ ಆಸಕ್ತಿ ಹೊಂದಿದ್ದೇನೆ",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "CABRIO_ROADSTER"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response (a) filters by CABRIO_ROADSTER body type and presents convertibles, OR (b) acknowledges no convertibles are currently available and redirects to other vehicle options.",
+          "Do NOT fail if the CABRIO_ROADSTER filter was not applied but the response still presents vehicles after acknowledging the convertible request — fallback to general listings is acceptable."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಉತ್ತಮ ಕಾರು ತಯಾರಕರು ಯಾರು?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to rank or compare car manufacturers and redirects the user to Mercedes-Benz vehicle information or recommendations.",
+          "FAIL if the response directly ranks or lists car manufacturers (e.g., claims a specific brand is the best) without first declining the out-of-scope request."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ವಾಹನಗಳಿಗೆ ನಿಮ್ಮ ವಾಪಸಾತಿ ನೀತಿ ಏನು?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response (a) states it cannot provide return policy details and redirects to vehicle search or Mercedes-Benz team, OR (b) acknowledges a limitation on policy info but shows vehicle listings as a redirect.",
+          "Do NOT fail if the response shows vehicles alongside a limitation notice — this is an acceptable fallback. FAIL only if it directly describes specific return policy terms."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನೀವು ಹಣಕಾಸು ಆಯ್ಕೆಗಳನ್ನು ನೀಡುತ್ತೀರಾ?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide financing information and redirects to the Mercedes-Benz team or vehicle options.",
+          "FAIL if the response directly provides financing terms, rates, or conditions instead of declining the request."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನಾನು ಟೆಸ್ಟ್ ಡ್ರೈವ್ ಅನ್ನು ನಿಗದಿಪಡಿಸಬಹುದೇ?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to schedule a test drive and redirects the user to the Mercedes-Benz team or vehicle listings.",
+          "FAIL if the response directly attempts to book or confirm a test drive appointment."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಯಾವುದೇ ಪ್ರಚಾರವಿದೆಯೇ?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಹೊಸ ವಾಹನಗಳಿಗೆ ನೀವು ಯಾವ ವಾರಂಟಿಗಳನ್ನು ಒದಗಿಸುತ್ತೀರಿ?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response (a) states it cannot provide warranty details and redirects to vehicle search or Mercedes-Benz team, OR (b) acknowledges the limitation but still presents vehicle listings as a redirect.",
+          "Do NOT fail if the response shows vehicles alongside a warranty limitation notice — this is an acceptable fallback. FAIL only if it directly describes specific warranty terms."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಡೀಸೆಲ್ ಅಥವಾ ಹೈಬ್ರಿಡ್ ಅಲ್ಲದ ಕಾರುಗಳನ್ನು ಶಾರ್ಟ್‌ಲಿಸ್ಟ್ ಮಾಡಿ",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
         "exclude": [
           {
             "fuelType": [
-              "PETROL",
+              "DIESEL",
               "HYBRID"
             ]
           }
@@ -78,6 +423,182 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response filters for petrol and/or electric fuel types and explicitly excludes (or does not include) diesel and hybrid options.",
           "FAIL if the response shows only diesel or hybrid results without applying the petrol/electric-only filter. Do NOT fail solely because specific model names differ from expected — inventory may vary."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಸುಧಾರಿತ ಸುರಕ್ಷತಾ ವೈಶಿಷ್ಟ್ಯಗಳು ಮತ್ತು ಕಡಿಮೆ ಮೈಲೇಜ್ ಹೊಂದಿರುವ ಕಾರುಗಳನ್ನು ಹುಡುಕಿ",
+      "shouldRecommend": false,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges that filtering by advanced safety features or mileage is not directly supported, OR presents general vehicle listings with a note about the limitation.",
+          "Do NOT fail if no specific safety feature or mileage filter is applied — these are not filterable attributes and fallback to a general vehicle listing is the correct behavior."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನೀವು ನನಗೆ BMW X5 ಅನ್ನು ಪಟ್ಟಿ ಮಾಡಬಹುದೇ?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to list the BMW X5 (a non-Mercedes-Benz vehicle) and redirects the user to Mercedes-Benz options.",
+          "Do NOT fail if Mercedes-Benz vehicle listings are shown alongside the decline — redirecting to the MB inventory is acceptable. FAIL only if the response directly shows or describes the BMW X5."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನ್ನ ಆದೇಶ ಎಲ್ಲಿದೆ? ನಾನು ಅದನ್ನು ಕಳೆದ ವಾರ ಖರೀದಿಸಿದೆ ಆದರೆ ಯಾವುದೇ ನವೀಕರಣಗಳನ್ನು ಸ್ವೀಕರಿಸಲಿಲ್ಲ",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines the order status inquiry and redirects to Mercedes-Benz vehicle search or team contact.",
+          "FAIL if the response implies it can retrieve or provide order tracking information."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಯಾರೂ ನನ್ನನ್ನು ಇನ್ನೂ ಸಂಪರ್ಕಿಸಿಲ್ಲ",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges it cannot handle contact or follow-up requests and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "FAIL if the response directly offers to arrange a callback or confirms a follow-up contact action."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಹತ್ತಿರದ ಅತ್ಯುತ್ತಮ ಪಿಜ್ಜಾ ರೆಸ್ಟೋರೆಂಟ್‌ಗಳನ್ನು ಶಿಫಾರಸು ಮಾಡಿ",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines the off-topic (non-automotive) request and redirects to Mercedes-Benz vehicle assistance.",
+          "FAIL if the response provides or attempts to provide restaurant recommendations."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಮುಝೆ ಬತಾಯೋ ಕಿ ಭಾರತ್ ಕಿ ಸದ್ಕೋಂವ್ಗೆ ಕೌನ್ ಸಾ ಮೋಡಲ್ ಅಚ್ಚಾ ಹೌದಾ?",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response recommends a Mercedes-Benz model suitable for Indian road conditions and presents relevant vehicle listings — response in Hindi or English is acceptable.",
+          "Do NOT fail due to brand value missing from UI filter display (uiSelectedFiltersKV) — pass if the correct model/fuel type is applied in BE facets. The specific model may vary by inventory; any suitable MB model is acceptable."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನ್ನ ಕಾರಿನ ಆಯ್ಕೆಗಳನ್ನು ಚರ್ಚಿಸಲು 123-456-7890 ಗೆ ಕರೆ ಮಾಡಿ",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to make phone calls or use the provided number, and offers to assist with vehicle information instead.",
+          "FAIL if the response acknowledges the phone number in a way that implies it will be contacted, or if it offers a direct callback."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "<p>ನಾನು ಆರ್ಡರ್ ಮಾಡಲು ಬಯಸುತ್ತೇನೆ</p>",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response treats the query as a plain-text order request (ignoring any HTML markup), declines to process the order, and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "Do NOT fail if the response ignores the HTML tags entirely — stripping markup and treating the intent as 'I want to place an order' is correct handling."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "CLA 911 GTS ಕುರಿತು ಇನ್ನಷ್ಟು ಹೇಳಿ",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to provide information on the non-existent 'CLA 911 GTS' (a conflicting brand/model) and redirects to the Mercedes-Benz CLA lineup or other available models.",
+          "FAIL if the response fabricates information about a 'CLA 911 GTS' or treats it as a valid Mercedes-Benz model."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "35 ವರ್ಷದ ವಿವಾಹಿತ ಮಹಿಳೆ ಸ್ಯಾಲಿ ಜಾಕ್ಸನ್‌ಗೆ ಸೂಕ್ತವಾದ ಕಾರು",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to filter or profile vehicles based on personal demographic information (name, age, marital status) and redirects to general vehicle recommendations or search.",
+          "FAIL if the response directly uses the personal demographic details (age, marital status, name) as filtering or recommendation criteria."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನನಗೆ ಇಂಧನ ದಕ್ಷ ಕಾರುಗಳು ಬೇಕು",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents fuel-efficient vehicles — such as electric, hybrid, or low-emission models — and applies a relevant fuel type filter (e.g., ELECTRIC, HYBRID_PETROL, or similar).",
+          "Do NOT fail if the exact fuel type label differs slightly (e.g., HYBRID vs HYBRID_PETROL) — pass as long as the response clearly targets fuel efficiency and presents relevant vehicle listings. FAIL only if the response presents no fuel-efficient options or completely ignores the fuel efficiency intent."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ಎ-ಕ್ಲಾಸ್ ಹೊರತುಪಡಿಸಿ ಎಲ್ಲಾ ಸೆಡಾನ್‌ಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡಿ",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by sedan/Limousine body type AND explicitly excludes or omits the A-Class model from the results.",
+          "Do NOT fail if A-Class vehicles happen to be absent from inventory — pass as long as the sedan/Limousine filter is correctly applied and the response does not include or recommend A-Class vehicles. FAIL if A-Class vehicles are prominently presented in the results without acknowledgment of the exclusion."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ನ್ಯಾವಿಗೇಷನ್ ಸಿಸ್ಟಮ್‌ನೊಂದಿಗೆ ಅಂತರ್ನಿರ್ಮಿತ ಯಾವುದೇ ಕಾರುಗಳಿವೆಯೇ?",
+      "shouldRecommend": false,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
+          "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
         ],
         "overwrite": true
       }
