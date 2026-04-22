@@ -20,8 +20,8 @@ function findJsonFiles(dir, fileList = []) {
   return fileList;
 }
 
-// Find the latest date subdirectory
-function findLatestSubdirectory(dir) {
+// Find all date subdirectories
+function findAllSubdirectories(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const subdirs = entries
     .filter(entry => entry.isDirectory() && /^\d{4}-\d{2}-\d{2}_\w+$/.test(entry.name))
@@ -37,7 +37,7 @@ function findLatestSubdirectory(dir) {
       return b.name.localeCompare(a.name);
     });
   
-  return subdirs.length > 0 ? subdirs[0] : null;
+  return subdirs;
 }
 
 // Find all search-results*.json files in ./results/json or provided path
@@ -47,26 +47,46 @@ const resultsJsonDir = inputPath
   ? (path.isAbsolute(inputPath) ? inputPath : path.join(process.cwd(), inputPath))
   : path.join(__dirname, 'results', 'json');
 
-// Find the latest subdirectory and process only files from there
-const latestSubdir = findLatestSubdirectory(resultsJsonDir);
-if (!latestSubdir) {
+// Find ALL subdirectories and process files from all of them
+const allSubdirs = findAllSubdirectories(resultsJsonDir);
+if (allSubdirs.length === 0) {
   console.error('No date subdirectories found in the format YYYY-MM-DD_ENV');
   process.exit(1);
 }
 
-console.log(`Processing latest directory: ${latestSubdir.name}`);
-const files = findJsonFiles(latestSubdir.fullPath);
-console.log(`Found ${files.length} JSON files in ${latestSubdir.name}`);
+console.log(`Processing ${allSubdirs.length} directories...`);
 
 let allResults = [];
-files.forEach(file => {
-  try {
-    const data = JSON.parse(fs.readFileSync(file, 'utf8'));
-    allResults = allResults.concat(data);
-  } catch (err) {
-    console.error(`Error reading ${file}:`, err.message);
-  }
+allSubdirs.forEach(subdir => {
+  const files = findJsonFiles(subdir.fullPath);
+  console.log(`  ${subdir.name}: ${files.length} JSON files`);
+  
+  files.forEach(file => {
+    try {
+      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const fileName = path.basename(file);
+      const fileMatch = fileName.match(/^([A-Z]{2})_([A-Z]+)_/);
+      
+      // Add metadata to each result
+      const enrichedData = data.map(result => ({
+        ...result,
+        _metadata: {
+          date: subdir.dateMatch[1],
+          environment: subdir.dateMatch[2],
+          country: fileMatch ? fileMatch[1] : 'UNKNOWN',
+          product: fileMatch ? fileMatch[2] : 'UNKNOWN',
+          fileName: fileName
+        }
+      }));
+      
+      allResults = allResults.concat(enrichedData);
+    } catch (err) {
+      console.error(`Error reading ${file}:`, err.message);
+    }
+  });
 });
+
+console.log(`Total results loaded: ${allResults.length}`);
 
 // Function to normalize text for matching
 function normalizeForMatch(text) {
@@ -84,7 +104,13 @@ function normalizeForMatch(text) {
 }
 
 // Function to find screenshots for a result
-function findScreenshot(result, screenshotDir, resultIndex) {
+function findScreenshot(result, resultIndex) {
+  const metadata = result._metadata;
+  if (!metadata) return null;
+  
+  const screenshotBaseDir = path.join(__dirname, 'results', 'screenshots');
+  const screenshotDir = path.join(screenshotBaseDir, `${metadata.date}_${metadata.environment}`);
+  
   if (!fs.existsSync(screenshotDir)) return null;
   
   try {
@@ -121,7 +147,7 @@ function findScreenshot(result, screenshotDir, resultIndex) {
         // Strategy 1: Match by query number (e.g., "query-1", "query-2")
         const queryNumMatch = screenshot.match(/query[_-](\d+)/i);
         if (queryNumMatch && parseInt(queryNumMatch[1]) === resultIndex + 1) {
-          return path.join(timestampDir, screenshot);
+          return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
         }
         
         // Strategy 2: Match by normalized query text (at least 10 chars match)
@@ -131,7 +157,7 @@ function findScreenshot(result, screenshotDir, resultIndex) {
           const querySubstring = normalizedQuery.substring(0, matchLength);
           
           if (normalizedScreenshot.includes(querySubstring)) {
-            return path.join(timestampDir, screenshot);
+            return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
           }
         }
         
@@ -141,7 +167,7 @@ function findScreenshot(result, screenshotDir, resultIndex) {
           const normalizedScreenshot = normalizeForMatch(screenshot);
           const matchedWords = queryWords.filter(word => normalizedScreenshot.includes(word));
           if (matchedWords.length >= Math.max(2, queryWords.length * 0.6)) {
-            return path.join(timestampDir, screenshot);
+            return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
           }
         }
       }
@@ -253,20 +279,24 @@ allResults = allResults.map(r => {
 });
 
 // Find and attach screenshots to results
-const screenshotDir = path.join(__dirname, 'results', 'screenshots', latestSubdir.name);
-console.log(`Looking for screenshots in: ${screenshotDir}`);
+console.log(`Looking for screenshots in: results/screenshots/`);
 
 allResults = allResults.map((r, index) => {
-  const screenshotPath = findScreenshot(r, screenshotDir, index);
+  const screenshotPath = findScreenshot(r, index);
   return {
     ...r,
     screenshot: screenshotPath
   };
 });
 
+// Extract unique values for filters
 const describeSet = [...new Set(allResults.map(r => r.testDescribe))].filter(Boolean);
 const titleSet = [...new Set(allResults.map(r => r.testTitle))].filter(Boolean);
 const statusSet = [...new Set(allResults.map(r => r.passed ? '✅' : '❌'))];
+const dateSet = [...new Set(allResults.map(r => r._metadata?.date))].filter(Boolean).sort().reverse();
+const environmentSet = [...new Set(allResults.map(r => r._metadata?.environment))].filter(Boolean).sort();
+const countrySet = [...new Set(allResults.map(r => r._metadata?.country))].filter(Boolean).sort();
+const productSet = [...new Set(allResults.map(r => r._metadata?.product))].filter(Boolean).sort();
 const timestamp = new Date().toLocaleString();
 
 function escapeHtml(str) {
@@ -395,6 +425,40 @@ let html = `<!DOCTYPE html>
     </div>
     <form class="row g-3 align-items-center mb-4">
       <div class="col-auto">
+        <label for="dateFilter" class="form-label mb-0">Date:</label>
+        <select id="dateFilter" class="form-select">
+          <option value="">All</option>
+          ${dateSet.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="environmentFilter" class="form-label mb-0">Environment:</label>
+        <select id="environmentFilter" class="form-select">
+          <option value="">All</option>
+          ${environmentSet.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="countryFilter" class="form-label mb-0">Market:</label>
+        <select id="countryFilter" class="form-select">
+          <option value="">All</option>
+          ${countrySet.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label for="productFilter" class="form-label mb-0">Product:</label>
+        <select id="productFilter" class="form-select">
+          <option value="">All</option>
+          ${productSet.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
+        </select>
+      </div>
+      <div class="col-auto">
+        <label class="form-label mb-0">&nbsp;</label>
+        <button id="resetBtn" type="button" class="btn btn-warning d-block">🔄 Reset All</button>
+      </div>
+    </form>
+    <form class="row g-3 align-items-center mb-4">
+      <div class="col-auto">
         <label for="describeFilter" class="form-label mb-0">Test Category:</label>
         <select id="describeFilter" class="form-select">
           <option value="">All</option>
@@ -425,19 +489,22 @@ let html = `<!DOCTYPE html>
         </div>
       </div>
       <div class="col-auto">
-        <button id="resetBtn" type="button" class="btn btn-secondary">Reset</button>
-      </div>
-      <div class="col-auto">
+        <label for="searchBox" class="form-label mb-0">Search:</label>
         <input id="searchBox" type="text" class="form-control" placeholder="Search query or result text">
       </div>
       <div class="col-auto">
-        <button id="exportBtn" type="button" class="btn btn-primary">Export CSV</button>
+        <label class="form-label mb-0">&nbsp;</label>
+        <button id="exportBtn" type="button" class="btn btn-primary d-block">📊 Export CSV</button>
       </div>
     </form>
     <div class="table-responsive">
       <table class="table table-bordered table-hover align-middle bg-white">
         <thead class="table-light">
           <tr>
+            <th>Date</th>
+            <th>Environment</th>
+            <th>Market</th>
+            <th>Product</th>
             <th>Test Category</th>
             <th>Test Title</th>
             <th>Mode</th>
@@ -456,10 +523,15 @@ let html = `<!DOCTYPE html>
               ? `${r.statusCode} (${r.responseTime}ms)` 
               : 'UI Test';
             const screenshotCell = r.screenshot 
-              ? `<img src="../screenshots/${latestSubdir.name}/${r.screenshot}" class="screenshot-thumbnail" alt="Screenshot" onclick="showScreenshot(this.src)">` 
+              ? `<img src="../screenshots/${r.screenshot}" class="screenshot-thumbnail" alt="Screenshot" onclick="showScreenshot(this.src)">` 
               : '<span class="text-muted">-</span>';
+            const metadata = r._metadata || {};
             return `
-            <tr data-describe="${escapeHtml(r.testDescribe || '')}" data-title="${escapeHtml(r.testTitle || '')}" data-status="${r.passed ? '✅' : '❌'}" data-mode="${mode}">
+            <tr data-date="${escapeHtml(metadata.date || '')}" data-environment="${escapeHtml(metadata.environment || '')}" data-country="${escapeHtml(metadata.country || '')}" data-product="${escapeHtml(metadata.product || '')}" data-describe="${escapeHtml(r.testDescribe || '')}" data-title="${escapeHtml(r.testTitle || '')}" data-status="${r.passed ? '✅' : '❌'}" data-mode="${mode}">
+              <td>${escapeHtml(metadata.date || '')}</td>
+              <td><span class="badge ${metadata.environment === 'PROD' ? 'bg-success' : metadata.environment === 'PREPROD' ? 'bg-warning' : 'bg-secondary'}">${escapeHtml(metadata.environment || '')}</span></td>
+              <td>${escapeHtml(metadata.country || '')}</td>
+              <td>${escapeHtml(metadata.product || '')}</td>
               <td>${escapeHtml(r.testDescribe || '')}</td>
               <td>${escapeHtml(r.testTitle || '')}</td>
               <td><span class="badge ${mode === 'API' ? 'bg-info' : 'bg-secondary'}">${mode}</span></td>
@@ -480,6 +552,10 @@ let html = `<!DOCTYPE html>
 const allResults = ${JSON.stringify(allResults)};
 const chartData = ${JSON.stringify(chartData)};
 const chartDataByTitle = ${JSON.stringify(chartDataByTitle)};
+const dateFilter = document.getElementById("dateFilter");
+const environmentFilter = document.getElementById("environmentFilter");
+const countryFilter = document.getElementById("countryFilter");
+const productFilter = document.getElementById("productFilter");
 const describeFilter = document.getElementById("describeFilter");
 const titleFilter = document.getElementById("titleFilter");
 const statusToggle = document.getElementById("statusToggle");
@@ -582,32 +658,91 @@ function renderChart() {
   }
 }
 function updateDropdowns() {
+  var dateVal = dateFilter.value;
+  var environmentVal = environmentFilter.value;
+  var countryVal = countryFilter.value;
+  var productVal = productFilter.value;
   var describeVal = describeFilter.value;
   var titleVal = titleFilter.value;
-  var filtered = allResults;
-  if (describeVal) filtered = filtered.filter(function(r){return r.testDescribe === describeVal;});
-  if (titleVal) filtered = filtered.filter(function(r){return r.testTitle === titleVal;});
-  if (statusVal) filtered = filtered.filter(function(r){return (r.passed ? '✅' : '❌') === statusVal;});
-  if (searchVal) {
-    const q = searchVal.toLowerCase();
-    filtered = filtered.filter(function(r){
-      return (r.query && r.query.toLowerCase().includes(q)) || (r.resultText && r.resultText.toLowerCase().includes(q));
-    });
+  
+  // Helper function to filter results excluding a specific filter
+  function getFilteredResults(excludeFilter) {
+    var filtered = allResults;
+    if (excludeFilter !== 'date' && dateVal) filtered = filtered.filter(function(r){return r._metadata && r._metadata.date === dateVal;});
+    if (excludeFilter !== 'environment' && environmentVal) filtered = filtered.filter(function(r){return r._metadata && r._metadata.environment === environmentVal;});
+    if (excludeFilter !== 'country' && countryVal) filtered = filtered.filter(function(r){return r._metadata && r._metadata.country === countryVal;});
+    if (excludeFilter !== 'product' && productVal) filtered = filtered.filter(function(r){return r._metadata && r._metadata.product === productVal;});
+    if (excludeFilter !== 'describe' && describeVal) filtered = filtered.filter(function(r){return r.testDescribe === describeVal;});
+    if (excludeFilter !== 'title' && titleVal) filtered = filtered.filter(function(r){return r.testTitle === titleVal;});
+    if (statusVal) filtered = filtered.filter(function(r){return (r.passed ? '✅' : '❌') === statusVal;});
+    if (searchVal) {
+      const q = searchVal.toLowerCase();
+      filtered = filtered.filter(function(r){
+        return (r.query && r.query.toLowerCase().includes(q)) || (r.resultText && r.resultText.toLowerCase().includes(q));
+      });
+    }
+    return filtered;
   }
+  
+  // Update date dropdown (exclude date filter when building options)
+  var dateOptions = [""];
+  var dateFiltered = getFilteredResults('date');
+  dateFiltered.forEach(function(r){if(r._metadata && r._metadata.date && dateOptions.indexOf(r._metadata.date)===-1) dateOptions.push(r._metadata.date);});
+  dateOptions.sort().reverse(); // Sort dates descending (latest first)
+  dateFilter.innerHTML = dateOptions.map(function(d){return '<option value="'+d+'">'+(d||'All')+'</option>';}).join('');
+  dateFilter.value = dateVal;
+  
+  // Update environment dropdown (exclude environment filter when building options)
+  var environmentOptions = [""];
+  var environmentFiltered = getFilteredResults('environment');
+  environmentFiltered.forEach(function(r){if(r._metadata && r._metadata.environment && environmentOptions.indexOf(r._metadata.environment)===-1) environmentOptions.push(r._metadata.environment);});
+  environmentOptions.sort();
+  environmentFilter.innerHTML = environmentOptions.map(function(e){return '<option value="'+e+'">'+(e||'All')+'</option>';}).join('');
+  environmentFilter.value = environmentVal;
+  
+  // Update country dropdown (exclude country filter when building options)
+  var countryOptions = [""];
+  var countryFiltered = getFilteredResults('country');
+  countryFiltered.forEach(function(r){if(r._metadata && r._metadata.country && countryOptions.indexOf(r._metadata.country)===-1) countryOptions.push(r._metadata.country);});
+  countryOptions.sort();
+  countryFilter.innerHTML = countryOptions.map(function(c){return '<option value="'+c+'">'+(c||'All')+'</option>';}).join('');
+  countryFilter.value = countryVal;
+  
+  // Update product dropdown (exclude product filter when building options)
+  var productOptions = [""];
+  var productFiltered = getFilteredResults('product');
+  productFiltered.forEach(function(r){if(r._metadata && r._metadata.product && productOptions.indexOf(r._metadata.product)===-1) productOptions.push(r._metadata.product);});
+  productOptions.sort();
+  productFilter.innerHTML = productOptions.map(function(p){return '<option value="'+p+'">'+(p||'All')+'</option>';}).join('');
+  productFilter.value = productVal;
+  
+  // Update describe dropdown (exclude describe filter when building options)
   var describeOptions = [""];
-  filtered.forEach(function(r){if(r.testDescribe && describeOptions.indexOf(r.testDescribe)===-1) describeOptions.push(r.testDescribe);});
+  var describeFiltered = getFilteredResults('describe');
+  describeFiltered.forEach(function(r){if(r.testDescribe && describeOptions.indexOf(r.testDescribe)===-1) describeOptions.push(r.testDescribe);});
   describeFilter.innerHTML = describeOptions.map(function(d){return '<option value="'+d+'">'+(d||'All')+'</option>';}).join('');
   describeFilter.value = describeVal;
+  
+  // Update title dropdown (exclude title filter when building options)
   var titleOptions = [""];
-  filtered.forEach(function(r){if(r.testTitle && titleOptions.indexOf(r.testTitle)===-1) titleOptions.push(r.testTitle);});
+  var titleFiltered = getFilteredResults('title');
+  titleFiltered.forEach(function(r){if(r.testTitle && titleOptions.indexOf(r.testTitle)===-1) titleOptions.push(r.testTitle);});
   titleFilter.innerHTML = titleOptions.map(function(t){return '<option value="'+t+'">'+(t||'All')+'</option>';}).join('');
   titleFilter.value = titleVal;
 }
 
 function filterTable() {
+  var dateVal = dateFilter.value;
+  var environmentVal = environmentFilter.value;
+  var countryVal = countryFilter.value;
+  var productVal = productFilter.value;
   var describeVal = describeFilter.value;
   var titleVal = titleFilter.value;
   document.querySelectorAll("#resultsBody tr").forEach(function(tr){
+    var date = tr.getAttribute('data-date');
+    var environment = tr.getAttribute('data-environment');
+    var country = tr.getAttribute('data-country');
+    var product = tr.getAttribute('data-product');
     var describe = tr.getAttribute('data-describe');
     var title = tr.getAttribute('data-title');
     var status = tr.getAttribute('data-status');
@@ -615,6 +750,10 @@ function filterTable() {
     var query = tr.querySelector('.query-text').textContent.toLowerCase();
     var resultText = tr.querySelector('.result-text').textContent.toLowerCase();
     var show = true;
+    if (dateVal && date !== dateVal) show = false;
+    if (environmentVal && environment !== environmentVal) show = false;
+    if (countryVal && country !== countryVal) show = false;
+    if (productVal && product !== productVal) show = false;
     if (describeVal && describe !== describeVal) show = false;
     if (titleVal && title !== titleVal) show = false;
     if (statusVal && status !== statusVal) show = false;
@@ -625,6 +764,10 @@ function filterTable() {
   updateDropdowns();
 }
 
+dateFilter.addEventListener("change", filterTable);
+environmentFilter.addEventListener("change", filterTable);
+countryFilter.addEventListener("change", filterTable);
+productFilter.addEventListener("change", filterTable);
 describeFilter.addEventListener("change", filterTable);
 titleFilter.addEventListener("change", filterTable);
 statusToggle.querySelectorAll('button').forEach(function(btn){
@@ -652,6 +795,10 @@ window.addEventListener("DOMContentLoaded", function() {
   updateDropdowns();
 });
 resetBtn.addEventListener("click", function() {
+  dateFilter.value = "";
+  environmentFilter.value = "";
+  countryFilter.value = "";
+  productFilter.value = "";
   describeFilter.value = "";
   titleFilter.value = "";
   statusVal = "";
@@ -666,9 +813,9 @@ resetBtn.addEventListener("click", function() {
 });
 exportBtn.addEventListener("click", function() {
   var rows = Array.from(document.querySelectorAll("#resultsBody tr")).filter(function(tr){return tr.style.display !== "none";});
-  var csv = ["Describe,Test Title,Query,Result Text,AI Evaluation,Status"];
+  var csv = ["Date,Environment,Market,Product,Test Category,Test Title,Mode,Query,Result Text,AI Evaluation,Status"];
   rows.forEach(function(tr){
-    var cells = Array.from(tr.children).map(function(td){return '"'+td.textContent.replace(/"/g,'""')+'"';});
+    var cells = Array.from(tr.children).slice(0, -2).map(function(td){return '"'+td.textContent.replace(/"/g,'""')+'"';});
     csv.push(cells.join(","));
   });
   var blob = new Blob([csv.join("\\n")], {type: 'text/csv'});
@@ -723,27 +870,18 @@ document.addEventListener('keydown', function(e) {
 </html>
 `;
 
-// Extract metadata from the subdirectory and filenames
-let country = 'UNKNOWN';
-let product = 'UNKNOWN';
-let dateStr = latestSubdir.dateMatch[1];
-let env = latestSubdir.dateMatch[2];
-
-// Try to extract country and product from the first filename
-if (files.length > 0) {
-  const fileName = path.basename(files[0]);
-  const fileMatch = fileName.match(/^([A-Z]{2})_([A-Z]+)_/);
-  if (fileMatch) {
-    country = fileMatch[1];
-    product = fileMatch[2];
-  }
-}
-
-console.log(`Generating HTML for: ${country}_${product} (${dateStr}_${env})`);
+console.log(`Generating comprehensive HTML for all results...`);
 
 const outputDir = path.join(__dirname, 'results', 'html');
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-const outputFile = path.join(outputDir, `search-results-all_${country}_${product}_${dateStr}_${env}.html`);
+const fileTimestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+const outputFile = path.join(outputDir, `search-results-all_${fileTimestamp}.html`);
 fs.writeFileSync(outputFile, html, 'utf8');
 
 console.log(`Results written to ${outputFile}`);
+console.log(`Summary:`);
+console.log(`  Total results: ${allResults.length}`);
+console.log(`  Dates: ${dateSet.join(', ')}`);
+console.log(`  Environments: ${environmentSet.join(', ')}`);
+console.log(`  Markets: ${countrySet.join(', ')}`);
+console.log(`  Products: ${productSet.join(', ')}`);
