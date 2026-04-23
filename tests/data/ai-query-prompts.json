@@ -81,10 +81,17 @@
   },
   "byFilterFacetsComplete": {
     "count": 1,
-    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search short sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Do not always start with 'I'm', 'Show me', 'Looking for'. Not required to mention 'Mercedes-Benz'. Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz model search in a single short sentence with a different structure and tone each time for {filterText}. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
+    "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
     "fallback": "Show me vehicles with {filterText}"
+  },
+  "byFilterFacetsCompleteShort": {
+    "count": 1,
+    "systemPrompt": "You are a car shopper. Generate ONE short search phrase (5-10 words), not a long sentence. Mention the requested filter value naturally. Keep it concise and query-like. Do not add explanations, connectors, or extra context. Good examples: 'searching for CLE 300 4MATIC', 'vehicles featuring advanced climate control systems', 'electric SUVs only'. Return only the sentence.",
+    "userPromptTemplate": "Create one short, concise search phrase for {filterText}. Keep it under 10 words. Generate in '{LANGUAGE}' language only.",
+    "maxTokens": 32,
+    "fallback": "searching for {filterText}"
   },
   "byFilterFacetsCompleteEquipment": {
     "count": 1,

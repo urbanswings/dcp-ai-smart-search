@@ -45,11 +45,9 @@ import {
   cleanOldScreenshots,
 } from "./utils/shared";
 import {
-  GeneratedFacetCompleteSuite,
-  GeneratedFacetMatrixSuite,
   normalizeFixedQueries,
-  normalizeGeneratedFacetCompleteSuite,
-  normalizeGeneratedFacetMatrixSuite,
+  loadFacetCompleteSuite,
+  loadFacetMatrixSuite,
 } from "./utils/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -427,16 +425,13 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Filter Facets (complete)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const completePath = path.join(__dirname, "data", "generated-facet-complete-suite.json");
-      const completeRaw = await fs.readFile(completePath, "utf-8");
-      const completeData = JSON.parse(completeRaw) as GeneratedFacetCompleteSuite;
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
       const fallbackHints = Object.keys(aiEvaluationRules).length === 0
         ? undefined
         : aiEvaluationRules;
       const queries = isFixedQueriesOnly()
         ? []
-        : normalizeGeneratedFacetCompleteSuite(completeData, fallbackHints);
+        : await loadFacetCompleteSuite(fallbackHints);
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -543,11 +538,9 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
-      const matrixPath = path.join(__dirname, "data", "generated-facet-matrix-suite.json");
-      const matrixRaw = await fs.readFile(matrixPath, "utf-8");
-      const matrixData = JSON.parse(matrixRaw) as GeneratedFacetMatrixSuite;
-      const matrixQueries = normalizeGeneratedFacetMatrixSuite(matrixData);
-
+      const matrixQueries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetMatrixSuite();
       const allQueries = mergeQueries(fixedQueries, matrixQueries);
 
       await runTestsAndSaveResults({

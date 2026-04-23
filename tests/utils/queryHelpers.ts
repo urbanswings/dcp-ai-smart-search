@@ -1,3 +1,9 @@
+import fs from "fs/promises";
+import path from "path";
+import { buildComplete, buildMatrix, readJson } from "./generateFacetMatrix.js";
+
+const DATA_DIR = path.join(__dirname, "../data");
+
 export interface AiEvaluationHints {
   value: string[];
   overwrite: boolean;
@@ -19,7 +25,7 @@ export interface FixedQueryCase {
 
 export type FixedQueryInput = string | FixedQueryCase;
 
-export interface GeneratedFacetCompleteSuite {
+export interface GeneratedFacetSuite {
   generatedAt?: string;
   sourcePath?: string;
   queryCount?: number;
@@ -27,12 +33,37 @@ export interface GeneratedFacetCompleteSuite {
   informativeHintsByQuery?: Record<string, string[]>;
 }
 
-export interface GeneratedFacetMatrixSuite {
-  generatedAt?: string;
-  sourcePath?: string;
-  queryCount?: number;
-  regressionQueries?: FixedQueryInput[];
-  informativeHintsByQuery?: Record<string, string[]>;
+export async function loadGeneratedFacetSuite(
+  filePath: string,
+  fallbackHints?: AiEvaluationHints
+): Promise<FixedQueryCase[]> {
+  const raw = await fs.readFile(filePath, "utf-8");
+  const suite = JSON.parse(raw) as GeneratedFacetSuite;
+  return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+}
+
+async function generateCompleteSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+  const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
+  const sourceData = readJson(sourceDataPath);
+  return buildComplete(sourceData);
+}
+
+async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+  const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
+  const sourceData = readJson(sourceDataPath);
+  return buildMatrix(sourceData);
+}
+
+export async function loadFacetCompleteSuite(
+  fallbackHints?: AiEvaluationHints
+): Promise<FixedQueryCase[]> {
+  const suite = await generateCompleteSuiteOnTheFly();
+  return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+}
+
+export async function loadFacetMatrixSuite(): Promise<FixedQueryCase[]> {
+  const suite = await generateMatrixSuiteOnTheFly();
+  return normalizeGeneratedFacetCompleteSuite(suite);
 }
 
 export function normalizeFixedQuery(
@@ -65,7 +96,7 @@ export function normalizeFixedQueries(
 }
 
 export function normalizeGeneratedFacetCompleteSuite(
-  suite: GeneratedFacetCompleteSuite,
+  suite: GeneratedFacetSuite,
   fallbackHints?: AiEvaluationHints
 ): FixedQueryCase[] {
   return normalizeFixedQueries(suite.regressionQueries || []).map((query) => {
@@ -91,17 +122,4 @@ export function normalizeGeneratedFacetCompleteSuite(
   });
 }
 
-export function normalizeGeneratedFacetMatrixSuite(
-  suite: GeneratedFacetMatrixSuite
-): FixedQueryCase[] {
-  return normalizeFixedQueries(suite.regressionQueries || []).map((query) => {
-    const generatedHints = suite.informativeHintsByQuery?.[query.value] || [];
-    if (generatedHints.length === 0) {
-      return query;
-    }
-    return {
-      ...query,
-      aiEvaluationHints: { value: generatedHints, overwrite: true },
-    };
-  });
-}
+
