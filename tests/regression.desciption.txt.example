@@ -1,0 +1,7 @@
+Different results even though query topic is same but in alternate phrasing.
+
+i typed "white car for families", only the EQA came out.
+but when i typed "white family cars", i had more options
+
+Expected behaviour
+- Results should be consistent across all related queries

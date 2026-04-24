@@ -461,6 +461,13 @@ export async function runTestsAndSaveResults(params: {
     testTitle: string;
   }) => Promise<any>;
   setupContextAndPage?: (browser: any) => Promise<any>;
+  postRunAnalysis?: (params: {
+    allResults: any[];
+    outputFileName: string;
+    testDescribe: string;
+    testTitle: string;
+    testType: string;
+  }) => Promise<void>;
 }): Promise<void> {
   const {
     queries,
@@ -473,6 +480,7 @@ export async function runTestsAndSaveResults(params: {
     performApiSmartSearchAndGetResults,
     processAndLogApiResult,
     setupContextAndPage,
+    postRunAnalysis,
   } = params;
 
   const uiResults = [];
@@ -539,6 +547,22 @@ export async function runTestsAndSaveResults(params: {
     JSON.stringify(allResults, null, 2),
     "utf-8"
   );
+
+  if (postRunAnalysis) {
+    try {
+      await postRunAnalysis({
+        allResults,
+        outputFileName,
+        testDescribe,
+        testTitle,
+        testType,
+      });
+    } catch (e) {
+      console.warn(
+        `[WARN] Post-run analysis failed: ${e instanceof Error ? e.message : e}`
+      );
+    }
+  }
 
   // Fail the test if any result has an error
   const failedResults = allResults.filter((r: any) => r.hasError === true);
