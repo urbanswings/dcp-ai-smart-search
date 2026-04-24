@@ -6,9 +6,10 @@ import { FixedQueryCase } from "./queryHelpers";
 const REGRESSION_DESCRIPTION_PATH = path.join(__dirname, "../regression.desciption.txt");
 const REGRESSION_TESTDATA_PATH = path.join(__dirname, "../data/regression.testdata.json");
 const REGRESSION_RUN_SUMMARY_PATH = path.join(__dirname, "../data/regression.run-summary.json");
+const EMH_API_RESPONSE_PATH = path.join(__dirname, "../data/emh-api-response.json");
 
 const SYSTEM_PROMPT = `You are a test-case engineer for a Mercedes-Benz vehicle search AI.
-Given a plain-text description of a search bug or regression scenario, generate a JSON array of test cases.
+Given a plain-text description of a search bug or regression scenario, generate a JSON array of regression test scenarios with evaluation decisions.
 
 Each test case must follow this TypeScript interface:
   {
@@ -20,7 +21,7 @@ Each test case must follow this TypeScript interface:
       strict: boolean;               // true = resultsFacets must contain ONLY the include keys
     };
     aiEvaluationHints: {
-      value: string[];               // evaluation rules for the AI judge
+      value: string[];               // evaluation rules + decision criteria for the AI judge
       overwrite: boolean;            // always true
     };
   }
@@ -33,11 +34,11 @@ Rules:
 - When specific filter values are expected, use the include/exclude/strict object form.
 - Use strict: true only when the query implies ONLY those filters should be applied and nothing else.
 - Use strict: false when additional filters may also be present.
-- Available facet keys: brand, modelIdentifier, bodyType, fuelType, color, upholstery, modelYear, motorization.
-- Body type values: LIMOUSINE, SUV_OFFROADER, STATION, HATCHBACK, CABRIO_ROADSTER, PEOPLE_CARRIER, COUPE.
-- Color values: PAINT_COLOR_WHITE, PAINT_COLOR_BLACK, PAINT_COLOR_RED, PAINT_COLOR_BLUE, PAINT_COLOR_SILVER, PAINT_COLOR_GREY.
-- Fuel type values: PETROL, DIESEL, ELECTRIC, PETROL_ELECTRIC_PLUG_IN_HYBRID.
-- aiEvaluationHints.value should contain list of precise PASS/FAIL rules relevant to this query. Include a rule "Response with failure reason otherwise response with 'PASS' only".
+- Source of truth for allowed facets and facet values is tests/data/emh-api-response.json.
+- Only use facet keys and values that exist in that source-of-truth file.
+- If a described expectation uses a facet/value not present in the source-of-truth file, do not invent it; choose the closest valid facet/value or omit that expectation.
+- aiEvaluationHints.value must define precise evaluation decision rules based on 'RCA' and 'Test Approach'. This is only to evaluate AI response message, and not UI filtering. Include a rule "Response with failure reason otherwise response with 'PASS' only"
+- Include at least one decision rule for recommendation behavior and one for filter correctness (when filters are expected).
 - Respond with ONLY a valid JSON array, no markdown, no explanation.
 
 Example shouldFilter for "list sedans only":
@@ -92,6 +93,42 @@ Rules:
 - If results are healthy, still mention residual risks.
 - Keep each bullet concise and actionable.`;
 
+async function loadFacetCatalogFromEmhApiResponse(): Promise<string> {
+  try {
+    const raw = await fs.readFile(EMH_API_RESPONSE_PATH, "utf-8");
+    const parsed = JSON.parse(raw);
+    const facets = parsed?.data?.search?.facets;
+
+    if (!facets || typeof facets !== "object") {
+      return "";
+    }
+
+    const catalog = Object.entries(facets).reduce<Record<string, string[]>>(
+      (accumulator, [facetKey, facetValue]) => {
+        const values = Array.isArray((facetValue as any)?.values)
+          ? (facetValue as any).values
+              .map((entry: any) =>
+                typeof entry === "string" ? entry : String(entry?.value ?? "").trim()
+              )
+              .filter(Boolean)
+          : [];
+
+        if (values.length > 0) {
+          accumulator[facetKey] = Array.from(new Set(values));
+        }
+
+        return accumulator;
+      },
+      {}
+    );
+
+    return JSON.stringify(catalog, null, 2);
+  } catch (e) {
+    console.warn("[regressionHelpers] Failed to load facet catalog from emh-api-response.json:", e);
+    return "";
+  }
+}
+
 export async function loadRegressionQueriesFromDescription(): Promise<FixedQueryCase[]> {
   let description: string;
   try {
@@ -107,6 +144,8 @@ export async function loadRegressionQueriesFromDescription(): Promise<FixedQuery
   }
 
   console.log("[regressionHelpers] Generating regression test cases from description via AI...");
+
+  const facetCatalog = await loadFacetCatalogFromEmhApiResponse();
 
   // Step 1: Generate RCA and test approach from the description
   let analysis = "";
@@ -130,9 +169,14 @@ export async function loadRegressionQueriesFromDescription(): Promise<FixedQuery
   }
 
   // Step 2: Generate test cases using description + analysis as combined input
-  const combinedInput = analysis.trim()
-    ? `Bug Description:\n${description.trim()}\n\n${analysis.trim()}`
-    : description.trim();
+  const combinedSections = [
+    `Bug Description:\n${description.trim()}`,
+    analysis.trim(),
+    facetCatalog
+      ? `Facet Catalog from tests/data/emh-api-response.json:\n${facetCatalog}`
+      : "",
+  ].filter(Boolean);
+  const combinedInput = combinedSections.join("\n\n");
 
   let raw: string;
   try {
