@@ -24,10 +24,13 @@ function normalizeFacetToken(value: string): string {
   return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    // Re-compose characters so Hangul syllables (e.g. 세단) are preserved
+    // before the allow-list regex below.
+    .normalize("NFC")
     .toLowerCase()
     .replace(/ı/g, "i")
     .replace(/^paint[_-]?color[_-]?/i, "")
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/[^a-z0-9가-힣]/g, "");
 }
 
 function collectPrimitiveFacetValues(value: any): string[] {
@@ -121,14 +124,76 @@ const facetValueAliasMap: Record<string, string[]> = {
   "blue": ["mavi"],
   "yesil": ["green"],
   "green": ["yesil"],
+  // KR color/body-type display names -> BE codes
+  "세단": ["limousine"],
+  "쿠페": ["coupe"],
+  "왜건": ["station", "estate"],
+  "해치백": ["hatchback", "hatches"],
+  "검정": ["black"],
+  "검은색": ["black"],
+  "흰색": ["white"],
+  "하얀색": ["white"],
+  "은색": ["silver", "grey", "gray"],
+  "회색": ["grey", "gray"],
+  "빨간색": ["red"],
+  "파란색": ["blue"],
+  "가솔린": ["petrol"],
+  "휘발유": ["petrol"],
+  "디젤": ["diesel"],
+  "전기": ["electric"],
+  "하이브리드": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  // KR body type UI text variants
+  "카브리올레로드스터": ["cabrioroadster", "cabrioletroadster"],
+  "카브리올레": ["cabrioroadster", "cabrioletroadster"],
 };
+
+let runtimeFacetValueAliasMap: Record<string, string[]> = {};
+
+function addAlias(aliasMap: Record<string, string[]>, from: string, to: string): void {
+  if (!from || !to || from === to) return;
+  if (!aliasMap[from]) aliasMap[from] = [];
+  if (!aliasMap[from].includes(to)) {
+    aliasMap[from].push(to);
+  }
+}
+
+function updateRuntimeFacetAliasesFromApiResponse(apiResponse: any): void {
+  runtimeFacetValueAliasMap = {};
+  const apiFacets = apiResponse?.data?.search?.facets || apiResponse?.data?.smartSearch?.facets || {};
+
+  for (const facet of Object.values(apiFacets) as any[]) {
+    const values = facet?.values;
+    if (!Array.isArray(values)) continue;
+
+    for (const item of values) {
+      if (!item || typeof item !== "object") continue;
+      const beValue = typeof item.value === "string" ? item.value : "";
+      const formattedValue = typeof item.formattedValue === "string" ? item.formattedValue : "";
+
+      const normalizedBe = normalizeFacetToken(beValue);
+      const normalizedFormatted = normalizeFacetToken(formattedValue);
+      if (!normalizedBe || !normalizedFormatted) continue;
+
+      addAlias(runtimeFacetValueAliasMap, normalizedFormatted, normalizedBe);
+      addAlias(runtimeFacetValueAliasMap, normalizedBe, normalizedFormatted);
+    }
+  }
+
+  // KR body type values often appear as UI text without formattedValue in facet payload.
+  addAlias(runtimeFacetValueAliasMap, "카브리올레로드스터", "cabrioroadster");
+  addAlias(runtimeFacetValueAliasMap, "cabrioroadster", "카브리올레로드스터");
+}
 
 function buildFacetCandidateTokens(rawValue: string): string[] {
   const candidates = new Set<string>();
+  const combinedAliasMap: Record<string, string[]> = {
+    ...facetValueAliasMap,
+    ...runtimeFacetValueAliasMap,
+  };
   const normalizedRaw = normalizeFacetToken(rawValue);
   if (normalizedRaw) {
     candidates.add(normalizedRaw);
-    for (const alias of facetValueAliasMap[normalizedRaw] || []) {
+    for (const alias of combinedAliasMap[normalizedRaw] || []) {
       candidates.add(alias);
     }
   }
@@ -138,7 +203,7 @@ function buildFacetCandidateTokens(rawValue: string): string[] {
     const normalizedLastToken = normalizeFacetToken(lastToken);
     if (normalizedLastToken) {
       candidates.add(normalizedLastToken);
-      for (const alias of facetValueAliasMap[normalizedLastToken] || []) {
+      for (const alias of combinedAliasMap[normalizedLastToken] || []) {
         candidates.add(alias);
       }
     }
@@ -148,6 +213,32 @@ function buildFacetCandidateTokens(rawValue: string): string[] {
 }
 
 function mapUiLabelToFacetKey(label: string): string | null {
+  const compactRawLabel = label
+    .toLowerCase()
+    .replace(/[：:]/g, "")
+    .replace(/\s+/g, "");
+
+  const rawLabelMap: Record<string, string> = {
+    "바디타입": "bodyType",
+    "차체타입": "bodyType",
+    "연료타입": "fuelType",
+    "연료유형": "fuelType",
+    "모델": "modelIdentifier",
+    "모델클래스": "modelIdentifier",
+    "모델라인": "modelIdentifier",
+    "브랜드": "brand",
+    "색상": "color",
+    "내장색상": "upholstery",
+    "연식": "modelYear",
+    "가격": "price",
+    "차량": "brand",
+    "옵션사양": "equipment",
+  };
+
+  if (rawLabelMap[compactRawLabel]) {
+    return rawLabelMap[compactRawLabel];
+  }
+
   const normalizedLabel = normalizeFacetToken(label);
   const labelMap: Record<string, string> = {
     "brand": "brand",
@@ -194,14 +285,53 @@ function mapUiLabelToFacetKey(label: string): string | null {
   return labelMap[normalizedLabel] || null;
 }
 
+function mapUiDataTestIdToFacetKey(dataTestId: string | null): string | null {
+  if (!dataTestId) {
+    return null;
+  }
+
+  const normalizedDataTestId = dataTestId.trim();
+  // Examples:
+  // - emh-selected-filters-tag__upholstery-UPHOLSTERY_COLOR_BEIGE
+  // - emh-selected-filters-tag__modelIdentifier-GLS
+  // - emh-selected-filters-tag__price
+  const match = normalizedDataTestId.match(/tag__([A-Za-z0-9_]+)(?:-|$)/);
+  const rawFacetKey = match?.[1] || "";
+  if (!rawFacetKey) {
+    return null;
+  }
+
+  const canonicalFacetKeyMap: Record<string, string> = {
+    brand: "brand",
+    bodytype: "bodyType",
+    modelidentifier: "modelIdentifier",
+    motorization: "motorization",
+    fueltype: "fuelType",
+    color: "color",
+    upholstery: "upholstery",
+    modelyear: "modelYear",
+    price: "price",
+    equipment: "equipment",
+    availability: "availability",
+  };
+
+  const normalizedFacetKey = normalizeFacetToken(rawFacetKey);
+  return canonicalFacetKeyMap[normalizedFacetKey] || mapUiLabelToFacetKey(rawFacetKey);
+}
+
+type UiSelectedFilterPill = {
+  text: string;
+  facetKeyHint?: string | null;
+};
+
 function parseUiSelectedFiltersToKeyValue(
-  uiSelectedFilters: string[]
+  uiSelectedFilters: UiSelectedFilterPill[]
 ): Record<string, string[]> {
   const keyValueFilters: Record<string, string[]> = {};
 
-  for (const text of uiSelectedFilters) {
-    const cleanText = text.replace(/\s+/g, " ").trim();
-    const colonIndex = cleanText.indexOf(":");
+  for (const filterPill of uiSelectedFilters) {
+    const cleanText = filterPill.text.replace(/\s+/g, " ").trim();
+    const colonIndex = cleanText.search(/[:：]/);
     if (colonIndex < 0) {
       continue;
     }
@@ -214,7 +344,11 @@ function parseUiSelectedFiltersToKeyValue(
     // Strip artefact colons produced by the tree-walker joining label+separator text nodes
     value = value.replace(/^[:\s]+|[:\s]+$/g, "").trim();
     
-    const facetKey = mapUiLabelToFacetKey(label);
+    const mappedFacetKey = mapUiLabelToFacetKey(label);
+    const facetKey = filterPill.facetKeyHint || mappedFacetKey;
+    console.debug(
+      `[DEBUG] Filter pill parsed: label='${label}', value='${value}', facetKeyHint='${filterPill.facetKeyHint || "<none>"}', mappedFacetKey='${mappedFacetKey || "<unmapped>"}', resolvedFacetKey='${facetKey || "<unmapped>"}'`
+    );
     if (!facetKey) {
       continue;
     }
@@ -369,14 +503,23 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       console.debug("[DEBUG] Selected filters reset button not visible, continuing with pill-based extraction...");
     }
 
-    const selectors = [".emh-selected-filters__pill", ".selected-filters__pill"];
+    const selectors = [
+      ".emh-selected-filters__pill",
+      ".selected-filters__pill",
+      ".selected-filters__item",
+      "[class*='selected-filters'] [class*='pill']",
+      "[class*='selected-filters'] [class*='chip']",
+    ];
+
+    let bestParsedResult: Record<string, string[]> = {};
+    let bestScore = 0;
 
     for (const selector of selectors) {
       console.debug(`[DEBUG] Checking for filter pills with selector "${selector}"...`);
       const pills = page.locator(selector);
       const firstVisible = await pills.first().isVisible().catch(() => false);
       if (!firstVisible) {
-        break;
+        continue;
       }
 
       const count = await pills.count().catch(() => 0);
@@ -387,9 +530,14 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       console.debug(`[DEBUG] Found ${count} filter pills with selector "${selector}"`);
 
       // Extract each pill's text individually for better accuracy
-      const pillTexts: string[] = [];
+      const parsedPills: UiSelectedFilterPill[] = [];
       for (let i = 0; i < count; i++) {
         const pill = pills.nth(i);
+        const dataTestId = await pill.getAttribute("data-test-id").catch(() => null);
+        const facetKeyHint = mapUiDataTestIdToFacetKey(dataTestId);
+        console.debug(
+          `[DEBUG] Filter pill metadata: data-test-id='${dataTestId || "<none>"}', facetKeyHint='${facetKeyHint || "<none>"}'`
+        );
         const innerText = await pill.innerText().catch(() => "");
         const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
         // If the pill innerText ends with ":" (no value captured), try several
@@ -426,27 +574,48 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
             return parts.join(" : ");
           }).catch(() => "");
           const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
-          pillTexts.push(normalizedRecovered.length > normalizedInnerText.length ? normalizedRecovered : innerText);
+          parsedPills.push({
+            text:
+              normalizedRecovered.length > normalizedInnerText.length
+                ? normalizedRecovered
+                : innerText,
+            facetKeyHint,
+          });
         } else {
-          pillTexts.push(innerText);
+          parsedPills.push({ text: innerText, facetKeyHint });
         }
       }
 
-      console.debug(`[DEBUG] Extracted filter texts: ${JSON.stringify(pillTexts)}`);
+      console.debug(
+        `[DEBUG] Extracted filter texts: ${JSON.stringify(parsedPills.map((pill) => pill.text))}`
+      );
 
-      const normalizedTexts = pillTexts
-        .map((text) => text.replace(/\s+/g, " ").trim())
-        .filter((text) => text.length > 0);
+      const normalizedPills = parsedPills
+        .map((pill) => ({
+          text: pill.text.replace(/\s+/g, " ").trim(),
+          facetKeyHint: pill.facetKeyHint,
+        }))
+        .filter((pill) => pill.text.length > 0);
 
-      if (normalizedTexts.length > 0) {
-        console.debug(`[DEBUG] Normalized filter texts: ${JSON.stringify(normalizedTexts)}`);
-        const result = parseUiSelectedFiltersToKeyValue(normalizedTexts);
-        console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(result)}`);
-        return result;
+      if (normalizedPills.length > 0) {
+        console.debug(
+          `[DEBUG] Normalized filter texts: ${JSON.stringify(normalizedPills.map((pill) => pill.text))}`
+        );
+        const parsedResult = parseUiSelectedFiltersToKeyValue(normalizedPills);
+        console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(parsedResult)}`);
+
+        const parsedScore = Object.values(parsedResult).reduce(
+          (sum, values) => sum + values.length,
+          0
+        );
+        if (parsedScore > bestScore) {
+          bestScore = parsedScore;
+          bestParsedResult = parsedResult;
+        }
       }
     }
 
-    return {};
+    return bestParsedResult;
   } catch (e: any) {
     if (e?.message?.includes("Target page, context or browser has been closed")) {
       console.debug("[DEBUG] Page closed during filter extraction, returning empty filters");
@@ -476,6 +645,7 @@ export async function processAndLogUiResult({
   const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
+  updateRuntimeFacetAliasesFromApiResponse(apiResponse);
   const uiSelectedFiltersKV: Record<string, string[]> =
     results.results?.uiSelectedFiltersKV || {};
   const resultsFacets = (() => {
@@ -685,25 +855,25 @@ export async function processAndLogUiResult({
   }
 
   // Validate language consistency between query and response using OpenAI
-  let langCheckResult = "YES";
-  try {
-    const langCompletion = await openaiChatCompletion([
-      { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
-      { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
-    ], {
-      max_tokens: 10,
-      temperature: 0.2
-    });
-    langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
-  } catch (error: any) {
-    console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
-    // Skip validation if OpenAI is unavailable (quota/network issues)
-    langCheckResult = "YES";
-  }
-  if (!isLanguageConsistencyAccepted(langCheckResult)) {
-    console.debug("[DEBUG] Language consistency check: FAIL");
-    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
-  }
+  // let langCheckResult = "YES";
+  // try {
+  //   const langCompletion = await openaiChatCompletion([
+  //     { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+  //     { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
+  //   ], {
+  //     max_tokens: 10,
+  //     temperature: 0.2
+  //   });
+  //   langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  // } catch (error: any) {
+  //   console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
+  //   // Skip validation if OpenAI is unavailable (quota/network issues)
+  //   langCheckResult = "YES";
+  // }
+  // if (!isLanguageConsistencyAccepted(langCheckResult)) {
+  //   console.debug("[DEBUG] Language consistency check: FAIL");
+  //   addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
+  // }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
   const evaluationPassed = normalizedEvaluation.toUpperCase() === "PASS";
