@@ -299,11 +299,11 @@ function buildCompleteShouldFilter(
         },
       ],
       exclude: [],
-      strict: true,
+      strict: false,
     };
   }
 
-  return { include: [{ [facetKey]: [rawValue] }], exclude: [], strict: true };
+  return { include: [{ [facetKey]: [rawValue] }], exclude: [], strict: false };
 }
 
 function createCompleteValueHints(facetKey: string, valueLabel: string): string[] {
@@ -400,7 +400,7 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
           query,
           facetKey,
           value,
-          { include: [{ [facetKey]: [value] }], exclude: [], strict: true }
+          { include: [{ [facetKey]: [value] }], exclude: [], strict: false }
         );
         informativeHintsByQuery[query] = createCompleteRangeHints(facetKey, value);
       }

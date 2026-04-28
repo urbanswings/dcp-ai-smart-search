@@ -891,6 +891,9 @@ export async function processAndLogApiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
+  console.log(
+    `BE Facets:     '${JSON.stringify(resultsFacets)}'`
+  );
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {

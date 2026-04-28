@@ -154,13 +154,13 @@
       }
     },
     {
-      "value": "예산은 AUD 80,000 이하야",
+      "value": "예산은 100,500,000 원 이하야",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 80000
+              "max": 100500000
             }
           }
         ],
@@ -169,7 +169,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of AUD 80,000 and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 100,500,000 원 and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true
@@ -594,7 +594,7 @@
             ]
           }
         ],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [

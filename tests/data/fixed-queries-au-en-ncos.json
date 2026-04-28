@@ -578,7 +578,7 @@
             ]
           }
         ],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [

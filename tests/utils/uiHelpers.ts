@@ -39,7 +39,9 @@ function collectPrimitiveFacetValues(value: any): string[] {
     return value.flatMap((item) => collectPrimitiveFacetValues(item));
   }
   if (typeof value === "object") {
-    return Object.values(value).flatMap((item) => collectPrimitiveFacetValues(item));
+    return Object.entries(value)
+      .filter(([key]) => !key.startsWith("__"))
+      .flatMap(([, item]) => collectPrimitiveFacetValues(item));
   }
   return [String(value)];
 }
@@ -99,7 +101,7 @@ const facetValueAliasMap: Record<string, string[]> = {
   "benzin": ["petrol"],
   "petrol": ["benzin"],
   "dizel": ["diesel"],
-  "diesel": ["dizel"],
+  "diesel": ["dizel", "디젤", "경유"],
   "elektrik": ["electric"],
   "electric": ["elektrik"],
   "hibrit": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
@@ -140,6 +142,7 @@ const facetValueAliasMap: Record<string, string[]> = {
   "가솔린": ["petrol"],
   "휘발유": ["petrol"],
   "디젤": ["diesel"],
+  "경유": ["diesel"],
   "전기": ["electric"],
   "하이브리드": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
   // KR body type UI text variants
@@ -492,16 +495,10 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
 async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
   try {
-    console.debug("[DEBUG] Attempting to extract selected filters from UI...");
     const resetButtonVisible = await page
       .locator("#emh-selected-filters-reset-button")
       .waitFor({ state: "visible", timeout: 5000 })
       .catch(() => false);
-    if (resetButtonVisible) {
-      console.debug("[DEBUG] Selected filters reset button visible, proceeding to extract selected filters...");
-    } else {
-      console.debug("[DEBUG] Selected filters reset button not visible, continuing with pill-based extraction...");
-    }
 
     const selectors = [
       ".emh-selected-filters__pill",
@@ -515,7 +512,6 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     let bestScore = 0;
 
     for (const selector of selectors) {
-      console.debug(`[DEBUG] Checking for filter pills with selector "${selector}"...`);
       const pills = page.locator(selector);
       const firstVisible = await pills.first().isVisible().catch(() => false);
       if (!firstVisible) {
@@ -527,17 +523,12 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
         continue;
       }
 
-      console.debug(`[DEBUG] Found ${count} filter pills with selector "${selector}"`);
-
       // Extract each pill's text individually for better accuracy
       const parsedPills: UiSelectedFilterPill[] = [];
       for (let i = 0; i < count; i++) {
         const pill = pills.nth(i);
         const dataTestId = await pill.getAttribute("data-test-id").catch(() => null);
         const facetKeyHint = mapUiDataTestIdToFacetKey(dataTestId);
-        console.debug(
-          `[DEBUG] Filter pill metadata: data-test-id='${dataTestId || "<none>"}', facetKeyHint='${facetKeyHint || "<none>"}'`
-        );
         const innerText = await pill.innerText().catch(() => "");
         const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
         // If the pill innerText ends with ":" (no value captured), try several
@@ -586,10 +577,6 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
         }
       }
 
-      console.debug(
-        `[DEBUG] Extracted filter texts: ${JSON.stringify(parsedPills.map((pill) => pill.text))}`
-      );
-
       const normalizedPills = parsedPills
         .map((pill) => ({
           text: pill.text.replace(/\s+/g, " ").trim(),
@@ -598,9 +585,6 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
         .filter((pill) => pill.text.length > 0);
 
       if (normalizedPills.length > 0) {
-        console.debug(
-          `[DEBUG] Normalized filter texts: ${JSON.stringify(normalizedPills.map((pill) => pill.text))}`
-        );
         const parsedResult = parseUiSelectedFiltersToKeyValue(normalizedPills);
         console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(parsedResult)}`);
 
@@ -886,7 +870,10 @@ export async function processAndLogUiResult({
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
   console.log(
-    `UI Filters:    '${JSON.stringify(uiSelectedFiltersKV)}'`
+    `BE Facets:     '${JSON.stringify(resultsFacets)}'`
+  );
+  console.log(
+    `UI Facets:    '${JSON.stringify(uiSelectedFiltersKV)}'`
   );
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
@@ -1076,7 +1063,7 @@ export async function handleCookieBanner(page: Page): Promise<void> {
   try {
     await page
       .locator(".cmm-cookie-banner__content")
-      .waitFor();
+      .waitFor({ state: "visible", timeout: 5000 });
     await page.click(".button--accept-all");
     console.debug("[DEBUG] Cookie banner accepted.");
   } catch (e) {
