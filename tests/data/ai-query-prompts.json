@@ -116,7 +116,7 @@
   },
   "recommendationModel": {
     "count": 8,
-    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 1 or more specification preferences. Only return the sentence.",
     "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
     "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."

@@ -556,7 +556,42 @@ function normalizeFacetToken(value: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .replace(/ı/g, "i")
-    .replace(/[^a-z0-9]/g, "");
+    .replace(/^paint[_-]?color[_-]?/i, "")
+    .replace(/[^a-z0-9가-힣]/g, "");
+}
+
+// Color name translations for multi-language support
+const colorTranslations: Record<string, string> = {
+  // Korean transliterations
+  "화이트": "white",
+  "블랙": "black",
+  "그레이": "grey",
+  "레드": "red",
+  "블루": "blue",
+  "실버": "silver",
+  "베이지": "beige",
+  "브라운": "brown",
+  // Korean native
+  "흰색": "white",
+  "하얀색": "white",
+  "검정": "black",
+  "검은색": "black",
+  "회색": "grey",
+  "은색": "silver",
+  "빨간색": "red",
+  "파란색": "blue",
+  // Turkish
+  "beyaz": "white",
+  "siyah": "black",
+  "gri": "grey",
+  "gumus": "silver",
+  "kirmizi": "red",
+  "mavi": "blue",
+};
+
+function translateColorName(value: string): string {
+  const normalized = normalizeFacetToken(value);
+  return colorTranslations[normalized] || normalized;
 }
 
 function buildFacetCandidateTokens(rawValue: string): string[] {
@@ -769,6 +804,22 @@ export async function processAndLogApiResult({
 
     let facetCheckPassed = true;
     const failureReasons: string[] = [];
+    
+    // Build UUID-to-semantic-name mapping from API facets for color/upholstery
+    const uuidToSemanticMap: Record<string, Record<string, string>> = {};
+    const facetsData = apiResponse?.data?.smartSearch?.facets || {};
+    for (const facetKey of ["color", "upholstery"]) {
+      if (facetsData[facetKey]?.values) {
+        uuidToSemanticMap[facetKey] = {};
+        for (const item of facetsData[facetKey].values) {
+          if (item.value && item.formattedValue) {
+            // Map UUID to translated semantic name (e.g., "화이트" -> "white")
+            const translated = translateColorName(item.formattedValue);
+            uuidToSemanticMap[facetKey][item.value.toUpperCase()] = translated.toLowerCase();
+          }
+        }
+      }
+    }
 
     // Check: all include key-value pairs must be present in resultsFacets
     for (const filterObj of include) {
@@ -780,9 +831,23 @@ export async function processAndLogApiResult({
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          // For color/upholstery, map UUID values to translated semantic names
+          const semanticActuals = actualValues.map((v) => {
+            const vStr = String(v).toUpperCase();
+            if (uuidToSemanticMap[key]?.[vStr]) {
+              return uuidToSemanticMap[key][vStr]; // already lowercase and translated
+            }
+            return normalizeFacetToken(String(v));
+          });
+          const actualSet = new Set(semanticActuals);
+          
           for (const expected of expectedValues) {
-            if (!actualSet.has(String(expected).toUpperCase())) {
+            // Normalize and translate expected value for comparison
+            const normalizedExpected = normalizeFacetToken(String(expected));
+            const translatedExpected = translateColorName(String(expected));
+            
+            // Check if either normalized or translated version matches
+            if (!actualSet.has(normalizedExpected) && !actualSet.has(translatedExpected)) {
               facetCheckPassed = false;
               failureReasons.push(`Missing required facet value: ${key}=${expected}`);
             }
@@ -797,9 +862,23 @@ export async function processAndLogApiResult({
         if (!resultsKeysSet.has(key)) continue;
         if (Array.isArray(excludedValues) && excludedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          // For color/upholstery, map UUID values to translated semantic names
+          const semanticActuals = actualValues.map((v) => {
+            const vStr = String(v).toUpperCase();
+            if (uuidToSemanticMap[key]?.[vStr]) {
+              return uuidToSemanticMap[key][vStr]; // already lowercase and translated
+            }
+            return normalizeFacetToken(String(v));
+          });
+          const actualSet = new Set(semanticActuals);
+          
           for (const excluded of excludedValues) {
-            if (actualSet.has(String(excluded).toUpperCase())) {
+            // Normalize and translate excluded value for comparison
+            const normalizedExcluded = normalizeFacetToken(String(excluded));
+            const translatedExcluded = translateColorName(String(excluded));
+            
+            // Check if either normalized or translated version matches
+            if (actualSet.has(normalizedExcluded) || actualSet.has(translatedExcluded)) {
               facetCheckPassed = false;
               failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
             }

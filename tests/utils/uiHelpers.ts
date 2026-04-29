@@ -33,6 +33,40 @@ function normalizeFacetToken(value: string): string {
     .replace(/[^a-z0-9가-힣]/g, "");
 }
 
+// Color name translations for multi-language support
+const colorTranslations: Record<string, string> = {
+  // Korean transliterations
+  "화이트": "white",
+  "블랙": "black",
+  "그레이": "grey",
+  "레드": "red",
+  "블루": "blue",
+  "실버": "silver",
+  "베이지": "beige",
+  "브라운": "brown",
+  // Korean native
+  "흰색": "white",
+  "하얀색": "white",
+  "검정": "black",
+  "검은색": "black",
+  "회색": "grey",
+  "은색": "silver",
+  "빨간색": "red",
+  "파란색": "blue",
+  // Turkish
+  "beyaz": "white",
+  "siyah": "black",
+  "gri": "grey",
+  "gumus": "silver",
+  "kirmizi": "red",
+  "mavi": "blue",
+};
+
+function translateColorName(value: string): string {
+  const normalized = normalizeFacetToken(value);
+  return colorTranslations[normalized] || normalized;
+}
+
 function collectPrimitiveFacetValues(value: any): string[] {
   if (value == null) return [];
   if (Array.isArray(value)) {
@@ -131,6 +165,7 @@ const facetValueAliasMap: Record<string, string[]> = {
   "쿠페": ["coupe"],
   "왜건": ["station", "estate"],
   "해치백": ["hatchback", "hatches"],
+  // KR native color names
   "검정": ["black"],
   "검은색": ["black"],
   "흰색": ["white"],
@@ -139,6 +174,15 @@ const facetValueAliasMap: Record<string, string[]> = {
   "회색": ["grey", "gray"],
   "빨간색": ["red"],
   "파란색": ["blue"],
+  // KR color transliterations (from API facets)
+  "화이트": ["white"],
+  "블랙": ["black"],
+  "그레이": ["grey", "gray"],
+  "레드": ["red"],
+  "블루": ["blue"],
+  "실버": ["silver"],
+  "베이지": ["beige"],
+  "브라운": ["brown"],
   "가솔린": ["petrol"],
   "휘발유": ["petrol"],
   "디젤": ["diesel"],
@@ -500,6 +544,13 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       .waitFor({ state: "visible", timeout: 5000 })
       .catch(() => false);
 
+    const showMoreButton = page.locator('[data-test-id="emh-selected-filters-show-more"]');
+    const showMoreVisible = await showMoreButton.isVisible().catch(() => false);
+    if (showMoreVisible) {
+      await showMoreButton.click().catch(() => {});
+      console.debug("[DEBUG] Clicked 'Show More' to reveal additional selected filters");
+    }
+
     const selectors = [
       ".emh-selected-filters__pill",
       ".selected-filters__pill",
@@ -745,6 +796,22 @@ export async function processAndLogUiResult({
     let facetCheckPassed = true;
     const failureReasons: string[] = [];
     
+    // Build UUID-to-semantic-name mapping from API facets for color/upholstery
+    const uuidToSemanticMap: Record<string, Record<string, string>> = {};
+    const facetsData = results.results.responseData?.data?.smartSearch?.facets || {};
+    for (const facetKey of ["color", "upholstery"]) {
+      if (facetsData[facetKey]?.values) {
+        uuidToSemanticMap[facetKey] = {};
+        for (const item of facetsData[facetKey].values) {
+          if (item.value && item.formattedValue) {
+            // Map UUID to translated semantic name (e.g., "화이트" -> "white")
+            const translated = translateColorName(item.formattedValue);
+            uuidToSemanticMap[facetKey][item.value.toUpperCase()] = translated.toLowerCase();
+          }
+        }
+      }
+    }
+    
     // Check: all include key-value pairs must be present in resultsFacets
     for (const filterObj of include) {
       for (const [key, expectedValues] of Object.entries(filterObj)) {
@@ -755,9 +822,35 @@ export async function processAndLogUiResult({
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          // For color/upholstery, map UUID values to their formattedValue from facets
+          const semanticActuals = actualValues.map((v) => {
+            const vStr = String(v).toUpperCase();
+            if (uuidToSemanticMap[key]?.[vStr]) {
+              return uuidToSemanticMap[key][vStr]; // already translated to lowercase
+            }
+            // If not a UUID, return as-is (translation happens in buildFacetCandidateTokens via aliases)
+            return String(v);
+          });
+          
+          // Build candidate tokens for all actual values (includes aliases)
+          const actualCandidates = new Set<string>();
+          for (const actual of semanticActuals) {
+            const candidates = buildFacetCandidateTokens(actual);
+            candidates.forEach(c => actualCandidates.add(c.toUpperCase()));
+          }
+          
           for (const expected of expectedValues) {
-            if (!actualSet.has(String(expected).toUpperCase())) {
+            // For color/upholstery facets, translate expected value first
+            const processedExpected = ["color", "upholstery"].includes(key)
+              ? translateColorName(String(expected))
+              : String(expected);
+            // Build candidate tokens for processed expected value (includes aliases)
+            const expectedCandidates = buildFacetCandidateTokens(processedExpected);
+            const hasMatch = expectedCandidates.some(candidate => 
+              actualCandidates.has(candidate.toUpperCase())
+            );
+            
+            if (!hasMatch) {
               facetCheckPassed = false;
               failureReasons.push(`Missing required facet value: ${key}=${expected}`);
             }
@@ -772,9 +865,35 @@ export async function processAndLogUiResult({
         if (!resultsKeysSet.has(key)) continue;
         if (Array.isArray(excludedValues) && excludedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const actualSet = new Set(actualValues.map((v) => String(v).toUpperCase()));
+          // For color/upholstery, map UUID values to their formattedValue from facets
+          const semanticActuals = actualValues.map((v) => {
+            const vStr = String(v).toUpperCase();
+            if (uuidToSemanticMap[key]?.[vStr]) {
+              return uuidToSemanticMap[key][vStr]; // already translated to lowercase
+            }
+            // If not a UUID, return as-is
+            return String(v);
+          });
+          
+          // Build candidate tokens for all actual values (includes aliases)
+          const actualCandidates = new Set<string>();
+          for (const actual of semanticActuals) {
+            const candidates = buildFacetCandidateTokens(actual);
+            candidates.forEach(c => actualCandidates.add(c.toUpperCase()));
+          }
+          
           for (const excluded of excludedValues) {
-            if (actualSet.has(String(excluded).toUpperCase())) {
+            // For color/upholstery facets, translate excluded value first
+            const processedExcluded = ["color", "upholstery"].includes(key)
+              ? translateColorName(String(excluded))
+              : String(excluded);
+            // Build candidate tokens for processed excluded value (includes aliases)
+            const excludedCandidates = buildFacetCandidateTokens(processedExcluded);
+            const hasMatch = excludedCandidates.some(candidate => 
+              actualCandidates.has(candidate.toUpperCase())
+            );
+            
+            if (hasMatch) {
               facetCheckPassed = false;
               failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
             }
