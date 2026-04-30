@@ -525,7 +525,11 @@
     "facetType": "MULTI_VALUE"
   },
   "modelYear": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 2025,
+      "max": 2026
+    }
   },
   "upholstery": {
     "values": [
@@ -1047,7 +1051,11 @@
     "facetType": "MULTI_VALUE"
   },
   "chargeTimeDCHigh": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 20,
+      "max": 32
+    }
   },
   "dealerId": {
     "values": [
@@ -1082,7 +1090,11 @@
     "facetType": "MULTI_VALUE"
   },
   "energyContent": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 4.84,
+      "max": 116
+    }
   },
   "firstRegistrationDate": {
     "values": {
@@ -1136,6 +1148,47 @@
     "values": {
       "min": 1910,
       "max": 3500
+    },
+    "facetType": "RANGE"
+  },
+  "upholsteryPolish": {
+    "facetType": "MULTI_VALUE",
+    "values": [
+      {
+        "formattedValue": "ARTICO man-made leather",
+        "value": "UPHOLSTERY_TYPE_IMITATION_LEATHER_ARTICO"
+      },
+      {
+        "formattedValue": "Leather",
+        "value": "UPHOLSTERY_TYPE_LEATHER"
+      },
+      {
+        "formattedValue": "Nappa leather",
+        "value": "UPHOLSTERY_TYPE_LEATHER_NAPPA"
+      }
+    ]
+  },
+  "colorPolish": {
+    "facetType": "MULTI_VALUE",
+    "values": [
+      {
+        "formattedValue": "MANUFAKTUR paint finishes",
+        "value": "PAINT_TYPE_MANUFAKTUR"
+      },
+      {
+        "formattedValue": "Metallic paint finishes",
+        "value": "PAINT_TYPE_METALLIC"
+      },
+      {
+        "formattedValue": "Non-metallic paint finishes",
+        "value": "PAINT_TYPE_UNI"
+      }
+    ]
+  },
+  "enginePowerKW": {
+    "values": {
+      "min": 120,
+      "max": 410
     },
     "facetType": "RANGE"
   }
