@@ -105,6 +105,31 @@
         "label": "Model",
         "formattedValue": "V-CLASS",
         "value": "V"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "B-CLASS",
+        "value": "B"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "EQE",
+        "value": "EQE"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "SL",
+        "value": "SL"
+      },
+      {
+        "label": "모델 클래스",
+        "formattedValue": "CLS",
+        "value": "CLS"
+      },
+      {
+        "label": "모델 클래스",
+        "formattedValue": "EQC",
+        "value": "EQC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -251,6 +276,102 @@
       },
       {
         "value": "V 300"
+      },
+      {
+        "value": "B 180"
+      },
+      {
+        "value": "C 180"
+      },
+      {
+        "value": "CLA 180"
+      },
+      {
+        "value": "CLE 180"
+      },
+      {
+        "value": "EQS 350"
+      },
+      {
+        "value": "G 500"
+      },
+      {
+        "value": "GLA 180"
+      },
+      {
+        "value": "GLB 180"
+      },
+      {
+        "value": "GLE 450 4MATIC"
+      },
+      {
+        "value": "GLS 450 4MATIC"
+      },
+      {
+        "value": "EQS 580 4MATIC"
+      },
+      {
+        "value": "S 350 d"
+      },
+      {
+        "value": "S 580"
+      },
+      {
+        "value": "CLE 450 4MATIC"
+      },
+      {
+        "value": "E 220 d 4MATIC"
+      },
+      {
+        "value": "E 300 4MATIC"
+      },
+      {
+        "value": "E 300 e 4MATIC"
+      },
+      {
+        "value": "E 450 4MATIC"
+      },
+      {
+        "value": "EQE 350+"
+      },
+      {
+        "value": "G 450 d"
+      },
+      {
+        "value": "G 63"
+      },
+      {
+        "value": "GLC 220 d 4MATIC"
+      },
+      {
+        "value": "GLS 580 4MATIC"
+      },
+      {
+        "value": "GT 43 4MATIC+"
+      },
+      {
+        "value": "GT 55 4MATIC+"
+      },
+      {
+        "value": "GT 63 S E PERFORMANCE"
+      },
+      {
+        "value": "S 350 d 4MATIC"
+      },
+      {
+        "value": "S 500 L 4MATIC"
+      },
+      {
+        "value": "S 63 E Performance"
+      },
+      {
+        "value": "S 680"
+      },
+      {
+        "value": "SL 43"
+      },
+      {
+        "value": "SL 680"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -314,7 +435,16 @@
     "facetType": "RANGE"
   },
   "campaigns": {
-    "values": [],
+    "values": [
+      {
+        "formattedValue": "RCOC-5067 IN - UAT invisible campaign with FA-3000 Mandatory",
+        "value": "8d6c14c4"
+      },
+      {
+        "formattedValue": "Man inv High Mileage",
+        "value": "7426090d"
+      }
+    ],
     "facetType": "MULTI_VALUE"
   },
   "fuelType": {
@@ -338,6 +468,16 @@
         "label": "Fuel Type",
         "formattedValue": "Petrol/Electric",
         "value": "PETROL_ELECTRIC_PLUGIN_HYBRID"
+      },
+      {
+        "label": "연료 유형",
+        "formattedValue": "N/A",
+        "value": "UNDEFINED"
+      },
+      {
+        "label": "연료 유형",
+        "formattedValue": "하이브리드(경유+전기)",
+        "value": "DIESEL_ELECTRIC_PLUGIN_HYBRID"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -370,6 +510,16 @@
         "label": "Transmission",
         "formattedValue": "Automatic",
         "value": "AUTOMATIC"
+      },
+      {
+        "label": "변속기",
+        "formattedValue": "",
+        "value": "UNDEFINED"
+      },
+      {
+        "label": "전송",
+        "formattedValue": "수동",
+        "value": "MANUAL"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -418,6 +568,69 @@
       {
         "formattedValue": "White/Silver",
         "value": "UPHOLSTERY_COLOR_WHITE_SILVER"
+      },
+      {
+        "formattedValue": "Beige/Grey",
+        "value": "UPHOLSTERY_COLOR_BEIGE_GREY"
+      },
+      {
+        "formattedValue": "Grey",
+        "value": "UPHOLSTERY_COLOR_GREY"
+      },
+      {
+        "value": "17500f9"
+      },
+      {
+        "formattedValue": "그레이 ",
+        "value": "461a08d9"
+      },
+      {
+        "formattedValue": "레드  ",
+        "value": "2f60067d"
+      },
+      {
+        "formattedValue": "베이지 ",
+        "value": "45a208bd"
+      },
+      {
+        "formattedValue": "브라운 ",
+        "value": "45ba08dd"
+      },
+      {
+        "formattedValue": "블랙  ",
+        "value": "309f06a9"
+      },
+      {
+        "formattedValue": "블루  ",
+        "value": "30f406bd"
+      },
+      {
+        "formattedValue": "화이트 ",
+        "value": "448b08b6"
+      },
+      {
+        "formattedValue": "그레이",
+        "value": "3d9e08b9"
+      },
+      {
+        "formattedValue": "레드",
+        "value": "2340063d"
+      },
+      {
+        "formattedValue": "베이지",
+        "value": "3d42089d"
+      },
+      {
+        "formattedValue": "브라운",
+        "value": "3d3a08bd"
+      },
+      {
+        "formattedValue": "블랙",
+        "value": "24270669"
+      },
+      {
+        "formattedValue": "블루",
+        "value": "2454067d"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -701,6 +914,54 @@
       {
         "formattedValue": "Trailer coupling",
         "value": "5a1e085d"
+      },
+      {
+        "formattedValue": "360° 카메라",
+        "value": "64080b00"
+      },
+      {
+        "formattedValue": "AMG 라인 (외장)",
+        "value": "8f750c67"
+      },
+      {
+        "formattedValue": "드라이빙 어시스턴스 패키지",
+        "value": "625c1c11"
+      },
+      {
+        "formattedValue": "디지털 라이트 · 멀티빔 LED",
+        "value": "eea1851"
+      },
+      {
+        "formattedValue": "부메스터 사운드 시스템",
+        "value": "b656177d"
+      },
+      {
+        "formattedValue": "스마트폰 통합 패키지",
+        "value": "70071579"
+      },
+      {
+        "formattedValue": "앞좌석 열선 및 통풍 시트",
+        "value": "d2dc17bd"
+      },
+      {
+        "formattedValue": "열선 스티어링 휠",
+        "value": "f45e114b"
+      },
+      {
+        "formattedValue": "전동 트렁크",
+        "value": "84ba0ca8"
+      },
+      {
+        "formattedValue": "파노라믹 선루프",
+        "value": "ea0b113f"
+      },
+      {
+        "formattedValue": "헤드업 디스플레이",
+        "value": "1b2f1304"
+      },
+      {
+        "formattedValue": "휠 (20인치)",
+        "value": "5b62098a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -738,9 +999,107 @@
       {
         "formattedValue": "White",
         "value": "PAINT_COLOR_WHITE"
+      },
+      {
+        "value": "17500f9"
+      },
+      {
+        "formattedValue": "그레이",
+        "value": "3d9e08b9"
+      },
+      {
+        "formattedValue": "그린",
+        "value": "251406aa"
+      },
+      {
+        "formattedValue": "레드",
+        "value": "2340063d"
+      },
+      {
+        "formattedValue": "블랙",
+        "value": "24270669"
+      },
+      {
+        "formattedValue": "블루",
+        "value": "2454067d"
+      },
+      {
+        "formattedValue": "실버",
+        "value": "2382064c"
+      },
+      {
+        "formattedValue": "옐로우",
+        "value": "3bb40882"
+      },
+      {
+        "formattedValue": "화이트 ",
+        "value": "448b08b6"
+      },
+      {
+        "formattedValue": "기타 색상",
+        "value": "60720a5a"
+      },
+      {
+        "formattedValue": "화이트",
+        "value": "3c320896"
       }
     ],
     "facetType": "MULTI_VALUE"
+  },
+  "chargeTimeDCHigh": {
+    "facetType": "RANGE"
+  },
+  "dealerId": {
+    "values": [
+      {
+        "value": "GS0014305"
+      },
+      {
+        "value": "GS0046081"
+      },
+      {
+        "value": "GS00108244"
+      },
+      {
+        "value": "GS0039885"
+      },
+      {
+        "value": "GS0052482"
+      },
+      {
+        "value": "GS0060817"
+      },
+      {
+        "value": "GS0034423"
+      },
+      {
+        "value": "GS0034673"
+      },
+      {
+        "value": "GS0035803"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "energyContent": {
+    "facetType": "RANGE"
+  },
+  "firstRegistrationDate": {
+    "values": {
+      "min": "2010-07-01",
+      "max": "2026-04-13"
+    },
+    "facetType": "DATE_RANGE"
+  },
+  "mileage": {
+    "values": {
+      "min": 10,
+      "max": 95800
+    },
+    "facetType": "RANGE"
+  },
+  "wltpRangeTotalAllIndividual": {
+    "facetType": "RANGE"
   },
   "generation": {
     "values": [],
@@ -759,6 +1118,9 @@
       },
       {
         "value": 8
+      },
+      {
+        "value": 6
       }
     ],
     "facetType": "MULTI_VALUE"
