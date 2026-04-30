@@ -1,0 +1,780 @@
+{
+  "brand": {
+    "values": [
+      {
+        "label": "Brand",
+        "formattedValue": "Mercedes-Benz",
+        "value": "Mercedes-Benz"
+      },
+      {
+        "label": "Brand",
+        "formattedValue": "Mercedes-AMG",
+        "value": "Mercedes-AMG"
+      },
+      {
+        "label": "Brand",
+        "formattedValue": "Mercedes-Maybach",
+        "value": "Mercedes-Maybach"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "modelIdentifier": {
+    "values": [
+      {
+        "label": "Model",
+        "formattedValue": "A-CLASS",
+        "value": "A"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "C-CLASS",
+        "value": "C"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "CLA",
+        "value": "CLA"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "CLE",
+        "value": "CLE"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "E-CLASS",
+        "value": "E"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "EQA",
+        "value": "EQA"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "EQB",
+        "value": "EQB"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "EQS",
+        "value": "EQS"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "G-CLASS",
+        "value": "G"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLA",
+        "value": "GLA"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLB",
+        "value": "GLB"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLC",
+        "value": "GLC"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLE",
+        "value": "GLE"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLS",
+        "value": "GLS"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "Mercedes-AMG GT",
+        "value": "AMGGT"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "S-CLASS",
+        "value": "S"
+      },
+      {
+        "label": "Model",
+        "formattedValue": "V-CLASS",
+        "value": "V"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "motorization": {
+    "values": [
+      {
+        "value": "A 200"
+      },
+      {
+        "value": "A 250 4MATIC"
+      },
+      {
+        "value": "A 35 4MATIC"
+      },
+      {
+        "value": "A 45 S 4MATIC+"
+      },
+      {
+        "value": "C 200"
+      },
+      {
+        "value": "C 300"
+      },
+      {
+        "value": "C 300 e"
+      },
+      {
+        "value": "C 43 4MATIC"
+      },
+      {
+        "value": "CLA 200"
+      },
+      {
+        "value": "CLA 250 4MATIC"
+      },
+      {
+        "value": "CLA 35 4MATIC"
+      },
+      {
+        "value": "CLA 45 S 4MATIC+"
+      },
+      {
+        "value": "CLE 200"
+      },
+      {
+        "value": "CLE 300 4MATIC"
+      },
+      {
+        "value": "CLE 53 4MATIC+"
+      },
+      {
+        "value": "E 200"
+      },
+      {
+        "value": "E 260 Style"
+      },
+      {
+        "value": "E 300 Style"
+      },
+      {
+        "value": "E 53 4MATIC+"
+      },
+      {
+        "value": "EQA 250+"
+      },
+      {
+        "value": "EQB 250+"
+      },
+      {
+        "value": "EQS 680"
+      },
+      {
+        "value": "G 580"
+      },
+      {
+        "value": "GLA 200"
+      },
+      {
+        "value": "GLA 250 4MATIC"
+      },
+      {
+        "value": "GLA 250 e"
+      },
+      {
+        "value": "GLA 35 4MATIC"
+      },
+      {
+        "value": "GLB 200"
+      },
+      {
+        "value": "GLB 250 4MATIC"
+      },
+      {
+        "value": "GLB 35 4MATIC"
+      },
+      {
+        "value": "GLC 200 4MATIC"
+      },
+      {
+        "value": "GLC 300 4MATIC"
+      },
+      {
+        "value": "GLC 300 e 4MATIC"
+      },
+      {
+        "value": "GLC 43 4MATIC"
+      },
+      {
+        "value": "GLC 63 S E PERFORMANCE"
+      },
+      {
+        "value": "GLE 300 d 4MATIC"
+      },
+      {
+        "value": "GLE 450 d 4MATIC"
+      },
+      {
+        "value": "GLE 53 4MATIC+"
+      },
+      {
+        "value": "GLE 63 S 4MATIC+"
+      },
+      {
+        "value": "GLS 450 d 4MATIC"
+      },
+      {
+        "value": "GLS 600"
+      },
+      {
+        "value": "GLS 63 4MATIC+"
+      },
+      {
+        "value": "GT 63 4MATIC+"
+      },
+      {
+        "value": "S 450 4MATIC"
+      },
+      {
+        "value": "S 580 4MATIC"
+      },
+      {
+        "value": "V 250"
+      },
+      {
+        "value": "V 300"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "bodyType": {
+    "values": [
+      {
+        "label": "Body type",
+        "formattedValue": "Limousine",
+        "value": "LIMOUSINE"
+      },
+      {
+        "label": "Body type",
+        "value": "SUV_OFFROADER"
+      },
+      {
+        "label": "Body type",
+        "formattedValue": "Hatchback",
+        "value": "HATCHBACK"
+      },
+      {
+        "label": "Body type",
+        "formattedValue": "Coupé",
+        "value": "COUPE"
+      },
+      {
+        "label": "Body type",
+        "value": "CABRIO_ROADSTER"
+      },
+      {
+        "label": "Body type",
+        "formattedValue": "People Carrier",
+        "value": "PEOPLE_CARRIER"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "stockType": {
+    "values": [
+      {
+        "value": "IN_PIPELINE"
+      },
+      {
+        "value": "AVAILABLE"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "price": {
+    "values": {
+      "min": 64421.55,
+      "max": 530966.4
+    },
+    "facetType": "RANGE"
+  },
+  "monthlyRate": {
+    "values": {
+      "min": 207.52,
+      "max": 2064.7
+    },
+    "facetType": "RANGE"
+  },
+  "campaigns": {
+    "values": [],
+    "facetType": "MULTI_VALUE"
+  },
+  "fuelType": {
+    "values": [
+      {
+        "label": "Fuel Type",
+        "formattedValue": "Diesel",
+        "value": "DIESEL"
+      },
+      {
+        "label": "Fuel Type",
+        "formattedValue": "Electric",
+        "value": "ELECTRIC"
+      },
+      {
+        "label": "Fuel Type",
+        "formattedValue": "Petrol",
+        "value": "PETROL"
+      },
+      {
+        "label": "Fuel Type",
+        "formattedValue": "Petrol/Electric",
+        "value": "PETROL_ELECTRIC_PLUGIN_HYBRID"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "enginePowerHP": {
+    "values": {
+      "min": 163,
+      "max": 680
+    },
+    "facetType": "RANGE"
+  },
+  "driveType": {
+    "values": [
+      {
+        "label": "Drive type",
+        "formattedValue": "",
+        "value": "UNDEFINED"
+      },
+      {
+        "label": "Drive type",
+        "formattedValue": "Rear-wheel drive",
+        "value": "RWD"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "gearbox": {
+    "values": [
+      {
+        "label": "Transmission",
+        "formattedValue": "Automatic",
+        "value": "AUTOMATIC"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "modelYear": {
+    "facetType": "RANGE"
+  },
+  "upholstery": {
+    "values": [
+      {
+        "formattedValue": "Beige",
+        "value": "UPHOLSTERY_COLOR_BEIGE"
+      },
+      {
+        "formattedValue": "Beige/Black",
+        "value": "UPHOLSTERY_COLOR_BEIGE_BLACK"
+      },
+      {
+        "formattedValue": "Beige/Brown",
+        "value": "UPHOLSTERY_COLOR_BEIGE_BROWN"
+      },
+      {
+        "formattedValue": "Black",
+        "value": "UPHOLSTERY_COLOR_BLACK"
+      },
+      {
+        "formattedValue": "Brown",
+        "value": "UPHOLSTERY_COLOR_BROWN"
+      },
+      {
+        "formattedValue": "Brown/Black",
+        "value": "UPHOLSTERY_COLOR_BROWN_BLACK"
+      },
+      {
+        "formattedValue": "Grey/Black",
+        "value": "UPHOLSTERY_COLOR_GREY_BLACK"
+      },
+      {
+        "formattedValue": "Red/Black",
+        "value": "UPHOLSTERY_COLOR_RED_BLACK"
+      },
+      {
+        "formattedValue": "White/Black",
+        "value": "UPHOLSTERY_COLOR_WHITE_BLACK"
+      },
+      {
+        "formattedValue": "White/Silver",
+        "value": "UPHOLSTERY_COLOR_WHITE_SILVER"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "packages": {
+    "values": [
+      {
+        "formattedValue": "Advanced Plus Package",
+        "value": "820509af"
+      },
+      {
+        "formattedValue": "Avantgarde Plus Package",
+        "value": "99bf0a96"
+      },
+      {
+        "formattedValue": "Premium Package",
+        "value": "509a07b4"
+      },
+      {
+        "formattedValue": "Premium Plus Package",
+        "value": "7b160978"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "lines": {
+    "values": [
+      {
+        "formattedValue": "AMG line",
+        "value": "1fd704a6"
+      },
+      {
+        "formattedValue": "Avantgarde",
+        "value": "2f320606"
+      },
+      {
+        "formattedValue": "Avantgarde Line",
+        "value": "50d307ae"
+      },
+      {
+        "formattedValue": "Exclusive",
+        "value": "29f005c1"
+      },
+      {
+        "formattedValue": "Mercedes-AMG exterior",
+        "value": "814209c5"
+      },
+      {
+        "formattedValue": "Mercedes-AMG interior",
+        "value": "811609bf"
+      },
+      {
+        "formattedValue": "Progressive",
+        "value": "36f406a2"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "equipment": {
+    "values": [
+      {
+        "formattedValue": "360° camera",
+        "value": "398c069d"
+      },
+      {
+        "formattedValue": "3rd seat row",
+        "value": "37810657"
+      },
+      {
+        "formattedValue": "Active Distance Assist Distronic",
+        "value": "6390e16"
+      },
+      {
+        "formattedValue": "Advanced sound system",
+        "value": "86220a2d"
+      },
+      {
+        "formattedValue": "AIR-BALANCE",
+        "value": "2bac04f8"
+      },
+      {
+        "formattedValue": "Ambient lighting",
+        "value": "5878083f"
+      },
+      {
+        "formattedValue": "AMG Aerodynamics Package",
+        "value": "9aeb0aa9"
+      },
+      {
+        "formattedValue": "AMG ceramic high-performance compound braking system",
+        "value": "5e6f1599"
+      },
+      {
+        "formattedValue": "AMG Driver Package",
+        "value": "5f200836"
+      },
+      {
+        "formattedValue": "AMG DYNAMIC PLUS Package",
+        "value": "85090933"
+      },
+      {
+        "formattedValue": "AMG Performance Advanced Seat Package",
+        "value": "40790f1f"
+      },
+      {
+        "formattedValue": "AMG Performance High-End Seat Package",
+        "value": "3ad50ecd"
+      },
+      {
+        "formattedValue": "AMG Performance seats",
+        "value": "7d6209b0"
+      },
+      {
+        "formattedValue": "AMG TRACK PACE",
+        "value": "3aee05ac"
+      },
+      {
+        "formattedValue": "Anti-theft alarm system",
+        "value": "98f90acf"
+      },
+      {
+        "formattedValue": "Augmented reality",
+        "value": "624908bd"
+      },
+      {
+        "formattedValue": "Blind Spot Assist",
+        "value": "5d32084f"
+      },
+      {
+        "formattedValue": "Burmester sound system",
+        "value": "951f0ad0"
+      },
+      {
+        "formattedValue": "Climate control system",
+        "value": "91c70aae"
+      },
+      {
+        "formattedValue": "Driver display",
+        "value": "498f078b"
+      },
+      {
+        "formattedValue": "Driving Assistance Package",
+        "value": "bd0c0bd6"
+      },
+      {
+        "formattedValue": "EASY-PACK tailgate",
+        "value": "5afa07f2"
+      },
+      {
+        "formattedValue": "Electrically adjustable seats with memory function",
+        "value": "54f31580"
+      },
+      {
+        "formattedValue": "ENERGIZING Package",
+        "value": "5ae107c7"
+      },
+      {
+        "formattedValue": "Head-up display",
+        "value": "4d8b07a3"
+      },
+      {
+        "formattedValue": "Heated front seats",
+        "value": "681208dd"
+      },
+      {
+        "formattedValue": "Heated rear seats",
+        "value": "5e6a085e"
+      },
+      {
+        "formattedValue": "Heated windscreen",
+        "value": "60cd08a6"
+      },
+      {
+        "formattedValue": "Highbeam Assist",
+        "value": "4f3107b5"
+      },
+      {
+        "formattedValue": "Hyperscreen",
+        "value": "36a50691"
+      },
+      {
+        "formattedValue": "Inreased towing capacity",
+        "value": "a77d0b5a"
+      },
+      {
+        "formattedValue": "KEYLESS-GO",
+        "value": "28c004ec"
+      },
+      {
+        "formattedValue": "Lane Keeping Assist",
+        "value": "6d900903"
+      },
+      {
+        "formattedValue": "LED DIGITAL LIGHT lighting system",
+        "value": "e7720ccf"
+      },
+      {
+        "formattedValue": "LED DIGITAL LIGHT lighting system with projection function",
+        "value": "9fee168e"
+      },
+      {
+        "formattedValue": "LED lighting system (all)",
+        "value": "a7010ac3"
+      },
+      {
+        "formattedValue": "LED MULTIBEAM lighting system",
+        "value": "c1a40bd9"
+      },
+      {
+        "formattedValue": "MBUX multimedia system",
+        "value": "8af90a55"
+      },
+      {
+        "formattedValue": "Mirror Package",
+        "value": "48b80750"
+      },
+      {
+        "formattedValue": "Multicontour seats",
+        "value": "6f22095e"
+      },
+      {
+        "formattedValue": "Navigation system",
+        "value": "63ca08de"
+      },
+      {
+        "formattedValue": "Night Package",
+        "value": "3ffd06cf"
+      },
+      {
+        "formattedValue": "Parking assistance system",
+        "value": "b5090be8"
+      },
+      {
+        "formattedValue": "PRE-SAFE",
+        "value": "1ef1043c"
+      },
+      {
+        "formattedValue": "Rear Seat Entertainment system",
+        "value": "ea830d83"
+      },
+      {
+        "formattedValue": "Rear-axle steering",
+        "value": "684c08eb"
+      },
+      {
+        "formattedValue": "Reversing camera",
+        "value": "5a970847"
+      },
+      {
+        "formattedValue": "Seat climate control",
+        "value": "7aaa09b6"
+      },
+      {
+        "formattedValue": "Sliding sunroof",
+        "value": "520507ff"
+      },
+      {
+        "formattedValue": "Smartphone Integration",
+        "value": "94cd0ace"
+      },
+      {
+        "formattedValue": "Sound system (all)",
+        "value": "693d0881"
+      },
+      {
+        "formattedValue": "Steering Assist",
+        "value": "517b07e1"
+      },
+      {
+        "formattedValue": "Steering wheel heater",
+        "value": "876a0a18"
+      },
+      {
+        "formattedValue": "Superscreen",
+        "value": "36fd0698"
+      },
+      {
+        "formattedValue": "Traffic Sign Assist",
+        "value": "6fbc0910"
+      },
+      {
+        "formattedValue": "Trailer coupling",
+        "value": "5a1e085d"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "color": {
+    "values": [
+      {
+        "formattedValue": "Black",
+        "value": "PAINT_COLOR_BLACK"
+      },
+      {
+        "formattedValue": "Blue",
+        "value": "PAINT_COLOR_BLUE"
+      },
+      {
+        "formattedValue": "Brown",
+        "value": "PAINT_COLOR_BROWN"
+      },
+      {
+        "formattedValue": "Green",
+        "value": "PAINT_COLOR_GREEN"
+      },
+      {
+        "formattedValue": "Grey",
+        "value": "PAINT_COLOR_GREY"
+      },
+      {
+        "formattedValue": "Red",
+        "value": "PAINT_COLOR_RED"
+      },
+      {
+        "formattedValue": "Silver",
+        "value": "PAINT_COLOR_SILVER"
+      },
+      {
+        "formattedValue": "White",
+        "value": "PAINT_COLOR_WHITE"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "generation": {
+    "values": [],
+    "facetType": "MULTI_VALUE"
+  },
+  "seats": {
+    "values": [
+      {
+        "value": 4
+      },
+      {
+        "value": 5
+      },
+      {
+        "value": 7
+      },
+      {
+        "value": 8
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "payload": {
+    "values": {
+      "min": 709,
+      "max": 733
+    },
+    "facetType": "RANGE"
+  },
+  "maximumWeight": {
+    "values": {
+      "min": 1910,
+      "max": 3500
+    },
+    "facetType": "RANGE"
+  }
+}
