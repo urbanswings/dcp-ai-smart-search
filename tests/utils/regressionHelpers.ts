@@ -143,7 +143,7 @@ export async function loadRegressionQueriesFromDescription(): Promise<FixedQuery
     return [];
   }
 
-  console.log("[regressionHelpers] Generating regression test cases from description via AI...");
+  console.log("[regressionHelpers] Generating regression test cases from description...");
 
   const facetCatalog = await loadFacetCatalogFromEmhApiResponse();
 

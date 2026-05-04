@@ -60,6 +60,9 @@ const colorTranslations: Record<string, string> = {
   "gumus": "silver",
   "kirmizi": "red",
   "mavi": "blue",
+  "kahverengi": "brown",
+  "bej": "beige",
+  "gümüş": "silver",
 };
 
 function translateColorName(value: string): string {
@@ -160,6 +163,11 @@ const facetValueAliasMap: Record<string, string[]> = {
   "blue": ["mavi"],
   "yesil": ["green"],
   "green": ["yesil"],
+  // TR color display names for upholstery/interior
+  "bej": ["beige"],
+  "beige": ["bej"],
+  "kahverengi": ["brown"],
+  "brown": ["kahverengi"],
   // KR color/body-type display names -> BE codes
   "세단": ["limousine"],
   "쿠페": ["coupe"],
@@ -552,11 +560,17 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     }
 
     const selectors = [
+      "[data-test-id^='emh-selected-filters-tag__']",
       ".emh-selected-filters__pill",
+      ".emh-selected-filters__tag",
       ".selected-filters__pill",
       ".selected-filters__item",
       "[class*='selected-filters'] [class*='pill']",
       "[class*='selected-filters'] [class*='chip']",
+      "[class*='selected-filters'] [class*='tag']",
+      "[data-testid*='selected-filters']",
+      "[id*='selected-filters'] > [class*='tag']",
+      "[id*='selected-filters'] > [class*='pill']",
     ];
 
     let bestParsedResult: Record<string, string[]> = {};
@@ -564,12 +578,13 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
 
     for (const selector of selectors) {
       const pills = page.locator(selector);
+      const count = await pills.count().catch(() => 0);
+      
       const firstVisible = await pills.first().isVisible().catch(() => false);
       if (!firstVisible) {
         continue;
       }
 
-      const count = await pills.count().catch(() => 0);
       if (count === 0) {
         continue;
       }
@@ -582,11 +597,18 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
         const facetKeyHint = mapUiDataTestIdToFacetKey(dataTestId);
         const innerText = await pill.innerText().catch(() => "");
         const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
+        
         // If the pill innerText ends with ":" (no value captured), try several
         // alternative sources to find the value: aria-label, data attributes,
         // child elements that may contain the value in a separate node.
         if (/:\s*$/.test(normalizedInnerText)) {
           const recovered: string = await pill.evaluate((el) => {
+            // 0. Brand logo: value rendered as <img> — read alt attribute
+            const tagImg = el.querySelector(".emh-selected-filters__tag-image");
+            if (tagImg) {
+              const alt = tagImg.getAttribute("alt") || "";
+              if (alt) return alt;
+            }
             // 1. aria-label on the pill itself
             const ariaLabel = el.getAttribute("aria-label") || "";
             if (ariaLabel) return ariaLabel;
@@ -637,7 +659,6 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
 
       if (normalizedPills.length > 0) {
         const parsedResult = parseUiSelectedFiltersToKeyValue(normalizedPills);
-        console.debug(`[DEBUG] Parsed filter result: ${JSON.stringify(parsedResult)}`);
 
         const parsedScore = Object.values(parsedResult).reduce(
           (sum, values) => sum + values.length,

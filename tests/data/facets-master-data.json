@@ -372,6 +372,24 @@
       },
       {
         "value": "SL 680"
+      },
+      {
+        "value": "C 200 4MATIC"
+      },
+      {
+        "value": "CLA 350 4MATIC"
+      },
+      {
+        "value": "E 180"
+      },
+      {
+        "value": "EQE 53 4MATIC+"
+      },
+      {
+        "value": "GLC 180"
+      },
+      {
+        "value": "GT 43"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -405,6 +423,11 @@
         "label": "Body type",
         "formattedValue": "People Carrier",
         "value": "PEOPLE_CARRIER"
+      },
+      {
+        "label": "Gövde Tipi",
+        "formattedValue": "Estate",
+        "value": "STATION"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -443,6 +466,10 @@
       {
         "formattedValue": "Man inv High Mileage",
         "value": "7426090d"
+      },
+      {
+        "formattedValue": "온라인 사전 예약",
+        "value": "f7dc1175"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -656,6 +683,18 @@
       {
         "formattedValue": "Premium Plus Package",
         "value": "7b160978"
+      },
+      {
+        "formattedValue": "Advanced Plus Paketi",
+        "value": "7a7f0974"
+      },
+      {
+        "formattedValue": "Premium paketi",
+        "value": "4b7d0799"
+      },
+      {
+        "formattedValue": "Premium Plus Paketi",
+        "value": "73b4093d"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -689,6 +728,34 @@
       {
         "formattedValue": "Progressive",
         "value": "36f406a2"
+      },
+      {
+        "formattedValue": "AMG",
+        "value": "ddf02f1"
+      },
+      {
+        "formattedValue": "Avantgarde Line",
+        "value": "523807c1"
+      },
+      {
+        "formattedValue": "Exclusive",
+        "value": "2ae305d4"
+      },
+      {
+        "formattedValue": "Mercedes-AMG dış mekan",
+        "value": "aaeb0bcf"
+      },
+      {
+        "formattedValue": "Mercedes-AMG iç mekan",
+        "value": "8f5b0a65"
+      },
+      {
+        "formattedValue": "Progressive",
+        "value": "380d06b5"
+      },
+      {
+        "formattedValue": "V8-Styling dış mekan",
+        "value": "96750b4a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -966,6 +1033,210 @@
       {
         "formattedValue": "휠 (20인치)",
         "value": "5b62098a"
+      },
+      {
+        "formattedValue": "360° kamerası",
+        "value": "531b08a0"
+      },
+      {
+        "formattedValue": "Advanced ses sistemi",
+        "value": "7ca209bb"
+      },
+      {
+        "formattedValue": "AIR-BALANCE",
+        "value": "2cc5050b"
+      },
+      {
+        "formattedValue": "Akıllı telefon entegrasyonu",
+        "value": "8780edb"
+      },
+      {
+        "formattedValue": "Ambiyans aydınlatması",
+        "value": "a9290c88"
+      },
+      {
+        "formattedValue": "AMG Driver Package",
+        "value": "60be0849"
+      },
+      {
+        "formattedValue": "AMG DYNAMIC PLUS paketi",
+        "value": "7f180918"
+      },
+      {
+        "formattedValue": "AMG Performance High-End koltuk paketi",
+        "value": "521a0fbf"
+      },
+      {
+        "formattedValue": "AMG Performance koltuklar",
+        "value": "aa8d0b7c"
+      },
+      {
+        "formattedValue": "AMG TRACK PACE",
+        "value": "3c4005bf"
+      },
+      {
+        "formattedValue": "AMG yüksek performanslı seramik kompozit fren tertibatı",
+        "value": "3b511a5d"
+      },
+      {
+        "formattedValue": "Arka aks direksiyon tertibatı",
+        "value": "f1280e4f"
+      },
+      {
+        "formattedValue": "Arka bölüm eğlence sistemi",
+        "value": "6b80efb"
+      },
+      {
+        "formattedValue": "Arka koltuk ısıtması",
+        "value": "ab1d0cfc"
+      },
+      {
+        "formattedValue": "Augmented Reality (artırılmış gerçeklik)",
+        "value": "1d8d164e"
+      },
+      {
+        "formattedValue": "Ayna paketi",
+        "value": "34810643"
+      },
+      {
+        "formattedValue": "Burmester ses sistemi",
+        "value": "8b0f0a5e"
+      },
+      {
+        "formattedValue": "Direksiyon asistanı",
+        "value": "83cd0ac5"
+      },
+      {
+        "formattedValue": "Direksiyon simidi ısıtması",
+        "value": "fa280f83"
+      },
+      {
+        "formattedValue": "Distronic mesafe sabitleyici",
+        "value": "dc1d0d0e"
+      },
+      {
+        "formattedValue": "EASY-PACK arka kapak",
+        "value": "6b4c0881"
+      },
+      {
+        "formattedValue": "ENERGIZING Paketi",
+        "value": "550a078c"
+      },
+      {
+        "formattedValue": "Ergonomik koltuklar",
+        "value": "780a09c0"
+      },
+      {
+        "formattedValue": "Gece paketi",
+        "value": "33a3062e"
+      },
+      {
+        "formattedValue": "Geri sürüş kamerası",
+        "value": "baa80d83"
+      },
+      {
+        "formattedValue": "Hafıza fonksiyonlu elektrikli ayarlanabilir koltuklar",
+        "value": "da2d1820"
+      },
+      {
+        "formattedValue": "Hyperscreen",
+        "value": "37be06a4"
+      },
+      {
+        "formattedValue": "Hırsızlık alarm sistemi",
+        "value": "ee370e44"
+      },
+      {
+        "formattedValue": "Isıtmalı ön cam",
+        "value": "82500ac8"
+      },
+      {
+        "formattedValue": "İklimlendirme",
+        "value": "57cf088d"
+      },
+      {
+        "formattedValue": "KEYLESS-GO",
+        "value": "29c604ff"
+      },
+      {
+        "formattedValue": "Koltuk iklimlendirmesi",
+        "value": "96e80af8"
+      },
+      {
+        "formattedValue": "Kör nokta yardımcısı",
+        "value": "c2850e01"
+      },
+      {
+        "formattedValue": "LED aydınlatma sistemi (tümü)",
+        "value": "1a6b0faf"
+      },
+      {
+        "formattedValue": "LED DIGITAL LIGHT aydınlatma sistemi",
+        "value": "2bb70f15"
+      },
+      {
+        "formattedValue": "LED MULTIBEAM aydınlatma sistemi",
+        "value": "1c50e1f"
+      },
+      {
+        "formattedValue": "MBUX multimedya sistemi",
+        "value": "97e00ad1"
+      },
+      {
+        "formattedValue": "Navigasyon sistemi",
+        "value": "6ede0959"
+      },
+      {
+        "formattedValue": "Park yardımcı sistemi",
+        "value": "ada20c52"
+      },
+      {
+        "formattedValue": "PRE-SAFE",
+        "value": "1fd1044f"
+      },
+      {
+        "formattedValue": "Projeksiyon fonksiyonlu LED DIGITAL LIGHT aydınlatma sistemi",
+        "value": "39de18b3"
+      },
+      {
+        "formattedValue": "Ses sistemi (tümü)",
+        "value": "82310ab5"
+      },
+      {
+        "formattedValue": "Superscreen",
+        "value": "381606ab"
+      },
+      {
+        "formattedValue": "Sürgülü tavan",
+        "value": "74260a6b"
+      },
+      {
+        "formattedValue": "Sürücü ekranı",
+        "value": "810e0b67"
+      },
+      {
+        "formattedValue": "Sürüş yardımcı paketi",
+        "value": "fdfd0f6b"
+      },
+      {
+        "formattedValue": "Trafik işareti yardımcısı",
+        "value": "ff2d0ff1"
+      },
+      {
+        "formattedValue": "Uzun far yardımcısı",
+        "value": "9e340c99"
+      },
+      {
+        "formattedValue": "Ön cam sanal göstergesi",
+        "value": "c3da0cc9"
+      },
+      {
+        "formattedValue": "Ön koltuk ısıtması",
+        "value": "af700d44"
+      },
+      {
+        "formattedValue": "Şerit takip yardımcısı",
+        "value": "de6c0ede"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1111,7 +1382,11 @@
     "facetType": "RANGE"
   },
   "wltpRangeTotalAllIndividual": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 447,
+      "max": 715
+    }
   },
   "generation": {
     "values": [],
@@ -1133,6 +1408,9 @@
       },
       {
         "value": 6
+      },
+      {
+        "value": 2
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1165,6 +1443,10 @@
       {
         "formattedValue": "Nappa leather",
         "value": "UPHOLSTERY_TYPE_LEATHER_NAPPA"
+      },
+      {
+        "formattedValue": "MANUFAKTUR",
+        "value": "UPHOLSTERY_TYPE_MANUFAKTUR"
       }
     ]
   },
@@ -1182,6 +1464,10 @@
       {
         "formattedValue": "Non-metallic paint finishes",
         "value": "PAINT_TYPE_UNI"
+      },
+      {
+        "formattedValue": "Magno",
+        "value": "PAINT_TYPE_MAGNO"
       }
     ]
   },
@@ -1189,6 +1475,39 @@
     "values": {
       "min": 120,
       "max": 410
+    },
+    "facetType": "RANGE"
+  },
+  "torque": {
+    "values": {
+      "min": 270,
+      "max": 1164
+    },
+    "facetType": "RANGE"
+  },
+  "loadspaceVolume": {
+    "facetType": "RANGE"
+  },
+  "loadspaceLength": {
+    "facetType": "RANGE"
+  },
+  "loadspaceWidth": {
+    "facetType": "RANGE"
+  },
+  "loadspaceHeight": {
+    "facetType": "RANGE"
+  },
+  "wheelbase": {
+    "values": {
+      "min": 3200,
+      "max": 3200
+    },
+    "facetType": "RANGE"
+  },
+  "vehicleHeight": {
+    "values": {
+      "min": 1352,
+      "max": 1989
     },
     "facetType": "RANGE"
   }
