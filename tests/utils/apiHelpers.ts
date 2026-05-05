@@ -362,7 +362,9 @@ export class SearchApiClient {
           },
           data: {
             smartSearch: {
-              parameters: responseData.search.variables,
+              parameters: Object.fromEntries(
+                Object.entries(responseData.search.variables || {}).filter(([_, value]) => value !== null)
+              ),
               message: responseData.messageToUser,
               facets: data.data.search.facets,
               navigation: data.data.search.navigation,
@@ -828,7 +830,8 @@ export async function processAndLogApiResult({
       "language",
       "profileId",
       "vehicleCategory",
-      "__typename"
+      "__typename",
+      "page"
     ];
     return Object.fromEntries(
       Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
@@ -894,12 +897,7 @@ export async function processAndLogApiResult({
     );
   } else if (results.results) {
     // Handle the new Smart Search + Actual Search response structure
-    const searchResults =
-      process.env.API_ENDPOINT_LOCAL === "true"
-        ? apiResponse?.searchResults
-        : apiResponse?.data?.smartSearch;
-    const smartSearchResponse = results.results.resultText;
-
+    const searchResults = apiResponse?.data?.smartSearch;    
     if (searchResults) {
       resultCount =
         searchResults.navigation?.totalResults ||
@@ -912,6 +910,7 @@ export async function processAndLogApiResult({
       addFailureReason("Payload is zero");
     }
 
+    const smartSearchResponse = results.results.resultText;
     openaiEvaluation = await evaluateSearchResult(
       smartSearchResponse,
       aiEvaluationHints,

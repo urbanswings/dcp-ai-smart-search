@@ -390,6 +390,12 @@
       },
       {
         "value": "GT 43"
+      },
+      {
+        "value": "C 63 S E PERFORMANCE"
+      },
+      {
+        "value": "SL 63 4MATIC+"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -470,6 +476,34 @@
       {
         "formattedValue": "온라인 사전 예약",
         "value": "f7dc1175"
+      },
+      {
+        "formattedValue": "$2000 EOFY Bonus",
+        "value": "41c40669"
+      },
+      {
+        "formattedValue": "$89,490 Driveaway",
+        "value": "4bae0733"
+      },
+      {
+        "formattedValue": "$94,900 Driveaway",
+        "value": "4b40072b"
+      },
+      {
+        "formattedValue": "Complimentary Sliding Roof",
+        "value": "c2110c0d"
+      },
+      {
+        "formattedValue": "EOFY Offer",
+        "value": "2967054e"
+      },
+      {
+        "formattedValue": "Finance & Servicing Offer",
+        "value": "a6090adf"
+      },
+      {
+        "formattedValue": "Special Edition",
+        "value": "4f9c07b6"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1356,6 +1390,9 @@
       },
       {
         "value": "GS0035803"
+      },
+      {
+        "value": "GS0004042"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1510,5 +1547,446 @@
       "max": 1989
     },
     "facetType": "RANGE"
+  },
+  "buildType": {
+    "values": [
+      {
+        "value": "CBU"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "colorName": {
+    "values": [
+      {
+        "formattedValue": "Cosmos Black",
+        "value": "LU-191"
+      },
+      {
+        "formattedValue": "Graphite Grey",
+        "value": "LU-831"
+      },
+      {
+        "formattedValue": "Graphite Grey metallic paint",
+        "value": "LU-831"
+      },
+      {
+        "formattedValue": "High Tech Silver",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "High-Tech Silver",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "High-Tech Silver ",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "High-tech Silver ",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "High-Tech Silver metallic paint",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Graphite Metallic",
+        "value": "LU-041"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Opalite White Bright",
+        "value": "LU-885"
+      },
+      {
+        "formattedValue": "MANUFAKTUR opalite white bright",
+        "value": "LU-885"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Opalite White Bright ",
+        "value": "LU-885"
+      },
+      {
+        "formattedValue": "MANUFAKTUR paint MANUFAKTUR opalite white bright",
+        "value": "LU-885"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Patagonia Red Bright",
+        "value": "LU-993"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Patagonia Red Metallic metallic paint",
+        "value": "LU-993"
+      },
+      {
+        "formattedValue": "Metallic paint Cosmos Black",
+        "value": "LU-191"
+      },
+      {
+        "formattedValue": "Metallic paint cosmos black",
+        "value": "LU-191"
+      },
+      {
+        "formattedValue": "Metallic paint Graphite Grey",
+        "value": "LU-831"
+      },
+      {
+        "formattedValue": "Metallic paint High-Tech Silver",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "Metallic paint high-tech silver",
+        "value": "LU-922"
+      },
+      {
+        "formattedValue": "Metallic paint mountain grey",
+        "value": "LU-787"
+      },
+      {
+        "formattedValue": "Metallic paint Obsidian Black",
+        "value": "LU-197"
+      },
+      {
+        "formattedValue": "Metallic paint Selenite Grey",
+        "value": "LU-992"
+      },
+      {
+        "formattedValue": "Metallic paint Spectral Blue",
+        "value": "LU-970"
+      },
+      {
+        "formattedValue": "Metallic paint spectral blue",
+        "value": "LU-970"
+      },
+      {
+        "formattedValue": "Metallic paint Verde Silver",
+        "value": "LU-188"
+      },
+      {
+        "formattedValue": "Mountain Grey",
+        "value": "LU-787"
+      },
+      {
+        "formattedValue": "Night Black",
+        "value": "LU-696"
+      },
+      {
+        "formattedValue": "Obsidian Black",
+        "value": "LU-197"
+      },
+      {
+        "formattedValue": "Obsidian Black ",
+        "value": "LU-197"
+      },
+      {
+        "formattedValue": "Obsidian Black metallic paint",
+        "value": "LU-197"
+      },
+      {
+        "formattedValue": "Opalite White Bright",
+        "value": "LU-885"
+      },
+      {
+        "formattedValue": "Patagonia Red",
+        "value": "LU-993"
+      },
+      {
+        "formattedValue": "Patagonia Red Bright",
+        "value": "LU-993"
+      },
+      {
+        "formattedValue": "Polar White",
+        "value": "LU-149"
+      },
+      {
+        "formattedValue": "Polar White solid paint",
+        "value": "LU-149"
+      },
+      {
+        "formattedValue": "Selenite Grey",
+        "value": "LU-992"
+      },
+      {
+        "formattedValue": "Sodalite Blue",
+        "value": "LU-842"
+      },
+      {
+        "formattedValue": "Solid paint Polar White",
+        "value": "LU-149"
+      },
+      {
+        "formattedValue": "Solid polar white",
+        "value": "LU-149"
+      },
+      {
+        "formattedValue": "Spectral Blue",
+        "value": "LU-970"
+      },
+      {
+        "formattedValue": "Verde Silver",
+        "value": "LU-188"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "dealerFittedOptions": {
+    "values": [],
+    "facetType": "MULTI_VALUE"
+  },
+  "estimatedArrivalDate": {
+    "facetType": "DATE_RANGE"
+  },
+  "modelDesignation": {
+    "values": [
+      {
+        "formattedValue": "B 180",
+        "value": "11f50304"
+      },
+      {
+        "formattedValue": "C 180 AMG Line",
+        "value": "369905a2"
+      },
+      {
+        "formattedValue": "C 180 Avantgarde",
+        "value": "48cc0722"
+      },
+      {
+        "formattedValue": "CLA 180 Progressive Coupe",
+        "value": "96dd0a67"
+      },
+      {
+        "formattedValue": "CLE 180 AVANTGARDE Coupe",
+        "value": "7ca608af"
+      },
+      {
+        "formattedValue": "E 200 AMG Line",
+        "value": "3664059d"
+      },
+      {
+        "formattedValue": "E 200 AVANTGARDE",
+        "value": "41cd05fd"
+      },
+      {
+        "formattedValue": "E 200 EXCLUSIVE",
+        "value": "3cb405d8"
+      },
+      {
+        "formattedValue": "EQA 250+ Progressive",
+        "value": "655c087b"
+      },
+      {
+        "formattedValue": "EQS 350 Electric Art",
+        "value": "6657083c"
+      },
+      {
+        "formattedValue": "GLA 180 Progressive",
+        "value": "5fce084f"
+      },
+      {
+        "formattedValue": "GLB 180 Progressive",
+        "value": "5fe00850"
+      },
+      {
+        "formattedValue": "GLC 200 4MATIC AVANTGARDE",
+        "value": "80720850"
+      },
+      {
+        "formattedValue": "GLC 300 4MATIC Coupe AMG Line",
+        "value": "a9080a0d"
+      },
+      {
+        "formattedValue": "GLE 450 4MATIC",
+        "value": "3769055c"
+      },
+      {
+        "formattedValue": "GLS 450 4MATIC",
+        "value": "381f056a"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLA 45 S 4MATIC+ Coupe",
+        "value": "1c80c28"
+      },
+      {
+        "formattedValue": "MERCEDES-AMG CLE 53 4MATIC+",
+        "value": "980308bc"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLB 35 4MATIC",
+        "value": "a3cb0972"
+      },
+      {
+        "formattedValue": "MERCEDES-AMG GLC 43 4MATIC",
+        "value": "8faf0892"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 43 4MATIC Coupe",
+        "value": "e2180b8e"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLE 53 4MATIC+ Coupe",
+        "value": "ec9c0bbc"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLE 53 4MATIC+ SUV",
+        "value": "d5620abe"
+      },
+      {
+        "formattedValue": "Mercedes-Benz G 500",
+        "value": "6cc80809"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
+  },
+  "productionDate": {
+    "values": {
+      "min": "2024-12-05",
+      "max": "2025-11-04"
+    },
+    "facetType": "DATE_RANGE"
+  },
+  "registrationType": {
+    "values": [],
+    "facetType": "MULTI_VALUE"
+  },
+  "upholsteryName": {
+    "values": [
+      {
+        "formattedValue": "AMG Nappa Leather Black",
+        "value": "AU-851"
+      },
+      {
+        "formattedValue": "AMG Nappa Leather Black ",
+        "value": "AU-851"
+      },
+      {
+        "formattedValue": "AMG Nappa Leather in Power Red / Black ",
+        "value": "AU-887"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - black",
+        "value": "AU-101"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - Black",
+        "value": "AU-101"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - black",
+        "value": "AU-111"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - neva grey / black",
+        "value": "AU-118"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - sienna brown / black",
+        "value": "AU-104"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather in Black",
+        "value": "AU-101"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather in Macchiato Beige / Black ",
+        "value": "AU-105"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather in Macchiato Beige/Black",
+        "value": "AU-105"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather in Tonka Brown / Black ",
+        "value": "AU-104"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather in Tonka Brown/Black",
+        "value": "AU-104"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather Macchiato Beige / Black",
+        "value": "AU-105"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather upholstery / MICROCUT microfibre - Black",
+        "value": "AU-651"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather upholstery / MICROCUT microfibre Bahia Brown / Black",
+        "value": "AU-654"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather, two-tone - sienna brown / black",
+        "value": "AU-194"
+      },
+      {
+        "formattedValue": "ARTICO man-made Macchiato Beige leather",
+        "value": "AU-105"
+      },
+      {
+        "formattedValue": "ARTICOMan-Made Leather/Bla",
+        "value": "AU-671"
+      },
+      {
+        "formattedValue": "Black",
+        "value": "AU-101"
+      },
+      {
+        "formattedValue": "Leather - Bahia Brown / Black",
+        "value": "AU-224"
+      },
+      {
+        "formattedValue": "Leather - black",
+        "value": "AU-221"
+      },
+      {
+        "formattedValue": "Leather - black / balao brown",
+        "value": "AU-211"
+      },
+      {
+        "formattedValue": "Leather - nut brown / black",
+        "value": "AU-214"
+      },
+      {
+        "formattedValue": "Leather black",
+        "value": "AU-211"
+      },
+      {
+        "formattedValue": "Leather in Black ",
+        "value": "AU-201"
+      },
+      {
+        "formattedValue": "Leather in Tonka Brown / Black ",
+        "value": "AU-214"
+      },
+      {
+        "formattedValue": "Leather two-tone Sienna Brown / Black ",
+        "value": "AU-294"
+      },
+      {
+        "formattedValue": "Leather two-tone Sienna brown / Black ",
+        "value": "AU-294"
+      },
+      {
+        "formattedValue": "Leather, Black",
+        "value": "AU-211"
+      },
+      {
+        "formattedValue": "Leather, two-tone Sienna Brown / Black",
+        "value": "AU-294"
+      },
+      {
+        "formattedValue": "nappa leather - sienna brown / black",
+        "value": "AU-804"
+      },
+      {
+        "formattedValue": "Sports seats in ARTICO leather black",
+        "value": "AU-111"
+      },
+      {
+        "formattedValue": "Two-tone AMG Nappa Leather Red Pepper / Black",
+        "value": "AU-857"
+      }
+    ],
+    "facetType": "MULTI_VALUE"
   }
 }
