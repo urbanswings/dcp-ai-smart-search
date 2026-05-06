@@ -1,4 +1,5 @@
 import axios from "axios";
+import http from "http";
 import fs from "fs/promises";
 import path from "path";
 import { evaluateSearchResult, fetchTranslation, openaiChatCompletion } from "./aiHelpers";
@@ -287,7 +288,7 @@ export class SearchApiClient {
               request_id: "cf19cf25-90b6-406b-8388-fda1757e94e5",
               sales_channel: salesChannel,
               user_query: actualInput,
-              vehicleCategory: "PASSENGER-CARS"            
+              vehicle_category: "PASSENGER-CARS"            
             }
           : {
               operationName: "GetSmartSearchResults",
@@ -307,17 +308,35 @@ export class SearchApiClient {
                 : "query GetSmartSearchResults($isUcos: Boolean = false, $language: String, $limit: Int! = 10, $profileId: String!, $sortingType: String! = \"price-asc\", $contextType: String, $query: String!) {\n  smartSearch(\n    language: $language\n    limit: $limit\n    profileId: $profileId\n    sortingType: $sortingType\n    contextType: $contextType\n    query: $query\n  ) {\n    message\n    parameters {\n      contextType\n      isUcos\n      limit\n      sortingType\n      language\n      profileId\n      vehicleCategory\n      modelIdentifier\n      color\n      upholstery\n      brand\n      fuelType\n      bodyType\n      motorization\n      equipment\n      price {\n        min\n        max\n        __typename\n      }\n      mileage {\n        min\n        max\n        __typename\n      }\n      modelYear {\n        min\n        max\n        __typename\n      }\n      __typename\n    }\n    facets {\n      brand {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      modelIdentifier {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      motorization {\n        ... on SimpleCountFacet {\n          values {\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      bodyType {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      stockType {\n        ... on SimpleCountFacet {\n          values {\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      price {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      monthlyRate {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      campaigns {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      fuelType {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      enginePowerHP {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      driveType {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      gearbox {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      modelYear {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      upholstery {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      packages {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      lines {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      equipment {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      color {\n        ... on FormattedValueFacet {\n          values {\n            label\n            formattedValue\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      seats {\n        ... on NumberCountFacet {\n          values {\n            value\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      payload {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      maximumWeight {\n        ... on RangeFacet {\n          values {\n            min\n            max\n            count\n            __typename\n          }\n          facetType\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    navigation {\n      currentLimit\n      currentPage\n      currentSortingCode\n      totalPages\n      totalResults\n      __typename\n    }\n    results {\n      characteristics {\n        stockCategories {\n          code\n          __typename\n        }\n        highlights {\n          label\n          __typename\n        }\n        campaigns {\n          description\n          footnote\n          label\n          __typename\n        }\n        __typename\n      }\n      consignorCompanyId\n      emissionAndConsumption {\n        attributes {\n          displayValue\n          id\n          label\n          mustShowIn\n          unit\n          value\n          __typename\n        }\n        footnotes\n        testProcedure\n        __typename\n      }\n      envkv {\n        co2Classes {\n          primary\n          secondary\n          __typename\n        }\n        __typename\n      }\n      estimatedArrivalDate\n      identification {\n        code\n        commissionNumber\n        dcpProductType\n        dealerId\n        dealerGroupName\n        mpcId\n        variantId\n        vin\n        vxVehicleId\n        allDealers\n        __typename\n      }\n      images {\n        default\n        __typename\n      }\n      productionDate\n      preProductionVehicle\n      stock {\n        stockType\n        __typename\n      }\n      stockCategory\n      technicalInformation {\n        engine {\n          fuelType {\n            ...TechnicalData\n            __typename\n          }\n          power {\n            ...PowerData\n            __typename\n          }\n          __typename\n        }\n        transmission {\n          ...TechnicalData\n          __typename\n        }\n        __typename\n      }\n      usedVehicleData @include(if: $isUcos) {\n        mileage {\n          ...IntegerTechnicalData\n          __typename\n        }\n        firstRegistrationDate\n        vehicleInspection {\n          maintenance\n          __typename\n        }\n        warranty {\n          status\n          unlimitedDistance\n          __typename\n        }\n        __typename\n      }\n      vehicleModel {\n        baumuster\n        bodyType {\n          ...TechnicalData\n          __typename\n        }\n        brand {\n          ...TechnicalData\n          __typename\n        }\n        category {\n          ...TechnicalData\n          __typename\n        }\n        facelift\n        generation\n        modelYear\n        modelYearCode\n        motorization\n        name\n        steeringPosition {\n          ...TechnicalData\n          __typename\n        }\n        typeClass\n        vehicleClass {\n          ...TechnicalData\n          __typename\n        }\n        __typename\n      }\n      wholesale\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment IntegerTechnicalData on IntegerTechnicalData {\n  label\n  formattedValue\n  value\n  unit\n  __typename\n}\n\nfragment PowerData on Power {\n  label\n  formattedValue\n  combustionKw {\n    ...IntegerTechnicalData\n    __typename\n  }\n  combustionHp {\n    ...IntegerTechnicalData\n    __typename\n  }\n  electricKw {\n    ...IntegerTechnicalData\n    __typename\n  }\n  electricHp {\n    ...IntegerTechnicalData\n    __typename\n  }\n  combinedKw {\n    ...IntegerTechnicalData\n    __typename\n  }\n  combinedHp {\n    ...IntegerTechnicalData\n    __typename\n  }\n  __typename\n}\n\nfragment TechnicalData on TechnicalData {\n  label\n  formattedValue\n  value\n  unit\n  __typename\n}"
             };
 
-      const response = await axios.post(endpoint, payload, {
+      const isLocalEndpoint = process.env.API_ENDPOINT_LOCAL === "true";
+      const requestConfig = {
         timeout: 30000,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
           "User-Agent": "AI-Smart-Search-Test/1.0",
+          ...(isLocalEndpoint && {
+            Connection: "close",
+          }),
           ...(process.env.API_ENDPOINT_LOCAL !== "true" && {
             "X-Api-Key": process.env.X_API_KEY || "",
           }),
         },
-      });
+        ...(isLocalEndpoint && {
+          httpAgent: new http.Agent({ keepAlive: false }),
+        }),
+      };
+
+      let response;
+      try {
+        response = await axios.post(endpoint, payload, requestConfig);
+      } catch (error: any) {
+        if (isLocalEndpoint && error?.code === "ECONNRESET") {
+          response = await axios.post(endpoint, payload, requestConfig);
+        } else {
+          throw error;
+        }
+      }
 
       const responseTime = Date.now() - responseStartTime;
       let responseData = response.data;
@@ -343,7 +362,9 @@ export class SearchApiClient {
             Accept: "application/json",
             "Content-Type": "application/json",
             "User-Agent": "AI-Smart-Search-Test/1.0",
+            Connection: "close",
           },
+          httpAgent: new http.Agent({ keepAlive: false }),
         });
         let data = response.data;
         if (typeof data === "string") {
@@ -352,6 +373,10 @@ export class SearchApiClient {
           } catch (e) {
             // If parsing fails, keep as string
           }
+        }
+
+        if (response.data?.errors) {
+          throw new Error(`API Error: ${JSON.stringify(response.data.errors)}`);
         }
 
         // Local endpoint returns: { request_id, messageToUser, search: { operationName, variables, query } }
@@ -819,9 +844,24 @@ export async function processAndLogApiResult({
   testTitle: string;
   expectedStatusCode?: number;
 }): Promise<any> {
-  const testFacets = process.env.TEST_FACETS === "true";
+  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  if (results.error) {
+    console.error(`API call failed with error: ${results.error}`);
+    return {
+      testMode: "api",
+      testDescribe,
+      testTitle,
+      query: {
+        [`${lang}`]: actualInput,
+      },
+      openaiEvaluation: `API call failed with error: ${results.error}`,
+      hasError: true,
+    };
+  }
+  
+  const testFacets = process.env.TEST_FACETS === "true";  
   const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results?.resultText || "";
   const apiResponse = results.results?.responseData;
@@ -848,8 +888,7 @@ export async function processAndLogApiResult({
   let uiFacetComparison: {
     matches: boolean;
     missingFacetValues: string[];
-  } | null = null;
-  const lang = LANGUAGE?.toLocaleLowerCase() || "en";  
+  } | null = null;   
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
     if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
@@ -1058,18 +1097,28 @@ export async function processAndLogApiResult({
 
   // Facets check (Query vs BE)
   const facetMismatches: string[] = [];
-  if (resultsFacets.equipment) {
-    const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
-      apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
-    const equipmentCodeToName = new Map<string, string>(
-      apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
-    );
-    const resolvedEquipment = (resultsFacets.equipment as string[]).map(
-      (code: string) => equipmentCodeToName.get(code) ?? code
-    );
-    resultsFacets.equipment = resolvedEquipment;
+  if (resultsFacets.equipment || resultsFacets.lines || resultsFacets.packages) {
+    const mappableFacets: Array<"equipment" | "lines" | "packages"> = [
+      "equipment",
+      "lines",
+      "packages",
+    ];
+
+    for (const facetKey of mappableFacets) {
+      if (!Array.isArray(resultsFacets[facetKey])) continue;
+
+      const apiFacetValues: Array<{ formattedValue: string; value: string }> =
+        apiResponse?.data?.smartSearch?.facets?.[facetKey]?.values ?? [];
+      const codeToName = new Map<string, string>(
+        apiFacetValues.map((f) => [f.value, f.formattedValue])
+      );
+
+      resultsFacets[facetKey] = (resultsFacets[facetKey] as string[]).map(
+        (code: string) => codeToName.get(code) ?? code
+      );
+    }
   }
-  if (query?.facet === 'equipment') {
+  if (query?.facet === 'equipment' || query?.facet === 'lines' || query?.facet === 'packages') {
     uiFacetComparison = compareSelectedFiltersWithFacetsByExpectedValue(
       query.filterValue,
       resultsFacets

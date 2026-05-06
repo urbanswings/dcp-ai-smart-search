@@ -495,6 +495,98 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
+  test("By Filter Facets ('Lines')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      // Fetch facets dynamically from API based on environment settings
+      const project = getProject();
+      const fixedQueries: string[] = [];
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const linesFacet = facets.find(f => f.code === "lines");
+      const queriesOnlyLines = linesFacet?.values?.map(v => ({
+        ...linesFacet,
+        values: [v],
+      })) ?? [];
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyLines, aiPromptData.byFilterFacetsComplete);
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "by-filter-lines",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('Packages')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      // Fetch facets dynamically from API based on environment settings
+      const project = getProject();
+      const fixedQueries: string[] = [];
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const packagesFacet = facets.find(f => f.code === "packages");
+      const queriesOnlyPackages = packagesFacet?.values?.map(v => ({
+        ...packagesFacet,
+        values: [v],
+      })) ?? [];
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyPackages, aiPromptData.byFilterFacetsComplete);
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "by-filter-packages",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();

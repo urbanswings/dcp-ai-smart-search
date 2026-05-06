@@ -692,9 +692,24 @@ export async function processAndLogUiResult({
   testTitle: string;
   page: Page;
 }): Promise<any> {
-  const testFacets = process.env.TEST_FACETS === "true";
+  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  if (results.error) {
+    console.error(`API call failed with error: ${results.error}`);
+    return {
+      testMode: "api",
+      testDescribe,
+      testTitle,
+      query: {
+        [`${lang}`]: actualInput,
+      },
+      openaiEvaluation: `API call failed with error: ${results.error}`,
+      hasError: true,
+    };
+  }
+
+  const testFacets = process.env.TEST_FACETS === "true";
   const aiEvaluationHints = query?.aiEvaluationHints;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
@@ -732,7 +747,6 @@ export async function processAndLogUiResult({
     matches: boolean;
     missingFacetValues: string[];
   } | null = null;
-  const lang = process.env.LANGUAGE?.toLocaleLowerCase() || "en";
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
     if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
@@ -939,22 +953,32 @@ export async function processAndLogUiResult({
 
   // Facets check (Query vs UI vs BE)
   const facetMismatches: string[] = [];
-  if (resultsFacets.equipment) {
-    const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
-      apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
-    const equipmentCodeToName = new Map<string, string>(
-      apiEquipmentFacets.map((f) => [f.value, f.formattedValue])
-    );
-    const resolvedEquipment = (resultsFacets.equipment as string[]).map(
-      (code: string) => equipmentCodeToName.get(code) ?? code
-    );
-    resultsFacets.equipment = resolvedEquipment;
+  if (resultsFacets.equipment || resultsFacets.lines || resultsFacets.packages) {
+    const mappableFacets: Array<"equipment" | "lines" | "packages"> = [
+      "equipment",
+      "lines",
+      "packages",
+    ];
+
+    for (const facetKey of mappableFacets) {
+      if (!Array.isArray(resultsFacets[facetKey])) continue;
+
+      const apiFacetValues: Array<{ formattedValue: string; value: string }> =
+        apiResponse?.data?.smartSearch?.facets?.[facetKey]?.values ?? [];
+      const codeToName = new Map<string, string>(
+        apiFacetValues.map((f) => [f.value, f.formattedValue])
+      );
+
+      resultsFacets[facetKey] = (resultsFacets[facetKey] as string[]).map(
+        (code: string) => codeToName.get(code) ?? code
+      );
+    }
   }
   uiFacetComparison = compareUiSelectedFiltersWithFacets(
     resultsFacets,
     uiSelectedFiltersKV
   );
-  if (query?.facet === 'equipment') {
+  if (query?.facet === 'equipment' || query?.facet === 'lines' || query?.facet === 'packages') {
     uiFacetComparison = compareUiSelectedFiltersWithFacetsByExpectedValue(
       query.filterValue,
       resultsFacets,
