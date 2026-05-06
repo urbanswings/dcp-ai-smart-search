@@ -1393,6 +1393,210 @@
       },
       {
         "value": "GS0004042"
+      },
+      {
+        "value": "GS0004099"
+      },
+      {
+        "value": "GS0004100"
+      },
+      {
+        "value": "GS0004105"
+      },
+      {
+        "value": "GS0004123"
+      },
+      {
+        "value": "GS0004125"
+      },
+      {
+        "value": "GS0004129"
+      },
+      {
+        "value": "GS0004132"
+      },
+      {
+        "value": "GS0004136"
+      },
+      {
+        "value": "GS0004145"
+      },
+      {
+        "value": "GS0004153"
+      },
+      {
+        "value": "GS0004156"
+      },
+      {
+        "value": "GS0004166"
+      },
+      {
+        "value": "GS0004171"
+      },
+      {
+        "value": "GS0004236"
+      },
+      {
+        "value": "GS0006432"
+      },
+      {
+        "value": "GS00101416"
+      },
+      {
+        "value": "GS00101702"
+      },
+      {
+        "value": "GS00102246"
+      },
+      {
+        "value": "GS00102976"
+      },
+      {
+        "value": "GS00110320"
+      },
+      {
+        "value": "GS00111069"
+      },
+      {
+        "value": "GS00111076"
+      },
+      {
+        "value": "GS00111117"
+      },
+      {
+        "value": "GS00111315"
+      },
+      {
+        "value": "GS00112351"
+      },
+      {
+        "value": "GS0016100"
+      },
+      {
+        "value": "GS0016381"
+      },
+      {
+        "value": "GS0016463"
+      },
+      {
+        "value": "GS0018036"
+      },
+      {
+        "value": "GS0026663"
+      },
+      {
+        "value": "GS0026725"
+      },
+      {
+        "value": "GS0031166"
+      },
+      {
+        "value": "GS0034279"
+      },
+      {
+        "value": "GS0038199"
+      },
+      {
+        "value": "GS0040512"
+      },
+      {
+        "value": "GS0043955"
+      },
+      {
+        "value": "GS0045555"
+      },
+      {
+        "value": "GS0045557"
+      },
+      {
+        "value": "GS0046638"
+      },
+      {
+        "value": "GS0047115"
+      },
+      {
+        "value": "GS0047572"
+      },
+      {
+        "value": "GS0050304"
+      },
+      {
+        "value": "GS0052663"
+      },
+      {
+        "value": "GS0066808"
+      },
+      {
+        "value": "GS0075146"
+      },
+      {
+        "value": "GS0077078"
+      },
+      {
+        "value": "GS0078110"
+      },
+      {
+        "value": "GS0004088"
+      },
+      {
+        "value": "GS0004148"
+      },
+      {
+        "value": "GS0004183"
+      },
+      {
+        "value": "GS00104372"
+      },
+      {
+        "value": "GS00112472"
+      },
+      {
+        "value": "GS0040495"
+      },
+      {
+        "value": "GS0043928"
+      },
+      {
+        "value": "GS0043929"
+      },
+      {
+        "value": "GS0045988"
+      },
+      {
+        "value": "GS0047569"
+      },
+      {
+        "value": "GS0052665"
+      },
+      {
+        "value": "GS0053743"
+      },
+      {
+        "value": "GS0045556"
+      },
+      {
+        "value": "GS00113399"
+      },
+      {
+        "value": "GS00111038"
+      },
+      {
+        "value": "GS00111114"
+      },
+      {
+        "value": "GS00112271"
+      },
+      {
+        "value": "GS0031753"
+      },
+      {
+        "value": "GS0034867"
+      },
+      {
+        "value": "GS0050326"
+      },
+      {
+        "value": "GS0069217"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1725,6 +1929,58 @@
       {
         "formattedValue": "Verde Silver",
         "value": "LU-188"
+      },
+      {
+        "formattedValue": "Black non-metallic",
+        "value": "LU-040"
+      },
+      {
+        "formattedValue": "Hyper Blue Metallic",
+        "value": "LU-888"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Alpine Grey Solid",
+        "value": "LU-956"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Graphite Grey Magno",
+        "value": "LU-818"
+      },
+      {
+        "formattedValue": "MANUFAKTUR green hell magno",
+        "value": "LU-376"
+      },
+      {
+        "formattedValue": "MANUFAKTUR hyacinth red metallic",
+        "value": "LU-996"
+      },
+      {
+        "formattedValue": "MANUFAKTUR olive magno",
+        "value": "LU-739"
+      },
+      {
+        "formattedValue": "MANUFAKTUR platinum magno",
+        "value": "LU-051"
+      },
+      {
+        "formattedValue": "MANUFAKTUR south seas blue magno",
+        "value": "LU-591"
+      },
+      {
+        "formattedValue": "Nautic Blue Metallic",
+        "value": "LU-595"
+      },
+      {
+        "formattedValue": "Obsidian black metallic",
+        "value": "LU-9197"
+      },
+      {
+        "formattedValue": "Rock crystal white, metallic",
+        "value": "LU-9134"
+      },
+      {
+        "formattedValue": "Velvet Brown Metallic",
+        "value": "LU-771"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1734,7 +1990,11 @@
     "facetType": "MULTI_VALUE"
   },
   "estimatedArrivalDate": {
-    "facetType": "DATE_RANGE"
+    "facetType": "DATE_RANGE",
+    "values": {
+      "min": "2026-04-07",
+      "max": "2026-08-17"
+    }
   },
   "modelDesignation": {
     "values": [
@@ -1833,6 +2093,310 @@
       {
         "formattedValue": "Mercedes-Benz G 500",
         "value": "6cc80809"
+      },
+      {
+        "formattedValue": "A 200 Hatch",
+        "value": "29130504"
+      },
+      {
+        "formattedValue": "A 200 Sedan",
+        "value": "292f0507"
+      },
+      {
+        "formattedValue": "A 200 Sedan Special Edition",
+        "value": "a6160ad4"
+      },
+      {
+        "formattedValue": "A 250 4MATIC Hatch Special Edition",
+        "value": "e6bf0c98"
+      },
+      {
+        "formattedValue": "A 250 4MATIC Hatchback",
+        "value": "6c3d085c"
+      },
+      {
+        "formattedValue": "A 250 4MATIC Sedan",
+        "value": "4db406ce"
+      },
+      {
+        "formattedValue": "A 250 4MATIC Sedan Special Edition",
+        "value": "e70b0c9b"
+      },
+      {
+        "formattedValue": "C 200 Sedan",
+        "value": "29470509"
+      },
+      {
+        "formattedValue": "C 200 Sedan Sport Edition",
+        "value": "92360a2d"
+      },
+      {
+        "formattedValue": "C 300 Sedan",
+        "value": "2951050a"
+      },
+      {
+        "formattedValue": "C 350 e Sedan",
+        "value": "32d40594"
+      },
+      {
+        "formattedValue": "CLA 200 Coupé",
+        "value": "3b9406ae"
+      },
+      {
+        "formattedValue": "CLA 250 4MATIC Coupe",
+        "value": "5c6c076e"
+      },
+      {
+        "formattedValue": "CLA 250 4MATIC Special Edition Coupé",
+        "value": "100a0e42"
+      },
+      {
+        "formattedValue": "CLE 200 Coupé",
+        "value": "3bc806b2"
+      },
+      {
+        "formattedValue": "CLE 300 4MATIC Cabriolet",
+        "value": "7d3f0907"
+      },
+      {
+        "formattedValue": "CLE 300 4MATIC Coupé",
+        "value": "65d60875"
+      },
+      {
+        "formattedValue": "E 200 Sedan",
+        "value": "295f050b"
+      },
+      {
+        "formattedValue": "E 300 Sedan",
+        "value": "2969050c"
+      },
+      {
+        "formattedValue": "EQA 250+",
+        "value": "1cd103c2"
+      },
+      {
+        "formattedValue": "EQA 250+ City Edition",
+        "value": "69a60867"
+      },
+      {
+        "formattedValue": "EQA 250+ Night Edition",
+        "value": "726f08c8"
+      },
+      {
+        "formattedValue": "EQB 250+",
+        "value": "1cd803c3"
+      },
+      {
+        "formattedValue": "EQB 250+ City Edition",
+        "value": "69ba0868"
+      },
+      {
+        "formattedValue": "EQB 250+ Night Edition",
+        "value": "728408c9"
+      },
+      {
+        "formattedValue": "G 580 with EQ-Technology",
+        "value": "898109e8"
+      },
+      {
+        "formattedValue": "G 580 with EQ-Technology Edition ONE",
+        "value": "181f0dd6"
+      },
+      {
+        "formattedValue": "GLA 200",
+        "value": "193f038f"
+      },
+      {
+        "formattedValue": "GLA 200 Special Edition",
+        "value": "7ea6095c"
+      },
+      {
+        "formattedValue": "GLA 250 4MATIC",
+        "value": "371f0556"
+      },
+      {
+        "formattedValue": "GLA 250 e with EQ hybrid technology",
+        "value": "1560da9"
+      },
+      {
+        "formattedValue": "GLA 250 Special Edition",
+        "value": "7f050961"
+      },
+      {
+        "formattedValue": "GLB 200",
+        "value": "19450390"
+      },
+      {
+        "formattedValue": "GLB 200 Special Edition",
+        "value": "7ebc095d"
+      },
+      {
+        "formattedValue": "GLB 250 4MATIC",
+        "value": "372c0557"
+      },
+      {
+        "formattedValue": "GLB 250 Special Edition",
+        "value": "7f1b0962"
+      },
+      {
+        "formattedValue": "GLC 200 4MATIC SUV",
+        "value": "4df60671"
+      },
+      {
+        "formattedValue": "GLC 300 4MATIC Coupé",
+        "value": "66060877"
+      },
+      {
+        "formattedValue": "GLC 300 4MATIC SUV",
+        "value": "4e050672"
+      },
+      {
+        "formattedValue": "GLC 350 e 4MATIC SUV",
+        "value": "5b6006fc"
+      },
+      {
+        "formattedValue": "GLE 300 d 4MATIC",
+        "value": "421e05da"
+      },
+      {
+        "formattedValue": "GLE 300 d 4MATIC Edition 7",
+        "value": "8cf1091d"
+      },
+      {
+        "formattedValue": "GLE 450 4MATIC Coupé",
+        "value": "6695087f"
+      },
+      {
+        "formattedValue": "GLE 450 4MATIC Coupé AMG Line+ Edition",
+        "value": "2c5c0e33"
+      },
+      {
+        "formattedValue": "GLE 450 d 4MATIC",
+        "value": "426705e0"
+      },
+      {
+        "formattedValue": "GLS 450 d 4MATIC",
+        "value": "433905ee"
+      },
+      {
+        "formattedValue": "GLS 450 d 4MATIC Edition 7",
+        "value": "8ed40931"
+      },
+      {
+        "formattedValue": "Mercedes AMG A 35 Hatch Edition R",
+        "value": "f45f0c75"
+      },
+      {
+        "formattedValue": "Mercedes AMG A 45 S Hatch Edition R+",
+        "value": "169f0d14"
+      },
+      {
+        "formattedValue": "Mercedes-AMG A 35 4MATIC Hatch",
+        "value": "cad90ae6"
+      },
+      {
+        "formattedValue": "Mercedes-AMG A 35 4MATIC Sedan",
+        "value": "caf50ae9"
+      },
+      {
+        "formattedValue": "Mercedes-AMG A 35 Sedan Edition R",
+        "value": "f5eb0c85"
+      },
+      {
+        "formattedValue": "Mercedes-AMG A 45 S 4MATIC+ Hatchback",
+        "value": "1acf0d16"
+      },
+      {
+        "formattedValue": "Mercedes-AMG C 43 4MATIC Sedan",
+        "value": "cb0b0aea"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLA 35 Edition R Coupé",
+        "value": "1d3e0e2c"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLA 45 S 4MATIC+ Coupé",
+        "value": "fdf0d2f"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLA 45 S Edition R+ Coupé",
+        "value": "40dc0ecb"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLE 53 4MATIC+ Cabriolet",
+        "value": "1e450d51"
+      },
+      {
+        "formattedValue": "Mercedes-AMG CLE 53 4MATIC+ Coupé",
+        "value": "f9ef0cbf"
+      },
+      {
+        "formattedValue": "Mercedes-AMG E 53 Hybrid 4MATIC+ Sedan",
+        "value": "321f0d9a"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLA 35 4MATIC",
+        "value": "a3bf0971"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 43 4MATIC Coupé",
+        "value": "ef950c95"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 43 4MATIC SUV",
+        "value": "cb3a0a90"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 43 Edition R SUV",
+        "value": "f47a0c2c"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 63 S E Coupé",
+        "value": "ce580bad"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 63 S E SUV",
+        "value": "acb509a8"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLE 53 4MATIC+ Coupé",
+        "value": "fa470cc3"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLE 63 S 4MATIC+ SUV",
+        "value": "ea490b32"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLS 63 4MATIC+",
+        "value": "ae0009af"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GT 63 4MATIC+ 2dr Coupe",
+        "value": "fd00ca8"
+      },
+      {
+        "formattedValue": "Mercedes-MAYBACH EQS 680 SUV",
+        "value": "bb590a38"
+      },
+      {
+        "formattedValue": "Mercedes-Maybach GLS 600 4MATIC",
+        "value": "e7f10b91"
+      },
+      {
+        "formattedValue": "S 450 4MATIC Saloon",
+        "value": "56b80763"
+      },
+      {
+        "formattedValue": "S 580 L 4MATIC Saloon",
+        "value": "631507d3"
+      },
+      {
+        "formattedValue": "V-Class V250 AVANTGARDE MWB",
+        "value": "a4570992"
+      },
+      {
+        "formattedValue": "V-Class V300 EXCLUSIVE MWB",
+        "value": "9bd80969"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1985,6 +2549,106 @@
       {
         "formattedValue": "Two-tone AMG Nappa Leather Red Pepper / Black",
         "value": "AU-857"
+      },
+      {
+        "formattedValue": "AMG Exclusive Nappa Leather - Black",
+        "value": "AU-551"
+      },
+      {
+        "formattedValue": "AMG Exclusive Nappa Leather - Two-Tone Macchiato Beige / Black",
+        "value": "AU-555"
+      },
+      {
+        "formattedValue": "AMG Exclusive Nappa Leather - Two-Tone Red Pepper / Black",
+        "value": "AU-557"
+      },
+      {
+        "formattedValue": "AMG leather black with red trimming",
+        "value": "AU-251"
+      },
+      {
+        "formattedValue": "AMG Nappa Leather - Two-Tone Macchiato Beige / Black",
+        "value": "AU-855"
+      },
+      {
+        "formattedValue": "AMG nappa leather black",
+        "value": "AU-861"
+      },
+      {
+        "formattedValue": "AMG nappa leather, two-tone neva grey / black",
+        "value": "AU-858"
+      },
+      {
+        "formattedValue": "AMG nappa leather, two-tone titanium grey pearl / black",
+        "value": "AU-878"
+      },
+      {
+        "formattedValue": "AMG nappa leather, two-tone tonka brown / black",
+        "value": "AU-854"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather upholstery / MICROCUT microfibre black",
+        "value": "AU-641"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather upholstery / MICROCUT microfibre black",
+        "value": "AU-601"
+      },
+      {
+        "formattedValue": "Exclusive Nappa Leather - Black",
+        "value": "AU-501"
+      },
+      {
+        "formattedValue": "Exclusive Nappa Leather - Sienna Brown / Black",
+        "value": "AU-504"
+      },
+      {
+        "formattedValue": "Leather - Macchiato Beige / Black",
+        "value": "AU-215"
+      },
+      {
+        "formattedValue": "Leather Lugano, black",
+        "value": "AU-VX7"
+      },
+      {
+        "formattedValue": "Leather nappa, black",
+        "value": "AU-VY7"
+      },
+      {
+        "formattedValue": "Leather, two-tone power red / black",
+        "value": "AU-297"
+      },
+      {
+        "formattedValue": "Leather, two-tone red pepper / black",
+        "value": "AU-277"
+      },
+      {
+        "formattedValue": "MANUFAKTUR saddle brown / black",
+        "value": "AU-934"
+      },
+      {
+        "formattedValue": "Maybach Exclusive MANUFAKTUR Nappa Leather - Mahogany Brown / Macchiat",
+        "value": "AU-514"
+      },
+      {
+        "formattedValue": "Maybach Exclusive MANUFAKTUR Nappa Leather Crystal White / Silver Grey",
+        "value": "AU-519"
+      },
+      {
+        "formattedValue": "Nappa leather / leather black",
+        "value": "AU-801"
+      },
+      {
+        "formattedValue": "Nappa leather / leather, two-tone white / black",
+        "value": "AU-885"
+      },
+      {
+        "formattedValue": "Nappa leather black",
+        "value": "AU-951"
+      },
+      {
+        "formattedValue": "Nappa leather silver pearl / black",
+        "value": "AU-868"
       }
     ],
     "facetType": "MULTI_VALUE"

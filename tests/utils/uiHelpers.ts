@@ -401,9 +401,6 @@ function parseUiSelectedFiltersToKeyValue(
     
     const mappedFacetKey = mapUiLabelToFacetKey(label);
     const facetKey = filterPill.facetKeyHint || mappedFacetKey;
-    console.debug(
-      `[DEBUG] Filter pill parsed: label='${label}', value='${value}', facetKeyHint='${filterPill.facetKeyHint || "<none>"}', mappedFacetKey='${mappedFacetKey || "<unmapped>"}', resolvedFacetKey='${facetKey || "<unmapped>"}'`
-    );
     if (!facetKey) {
       continue;
     }
@@ -553,7 +550,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       .catch(() => false);
 
     const showMoreButton = page.locator('[data-test-id="emh-selected-filters-show-more"]');
-    const showMoreVisible = await showMoreButton.isVisible().catch(() => false);
+    const showMoreVisible = await showMoreButton.isVisible({ timeout: 5000 }).catch(() => false);
     if (showMoreVisible) {
       await showMoreButton.click().catch(() => {});
       console.debug("[DEBUG] Clicked 'Show More' to reveal additional selected filters");
@@ -580,7 +577,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       const pills = page.locator(selector);
       const count = await pills.count().catch(() => 0);
       
-      const firstVisible = await pills.first().isVisible().catch(() => false);
+      const firstVisible = await pills.first().isVisible({ timeout: 5000 }).catch(() => false);
       if (!firstVisible) {
         continue;
       }
@@ -942,8 +939,7 @@ export async function processAndLogUiResult({
 
   // Facets check (Query vs UI vs BE)
   const facetMismatches: string[] = [];
-  const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
-  if (isFacetEquipmentOnly) {
+  if (resultsFacets.equipment) {
     const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
       apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
     const equipmentCodeToName = new Map<string, string>(
@@ -1394,7 +1390,7 @@ export async function performUISmartSearchAndGetResults(
           retries + 1
         }/3)...`
       );
-      await successBubbleLocator.waitFor({ state: "visible", timeout: 10000 }).catch(() => false);
+      await successBubbleLocator.waitFor({ state: "visible", timeout: 5000 }).catch(() => false);
       if (await successBubbleLocator.isVisible()) {
         // Prefer message-specific descendants, then fallback to full bubble text.
         let extractedText = await successBubbleLocator
@@ -1420,7 +1416,7 @@ export async function performUISmartSearchAndGetResults(
       }
 
       const errorVisible = await errorResultLocator
-        .isVisible()
+        .isVisible({ timeout: 3000 })
         .catch(() => false);
       if (errorVisible) {
         resultText = await errorResultLocator.innerText();
@@ -1435,7 +1431,7 @@ export async function performUISmartSearchAndGetResults(
           `[DEBUG] Results not visible, retrying search button click (attempt ${retries + 1}/3)...`
         );
         await page.waitForTimeout(500); // Brief delay before retry
-        if (await searchButton.isVisible().catch(() => false)) {
+        if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
           await searchButton.click();
         }
       }
@@ -1454,7 +1450,7 @@ export async function performUISmartSearchAndGetResults(
           `[DEBUG] Retrying search button click (attempt ${retries + 1}/3)...`
         );
         await page.waitForTimeout(500); // Brief delay before retry
-        if (await searchButton.isVisible().catch(() => false)) {
+        if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
           await searchButton.click();
         }
       }

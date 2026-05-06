@@ -268,7 +268,6 @@ export class SearchApiClient {
       const language = country === "IN" ? "en" : LANGUAGE?.toLocaleLowerCase() || "en";
       const product = PRODUCT?.toUpperCase() || "UCOS";
       const salesChannel = getSalesChannel();
-      const xApiKey = process.env.X_API_KEY;
 
       const endpoint =
         process.env.API_ENDPOINT_LOCAL === "true"
@@ -314,7 +313,9 @@ export class SearchApiClient {
           Accept: "application/json",
           "Content-Type": "application/json",
           "User-Agent": "AI-Smart-Search-Test/1.0",
-          "X-Api-Key": xApiKey,
+          ...(process.env.API_ENDPOINT_LOCAL !== "true" && {
+            "X-Api-Key": process.env.X_API_KEY || "",
+          }),
         },
       });
 
@@ -601,12 +602,14 @@ export async function fetchEmhApiResponse(): Promise<any> {
     if (process.env.API_ENDPOINT_LOCAL === "true") {
       (graphqlPayload.variables as any) = {
         "contextType": "B2C",
-        "isUcos": false,
+        "isUcos": product === "UCOS",
         "limit": 12,
         "page": 0,
         "sortingType": "price-asc",
-        "language": "en",
-        "profileId": "SG-NEW_VEHICLES",
+        "language": `${language}`,
+        "profileId": `${country}-${
+          product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES"
+        }`,
         "vehicleCategory": "PASSENGER-CARS",
         "modelIdentifier": null,
         "color": null,
@@ -628,7 +631,9 @@ export async function fetchEmhApiResponse(): Promise<any> {
     const response = await axios.post(apiUrl, graphqlPayload, {
       headers: {
         "Content-Type": "application/json",
-        "X-Api-Key": process.env.X_API_KEY || "",
+        ...(process.env.API_ENDPOINT_LOCAL !== "true" && {
+          "X-Api-Key": process.env.X_API_KEY || "",
+        }),
       },
     });
 
@@ -1051,10 +1056,9 @@ export async function processAndLogApiResult({
     }
   }
 
-  // Facets check (Query vs UI vs BE)
+  // Facets check (Query vs BE)
   const facetMismatches: string[] = [];
-  const isFacetEquipmentOnly = Object.keys(resultsFacets).length > 1 && resultsFacets.equipment;
-  if (isFacetEquipmentOnly) {
+  if (resultsFacets.equipment) {
     const apiEquipmentFacets: Array<{ formattedValue: string; value: string }> =
       apiResponse?.data?.smartSearch?.facets?.equipment?.values ?? [];
     const equipmentCodeToName = new Map<string, string>(
