@@ -738,6 +738,7 @@ function normalizeFacetToken(value: string): string {
     .toLowerCase()
     .replace(/ı/g, "i")
     .replace(/^paint[_-]?color[_-]?/i, "")
+    .replace(/^upholstery[_-]?color[_-]?/i, "")
     .replace(/[^a-z0-9가-힣]/g, "");
 }
 

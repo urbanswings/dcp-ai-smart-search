@@ -7,11 +7,11 @@ import { AzureOpenAI } from "openai";
  */
 
 const COMPLETE_QUERY_STYLE_HINTS = [
-  "Use a direct command style",
-  "Use a compact noun phrase style",
-  "Use a conversational ask style",
+  "Use exact form '<facet name> <filter value>'",
   "Use a feature-led style",
   "Use a shortlist style",
+  "Use a direct command style",
+  "Use a conversational ask style",
   "Use an explore/discover style",
   "Use a minimal keyword style",
   "Use a preference-led style",
@@ -86,6 +86,21 @@ function pickNextCompleteStyle(context: PromptContext): string {
   return COMPLETE_QUERY_STYLE_HINTS[idx];
 }
 
+function shouldUseExactFacetFirstFormat(): boolean {
+  return COMPLETE_QUERY_STYLE_HINTS.some((hint) => hint.includes("exact form '<facet name> <filter value>'"));
+}
+
+function buildFacetFirstQuery(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+  facetDisplayNameFn: (key: string) => string
+): string {
+  const valueLabel = normalizeWhitespace(formattedValue || rawValue);
+  const keyLabel = normalizeWhitespace(facetDisplayNameFn(facetKey) || facetKey);
+  return normalizeWhitespace(`${keyLabel} ${valueLabel}`);
+}
+
 /**
  * Build varied fallback phrase by rotating through templates
  */
@@ -96,6 +111,11 @@ function buildVariedFallbackPhrase(
   facetDisplayNameFn: (key: string) => string,
   context: PromptContext
 ): string {
+  if (shouldUseExactFacetFirstFormat()) {
+    context.templateCursor += 1;
+    return buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
+  }
+
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
   const keyLabel = facetDisplayNameFn(facetKey);
   const templates = [
@@ -135,6 +155,12 @@ function enforceCompleteQueryVariation(
   facetDisplayNameFn: (key: string) => string,
   context: PromptContext
 ): string {
+  if (shouldUseExactFacetFirstFormat()) {
+    const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
+    recordOpening(context, getOpeningSignature(exactQuery));
+    return exactQuery;
+  }
+
   const normalized = normalizeWhitespace(generated);
   if (!normalized) {
     const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
@@ -209,7 +235,19 @@ async function generateQueryWithVariation(
   options: GenerationOptions = {}
 ): Promise<string> {
   const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
-  const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : `show me ${formattedValue}`;
+  const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
+  const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
+
+  if (shouldUseExactFacetFirstFormat()) {
+    return enforceCompleteQueryVariation(
+      exactQuery,
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      context
+    );
+  }
 
   if (!client || !systemPrompt || !userPromptTemplate) {
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
@@ -259,6 +297,7 @@ export {
   createPromptContext,
   // Diversification
   pickNextCompleteStyle,
+  buildFacetFirstQuery,
   buildVariedFallbackPhrase,
   recordOpening,
   // Enforcement

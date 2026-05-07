@@ -6,7 +6,10 @@ node_modules/
 
 # Test results
 test-results/
-results/
+results/*
+!results/html/
+results/html/*
+!results/html/test-results-viewer.html
 
 # Playwright cache and temp
 .playwright-cache/

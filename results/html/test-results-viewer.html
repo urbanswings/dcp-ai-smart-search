@@ -1,0 +1,999 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Search - Test Results Viewer</title>
+  <style>
+    :root {
+      --bg: #f3f5f8;
+      --card: #ffffff;
+      --text: #18212b;
+      --muted: #5d6875;
+      --border: #d2d9e2;
+      --accent: #0f766e;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text);
+      background: linear-gradient(180deg, #eaf0f5 0%, var(--bg) 100%);
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .wrap {
+      /* width: min(980px, 100%); */
+      max-width: 100%;
+      min-width: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      padding: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .hint {
+      margin: 0 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      height: 38px;
+      padding: 0 14px;
+      background: #fff;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    select {
+      width: 100%;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 10px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .info {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .path {
+      margin-top: 10px;
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #fbfcfe;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 13px;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+
+    .preview {
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafc;
+      width: 100%;
+      min-width: 0;
+      max-height: 360px;
+      overflow: auto;
+      padding: 10px;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .tableWrap {
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #ffffff;
+      overflow: auto;
+      max-height: 320px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      min-width: 920px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      z-index: 1;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 8px;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+      cursor: pointer;
+    }
+
+    tbody tr.selectedRow {
+      background: #fef9c3;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .truncate {
+      max-width: 260px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .indexCellOk {
+      background: #dcfce7;
+      color: #166534;
+      font-weight: 700;
+    }
+
+    .indexCellError {
+      background: #fee2e2;
+      color: #991b1b;
+      font-weight: 700;
+    }
+
+    .indexCellUnknown {
+      background: #e5e7eb;
+      color: #374151;
+      font-weight: 700;
+    }
+
+    .metaGrid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metaCard {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      background: #f8fafc;
+      min-width: 0;
+    }
+
+    .metaLabel {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .metaValue {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .rowDetailPane {
+      margin-top: 8px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: slategrey;
+      width: 100%;
+      min-width: 0;
+      max-height: 420px;
+      overflow: auto;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .rowDetailPane > * + * {
+      margin-top: 10px;
+    }
+
+    .detailGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .detailItem {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 8px;
+      min-width: 0;
+    }
+
+    .detailLabel {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      letter-spacing: 0.02em;
+    }
+
+    .detailValue {
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .langGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .detailBlock {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 8px;
+      min-width: 0;
+    }
+
+    .detailHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .copyIconBtn {
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: var(--muted);
+      border-radius: 6px;
+      height: 22px;
+      min-width: 22px;
+      padding: 0 6px;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .copyIconBtn:hover {
+      color: var(--text);
+      border-color: #b8c2cf;
+      background: #f8fafc;
+    }
+
+    .detailText {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      max-height: 140px;
+      overflow: auto;
+      font-size: 12px;
+    }
+
+    .detailTextWide {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .chipRow {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      color: #334155;
+      max-width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .badgePass {
+      color: #166534;
+      background: #dcfce7;
+      border-color: #86efac;
+    }
+
+    .badgeFail {
+      color: #991b1b;
+      background: #fee2e2;
+      border-color: #fecaca;
+    }
+
+    @media (max-width: 700px) {
+      .row {
+        grid-template-columns: 1fr;
+      }
+
+      .metaGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .detailGrid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .langGrid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Smart Search - Test Results Viewer</h1>
+    <p class="hint" id="versionText">Build: 2026-05-07-12</p>
+    <p class="hint">
+      Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder, and this page will build dropdowns dynamically.<br>
+      No external JS file required.
+    </p>
+
+    <div class="actions">
+      <button id="pickBtn" class="primary">Pick Root Folder</button>
+    </div>
+    <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
+
+    <div class="row">
+      <div>
+        <label for="folderSelect">Folder</label>
+        <select id="folderSelect"></select>
+      </div>
+      <div>
+        <label for="fileSelect">File</label>
+        <select id="fileSelect"></select>
+      </div>
+    </div>
+
+    <div class="info" id="infoText">No folder selected.</div>
+    <div class="path" id="selectedPath">No file selected.</div>
+    <div class="metaGrid">
+      <div class="metaCard">
+        <div class="metaLabel">Mode</div>
+        <div class="metaValue" id="modeValue">-</div>
+      </div>
+      <div class="metaCard">
+        <div class="metaLabel">Describe</div>
+        <div class="metaValue" id="describeValue">-</div>
+      </div>
+      <div class="metaCard">
+        <div class="metaLabel">Title</div>
+        <div class="metaValue" id="titleValue">-</div>
+      </div>
+      <div class="metaCard">
+        <div class="metaLabel">Pass %</div>
+        <div class="metaValue" id="passRateValue">-</div>
+      </div>
+    </div>
+    <div class="info" id="tableTitle">Results Table</div>
+    <div class="tableWrap">
+      <table id="resultsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>query.tr</th>
+            <th>query.en</th>
+            <th>response.tr</th>
+            <th>response.en</th>
+            <th>evaluation</th>
+            <th>facets</th>
+            <th>count</th>
+            <th>ms</th>
+            <th>status</th>
+            <th>timestampSG</th>
+          </tr>
+        </thead>
+        <tbody id="resultsTbody">
+          <tr><td colspan="11">Select a file to load results.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="info" id="rowViewTitle">Selected Row View</div>
+    <div class="rowDetailPane" id="rowViewPane">Click a table row to view that row's data.</div>
+    <div class="info" id="previewTitle">Preview</div>
+    <pre class="preview" id="previewPane">Select a file to preview JSON.</pre>
+  </main>
+
+  <script>
+    const pickBtn = document.getElementById("pickBtn");
+    const folderSelect = document.getElementById("folderSelect");
+    const fileSelect = document.getElementById("fileSelect");
+    const infoText = document.getElementById("infoText");
+    const selectedPath = document.getElementById("selectedPath");
+    const modeValue = document.getElementById("modeValue");
+    const describeValue = document.getElementById("describeValue");
+    const titleValue = document.getElementById("titleValue");
+    const passRateValue = document.getElementById("passRateValue");
+    const tableTitle = document.getElementById("tableTitle");
+    const resultsTbody = document.getElementById("resultsTbody");
+    const previewTitle = document.getElementById("previewTitle");
+    const previewPane = document.getElementById("previewPane");
+    const rowViewTitle = document.getElementById("rowViewTitle");
+    const rowViewPane = document.getElementById("rowViewPane");
+
+    let rootLabel = "selected-root";
+    let selectedFiles = [];
+    let folders = [];
+    let currentRows = [];
+    let selectedRowIndex = -1;
+    let pendingRestoreRelativePath = "";
+
+    function normalizePath(pathValue) {
+      return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
+    }
+
+    function buildFolderMap(files, rootSegmentToStrip) {
+      const folderMap = new Map();
+
+      files.forEach((file) => {
+        let relPath = normalizePath(file.webkitRelativePath || file.name);
+        if (!relPath || relPath.endsWith(".DS_Store")) {
+          return;
+        }
+
+        if (rootSegmentToStrip && relPath.startsWith(rootSegmentToStrip + "/")) {
+          relPath = relPath.slice(rootSegmentToStrip.length + 1);
+        }
+
+        if (!relPath) {
+          return;
+        }
+
+        const parts = relPath.split("/");
+        if (parts.length === 1) {
+          if (!folderMap.has("(root)")) {
+            folderMap.set("(root)", []);
+          }
+          folderMap.get("(root)").push(parts[0]);
+          return;
+        }
+
+        const folderName = parts[0];
+        const filePathInsideFolder = parts.slice(1).join("/");
+        if (!folderMap.has(folderName)) {
+          folderMap.set(folderName, []);
+        }
+        folderMap.get(folderName).push(filePathInsideFolder);
+      });
+
+      const folderRows = [];
+      for (const [name, fileList] of folderMap.entries()) {
+        fileList.sort((a, b) => a.localeCompare(b));
+        folderRows.push({ name, files: fileList });
+      }
+      folderRows.sort((a, b) => b.name.localeCompare(a.name));
+
+      return folderRows;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    async function copyToClipboard(text) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+    }
+
+    function compactFacets(facets) {
+      if (!facets || typeof facets !== "object") {
+        return "";
+      }
+      const parts = [];
+      for (const key of Object.keys(facets)) {
+        const value = facets[key];
+        if (Array.isArray(value)) {
+          parts.push(key + ":" + value.join("|"));
+        } else {
+          parts.push(key + ":" + String(value));
+        }
+      }
+      return parts.join(", ");
+    }
+
+    function toStaticValue(values) {
+      const cleaned = values.filter((v) => String(v || "").trim() !== "");
+      if (!cleaned.length) {
+        return "-";
+      }
+      const unique = [...new Set(cleaned.map((v) => String(v)))];
+      if (unique.length === 1) {
+        return unique[0];
+      }
+      return "Mixed (" + unique.length + ")";
+    }
+
+    function renderFileMeta(rows) {
+      modeValue.textContent = toStaticValue(rows.map((item) => item && item.testMode));
+      describeValue.textContent = toStaticValue(rows.map((item) => item && item.testDescribe));
+      titleValue.textContent = toStaticValue(rows.map((item) => item && item.testTitle));
+
+      const total = rows.length;
+      if (!total) {
+        passRateValue.textContent = "-";
+        return;
+      }
+
+      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
+      const passPercent = Math.round((passCount / total) * 100);
+      passRateValue.textContent = passPercent + "% (" + passCount + "/" + total + ")";
+    }
+
+    function resetFileMeta() {
+      modeValue.textContent = "-";
+      describeValue.textContent = "-";
+      titleValue.textContent = "-";
+      passRateValue.textContent = "-";
+    }
+
+    function resetRowView() {
+      selectedRowIndex = -1;
+      rowViewTitle.textContent = "Selected Row View";
+      rowViewPane.innerHTML = "Click a table row to view that row's data.";
+    }
+
+    function toBadgeClass(evaluation) {
+      const value = String(evaluation || "").toUpperCase();
+      if (value === "PASS") {
+        return "badgePass";
+      }
+      if (value === "FAIL") {
+        return "badgeFail";
+      }
+      return "";
+    }
+
+    function formatFacetChips(facets) {
+      if (!facets || typeof facets !== "object") {
+        return "<span class=\"chip\">-</span>";
+      }
+
+      const chips = [];
+      for (const key of Object.keys(facets)) {
+        const value = facets[key];
+        if (Array.isArray(value)) {
+          value.forEach((item) => {
+            chips.push("<span class=\"chip\" title=\"" + escapeHtml(key + ": " + String(item)) + "\">" + escapeHtml(key + ": " + String(item)) + "</span>");
+          });
+        } else {
+          chips.push("<span class=\"chip\" title=\"" + escapeHtml(key + ": " + String(value)) + "\">" + escapeHtml(key + ": " + String(value)) + "</span>");
+        }
+      }
+
+      if (!chips.length) {
+        return "<span class=\"chip\">-</span>";
+      }
+      return chips.join("");
+    }
+
+    function renderSelectedRowView() {
+      if (selectedRowIndex < 0 || selectedRowIndex >= currentRows.length) {
+        resetRowView();
+        return;
+      }
+
+      const rowData = currentRows[selectedRowIndex];
+      const evaluation = rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-";
+      const evaluationClass = toBadgeClass(evaluation);
+      rowViewTitle.textContent = "Selected Row View: #" + (selectedRowIndex + 1);
+      const queryTr = rowData && rowData.query && rowData.query.tr ? rowData.query.tr : "-";
+      const queryEn = rowData && rowData.query && rowData.query.en ? rowData.query.en : "-";
+      rowViewPane.innerHTML =
+        "<div class=\"detailBlock\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\"><span class=\"chip " + evaluationClass + "\">" + escapeHtml(evaluation) + "</span></div></div>" +
+        "<div class=\"langGrid\">" +
+          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryTr) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryTr) + "</div></div>" +
+          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
+        "</div>" +
+        "<div class=\"langGrid\">" +
+          "<div class=\"detailBlock\"><div class=\"detailLabel\">Response</div><div class=\"detailText\">" + escapeHtml(rowData && rowData.response && rowData.response.tr ? rowData.response.tr : "-") + "</div></div>" +
+          "<div class=\"detailBlock\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><div class=\"detailText\">" + escapeHtml(rowData && rowData.response && rowData.response.en ? rowData.response.en : "-") + "</div></div>" +
+        "</div>" +
+        "<div class=\"detailBlock\"><div class=\"detailLabel\">Facets</div><div class=\"chipRow\">" + formatFacetChips(rowData ? rowData.facets : undefined) + "</div></div>" +
+        "<div class=\"detailGrid\">" +
+          "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.timestampSG ? rowData.timestampSG : (rowData && rowData.timestamp ? rowData.timestamp : "-")) + "</div></div>" +
+          "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.resultCount !== undefined ? rowData.resultCount : "-") + "</div></div>" +
+          "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.responseTime !== undefined ? rowData.responseTime : "-") + "</div></div>" +
+          "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.statusCode !== undefined ? rowData.statusCode : "-") + "</div></div>" +
+        "</div>";
+    }
+
+    function renderTableRows(rows) {
+      currentRows = rows.slice();
+
+      if (!rows.length) {
+        resetFileMeta();
+        resetRowView();
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows in selected JSON.</td></tr>";
+        tableTitle.textContent = "Results Table";
+        return;
+      }
+
+      if (selectedRowIndex < 0 || selectedRowIndex >= rows.length) {
+        selectedRowIndex = 0;
+      }
+
+      renderFileMeta(rows);
+      tableTitle.textContent = "Results Table: " + rows.length + " row(s)";
+      const html = rows.map((item, index) => {
+        const queryTr = item && item.query && item.query.tr ? item.query.tr : "";
+        const queryEn = item && item.query && item.query.en ? item.query.en : "";
+        const responseTr = item && item.response && item.response.tr ? item.response.tr : "";
+        const responseEn = item && item.response && item.response.en ? item.response.en : "";
+        const facetsText = compactFacets(item ? item.facets : undefined);
+        const isError = item && item.hasError;
+        const indexClass = isError === true ? "indexCellError" : (isError === false ? "indexCellOk" : "indexCellUnknown");
+
+        const selectedClass = selectedRowIndex === index ? " selectedRow" : "";
+
+        return "<tr data-row-index=\"" + index + "\" class=\"" + selectedClass + "\">" +
+          "<td class=\"mono " + indexClass + "\">" + (index + 1) + "</td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(queryTr) + "\">" + escapeHtml(queryTr) + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(queryEn) + "\">" + escapeHtml(queryEn) + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(responseTr) + "\">" + escapeHtml(responseTr) + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(responseEn) + "\">" + escapeHtml(responseEn) + "</span></td>" +
+          "<td>" + escapeHtml(item && item.openaiEvaluation ? item.openaiEvaluation : "") + "</td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(facetsText) + "\">" + escapeHtml(facetsText) + "</span></td>" +
+          "<td class=\"mono\">" + escapeHtml(item && item.resultCount !== undefined ? item.resultCount : "") + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(item && item.responseTime !== undefined ? item.responseTime : "") + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(item && item.statusCode !== undefined ? item.statusCode : "") + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(item && item.timestampSG ? item.timestampSG : (item && item.timestamp ? item.timestamp : "")) + "</td>" +
+        "</tr>";
+      }).join("");
+
+      resultsTbody.innerHTML = html;
+      renderSelectedRowView();
+    }
+
+    function findFolderAndFileForRelativePath(relativePath) {
+      const target = normalizePath(relativePath);
+      if (!target) {
+        return null;
+      }
+
+      for (let folderIndex = 0; folderIndex < folders.length; folderIndex += 1) {
+        const folder = folders[folderIndex];
+        for (const fileName of folder.files) {
+          const rel = folder.name === "(root)" ? fileName : (folder.name + "/" + fileName);
+          if (normalizePath(rel) === target) {
+            return { folderIndex, fileName };
+          }
+        }
+      }
+      return null;
+    }
+
+    function readRootFromSelectedFiles(preferredRelativePath = "") {
+      if (!selectedFiles.length) {
+        infoText.textContent = "No folder selected.";
+        folderSelect.innerHTML = "";
+        fileSelect.innerHTML = "";
+        selectedPath.textContent = "No file selected.";
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Select a file to load results.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Select a file to preview JSON.";
+        return;
+      }
+
+      try {
+        folders = buildFolderMap(selectedFiles, rootLabel);
+        renderFolders(preferredRelativePath);
+      } catch (error) {
+        const reason = error && error.message ? error.message : String(error);
+        infoText.textContent = "Unable to read selected files: " + reason;
+        folderSelect.innerHTML = "";
+        fileSelect.innerHTML = "";
+        selectedPath.textContent = "No file selected.";
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to load rows.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Read error: " + reason;
+      }
+    }
+
+    function renderFolders(preferredRelativePath = "") {
+      folderSelect.innerHTML = "";
+
+      if (folders.length === 0) {
+        const opt = document.createElement("option");
+        opt.textContent = "(no subfolders found)";
+        opt.value = "";
+        folderSelect.appendChild(opt);
+        fileSelect.innerHTML = "<option>(no files)</option>";
+        infoText.textContent = "Selected folder has no subdirectories.";
+        selectedPath.textContent = "No file selected.";
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Select a file to preview JSON.";
+        return;
+      }
+
+      folders.forEach((folder, index) => {
+        const opt = document.createElement("option");
+        opt.value = String(index);
+        opt.textContent = folder.name;
+        folderSelect.appendChild(opt);
+      });
+
+      const preferred = findFolderAndFileForRelativePath(preferredRelativePath);
+      folderSelect.value = preferred ? String(preferred.folderIndex) : "0";
+      renderFiles(Number(folderSelect.value), preferred ? preferred.fileName : "");
+    }
+
+    function renderFiles(folderIndex, preferredFileName = "") {
+      const folder = folders[folderIndex];
+      fileSelect.innerHTML = "";
+
+      if (!folder || folder.files.length === 0) {
+        fileSelect.innerHTML = "<option>(no files)</option>";
+        infoText.textContent = folder ? folder.name + ": 0 files" : "No folder selected.";
+        selectedPath.textContent = "No file selected.";
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Select a file to preview JSON.";
+        return;
+      }
+
+      folder.files.forEach((fileName) => {
+        const opt = document.createElement("option");
+        opt.value = fileName;
+        opt.textContent = fileName;
+        fileSelect.appendChild(opt);
+      });
+
+      if (preferredFileName && folder.files.includes(preferredFileName)) {
+        fileSelect.value = preferredFileName;
+      } else {
+        fileSelect.value = folder.files[0];
+      }
+
+      infoText.textContent = folder.name + ": " + folder.files.length + " files";
+      updateSelectedPath();
+      void renderPreview();
+    }
+
+    function updateSelectedPath() {
+      const folder = folders[Number(folderSelect.value)];
+      const fileName = fileSelect.value;
+      if (!folder || !fileName) {
+        selectedPath.textContent = "No file selected.";
+        return;
+      }
+      const folderPart = folder.name === "(root)" ? "" : (folder.name + "/");
+      selectedPath.textContent = rootLabel + "/" + folderPart + fileName;
+    }
+
+    function getSelectedRelativePath() {
+      const folder = folders[Number(folderSelect.value)];
+      const fileName = fileSelect.value;
+      if (!folder || !fileName) {
+        return "";
+      }
+      return folder.name === "(root)" ? fileName : folder.name + "/" + fileName;
+    }
+
+    async function renderPreview() {
+      const relPath = getSelectedRelativePath();
+      if (!relPath) {
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Select a file to preview JSON.";
+        return;
+      }
+
+      const normalizedRel = normalizePath(relPath);
+      const fileObj = selectedFiles.find((file) => {
+        const pathValue = normalizePath(file.webkitRelativePath || file.name);
+        return pathValue === normalizedRel || pathValue === normalizePath(rootLabel + "/" + normalizedRel);
+      });
+
+      if (!fileObj) {
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to locate selected file.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Unable to locate selected file in current browser selection.";
+        return;
+      }
+
+      previewTitle.textContent = "Preview: " + normalizedRel;
+      const text = await fileObj.text();
+      try {
+        const parsed = JSON.parse(text);
+        const rows = Array.isArray(parsed) ? parsed : [parsed];
+        renderTableRows(rows.filter((row) => row && typeof row === "object"));
+        previewPane.textContent = JSON.stringify(parsed, null, 2);
+      } catch {
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Selected file is not valid JSON.</td></tr>";
+        previewPane.textContent = text;
+      }
+    }
+
+    resultsTbody.addEventListener("click", (event) => {
+      const row = event.target.closest("tr[data-row-index]");
+      if (!row) {
+        return;
+      }
+
+      const rowIndexText = row.getAttribute("data-row-index");
+      const rowIndex = rowIndexText ? Number(rowIndexText) : -1;
+      if (Number.isNaN(rowIndex) || rowIndex < 0 || rowIndex >= currentRows.length) {
+        return;
+      }
+
+      selectedRowIndex = rowIndex;
+      renderTableRows(currentRows);
+    });
+
+    rowViewPane.addEventListener("click", async (event) => {
+      const button = event.target.closest("button[data-copy-text]");
+      if (!button) {
+        return;
+      }
+
+      const textToCopy = button.getAttribute("data-copy-text") || "";
+      try {
+        await copyToClipboard(textToCopy);
+        const original = button.innerHTML;
+        button.textContent = "OK";
+        setTimeout(() => {
+          button.innerHTML = original;
+        }, 900);
+      } catch {
+        button.textContent = "ERR";
+      }
+    });
+
+    folderSelect.addEventListener("change", () => {
+      renderFiles(Number(folderSelect.value));
+    });
+
+    fileSelect.addEventListener("change", () => {
+      updateSelectedPath();
+      void renderPreview();
+    });
+
+    const folderInput = document.getElementById("folderInput");
+
+    pickBtn.addEventListener("click", () => {
+      folderInput.click();
+    });
+
+    folderInput.addEventListener("change", () => {
+      selectedFiles = Array.from(folderInput.files || []);
+      if (!selectedFiles.length) {
+        infoText.textContent = "Folder selection canceled.";
+        pendingRestoreRelativePath = "";
+        return;
+      }
+
+      const normalizedPaths = selectedFiles
+        .map((file) => normalizePath(file.webkitRelativePath || file.name))
+        .filter(Boolean);
+
+      const firstPath = normalizedPaths[0] || "selected-root";
+      const firstSegment = firstPath.split("/")[0] || "selected-root";
+      const allShareFirstSegment = normalizedPaths.every((pathValue) =>
+        pathValue === firstSegment || pathValue.startsWith(firstSegment + "/")
+      );
+
+      rootLabel = allShareFirstSegment ? firstSegment : "selected-root";
+
+      readRootFromSelectedFiles(pendingRestoreRelativePath);
+      pendingRestoreRelativePath = "";
+    });
+
+  </script>
+</body>
+</html>

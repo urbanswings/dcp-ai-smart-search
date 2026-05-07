@@ -22,6 +22,32 @@ const EXCLUDE_FACETS = [
   "dealerFittedOptions",
 ];
 
+// Facets to include in query generation (allowlist — empty means all)
+const INCLUDE_FACETS = [
+  "bodyType",
+  "brand",
+  "campaigns",
+  "color",
+  "contextType",
+  "enginePowerHP",
+  "enginePowerKW",
+  "equipment",
+  "fuelType",
+  "lines",
+  "mileage",
+  "modelDesignation",
+  "modelIdentifier",
+  "modelYear",
+  "motorization",
+  "packages",
+  "page",
+  "price",
+  "stockType",
+  "upholstery",
+  "upholsteryPolish",
+  "vehicleCategory",
+];
+
 // Types
 interface FacetValue {
   value: string | number;
@@ -264,9 +290,9 @@ function loadCompletePromptConfig(): PromptConfig {
 
 function buildCompleteFilterText(facetKey: string, formattedValue: string, rawValue: unknown): string {
   if (facetKey === "price") {
-    return `filter category 'price' with value of '${formatNumberForQuery(rawValue)}'`;
+    return `'category'='price' 'value'='${formatNumberForQuery(rawValue)}'`;
   }
-  return `filter category '${facetDisplayName(facetKey)}' with value of '${formattedValue}'`;
+  return `'category'='${facetDisplayName(facetKey)}' 'value'='${formattedValue}'`;
 }
 
 function buildMotorizationModelMap(data: ApiResponse): Map<string, Array<string | number>> {
@@ -355,6 +381,10 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   for (const facetKey of Object.keys(facets)) {
     // Skip excluded facets
     if (EXCLUDE_FACETS.includes(facetKey)) {
+      continue;
+    }
+    // Skip facets not in the allowlist (when allowlist is non-empty)
+    if (INCLUDE_FACETS.length > 0 && !INCLUDE_FACETS.includes(facetKey)) {
       continue;
     }
 
