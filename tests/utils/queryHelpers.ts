@@ -4,6 +4,14 @@ import { buildComplete, buildMatrix, readJson } from "./generateFacetMatrix.js";
 
 const DATA_DIR = path.join(__dirname, "../data");
 
+// Generate output filename based on execution config
+export function generateOutputFileName(
+  country: string = process.env.COUNTRY || "au",
+  language: string = process.env.LANGUAGE || "en"
+): string {
+  return `generated-queries-${country.toLowerCase()}-${language.toLowerCase()}-ncos.json`;
+}
+
 export interface AiEvaluationHints {
   value: string[];
   overwrite: boolean;
@@ -58,7 +66,20 @@ export async function loadFacetCompleteSuite(
   fallbackHints?: AiEvaluationHints
 ): Promise<FixedQueryCase[]> {
   const suite = await generateCompleteSuiteOnTheFly();
-  return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+  await saveFacetCompleteSuite(normalizedSuite);
+  return normalizedSuite;
+}
+
+export async function saveFacetCompleteSuite(
+  normalizedSuite: FixedQueryCase[],
+  outputFileName: string = generateOutputFileName()
+): Promise<void> {
+  const outputPath = path.join(DATA_DIR, outputFileName);
+  await fs.writeFile(outputPath, JSON.stringify(normalizedSuite, null, 2), "utf-8");
+  
+  console.log(`✅ Generated queries saved to: ${outputPath}`);
+  console.log(`📊 Total queries generated: ${normalizedSuite.length}`);
 }
 
 export async function loadFacetMatrixSuite(): Promise<FixedQueryCase[]> {

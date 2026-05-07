@@ -12,6 +12,16 @@ const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
+// Facets to exclude from query generation
+const EXCLUDE_FACETS = [
+  "dealerId",
+  "driveType",
+  "campaigns",
+  "generation",
+  "registrationType",
+  "dealerFittedOptions",
+];
+
 // Types
 interface FacetValue {
   value: string | number;
@@ -343,6 +353,11 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   const motorizationModelMap = buildMotorizationModelMap(data);
 
   for (const facetKey of Object.keys(facets)) {
+    // Skip excluded facets
+    if (EXCLUDE_FACETS.includes(facetKey)) {
+      continue;
+    }
+
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
       const query = await promptEngine.generateQueryWithVariation(

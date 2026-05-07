@@ -40,5 +40,6 @@ tests/regression.desciption.txt
 tests/data/emh-api-response.json
 tests/data/generated-facet-matrix-suite.json
 tests/data/generated-facet-complete-suite.json
+tests/data/generated-queries-*.json
 tests/data/regression.testdata.json
 tests/data/regression.run-summary.json

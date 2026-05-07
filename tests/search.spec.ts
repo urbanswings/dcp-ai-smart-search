@@ -37,6 +37,7 @@ import {
   ENVIRONMENT,
   COUNTRY,
   PRODUCT,
+  VEHICLE_CATEGORY,
   LANGUAGE,
   runTestsAndSaveResults,
   mergeQueries,
@@ -105,6 +106,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
     const env = ENVIRONMENT;
     const country = COUNTRY;
     const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
     const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
@@ -115,6 +117,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
       env,
       country,
       product,
+      vehicleCategory,
       project,
       timestamp,
       language,
@@ -125,6 +128,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
         env,
         country,
         product,
+        vehicleCategory,
         project,
         browserType,
         timestamp,
@@ -227,6 +231,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     const env = ENVIRONMENT;
     const country = COUNTRY;
     const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
     const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
@@ -237,8 +242,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       env,
       country,
       product,
+      vehicleCategory,
       project,
       timestamp,
+      language,
     });
     testInfo.annotations.push({
       type: "context",
@@ -246,7 +253,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         env,
         country,
         product,
-        project,
+        vehicleCategory,
+        project,        
         browserType,
         timestamp,
       }),
@@ -740,6 +748,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     const env = ENVIRONMENT;
     const country = COUNTRY;
     const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
     const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
@@ -750,8 +759,10 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       env,
       country,
       product,
+      vehicleCategory,
       project,
       timestamp,
+      language,
     });
     testInfo.annotations.push({
       type: "context",
@@ -759,6 +770,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         env,
         country,
         product,
+        vehicleCategory,
         project,
         browserType,
         timestamp,
@@ -934,6 +946,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     const env = ENVIRONMENT;
     const country = COUNTRY;
     const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
     const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
@@ -944,8 +957,10 @@ test.describe("AI Smart Search - Other Scenarios", () => {
       env,
       country,
       product,
+      vehicleCategory,
       project,
       timestamp,
+      language,
     });
     testInfo.annotations.push({
       type: "context",
@@ -953,6 +968,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
         env,
         country,
         product,
+        vehicleCategory,
         project,
         browserType,
         timestamp,
@@ -1609,6 +1625,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
     const env = ENVIRONMENT;
     const country = COUNTRY;
     const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
     const project = getProject();
     const browserType = "chromium";
     const timestamp = new Date().toISOString();
@@ -1619,8 +1636,10 @@ test.describe("AI Smart Search - Special Scenarios", () => {
       env,
       country,
       product,
+      vehicleCategory,
       project,
       timestamp,
+      language,
     });
     testInfo.annotations.push({
       type: "context",
@@ -1628,6 +1647,7 @@ test.describe("AI Smart Search - Special Scenarios", () => {
         env,
         country,
         product,
+        vehicleCategory,
         project,
         browserType,
         timestamp,

@@ -2,9 +2,9 @@ import { fetchTranslation, isSemanticallySimilarOpenAI } from "./aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
-import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE } from "./testHelpers";
+import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE, VEHICLE_CATEGORY } from "./testHelpers";
 
-export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE };
+export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE, VEHICLE_CATEGORY };
 
 const REPEAT_COUNT = 5;
 

@@ -4,6 +4,7 @@ export const ENVIRONMENT = process.env.ENVIRONMENT || "PROD";
 export const COUNTRY = process.env.COUNTRY || "AU";
 export const LANGUAGE = process.env.LANGUAGE || "EN";
 export const PRODUCT = process.env.PRODUCT || "EMH";
+export const VEHICLE_CATEGORY = process.env.VEHICLE_CATEGORY || "PASSENGER-CARS";
 
 export const testDataVehicles = "./tests/data/vehicles-make-model.json";
 
@@ -14,6 +15,7 @@ export async function logTestContext({
   env,
   country,
   product,
+  vehicleCategory,
   project,
   timestamp,
   language,
@@ -24,21 +26,23 @@ export async function logTestContext({
   env?: string;
   country?: string;
   product?: string;
+  vehicleCategory?: string;
   project?: string;
   timestamp?: string;
   language?: string;
 }) {
-  console.log(`\n--- Test Execution ---`);
-  console.log(`• Describe: ${describeName}`);
-  console.log(`• Title: ${testInfo.title}`);
-  console.log(`• Browser: ${browserType}`);
-  console.log(`• Environment: ${env || ENVIRONMENT}`);
-  console.log(`• Country: ${country || COUNTRY}`);
-  console.log(`• Language: ${language || LANGUAGE}`);
-  console.log(`• Product: ${product || PRODUCT}`);
-  console.log(`• Project: ${project}`);
-  console.log(`• Timestamp: ${timestamp}`);
-  console.log(`----------------------\n`);
+  console.log(`\n--------------- Test Execution ---------------`);
+  console.log(`• Describe:          ${describeName}`);
+  console.log(`• Title:             ${testInfo.title}`);
+  console.log(`• Browser:           ${browserType}`);
+  console.log(`• Environment:       ${env || ENVIRONMENT}`);
+  console.log(`• Country:           ${country || COUNTRY}`);
+  console.log(`• Language:          ${language || LANGUAGE}`);
+  console.log(`• Product:           ${product || PRODUCT}`);
+  console.log(`• Vehicle Category:  ${vehicleCategory || VEHICLE_CATEGORY}`);
+  console.log(`• Project:           ${project}`);
+  console.log(`• Timestamp:         ${timestamp}`);
+  console.log(`-----------------------------------------------\n`);
 }
 
 export async function getRandomVehicleCombinationsNonMB(
