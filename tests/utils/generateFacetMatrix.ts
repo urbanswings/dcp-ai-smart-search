@@ -9,6 +9,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const rootDir = process.cwd();
 const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
 const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
+const COUNTRY = (process.env.COUNTRY || "AU").toUpperCase();
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
@@ -206,11 +207,42 @@ function getFacetRange(facets: Facets, facetKey: string): FacetRange | null {
   return { min, max };
 }
 
-function formatNumberForQuery(value: unknown): string {
-  return Math.round(Number(value)).toLocaleString("en-US");
+function formatLocalizedInteger(value: unknown, locale: string): string {
+  const numericValue = Math.round(Number(value));
+  if (!Number.isFinite(numericValue)) {
+    return String(value);
+  }
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(numericValue);
+}
+
+function formatLocalizedPriceValue(value: unknown): string {
+  switch (COUNTRY) {
+    case "TR":
+      return `₺${formatLocalizedInteger(value, "tr-TR")}`;
+    case "AU":
+      return `A$ ${formatLocalizedInteger(value, "en-AU")}`;
+    case "IN":
+      return `₹ ${formatLocalizedInteger(value, "en-IN")}`;
+    case "SG":
+      return `${formatLocalizedInteger(value, "en-SG")} SGD`;
+    case "KR":
+      return `${formatLocalizedInteger(value, "ko-KR")} 원`;
+    case "TH":
+      return `THB ${formatLocalizedInteger(value, "en-TH")}`;
+    default:
+      return formatLocalizedInteger(value, "en-US");
+  }
+}
+
+function formatFacetValueForQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
+  if (facetKey === "price" || facetKey === "monthlyRate") {
+    return formatLocalizedPriceValue(rawValue);
+  }
+  return String(formattedValue || rawValue);
 }
 
 function fallbackCompleteQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
+  const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
   if (facetKey === "modelIdentifier") {
     return `list me all ${formattedValue}`;
   }
@@ -218,10 +250,10 @@ function fallbackCompleteQuery(facetKey: string, formattedValue: string, rawValu
     return `i'm interested in ${formattedValue} interior`;
   }
   if (facetKey === "price") {
-    return `vehicles around price of $${formatNumberForQuery(rawValue)}`;
+    return `vehicles around price of ${displayValue}`;
   }
   if (facetKey === "monthlyRate") {
-    return `vehicles around monthly rate of $${formatNumberForQuery(rawValue)}`;
+    return `vehicles around monthly rate of ${displayValue}`;
   }
   if (facetKey === "color") {
     return `show me ${formattedValue.toLowerCase()} cars`;
@@ -248,18 +280,19 @@ function addCompleteQuery(
   filterValue: unknown,
   shouldFilter: ShouldFilter
 ): void {
+  const displayFilterValue = formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
   if (queryMap.has(query)) {
     return;
   }
   queryMap.set(query, {
     value: query,
     facet: facetKey,
-    filterValue: String(filterValue),
+    filterValue: displayFilterValue,
     shouldRecommend: true,
     shouldFilter,
   });
   console.log("===============================");
-  console.log(`[complete-generator] filter: ${facetKey} : ${filterValue}`);
+  console.log(`[complete-generator] filter: ${facetKey} : ${displayFilterValue}`);
   console.log(`[complete-generator] query: ${query}`);
   console.log("===============================");
   console.log("\n");
@@ -289,8 +322,8 @@ function loadCompletePromptConfig(): PromptConfig {
 }
 
 function buildCompleteFilterText(facetKey: string, formattedValue: string, rawValue: unknown): string {
-  if (facetKey === "price") {
-    return `'category'='price' 'value'='${formatNumberForQuery(rawValue)}'`;
+  if (facetKey === "price" || facetKey === "monthlyRate") {
+    return `'category'='${facetDisplayName(facetKey)}' 'value'='${formatLocalizedPriceValue(rawValue)}'`;
   }
   return `'category'='${facetDisplayName(facetKey)}' 'value'='${formattedValue}'`;
 }
@@ -356,18 +389,34 @@ function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawV
   if (["bodyType", "fuelType", "color"].includes(facetKey)) {
     return toHintLabel(facetKey, rawValue);
   }
+  if (facetKey === "price" || facetKey === "monthlyRate") {
+    return formatLocalizedPriceValue(rawValue);
+  }
   return String(formattedValue || rawValue);
 }
 
 function createCompleteRangeHints(facetKey: string, numericValue: unknown): string[] {
   const facetName = facetDisplayName(facetKey);
-  const rounded = Math.round(Number(numericValue));
+  const targetValue = toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
   return [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} range intent.`,
-    `Respond with "PASS" if the response references vehicles around ${facetName} ${rounded} (exact number not required).`,
-    `If the response ignores the requested ${facetName} target (${rounded}) or provides clearly unrelated values, respond with "FAIL: missing or incorrect ${facetName} target (${rounded})".`,
+    `Respond with "PASS" if the response references vehicles around ${facetName} ${targetValue} (exact number not required).`,
+    `If the response ignores the requested ${facetName} target (${targetValue}) or provides clearly unrelated values, respond with "FAIL: missing or incorrect ${facetName} target (${targetValue})".`,
     `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
   ];
+}
+
+function getRangePoints(facetKey: string, range: FacetRange): number[] {
+  if (facetKey === "price" || facetKey === "monthlyRate") {
+    const spread = range.max - range.min;
+    const interiorPoints = [0.25, 0.5, 0.75]
+      .map((ratio) => Math.round(range.min + spread * ratio))
+      .filter((value) => value > range.min && value < range.max);
+
+    return [...new Set(interiorPoints)];
+  }
+
+  return [...new Set([range.min, Math.round((range.min + range.max) / 2), range.max])];
 }
 
 async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
@@ -421,13 +470,13 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
 
     const range = getFacetRange(facets, facetKey);
     if (range) {
-      const points = [range.min, Math.round((range.min + range.max) / 2), range.max];
-      const uniquePoints = [...new Set(points)];
-      for (const value of uniquePoints) {
+      const rangePoints = getRangePoints(facetKey, range);
+      for (const value of rangePoints) {
+        const formattedRangeValue = formatFacetValueForQuery(facetKey, String(value), value);
         const query = await promptEngine.generateQueryWithVariation(
           getOpenAiClient(),
           facetKey,
-          String(value),
+          formattedRangeValue,
           value,
           promptConfig.systemPrompt,
           promptConfig.userPromptTemplate,
@@ -545,6 +594,8 @@ function facetDisplayName(facetKey: string): string {
     color: "color",
     stockType: "stock type",
     brand: "brand",
+    price: "price",
+    monthlyRate: "monthly rate",
     seats: "seat count",
     modelIdentifier: "model",
     motorization: "variant",
