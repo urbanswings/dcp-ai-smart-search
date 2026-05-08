@@ -44,6 +44,7 @@ const INCLUDE_FACETS = [
   "page",
   "price",
   "stockType",
+  "seats",
   "upholstery",
   "upholsteryPolish",
   "vehicleCategory",

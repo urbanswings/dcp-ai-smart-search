@@ -23,6 +23,7 @@ const REPETITIVE_COMPLETE_QUERY_PREFIXES = [
   "show me",
   "i want",
   "i need",
+  "recommend",
 ];
 
 const REPETITIVE_COMPLETE_QUERY_PATTERNS = [
@@ -86,10 +87,6 @@ function pickNextCompleteStyle(context: PromptContext): string {
   return COMPLETE_QUERY_STYLE_HINTS[idx];
 }
 
-function shouldUseExactFacetFirstFormat(): boolean {
-  return COMPLETE_QUERY_STYLE_HINTS.some((hint) => hint.includes("exact form '<facet name> <filter value>'"));
-}
-
 function buildFacetFirstQuery(
   facetKey: string,
   formattedValue: string,
@@ -111,11 +108,6 @@ function buildVariedFallbackPhrase(
   facetDisplayNameFn: (key: string) => string,
   context: PromptContext
 ): string {
-  if (shouldUseExactFacetFirstFormat()) {
-    context.templateCursor += 1;
-    return buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
-  }
-
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
   const keyLabel = facetDisplayNameFn(facetKey);
   const templates = [
@@ -155,12 +147,6 @@ function enforceCompleteQueryVariation(
   facetDisplayNameFn: (key: string) => string,
   context: PromptContext
 ): string {
-  if (shouldUseExactFacetFirstFormat()) {
-    const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
-    recordOpening(context, getOpeningSignature(exactQuery));
-    return exactQuery;
-  }
-
   const normalized = normalizeWhitespace(generated);
   if (!normalized) {
     const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
@@ -169,7 +155,7 @@ function enforceCompleteQueryVariation(
   }
 
   const lower = normalized.toLowerCase();
-  const startsRepetitive = REPETITIVE_COMPLETE_QUERY_PREFIXES.some((prefix) => lower.startsWith(prefix));
+  const startsRepetitive = context.recentOpenings.some((prefix) => lower.startsWith(prefix));
   const matchesRepetitivePattern = REPETITIVE_COMPLETE_QUERY_PATTERNS.some((pattern) => pattern.test(normalized));
   const opening = getOpeningSignature(normalized);
   const seenRecently = context.recentOpenings.includes(opening);
@@ -238,17 +224,6 @@ async function generateQueryWithVariation(
   const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
   const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
 
-  if (shouldUseExactFacetFirstFormat()) {
-    return enforceCompleteQueryVariation(
-      exactQuery,
-      facetKey,
-      formattedValue,
-      rawValue,
-      facetDisplayNameFn,
-      context
-    );
-  }
-
   if (!client || !systemPrompt || !userPromptTemplate) {
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
   }
@@ -266,15 +241,28 @@ async function generateQueryWithVariation(
       .replace(/\{styleHint\}/g, styleHint);
     const resolvedUserPrompt = `${resolvedUserPromptBase}\nStyle requirement: ${styleHint}.`;
 
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return enforceCompleteQueryVariation(
+        exactQuery,
+        facetKey,
+        formattedValue,
+        rawValue,
+        facetDisplayNameFn,
+        context
+      );
+    }
+    
     const generated = await generateOpenAiQuery(client, resolvedSystemPrompt, resolvedUserPrompt, maxTokens);
-    return enforceCompleteQueryVariation(
-      generated || fallback,
-      facetKey,
-      formattedValue,
-      rawValue,
-      facetDisplayNameFn,
-      context
-    );
+    return generated;
+    // const generatedVariation = enforceCompleteQueryVariation(
+    //   generated || fallback,
+    //   facetKey,
+    //   formattedValue,
+    //   rawValue,
+    //   facetDisplayNameFn,
+    //   context
+    // );
+    // return generatedVariation;
   } catch (error) {
     console.error(`[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`);
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, context);

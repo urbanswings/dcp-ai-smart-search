@@ -567,6 +567,21 @@
       document.body.removeChild(textarea);
     }
 
+    function formatFacetValue(value) {
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const hasMinMax = Object.prototype.hasOwnProperty.call(value, "min") || Object.prototype.hasOwnProperty.call(value, "max");
+        if (hasMinMax) {
+          const minPart = Object.prototype.hasOwnProperty.call(value, "min") ? "min: " + String(value.min) : "";
+          const maxPart = Object.prototype.hasOwnProperty.call(value, "max") ? "max: " + String(value.max) : "";
+          return [minPart, maxPart].filter(Boolean).join(", ");
+        }
+        return Object.keys(value)
+          .map((key) => key + ": " + String(value[key]))
+          .join(", ");
+      }
+      return String(value);
+    }
+
     function compactFacets(facets) {
       if (!facets || typeof facets !== "object") {
         return "";
@@ -575,9 +590,9 @@
       for (const key of Object.keys(facets)) {
         const value = facets[key];
         if (Array.isArray(value)) {
-          parts.push(key + ":" + value.join("|"));
+          parts.push(key + ":" + value.map((item) => formatFacetValue(item)).join("|"));
         } else {
-          parts.push(key + ":" + String(value));
+          parts.push(key + ":" + formatFacetValue(value));
         }
       }
       return parts.join(", ");
@@ -645,10 +660,12 @@
         const value = facets[key];
         if (Array.isArray(value)) {
           value.forEach((item) => {
-            chips.push("<span class=\"chip\" title=\"" + escapeHtml(key + ": " + String(item)) + "\">" + escapeHtml(key + ": " + String(item)) + "</span>");
+            const label = key + ": " + formatFacetValue(item);
+            chips.push("<span class=\"chip\" title=\"" + escapeHtml(label) + "\">" + escapeHtml(label) + "</span>");
           });
         } else {
-          chips.push("<span class=\"chip\" title=\"" + escapeHtml(key + ": " + String(value)) + "\">" + escapeHtml(key + ": " + String(value)) + "</span>");
+          const label = key + ": " + formatFacetValue(value);
+          chips.push("<span class=\"chip\" title=\"" + escapeHtml(label) + "\">" + escapeHtml(label) + "</span>");
         }
       }
 
