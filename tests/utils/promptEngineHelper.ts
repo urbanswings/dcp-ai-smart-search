@@ -8,9 +8,9 @@ import { AzureOpenAI } from "openai";
 
 const COMPLETE_QUERY_STYLE_HINTS = [
   "Use exact form '<facet name> <filter value>'",
+  "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
   "Use a feature-led style",
   "Use a shortlist style",
-  "Use a direct command style",
   "Use a conversational ask style",
   "Use an explore/discover style",
   "Use a minimal keyword style",
