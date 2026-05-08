@@ -493,7 +493,8 @@ function compareUiSelectedFiltersWithFacets(
 function compareUiSelectedFiltersWithFacetsByExpectedValue(
   expectedValue: string,
   facets: Record<string, any>,
-  uiSelectedFiltersKV: Record<string, string[]>
+  uiSelectedFiltersKV: Record<string, string[]>,
+  facetKey: string = "equipment"
 ): {
   matches: boolean;
   missingFacetValues: string[];
@@ -506,15 +507,15 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
     };
   }
 
-  const backendEquipmentValues = collectPrimitiveFacetValues(facets?.equipment);
-  const uiEquipmentValues = uiSelectedFiltersKV?.equipment || [];
+  const backendFacetValues = collectPrimitiveFacetValues(facets?.[facetKey]);
+  const uiFacetValues = uiSelectedFiltersKV?.[facetKey] || [];
 
   const expectedCandidates = buildFacetCandidateTokens(expectedValue);
   const backendTokens = new Set(
-    backendEquipmentValues.flatMap((value) => buildFacetCandidateTokens(value))
+    backendFacetValues.flatMap((value) => buildFacetCandidateTokens(value))
   );
   const uiTokens = new Set(
-    uiEquipmentValues.flatMap((value) => buildFacetCandidateTokens(value))
+    uiFacetValues.flatMap((value) => buildFacetCandidateTokens(value))
   );
 
   const matchesTokenSet = (tokens: Set<string>): boolean =>
@@ -531,10 +532,10 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
   const missingFacetValues: string[] = [];
   if (!matchesBackend) {
-    missingFacetValues.push(`be:equipment missing '${expectedValue}'`);
+    missingFacetValues.push(`be:${facetKey} missing '${expectedValue}'`);
   }
   if (!matchesUi) {
-    missingFacetValues.push(`ui:equipment missing '${expectedValue}'`);
+    missingFacetValues.push(`ui:${facetKey} missing '${expectedValue}'`);
   }
 
   return {
@@ -983,7 +984,8 @@ export async function processAndLogUiResult({
     uiFacetComparison = compareUiSelectedFiltersWithFacetsByExpectedValue(
       query.filterValue,
       resultsFacets,
-      uiSelectedFiltersKV
+      uiSelectedFiltersKV,
+      query.facet
     );
   }
   if (!uiFacetComparison.matches) {

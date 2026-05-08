@@ -798,7 +798,8 @@ function buildFacetCandidateTokens(rawValue: string): string[] {
 
 function compareSelectedFiltersWithFacetsByExpectedValue(
   expectedValue: string,
-  facets: Record<string, any>
+  facets: Record<string, any>,
+  facetKey: string = 'equipment'
 ): {
   matches: boolean;
   missingFacetValues: string[];
@@ -812,11 +813,11 @@ function compareSelectedFiltersWithFacetsByExpectedValue(
   }
 
   const expectedCandidates = buildFacetCandidateTokens(expectedValue);
-  const backendEquipmentValues = Array.isArray(facets?.equipment)
-    ? facets.equipment.map((value: any) => String(value))
+  const backendFacetValues = Array.isArray(facets?.[facetKey])
+    ? facets[facetKey].map((value: any) => String(value))
     : [];
   const backendTokens = new Set(
-    backendEquipmentValues.flatMap((value: string) =>
+    backendFacetValues.flatMap((value: string) =>
       buildFacetCandidateTokens(value)
     )
   );
@@ -833,7 +834,7 @@ function compareSelectedFiltersWithFacetsByExpectedValue(
     matches: matchesBackend,
     missingFacetValues: matchesBackend
       ? []
-      : [`be:equipment missing '${expectedValue}'`],
+      : [`be:${facetKey} missing '${expectedValue}'`],
   };
 }
 
@@ -1127,7 +1128,8 @@ export async function processAndLogApiResult({
   if (query?.facet === 'equipment' || query?.facet === 'lines' || query?.facet === 'packages') {
     uiFacetComparison = compareSelectedFiltersWithFacetsByExpectedValue(
       query.filterValue,
-      resultsFacets
+      resultsFacets,
+      query.facet
     );
   }
   if (uiFacetComparison && !uiFacetComparison.matches) {

@@ -558,6 +558,22 @@
       {
         "formattedValue": "Special Edition",
         "value": "4f9c07b6"
+      },
+      {
+        "formattedValue": "Marketing Campaign 1",
+        "value": "7d4b094f"
+      },
+      {
+        "formattedValue": "Marketing Campaign 2",
+        "value": "7d4d0950"
+      },
+      {
+        "formattedValue": "Marketing Campaign 1",
+        "value": "7b87093c"
+      },
+      {
+        "formattedValue": "Marketing Campaign 2",
+        "value": "7b89093d"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1898,6 +1914,219 @@
       },
       {
         "value": "GSTRC10115"
+      },
+      {
+        "value": "GS0003510"
+      },
+      {
+        "value": "GS0003514"
+      },
+      {
+        "value": "GS0003515"
+      },
+      {
+        "value": "GS00100520"
+      },
+      {
+        "value": "GS00101210"
+      },
+      {
+        "value": "GS00104432"
+      },
+      {
+        "value": "GS00105876"
+      },
+      {
+        "value": "GS00106951"
+      },
+      {
+        "value": "GS00106974"
+      },
+      {
+        "value": "GS00110405"
+      },
+      {
+        "value": "GS00110454"
+      },
+      {
+        "value": "GS00110487"
+      },
+      {
+        "value": "GS00110583"
+      },
+      {
+        "value": "GS00110593"
+      },
+      {
+        "value": "GS00110898"
+      },
+      {
+        "value": "GS00111211"
+      },
+      {
+        "value": "GS00111218"
+      },
+      {
+        "value": "GS00111493"
+      },
+      {
+        "value": "GS00111494"
+      },
+      {
+        "value": "GS00111495"
+      },
+      {
+        "value": "GS00112576"
+      },
+      {
+        "value": "GS00112622"
+      },
+      {
+        "value": "GS00112849"
+      },
+      {
+        "value": "GS00113026"
+      },
+      {
+        "value": "GS00113033"
+      },
+      {
+        "value": "GS00113143"
+      },
+      {
+        "value": "GS00113144"
+      },
+      {
+        "value": "GS00113145"
+      },
+      {
+        "value": "GS00113190"
+      },
+      {
+        "value": "GS00113191"
+      },
+      {
+        "value": "GS00113210"
+      },
+      {
+        "value": "GS00113215"
+      },
+      {
+        "value": "GS0012795"
+      },
+      {
+        "value": "GS0013520"
+      },
+      {
+        "value": "GS0013523"
+      },
+      {
+        "value": "GS0014966"
+      },
+      {
+        "value": "GS0016662"
+      },
+      {
+        "value": "GS0016773"
+      },
+      {
+        "value": "GS0022804"
+      },
+      {
+        "value": "GS0026735"
+      },
+      {
+        "value": "GS0028183"
+      },
+      {
+        "value": "GS0028360"
+      },
+      {
+        "value": "GS0028694"
+      },
+      {
+        "value": "GS0028759"
+      },
+      {
+        "value": "GS0029950"
+      },
+      {
+        "value": "GS0031832"
+      },
+      {
+        "value": "GS0032835"
+      },
+      {
+        "value": "GS0033806"
+      },
+      {
+        "value": "GS0034627"
+      },
+      {
+        "value": "GS0035386"
+      },
+      {
+        "value": "GS0035708"
+      },
+      {
+        "value": "GS0035879"
+      },
+      {
+        "value": "GS0036196"
+      },
+      {
+        "value": "GS0038268"
+      },
+      {
+        "value": "GS0043348"
+      },
+      {
+        "value": "GS0044979"
+      },
+      {
+        "value": "GS0045195"
+      },
+      {
+        "value": "GS0045196"
+      },
+      {
+        "value": "GS0045198"
+      },
+      {
+        "value": "GS0046167"
+      },
+      {
+        "value": "GS0047004"
+      },
+      {
+        "value": "GS0049232"
+      },
+      {
+        "value": "GS0049636"
+      },
+      {
+        "value": "GS0050229"
+      },
+      {
+        "value": "GS0054571"
+      },
+      {
+        "value": "GS0061625"
+      },
+      {
+        "value": "GS0061747"
+      },
+      {
+        "value": "GS0061761"
+      },
+      {
+        "value": "GS0089685"
+      },
+      {
+        "value": "GS0093123"
+      },
+      {
+        "value": "GS0094439"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2083,6 +2312,9 @@
     "values": [
       {
         "value": "CBU"
+      },
+      {
+        "value": "CKD"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2348,6 +2580,26 @@
       {
         "formattedValue": "Tenorit Gri, Metalik",
         "value": "LU-7755"
+      },
+      {
+        "formattedValue": "MANUFAKTUR mat mavi",
+        "value": "LU-644"
+      },
+      {
+        "formattedValue": "MANUFAKTUR metalik Côte d'Azur açık mavi",
+        "value": "LU-385"
+      },
+      {
+        "formattedValue": "MANUFAKTUR metalik rubelit kırmızısı",
+        "value": "LU-660"
+      },
+      {
+        "formattedValue": "Metalik açık mavi",
+        "value": "LU-809"
+      },
+      {
+        "formattedValue": "EMERALD GREEN - METALLIC PAINT",
+        "value": "LU-989"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2804,6 +3056,166 @@
       {
         "formattedValue": "Servis 15+1 PRO",
         "value": "4a74068b"
+      },
+      {
+        "formattedValue": "A 200 FL AMG",
+        "value": "2c4b04b6"
+      },
+      {
+        "formattedValue": "C 200 4MATIC All-Terrain",
+        "value": "7dd3090e"
+      },
+      {
+        "formattedValue": "C 200 4MATIC AMG",
+        "value": "413b05c8"
+      },
+      {
+        "formattedValue": "CLA 350 4MATIC Edition 1 AMG",
+        "value": "a2300998"
+      },
+      {
+        "formattedValue": "E 180 Exclusive",
+        "value": "43f306f2"
+      },
+      {
+        "formattedValue": "E 220 d 4MATIC AMG",
+        "value": "4d7d0650"
+      },
+      {
+        "formattedValue": "E 220 d 4MATIC Exclusive",
+        "value": "7ebb0933"
+      },
+      {
+        "formattedValue": "EQA 250+ AMG+",
+        "value": "32cd04f5"
+      },
+      {
+        "formattedValue": "EQA 250+ FL AMG",
+        "value": "3ce4057c"
+      },
+      {
+        "formattedValue": "G 580 Heritage",
+        "value": "3cd00669"
+      },
+      {
+        "formattedValue": "GLB 200 FL Progressive",
+        "value": "74dd090e"
+      },
+      {
+        "formattedValue": "GLC 180 Coupé AMG",
+        "value": "59de07c3"
+      },
+      {
+        "formattedValue": "Mercedes-AMG C 43 4MATIC",
+        "value": "927508f2"
+      },
+      {
+        "formattedValue": "Mercedes-AMG C 43 4MATIC Estate",
+        "value": "d92b0b78"
+      },
+      {
+        "formattedValue": "Mercedes-AMG EQE 53 4MATIC+",
+        "value": "afb009b6"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GLC 43 4MATIC Coupé",
+        "value": "f2500ca8"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GT 43",
+        "value": "63480788"
+      },
+      {
+        "formattedValue": "Mercedes-AMG GT 43 4MATIC+ FL",
+        "value": "c2ba0a27"
+      },
+      {
+        "formattedValue": "Mercedes-AMG S 63 E Performance",
+        "value": "e0970c39"
+      },
+      {
+        "formattedValue": "Mercedes-AMG SL 43",
+        "value": "6368078c"
+      },
+      {
+        "formattedValue": "Mercedes-Maybach S 580 4MATIC Inspiratio",
+        "value": "63730f5a"
+      },
+      {
+        "formattedValue": "AMG CLE 53 4M+ COUPE",
+        "value": "5a6206c2"
+      },
+      {
+        "formattedValue": "C 200",
+        "value": "11e702fe"
+      },
+      {
+        "formattedValue": "C 220d",
+        "value": "15380364"
+      },
+      {
+        "formattedValue": "C200 140 Years Celebration Edition",
+        "value": "f1470d2b"
+      },
+      {
+        "formattedValue": "CLE 300 4MATIC CABRIOLET AMG Line",
+        "value": "c96f0aa4"
+      },
+      {
+        "formattedValue": "E 220d",
+        "value": "15460366"
+      },
+      {
+        "formattedValue": "EQS 450 4MATIC",
+        "value": "3847056d"
+      },
+      {
+        "formattedValue": "EQS SUV 580 4MATIC",
+        "value": "5225068f"
+      },
+      {
+        "formattedValue": "EQS SUV 580 AMG Line",
+        "value": "606b076a"
+      },
+      {
+        "formattedValue": "GLC 200",
+        "value": "194b0391"
+      },
+      {
+        "formattedValue": "GLC 300 4MATIC",
+        "value": "37120554"
+      },
+      {
+        "formattedValue": "GLE 300d 4MATIC AMG Line",
+        "value": "7ac20857"
+      },
+      {
+        "formattedValue": "GLE 450 4MATIC AMG Line",
+        "value": "711607f9"
+      },
+      {
+        "formattedValue": "GLS 450 4MATIC AMG Line",
+        "value": "724a0807"
+      },
+      {
+        "formattedValue": "GLS 450d 4MATIC",
+        "value": "3ece05ce"
+      },
+      {
+        "formattedValue": "GLS 450D 4MATIC AMG Line",
+        "value": "7a3d084b"
+      },
+      {
+        "formattedValue": "Mercedes-Maybach GLS 600",
+        "value": "9e8309cf"
+      },
+      {
+        "formattedValue": "Mercedes-Maybach S 580 4MATIC",
+        "value": "d0790b05"
+      },
+      {
+        "formattedValue": "S 350d",
+        "value": "15b90378"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -3068,6 +3480,70 @@
       {
         "formattedValue": "Suni siyah deri",
         "value": "AU-VU9"
+      },
+      {
+        "formattedValue": "Macchiato beji ARTICO deri, uzay grisi konsol",
+        "value": "AU-115"
+      },
+      {
+        "formattedValue": "Macchiato beji Maybach Exclusive nappa deri",
+        "value": "AU-515"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Espresso kahvesi nappa deri",
+        "value": "AU-924"
+      },
+      {
+        "formattedValue": "MANUFAKTUR eyer kahvesi Exclusive nappa deri, siyah konsol",
+        "value": "AU-554"
+      },
+      {
+        "formattedValue": "MANUFAKTUR macchiato beji nappa deri, gri konsol",
+        "value": "AU-835"
+      },
+      {
+        "formattedValue": "MANUFAKTUR trüf kahvesi Exclusive nappa deri, siyah konsol",
+        "value": "AU-564"
+      },
+      {
+        "formattedValue": "MANUFAKTUR trüf kahvesi nappa deri, siyah konsol",
+        "value": "AU-824"
+      },
+      {
+        "formattedValue": "Siyah Maybach nappa deri, siyah konsol",
+        "value": "AU-811"
+      },
+      {
+        "formattedValue": "Tonka kahvesi ARTICO deri, siyah konsol",
+        "value": "AU-114"
+      },
+      {
+        "formattedValue": "135A-ARTICO LEATHER-BEIGE",
+        "value": "AU-135"
+      },
+      {
+        "formattedValue": "ARTICO LEATHER - BEIGE",
+        "value": "AU-125"
+      },
+      {
+        "formattedValue": "ARTICO man-made leather - Bahia brown / black",
+        "value": "AU-124"
+      },
+      {
+        "formattedValue": "LEATHER - Macchiato beige/ Space grey ",
+        "value": "AU-205"
+      },
+      {
+        "formattedValue": "LEATHER - Neva grey / Balao brown",
+        "value": "AU-209"
+      },
+      {
+        "formattedValue": "Leather tonka brown / black",
+        "value": "AU-204"
+      },
+      {
+        "formattedValue": "NAPPA LEATHER - MACCHIATO BIEGE",
+        "value": "AU-805"
       }
     ],
     "facetType": "MULTI_VALUE"
