@@ -737,16 +737,39 @@ Whether the AI is expected to present vehicle recommendations.
 ---
 
 #### `shouldFilter` *(object \| boolean)*
-Declares the expected backend filter facets applied by the AI. Supports three modes:
+Declares the expected backend filter facets applied by the AI. Supports these modes:
 
 | Value | Meaning |
 |-------|---------|
 | `{}` (empty object) | No specific filter expected (e.g. unsupported attribute, no-match fallback) |
-| `{ "bodyType": ["LIMOUSINE"] }` | Exact filter keys/values expected |
+| object with `include` / `exclude` | Expected filter rules to be applied |
 | `false` | Assert that **no filters at all** were applied |
 | `true` | Assert that **at least one filter** was applied (any) |
 
-**Common filter keys:**
+When using object mode, use this structure:
+
+```json
+"shouldFilter": {
+  "include": [
+    {
+      "bodyType": ["LIMOUSINE"]
+    }
+  ],
+  "exclude": [],
+  "strict": false
+}
+```
+
+- `include`: Facets that must be applied.
+- `exclude`: Facets that must be excluded from results.
+- `strict`: If `true`, expect tight matching to the declared facets. If `false`, allow non-facet fallback behavior while still preferring the declared facets.
+
+Matching semantics:
+- `include` is cumulative (`AND`) across all objects, keys, and listed values.
+- `exclude` is cumulative (`AND`) across all objects and keys: any listed excluded value causes failure.
+- If an `exclude` key is provided with an empty value list, the facet key itself must be absent.
+
+**Common filter keys used inside `include` / `exclude`:**
 
 | Key | Example values |
 |-----|---------------|
@@ -762,10 +785,65 @@ Declares the expected backend filter facets applied by the AI. Supports three mo
 **Examples:**
 
 ```json
-"shouldFilter": { "bodyType": ["LIMOUSINE"] }
+"shouldFilter": {
+  "include": [
+    {
+      "bodyType": ["SUV_OFFROADER"]
+    },
+    {
+      "fuelType": ["ELECTRIC"]
+    }
+  ],
+  "exclude": [],
+  "strict": true
+}
+```
+
+```json
+"shouldFilter": {
+  "include": [
+    {
+      "modelIdentifier": ["CLA"]
+    }
+  ],
+  "exclude": [],
+  "strict": false
+}
+```
+
+```json
+"shouldFilter": {
+  "include": [
+    {
+      "bodyType": ["LIMOUSINE"]
+    }
+  ],
+  "exclude": [],
+  "strict": true
+}
 ```
 ```json
-"shouldFilter": { "bodyType": ["SUV_OFFROADER"], "color": ["PAINT_COLOR_BLACK"] }
+"shouldFilter": {
+  "include": [
+    {
+      "bodyType": ["SUV_OFFROADER"],
+      "color": ["PAINT_COLOR_BLACK"]
+    }
+  ],
+  "exclude": [],
+  "strict": true
+}
+```
+```json
+"shouldFilter": {
+  "include": [],
+  "exclude": [
+    {
+      "fuelType": ["DIESEL", "HYBRID"]
+    }
+  ],
+  "strict": false
+}
 ```
 ```json
 "shouldFilter": false
@@ -807,7 +885,15 @@ Instructions passed to the OpenAI evaluator to determine PASS/FAIL. Always use `
 {
   "value": "show me sedans",
   "shouldRecommend": true,
-  "shouldFilter": { "bodyType": ["LIMOUSINE"] },
+  "shouldFilter": {
+    "include": [
+      {
+        "bodyType": ["LIMOUSINE"]
+      }
+    ],
+    "exclude": [],
+    "strict": true
+  },
   "aiEvaluationHints": {
     "value": [
       "Respond ONLY with: 'PASS' if the response presents sedan/Limousine body-type vehicles.",
