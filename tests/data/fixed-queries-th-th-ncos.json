@@ -1,0 +1,302 @@
+{
+  "multiIntent": [
+    "แสดงรถ SUV ให้ฉันดูหน่อย และเราก็สามารถดูตัวเลือกการเงินได้ด้วย",
+    "ฉันกำลังมองหารถเก๋งหรือรถคูเป้ มีส่วนลดไหม?",
+    "หารถไฟฟ้าให้ฉันหน่อย และจัดการเรื่องประกันด้วย",
+    "คุณมีรถแฮทช์แบ็กไหม และช่วยอธิบายเรื่องการรับประกันด้วย?",
+    "ฉันต้องการรถสำหรับครอบครัวหรือรถขนาดเล็ก การคืนสินค้าทำยังไง?",
+    "แสดงรถเปิดประทุนให้ฉันดู มีฟีเจอร์ความปลอดภัยอะไรบ้าง?"
+  ],
+  "clarification": [
+    "คุณหมายถึงรถคูเป้แบบไหนกันแน่?",
+    "คุณกำลังมองหารถใหม่หรือรถมือสอง?",
+    "GLC หมายความว่าอะไร?",
+    "การคืนสินค้าทำยังไง ช่วยอธิบายหน่อย?",
+    "มีตัวเลือกการรับประกันอะไรบ้าง ช่วยอธิบายสั้นๆ?",
+    "ช่วยอธิบายเรื่องการเงินให้ละเอียดหน่อย?"
+  ],
+  "priceNegotiation": [
+    "ฉันขอส่วนลดสำหรับ GLC ได้ไหม?",
+    "มีแคมเปญสำหรับ EQS ไหม ช่วยเช็คให้หน่อย?",
+    "ที่ตัวแทนจำหน่ายอื่นถูกกว่า คุณจับคู่ราคาได้ไหม?",
+    "ตอนนี้มีส่วนลดไหม?",
+    "คุณมีข้อเสนอพิเศษไหม?",
+    "มีแคมเปญอะไรบ้างตอนนี้ ช่วยสรุปให้หน่อย?",
+    "ฉันขอส่วนลดเพิ่มอีกนิดได้ไหม?",
+    "ตอนนี้มีดีลพิเศษอะไรเพิ่มเติมไหม?"
+  ],
+  "unusualUnits": [
+    "คุณมีรถที่วิ่งต่ำกว่า 10,000 กม. ไหม?",
+    "ฉันกำลังมองหารถที่ประหยัดน้ำมันมากกว่า 20 กม./ลิตร",
+    "คุณมีรถที่มีพื้นที่เก็บของมากกว่า 400 ลิตรไหม?"
+  ],
+  "jokeHumor": [
+    "คุณมีรถบินได้ไหม ไม่ล้อเล่นนะ?",
+    "ฉันหารถล่องหนได้ไหม?",
+    "ถ้ามีรถที่ใช้พิซซ่าเป็นเชื้อเพลิง ฉันจะซื้อเลย!"
+  ],
+  "repeatLooping": [
+    "แสดงรถ SUV ให้ฉันดู",
+    "แสดงรถ SUV อีกครั้งได้ไหม?",
+    "แสดงรถ SUV อีกรอบนะ?"
+  ],
+  "brandLoyaltySwitching": [
+    "ฉันขับ BMW มาตลอด ทำไมต้องเปลี่ยนมาเมอร์เซเดส?",
+    "โน้มน้าวฉันให้เปลี่ยนจาก Audi มาเมอร์เซเดสหน่อย",
+    "ฉันใช้เมอร์เซเดสมาหลายปี มีอะไรใหม่ๆ สำหรับฉันบ้าง?"
+  ],
+  "accessibilityNeeds": [
+    "คุณมีรถที่เหมาะสำหรับผู้ใช้วีลแชร์ไหม?",
+    "คุณมีรถที่สามารถใช้กับระบบควบคุมด้วยมือได้ไหม?",
+    "ฉันกำลังมองหารถที่ผู้สูงอายุขึ้นลงได้ง่าย"
+  ],
+  "environmentalConcerns": [
+    "คุณมีรถที่เป็นมิตรกับสิ่งแวดล้อมไหม?",
+    "ฉันกำลังมองหารถที่มีการปล่อยมลพิษต่ำ มีไหม?",
+    "ฉันกำลังมองหารถเมอร์เซเดสที่เป็นมิตรกับสิ่งแวดล้อมหรือไฮบริด"
+  ],
+  "byFixedQuery": [
+    {
+      "value": "แสดงรถเก๋งให้ฉันดู",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response presents sedan/Limousine body-type vehicles in Thai or English.",
+          "Do NOT fail if the exact vehicle count varies — pass as long as the sedan filter is correctly applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ฉันต้องการรถไฟฟ้า",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response finds and presents electric vehicles in Thai or English.",
+          "Do NOT fail due to brand value missing from UI filter display."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "งบประมาณของฉันไม่เกิน 3,000,000 บาท",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "price": {
+              "max": 3000000
+            }
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 3,000,000 THB in Thai or English.",
+          "Pass as long as a price-based filter is applied and results are within budget."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ฉันกำลังมองหารถสำหรับครอบครัว",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response recommends family-suitable vehicles in Thai or English.",
+          "Do NOT fail due to brand value missing from UI filter display."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "คุณมีรถสีขาวไหม?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_WHITE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by white color in Thai or English."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "คุณช่วยแนะนำรถให้ฉันหน่อยได้ไหม?",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response provides a vehicle recommendation in Thai or English.",
+          "Pass as long as a genuine recommendation is made."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "บริษัทผลิตรถยนต์ที่ดีที่สุดคือใคร?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to rank manufacturers in Thai or English.",
+          "FAIL if it directly ranks manufacturers."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "นโยบายการคืนรถของคุณคืออะไร?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide policy details in Thai or English.",
+          "Do NOT fail if vehicles are shown alongside limitation notice."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ฉันสามารถนัดทดลองขับได้ไหม?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to schedule test drive in Thai or English.",
+          "FAIL if it attempts to book directly."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ฉันต้องการรถปลั๊กอินไฮบริด",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "PETROL_ELECTRIC_PLUGIN_HYBRID"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by plug-in hybrid in Thai or English.",
+          "Pass as long as the PETROL_ELECTRIC_PLUGIN_HYBRID filter is applied."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "recommendationModel": [
+    "คุณมี SUV เมอร์เซเดสที่เหมาะสำหรับครอบครัว 5 คนไหม?",
+    "เมอร์เซเดสรุ่นไหนดีที่สุดสำหรับการขับในเมืองกรุงเทพฯ?",
+    "คุณช่วยแนะนำรถเก๋งเมอร์เซเดสที่ประหยัดน้ำมันให้หน่อย?",
+    "รุ่นเมอร์เซเดสไหนที่สบายที่สุดสำหรับการเดินทางไกล?",
+    "ฉันซื้อรถคันแรก ควรเลือกเมอร์เซเดสรุ่นไหน?",
+    "แนะนำเมอร์เซเดสที่มีฟีเจอร์เทคโนโลยีเยอะๆ",
+    "เมอร์เซเดสรุ่นไหนดีที่สุดสำหรับคนที่ชอบรถสปอร์ต?",
+    "แนะนำรถไฮบริดหรือรถไฟฟ้าหน่อย",
+    "เมอร์เซเดสรุ่นไหนมีอัตราส่วนราคา/ประสิทธิภาพที่ดีที่สุด?"
+  ],
+  "superlative": [
+    "เมอร์เซเดสรุ่นไหนประหยัดน้ำมันที่สุด?",
+    "แสดงรถเมอร์เซเดสที่ปลอดภัยที่สุดให้ฉันดู",
+    "เมอร์เซเดสรุ่นไหนที่เร็วที่สุดในสต็อก?",
+    "แนะนำรถเก๋งเมอร์เซเดสที่หรูหราที่สุด"
+  ],
+  "randomNumbers": [
+    "111",
+    "98234",
+    "00001",
+    "999999",
+    "1234567890",
+    "20260304"
+  ],
+  "byBrandModel": [
+    "แสดงรถเก๋งเมอร์เซเดส-เบนซ์ S-Class",
+    "เรากำลังพิจารณาเมอร์เซเดส-เบนซ์ EQS สีขาว"
+  ],
+  "bySpecs": [
+    "รถขนาดเล็กที่มีเครื่องยนต์ไฮบริดประหยัดน้ำมันและดีไซน์ภายนอกที่ทันสมัย",
+    "ฉันกำลังมองหารถที่มีเครื่องยนต์ทรงพลังและดีไซน์ภายนอกที่สวยงาม"
+  ],
+  "byFilterFacetsAndOr": [
+    "แสดงเฉพาะรถเก๋งและรถคูเป้",
+    "คุณมีรถที่ใช้เชื้อเพลิงเบนซินหรือไฟฟ้าไหม โดยเฉพาะรุ่น GLC?",
+    "คุณมี SUV สีขาวหรือสีดำไหม?"
+  ],
+  "noBrandModel": [
+    "ฉันกำลังมองหารถที่ผสมผสานความประหยัดน้ำมันกับฟีเจอร์ความปลอดภัยขั้นสูง",
+    "หารถที่มีดีไซน์สวยงามและฟีเจอร์ทันสมัย"
+  ],
+  "keywordSingle": [
+    "tesla model x",
+    "ford mustang"
+  ],
+  "nonMbFeatures": [
+    {
+      "value": "ฉันต้องการรุ่นที่มีเครื่องยนต์ VTEC",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response EXPLICITLY states it cannot assist with non-Mercedes features in Thai or English.",
+          "FAIL if it presents results without declining first."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "randomTopics": [
+    "การดื่มชาเขียวทุกวันมีประโยชน์ต่อสุขภาพอย่างไร?",
+    "ฉันทานอาหารไทยเที่ยง แล้วคุณล่ะ?"
+  ],
+  "edgeCase": [],
+  "negativeContradictory": [
+    "ฉันกำลังมองหา Mercedes-Benz G-Wagon สีส้มสดจากยุค 1980 ที่มีกระจกกันกระสุน",
+    "ฉันได้ยินว่า Mercedes-Benz G-Class จากยุค 1950 วิ่งได้เร็วกว่า 1000 ไมล์ต่อชั่วโมง"
+  ],
+  "localization": [
+    "แสดงรถเมอร์เซเดส-เบนซ์สีขาวที่จดทะเบียนหลังปี 2024",
+    "แสดงรถเมอร์เซเดส-เบนซ์ที่มีภายในสีดำ"
+  ]
+}

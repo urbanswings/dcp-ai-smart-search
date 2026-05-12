@@ -1,0 +1,163 @@
+{
+  "multiIntent": [
+    "แสดงรถ SUV มือสองให้ฉันดูหน่อย และเราก็สามารถดูตัวเลือกการเงินได้ด้วย",
+    "ฉันกำลังมองหารถเก๋งหรือรถคูเป้มือสอง มีส่วนลดไหม?",
+    "หารถไฟฟ้ามือสองให้ฉันหน่อย และจัดการเรื่องประกันด้วย",
+    "คุณมีรถแฮทช์แบ็กมือสองไหม และช่วยอธิบายเรื่องการรับประกันด้วย?"
+  ],
+  "clarification": [
+    "รถที่ผ่านการรับรองหมายถึงอะไร?",
+    "คุณกำลังมองหารถที่วิ่งน้อยไหม?",
+    "มีตัวเลือกการรับประกันอะไรบ้างสำหรับรถมือสอง?"
+  ],
+  "priceNegotiation": [
+    "ฉันขอส่วนลดสำหรับ GLC มือสองคันนี้ได้ไหม?",
+    "มีแคมเปญสำหรับรถมือสองไหม?",
+    "ตอนนี้มีส่วนลดสำหรับรถมือสองไหม?"
+  ],
+  "byFixedQuery": [
+    {
+      "value": "แสดงรถเก๋งมือสองให้ฉันดู",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response presents used sedan/Limousine vehicles in Thai or English.",
+          "Do NOT fail if the exact vehicle count varies."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "ฉันต้องการรถไฟฟ้ามือสอง",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response finds and presents used electric vehicles in Thai or English.",
+          "Pass as long as the ELECTRIC fuel type filter is applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "งบประมาณของฉันไม่เกิน 2,500,000 บาทสำหรับรถมือสอง",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "price": {
+              "max": 2500000
+            }
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 2,500,000 THB in Thai or English.",
+          "Pass as long as a price-based filter is applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "คุณมีรถมือสองสีขาวไหม?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_WHITE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by white color for used vehicles in Thai or English."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "แสดงรถมือสองที่วิ่งน้อยให้ฉันดู",
+      "shouldRecommend": true,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges the low mileage request and presents used vehicles in Thai or English.",
+          "Do NOT fail if no specific mileage filter is applied."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "recommendationModel": [
+    "คุณมี SUV เมอร์เซเดสมือสองที่เหมาะสำหรับครอบครัวไหม?",
+    "เมอร์เซเดสมือสองรุ่นไหนดีที่สุดสำหรับการขับในเมืองกรุงเทพฯ?",
+    "คุณช่วยแนะนำรถเก๋งเมอร์เซเดสมือสองที่ประหยัดน้ำมันให้หน่อย?",
+    "แนะนำรถไฮบริดหรือรถไฟฟ้ามือสองหน่อย",
+    "เมอร์เซเดสมือสองรุ่นไหนที่คุ้มค่าที่สุด?"
+  ],
+  "superlative": [
+    "เมอร์เซเดสมือสองรุ่นไหนประหยัดน้ำมันที่สุด?",
+    "แสดงรถเมอร์เซเดสมือสองที่ปลอดภัยที่สุดให้ฉันดู",
+    "แนะนำรถเก๋งเมอร์เซเดสมือสองที่หรูหราที่สุด"
+  ],
+  "randomNumbers": [
+    "111",
+    "98234",
+    "999999",
+    "20260304"
+  ],
+  "byBrandModel": [
+    "แสดงรถเก๋งเมอร์เซเดส-เบนซ์ E-Class มือสอง",
+    "เรากำลังพิจารณาเมอร์เซเดส-เบนซ์ GLC มือสองสีขาว"
+  ],
+  "byFilterFacetsAndOr": [
+    "แสดงเฉพาะรถเก๋งและรถคูเป้มือสอง",
+    "คุณมีรถมือสองที่ใช้เชื้อเพลิงเบนซินหรือไฟฟ้าไหม?",
+    "คุณมี SUV มือสองสีขาวหรือสีดำไหม?"
+  ],
+  "noBrandModel": [
+    "ฉันกำลังมองหารถมือสองที่ผสมผสานความประหยัดน้ำมันกับฟีเจอร์ความปลอดภัยขั้นสูง"
+  ],
+  "keywordSingle": [
+    "tesla model x",
+    "bmw x5"
+  ],
+  "randomTopics": [
+    "การดื่มชาเขียวทุกวันมีประโยชน์ต่อสุขภาพอย่างไร?"
+  ],
+  "negativeContradictory": [
+    "ฉันกำลังมองหา Mercedes-Benz G-Wagon มือสองจากยุค 1980 ที่มีกระจกกันกระสุน"
+  ],
+  "localization": [
+    "แสดงรถเมอร์เซเดส-เบนซ์มือสองสีขาวที่จดทะเบียนหลังปี 2020",
+    "แสดงรถเมอร์เซเดส-เบนซ์มือสองที่มีภายในสีดำ"
+  ]
+}

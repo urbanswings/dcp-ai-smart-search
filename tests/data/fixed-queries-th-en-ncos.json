@@ -1,0 +1,306 @@
+{
+  "multiIntent": [
+    "Show me SUVs, and we can also look at financing.",
+    "I'm looking at sedans or coupes, are there any discounts?",
+    "Find electric cars, and let's sort out insurance too.",
+    "Do you have hatchbacks, and can you explain the warranty too?",
+    "I need a family car or something compact, how do returns work?",
+    "Show me convertibles, what safety features do they have?"
+  ],
+  "clarification": [
+    "What exactly do you mean by coupe?",
+    "Are you looking for new or used?",
+    "What does 'GLC' mean?",
+    "How do returns work, can you explain?",
+    "What warranty options are available, can you briefly explain?",
+    "Can you elaborate a bit on financing?"
+  ],
+  "priceNegotiation": [
+    "Can I get a discount on the GLC?",
+    "Are there any campaigns for EQS, can we check?",
+    "It's cheaper at another dealership, can you match it?",
+    "Is there a discount right now?",
+    "Do you have any special offers?",
+    "What campaigns are available right now, can you summarize?",
+    "Can I get a bit more discount on this one?",
+    "Is there any extra deal available right now?"
+  ],
+  "unusualUnits": [
+    "Do you have cars under 10,000 km?",
+    "I'm looking for a vehicle with over 15 km/l fuel efficiency.",
+    "Do you have a car with luggage space bigger than 400 liters?",
+    "Show me cars with over 20 km/l fuel efficiency.",
+    "I'm looking for a vehicle with trunk space over 500 liters."
+  ],
+  "jokeHumor": [
+    "Do you have flying cars, jokes aside?",
+    "Can I find an invisible car?",
+    "If there's a pizza-powered car, I'll buy it right away!"
+  ],
+  "repeatLooping": [
+    "Show me SUVs.",
+    "Can you show SUVs again?",
+    "Can you show SUVs one more time?"
+  ],
+  "brandLoyaltySwitching": [
+    "I've always driven BMW, why should I switch to Mercedes?",
+    "Convince me to switch from Audi to Mercedes.",
+    "I've used Mercedes for years, what's new for me?"
+  ],
+  "accessibilityNeeds": [
+    "Do you have cars suitable for wheelchair users?",
+    "Do you have vehicles that can be used with hand controls?",
+    "I'm looking for cars that are easy for elderly people to get in and out of."
+  ],
+  "environmentalConcerns": [
+    "Do you have eco-friendly cars?",
+    "I'm looking for low-emission cars, do you have any?",
+    "I'm looking for sustainable or hybrid Mercedes models."
+  ],
+  "byFixedQuery": [
+    {
+      "value": "show me sedans",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response presents sedan/Limousine body-type vehicles or confirms finding sedans matching the request.",
+          "Do NOT fail if the exact vehicle count varies — pass as long as the Limousine/sedan body type filter is correctly applied and relevant vehicles are listed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "I want an electric vehicle",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response finds and presents electric vehicles filtered by electric fuel type.",
+          "Do NOT fail due to brand value missing from UI filter display — pass as long as the ELECTRIC fuel type filter is correctly applied in BE facets and the response highlights electric models."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "my budget is under 3,000,000 baht",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "price": {
+              "max": 3000000
+            }
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 3,000,000 THB and presents available vehicles within that budget.",
+          "Do NOT fail if the exact recommended model differs — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "I'm looking for a family car",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response recommends a spacious, family-suitable vehicle (SUV, MPV, or larger sedan) and presents relevant listings.",
+          "Do NOT fail due to brand value missing from the UI filter display — pass if the correct model/body type is applied in background facets."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "do you have a white car?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_WHITE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by white color and presents available white vehicles.",
+          "Do NOT fail if the response focuses primarily on the color aspect."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "can you give me a recommendation?",
+      "shouldRecommend": true,
+      "shouldFilter": true,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response provides a concrete vehicle recommendation and presents at least one specific Mercedes-Benz model.",
+          "Do NOT fail if the recommended model differs from expected — inventory may vary. Pass as long as a genuine recommendation is made with listed vehicles."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "who are the best car manufacturers?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to rank or compare car manufacturers and redirects to Mercedes-Benz vehicle information.",
+          "FAIL if the response directly ranks or lists car manufacturers."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "what is your return policy for vehicles?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide return policy details and redirects to vehicle search or Mercedes-Benz team.",
+          "Do NOT fail if the response shows vehicles alongside a limitation notice."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "can I schedule a test drive?",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response declines to schedule a test drive and redirects to Mercedes-Benz team or vehicle listings.",
+          "FAIL if the response directly attempts to book a test drive."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "I want a plug-in hybrid",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "PETROL_ELECTRIC_PLUGIN_HYBRID"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by plug-in hybrid fuel type and presents relevant vehicles.",
+          "Pass as long as the PETROL_ELECTRIC_PLUGIN_HYBRID filter is correctly applied."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "recommendationModel": [
+    "Do you have a Mercedes SUV suitable for a family of five?",
+    "Which Mercedes is best for city driving in Bangkok?",
+    "Can you recommend a fuel-efficient Mercedes sedan?",
+    "Which Mercedes model is most comfortable for long trips?",
+    "I'm buying my first car, which Mercedes should I get?",
+    "Recommend a Mercedes with lots of technology features.",
+    "Which Mercedes is best for someone who loves performance cars?",
+    "Recommend a hybrid or electric vehicle.",
+    "Which Mercedes has the best price/performance ratio?"
+  ],
+  "superlative": [
+    "Which Mercedes has the best fuel efficiency?",
+    "Show me the safest Mercedes model available.",
+    "What is the fastest Mercedes in stock?",
+    "Recommend the most luxurious Mercedes sedan."
+  ],
+  "randomNumbers": [
+    "111",
+    "234546748@",
+    "98234",
+    "00001",
+    "999999",
+    "1234567890",
+    "20260304"
+  ],
+  "byBrandModel": [
+    "Show Mercedes-Benz S-Class sedans",
+    "We are considering a white Mercedes-Benz EQS"
+  ],
+  "bySpecs": [
+    "A compact car with a fuel-efficient hybrid engine and a sleek, modern exterior design.",
+    "I'm looking for a vehicle with a powerful engine and a stylish exterior."
+  ],
+  "byFilterFacetsAndOr": [
+    "Show me only sedans and coupes",
+    "Do you have vehicles with petrol or electric fuel type, especially the GLC model?",
+    "Do you have SUVs in white or black?"
+  ],
+  "noBrandModel": [
+    "I'm looking for a vehicle that combines high fuel efficiency with advanced safety features.",
+    "Find vehicles with stylish design and cutting-edge features."
+  ],
+  "keywordSingle": [
+    "tesla model x",
+    "ford mustang"
+  ],
+  "nonMbFeatures": [
+    {
+      "value": "I want models that has VTEC engine",
+      "shouldRecommend": false,
+      "shouldFilter": {},
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response EXPLICITLY states it cannot assist with the specific non-Mercedes-Benz feature and redirects to Mercedes-Benz models.",
+          "FAIL if the response presents results without first explicitly declining."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "randomTopics": [
+    "What are the health benefits of drinking green tea every day?",
+    "I had Thai food for lunch. What about you?"
+  ],
+  "edgeCase": [],
+  "negativeContradictory": [
+    "I'm looking for a bright orange Mercedes-Benz G-Wagon from the 1980s with bulletproof windows.",
+    "I heard a Mercedes-Benz G-Class from the 1950s can go over 1000 miles per hour."
+  ],
+  "localization": [
+    "แสดงรถเมอร์เซเดส-เบนซ์สีขาว",
+    "ฉันต้องการรถ SUV สำหรับครอบครัว"
+  ]
+}

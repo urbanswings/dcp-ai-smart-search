@@ -64,6 +64,17 @@ const colorTranslations: Record<string, string> = {
   "kahverengi": "brown",
   "bej": "beige",
   "gümüş": "silver",
+  // Thai native color names
+  "ดำ": "black",
+  "ขาว": "white",
+  "เทา": "grey",
+  "เงิน": "silver",
+  "แดง": "red",
+  "น้ำเงิน": "blue",
+  "เขียว": "green",
+  "เหลือง": "yellow",
+  "น้ำตาล": "brown",
+  "เบจ": "beige",
 };
 
 function translateColorName(value: string): string {
@@ -201,6 +212,24 @@ const facetValueAliasMap: Record<string, string[]> = {
   // KR body type UI text variants
   "카브리올레로드스터": ["cabrioroadster", "cabrioletroadster"],
   "카브리올레": ["cabrioroadster", "cabrioletroadster"],
+  // Thai fuel type translations
+  "ดีเซล": ["diesel"],
+  "เบนซิน": ["petrol"],
+  "ไฟฟ้า": ["electric"],
+  "ปลั๊กอินไฮบริด": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  "ดีเซล/ไฟฟ้า": ["dieselelectricpluginhybrid"],
+  "ดีเซลปลั๊กอินไฮบริด": ["dieselelectricpluginhybrid"],
+  // Thai body type translations
+  "ลิมูซีน": ["limousine", "sedan", "saloon"],
+  "คูเป้": ["coupe"],
+  "เอสยูวี": ["suv", "suvoffroader"],
+  "คาบริโอเล": ["cabrioroadster", "cabrioletroadster"],
+  "รถตู้": ["peoplecarrier"],
+  "saloon": ["limousine", "sedan"],
+  // Thai transmission type translations
+  "อัตโนมัติ": ["automatic"],
+  "เกียร์ธรรมดา": ["manual"],
+  "ธรรมดา": ["manual"],
 };
 
 let runtimeFacetValueAliasMap: Record<string, string[]> = {};
@@ -289,6 +318,19 @@ function mapUiLabelToFacetKey(label: string): string | null {
     "가격": "price",
     "차량": "brand",
     "옵션사양": "equipment",
+    // Thai UI label mappings
+    "ประเภทรถ": "bodyType",
+    "ประเภทเชื้อเพลิง": "fuelType",
+    "รุ่น": "modelIdentifier",
+    "แบรนด์": "brand",
+    "ยี่ห้อ": "brand",
+    "สี": "color",
+    "สีภายใน": "upholstery",
+    "ปีรุ่น": "modelYear",
+    "ราคา": "price",
+    "อุปกรณ์": "equipment",
+    "เกียร์": "gearbox",
+    "ระยะทาง": "mileage",
   };
 
   if (rawLabelMap[compactRawLabel]) {

@@ -1,0 +1,163 @@
+{
+  "multiIntent": [
+    "Show me used SUVs, and we can also look at financing.",
+    "I'm looking at used sedans or coupes, are there any discounts?",
+    "Find used electric cars, and let's sort out insurance too.",
+    "Do you have used hatchbacks, and can you explain the warranty too?"
+  ],
+  "clarification": [
+    "What exactly do you mean by certified pre-owned?",
+    "Are you looking for low mileage vehicles?",
+    "What warranty options are available for used cars?"
+  ],
+  "priceNegotiation": [
+    "Can I get a discount on this used GLC?",
+    "Are there any campaigns for used vehicles?",
+    "Is there a discount right now for used cars?"
+  ],
+  "byFixedQuery": [
+    {
+      "value": "show me used sedans",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "LIMOUSINE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response presents used sedan/Limousine body-type vehicles.",
+          "Do NOT fail if the exact vehicle count varies."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "I want a used electric vehicle",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response finds and presents used electric vehicles.",
+          "Pass as long as the ELECTRIC fuel type filter is correctly applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "my budget is under 2,500,000 baht for a used car",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "price": {
+              "max": 2500000
+            }
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 2,500,000 THB.",
+          "Pass as long as a price-based filter is applied."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "do you have a used white car?",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "PAINT_COLOR_WHITE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters by white color for used vehicles."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "show me low mileage used cars",
+      "shouldRecommend": true,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges the low mileage request and presents used vehicles.",
+          "Do NOT fail if no specific mileage filter is applied — this may not be a filterable attribute."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
+  "recommendationModel": [
+    "Do you have a used Mercedes SUV suitable for a family?",
+    "Which used Mercedes is best for city driving in Bangkok?",
+    "Can you recommend a fuel-efficient used Mercedes sedan?",
+    "Recommend a used hybrid or electric vehicle.",
+    "Which used Mercedes has the best value?"
+  ],
+  "superlative": [
+    "Which used Mercedes has the best fuel efficiency?",
+    "Show me the safest used Mercedes model available.",
+    "Recommend the most luxurious used Mercedes sedan."
+  ],
+  "randomNumbers": [
+    "111",
+    "98234",
+    "999999",
+    "20260304"
+  ],
+  "byBrandModel": [
+    "Show used Mercedes-Benz E-Class sedans",
+    "We are considering a used white Mercedes-Benz GLC"
+  ],
+  "byFilterFacetsAndOr": [
+    "Show me only used sedans and coupes",
+    "Do you have used vehicles with petrol or electric fuel type?",
+    "Do you have used SUVs in white or black?"
+  ],
+  "noBrandModel": [
+    "I'm looking for a used vehicle that combines high fuel efficiency with advanced safety features."
+  ],
+  "keywordSingle": [
+    "tesla model x",
+    "bmw x5"
+  ],
+  "randomTopics": [
+    "What are the health benefits of drinking green tea every day?"
+  ],
+  "negativeContradictory": [
+    "I'm looking for a used Mercedes-Benz G-Wagon from the 1980s with bulletproof windows."
+  ],
+  "localization": [
+    "แสดงรถเมอร์เซเดส-เบนซ์มือสองสีขาว",
+    "ฉันต้องการรถ SUV มือสอง"
+  ]
+}
