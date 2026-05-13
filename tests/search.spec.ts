@@ -223,6 +223,32 @@ test.describe("AI Smart Search - Sanity Test", () => {
       });
     }
   );
+
+  test("By Filter Facets (complete)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: "sentence-by-filter-options",
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );  
 });
 
 test.describe("AI Smart Search - Vehicles MB", () => {
@@ -364,74 +390,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Filter Facets (random)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.byFilterFacetsRandom;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, filterOptions, fallback } = aiPromptData.byFilterFacetsRandom || {};
-      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsRandom || {};
-      // Generate queries: pick random 1-4 filter options for each query
-      function getRandomFilterCombo() {
-        type FilterKey = keyof typeof filterOptions;
-        const keys = Object.keys(filterOptions) as FilterKey[];
-        const numFilters = Math.floor(Math.random() * 4) + 1; // 1 to 4
-        const selectedKeys = keys
-          .sort(() => 0.5 - Math.random())
-          .slice(0, numFilters);
-        const combo = selectedKeys.map((key) => {
-          const values = filterOptions[key];
-          const value = values[Math.floor(Math.random() * values.length)];
-          return { facet: key, value };
-        });
-        return combo;
-      }
-      const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const generatedQueries = [];
-        for (let i = 0; i < 8; i++) {
-          const combo = getRandomFilterCombo();
-          const comboText = combo
-            .map(({ facet, value }) => `${String(facet)}: ${value}`)
-            .join(", ");
-          const queryValues = await generateUniqueQueries(
-            count,
-            systemPrompt,
-            userPromptTemplate.replace('{comboText}', comboText),
-            maxTokens,
-            fallback.replace('{comboText}', comboText)
-          );
-          generatedQueries.push(queryValues);
-        }
-        return generatedQueries.flat();
-      })();
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        testType: "sentence-by-filter-options",
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets (complete)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("By Filter Facets ('upholstery')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "upholstery";
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
       const fallbackHints = Object.keys(aiEvaluationRules).length === 0
@@ -439,14 +399,15 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         : aiEvaluationRules;
       const queries = isFixedQueriesOnly()
         ? []
-        : await loadFacetCompleteSuite(fallbackHints);
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
       const allQueries = mergeQueries(fixedQueries, queries);
 
+      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: "sentence-by-filter-options",
+        testType: `by-filter-${targetFacet}`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -457,42 +418,52 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Filter Facets ('Equipment')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      // Fetch facets dynamically from API based on environment settings
-      const project = getProject();
-      const fixedQueries: string[] = [];
-      const facets = await fetchAndConvertFacets(
-        emhApiResponse,
-        dcpApiResponse,
-        project
-      );
-      const equipmentFacet = facets.find(f => f.code === "equipment");
-      const queriesOnlyEquipment = equipmentFacet?.values?.map(v => ({
-        ...equipmentFacet,
-        values: [v],
-      })) ?? [];
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyEquipment, aiPromptData.byFilterFacetsComplete);
+  test("By Filter Facets ('upholsteryPolish')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "upholsteryPolish";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
 
+      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: "by-filter-equipment",
+        testType: `by-filter-${targetFacet}`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  ); 
+  
+  test("By Filter Facets ('lines')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "lines";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -503,42 +474,24 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Filter Facets ('Lines')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      // Fetch facets dynamically from API based on environment settings
-      const project = getProject();
-      const fixedQueries: string[] = [];
-      const facets = await fetchAndConvertFacets(
-        emhApiResponse,
-        dcpApiResponse,
-        project
-      );
-      const linesFacet = facets.find(f => f.code === "lines");
-      const queriesOnlyLines = linesFacet?.values?.map(v => ({
-        ...linesFacet,
-        values: [v],
-      })) ?? [];
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyLines, aiPromptData.byFilterFacetsComplete);
+  test("By Filter Facets ('packages')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "packages";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
 
+      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: "by-filter-lines",
+        testType: `by-filter-${targetFacet}`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -549,42 +502,24 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Filter Facets ('Packages')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      // Fetch facets dynamically from API based on environment settings
-      const project = getProject();
-      const fixedQueries: string[] = [];
-      const facets = await fetchAndConvertFacets(
-        emhApiResponse,
-        dcpApiResponse,
-        project
-      );
-      const packagesFacet = facets.find(f => f.code === "packages");
-      const queriesOnlyPackages = packagesFacet?.values?.map(v => ({
-        ...packagesFacet,
-        values: [v],
-      })) ?? [];
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(queriesOnlyPackages, aiPromptData.byFilterFacetsComplete);
+  test("By Filter Facets ('equipment')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "equipment";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
 
+      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: "by-filter-packages",
+        testType: `by-filter-${targetFacet}`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,

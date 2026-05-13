@@ -440,6 +440,21 @@
       },
       {
         "value": "EQV 300 Extra-"
+      },
+      {
+        "value": "EQE 280"
+      },
+      {
+        "value": "GLB 200+"
+      },
+      {
+        "value": "GLC 300 d 4MATIC"
+      },
+      {
+        "value": "S 450 d 4MATIC"
+      },
+      {
+        "value": "CLA 220 4MATIC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -599,6 +614,10 @@
       {
         "formattedValue": "Marketing Campaign 2",
         "value": "7c300944"
+      },
+      {
+        "formattedValue": "Marketing campaign 1",
+        "value": "7ce7095c"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -791,6 +810,10 @@
       {
         "formattedValue": "블루",
         "value": "2454067d"
+      },
+      {
+        "formattedValue": "Gray/Blue",
+        "value": "UPHOLSTERY_COLOR_GREY_BLUE"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -929,6 +952,10 @@
       {
         "formattedValue": "익스클루시브",
         "value": "acbb0f02"
+      },
+      {
+        "formattedValue": "Electric Art",
+        "value": "3b7a068e"
       }
     ],
     "facetType": "MULTI_VALUE"
