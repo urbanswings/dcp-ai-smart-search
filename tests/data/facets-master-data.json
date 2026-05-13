@@ -431,6 +431,15 @@
       },
       {
         "value": "eSprinter 420"
+      },
+      {
+        "value": "EQS 450 4MATIC"
+      },
+      {
+        "value": "EQS 450+"
+      },
+      {
+        "value": "EQV 300 Extra-"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -582,6 +591,14 @@
       {
         "formattedValue": "Marketing Campaign-2",
         "value": "7c570951"
+      },
+      {
+        "formattedValue": "Marketing Campaign 1",
+        "value": "7c2e0943"
+      },
+      {
+        "formattedValue": "Marketing Campaign 2",
+        "value": "7c300944"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -807,6 +824,18 @@
       {
         "formattedValue": "Premium Plus Paketi",
         "value": "73b4093d"
+      },
+      {
+        "formattedValue": "어드밴스드 플러스 패키지",
+        "value": "ad619c7"
+      },
+      {
+        "formattedValue": "프리미엄 패키지",
+        "value": "e8df1112"
+      },
+      {
+        "formattedValue": "프리미엄 플러스 패키지",
+        "value": "b7eb178f"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -880,6 +909,26 @@
       {
         "formattedValue": "Tourer SELECT",
         "value": "4111067d"
+      },
+      {
+        "formattedValue": "AMG line",
+        "value": "202a04ad"
+      },
+      {
+        "formattedValue": "Mercedes-AMG 익스테리어",
+        "value": "fa441123"
+      },
+      {
+        "formattedValue": "Mercedes-AMG 인테리어",
+        "value": "c8940f0c"
+      },
+      {
+        "formattedValue": "아방가르드 라인",
+        "value": "ebe81176"
+      },
+      {
+        "formattedValue": "익스클루시브",
+        "value": "acbb0f02"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1385,6 +1434,162 @@
       {
         "formattedValue": "Yükleme alanı plastik taban",
         "value": "3cf0e71"
+      },
+      {
+        "formattedValue": "360도 카메라",
+        "value": "6e670b8c"
+      },
+      {
+        "formattedValue": "AMG 다이내믹 플러스 패키지",
+        "value": "e48418b4"
+      },
+      {
+        "formattedValue": "Burmester 사운드 시스템",
+        "value": "264312b2"
+      },
+      {
+        "formattedValue": "LED DIGITAL LIGHT 조명 시스템",
+        "value": "1f7d116d"
+      },
+      {
+        "formattedValue": "LED MULTIBEAM 조명 시스템",
+        "value": "f88e1077"
+      },
+      {
+        "formattedValue": "LED 조명 시스템(전체)",
+        "value": "2433126a"
+      },
+      {
+        "formattedValue": "MBUX 멀티미디어 시스템",
+        "value": "53e1149e"
+      },
+      {
+        "formattedValue": "PRE-SAFE",
+        "value": "1f440443"
+      },
+      {
+        "formattedValue": "교통 표지판 어시스트",
+        "value": "6977156f"
+      },
+      {
+        "formattedValue": "나이트 패키지",
+        "value": "b3c50ee8"
+      },
+      {
+        "formattedValue": "내비게이션 시스템",
+        "value": "22ee1322"
+      },
+      {
+        "formattedValue": "도난 방지 경보 시스템",
+        "value": "789015b4"
+      },
+      {
+        "formattedValue": "뒤차축 스티어링",
+        "value": "ea361157"
+      },
+      {
+        "formattedValue": "뒷좌석 시트 히터",
+        "value": "f2ae1121"
+      },
+      {
+        "formattedValue": "뒷좌석 엔터테인먼트",
+        "value": "5ced1580"
+      },
+      {
+        "formattedValue": "멀티컨투어 시트",
+        "value": "ec501154"
+      },
+      {
+        "formattedValue": "메모리 기능이 있는 전동식 시트",
+        "value": "e5f31e6f"
+      },
+      {
+        "formattedValue": "미러 패키지",
+        "value": "8a0a0cff"
+      },
+      {
+        "formattedValue": "사각지대 어시스트",
+        "value": "1c1c1301"
+      },
+      {
+        "formattedValue": "사운드 시스템(전체)",
+        "value": "40a7138c"
+      },
+      {
+        "formattedValue": "수퍼스크린",
+        "value": "7ec70cc7"
+      },
+      {
+        "formattedValue": "스마트폰 연동",
+        "value": "b6040f05"
+      },
+      {
+        "formattedValue": "스티어링 어시스트",
+        "value": "213a134d"
+      },
+      {
+        "formattedValue": "스티어링 휠 열선",
+        "value": "f633114b"
+      },
+      {
+        "formattedValue": "슬라이딩 루프",
+        "value": "b99c0f36"
+      },
+      {
+        "formattedValue": "시트 온도 조절",
+        "value": "bcf50f0d"
+      },
+      {
+        "formattedValue": "앞좌석 시트 히터",
+        "value": "f0e5110c"
+      },
+      {
+        "formattedValue": "앰비언트 라이트",
+        "value": "ed9611a2"
+      },
+      {
+        "formattedValue": "에너자이징 패키지",
+        "value": "1e791300"
+      },
+      {
+        "formattedValue": "에어 밸런스",
+        "value": "88b90d20"
+      },
+      {
+        "formattedValue": "온도 조절 시스템",
+        "value": "ee761106"
+      },
+      {
+        "formattedValue": "운전석 디스플레이",
+        "value": "1c641311"
+      },
+      {
+        "formattedValue": "이지팩 테일게이트",
+        "value": "20c81379"
+      },
+      {
+        "formattedValue": "주차 어시스트 시스템",
+        "value": "73bc15ac"
+      },
+      {
+        "formattedValue": "증강 현실(Augmented Reality)",
+        "value": "6ea81197"
+      },
+      {
+        "formattedValue": "차간 거리 크루즈 컨트롤 디스트로닉",
+        "value": "af172315"
+      },
+      {
+        "formattedValue": "차선 이탈 방지 어시스트",
+        "value": "c1d417e2"
+      },
+      {
+        "formattedValue": "키레스 고",
+        "value": "61d30aad"
+      },
+      {
+        "formattedValue": "하이빔 어시스트",
+        "value": "e9461151"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2318,6 +2523,99 @@
       },
       {
         "value": "GS0091066"
+      },
+      {
+        "value": "GS0004060"
+      },
+      {
+        "value": "GS0004067"
+      },
+      {
+        "value": "GS0028520"
+      },
+      {
+        "value": "GS0062394"
+      },
+      {
+        "value": "GS0004049"
+      },
+      {
+        "value": "GS0004053"
+      },
+      {
+        "value": "GS0004057"
+      },
+      {
+        "value": "GS0004061"
+      },
+      {
+        "value": "GS0004063"
+      },
+      {
+        "value": "GS0004065"
+      },
+      {
+        "value": "GS0004068"
+      },
+      {
+        "value": "GS0004069"
+      },
+      {
+        "value": "GS0004070"
+      },
+      {
+        "value": "GS0004071"
+      },
+      {
+        "value": "GS00111799"
+      },
+      {
+        "value": "GS0014265"
+      },
+      {
+        "value": "GS0014267"
+      },
+      {
+        "value": "GS0014269"
+      },
+      {
+        "value": "GS0014273"
+      },
+      {
+        "value": "GS0014275"
+      },
+      {
+        "value": "GS0014288"
+      },
+      {
+        "value": "GS0014290"
+      },
+      {
+        "value": "GS0014296"
+      },
+      {
+        "value": "GS0030416"
+      },
+      {
+        "value": "GS0035352"
+      },
+      {
+        "value": "GS0037496"
+      },
+      {
+        "value": "GS0040976"
+      },
+      {
+        "value": "GS0049168"
+      },
+      {
+        "value": "GS0055093"
+      },
+      {
+        "value": "GS0061827"
+      },
+      {
+        "value": "GS0062209"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2391,6 +2689,9 @@
       },
       {
         "value": 20
+      },
+      {
+        "value": 11
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -3725,6 +4026,26 @@
       {
         "formattedValue": "S 580 4MATIC Sedan long",
         "value": "76e608bd"
+      },
+      {
+        "formattedValue": "Mercedes-Benz EQS 450 4MATIC SUV AMG Dynamic",
+        "value": "bc9788df"
+      },
+      {
+        "formattedValue": "Mercedes-Benz EQS 450+ AMG Dynamic",
+        "value": "c27b6bbb"
+      },
+      {
+        "formattedValue": "Mercedes-Benz V 300 d Exclusive",
+        "value": "777752e9"
+      },
+      {
+        "formattedValue": "Mercedes-Benz Vito 119 CDI Tourer Pro",
+        "value": "eb586671"
+      },
+      {
+        "formattedValue": "Mercedes-Maybach S 580 e Premium",
+        "value": "f2b44f86"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4157,6 +4478,10 @@
       {
         "formattedValue": "익스클루시브 나파 가죽, 실버 그레이/블랙",
         "value": "AU-508"
+      },
+      {
+        "formattedValue": "Leather - black / space grey",
+        "value": "AU-231"
       }
     ],
     "facetType": "MULTI_VALUE"

@@ -241,16 +241,8 @@ async function generateQueryWithVariation(
       .replace(/\{styleHint\}/g, styleHint);
     const resolvedUserPrompt = `${resolvedUserPromptBase}\nStyle requirement: ${styleHint}.`;
 
-    if (styleHint.includes("'<facet name> <filter value>'")) {
-      return enforceCompleteQueryVariation(
-        exactQuery,
-        facetKey,
-        formattedValue,
-        rawValue,
-        facetDisplayNameFn,
-        context
-      );
-    }
+    // If the style hint is the exact query format, skip AI generation and return the exact query to ensure we have that variation covered
+    if (styleHint.includes("'<facet name> <filter value>'")) return normalizeWhitespace(exactQuery);
     
     const generated = await generateOpenAiQuery(client, resolvedSystemPrompt, resolvedUserPrompt, maxTokens);
     return generated;

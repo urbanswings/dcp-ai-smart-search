@@ -50,10 +50,41 @@ export async function loadGeneratedFacetSuite(
   return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
 }
 
-async function generateCompleteSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+function filterFacetsInApiResponse(
+  sourceData: GeneratedFacetSuite | any,
+  allowedFacetKeys: string[]
+): any {
+  if (!Array.isArray(allowedFacetKeys) || allowedFacetKeys.length === 0) {
+    return sourceData;
+  }
+
+  const allowed = new Set(allowedFacetKeys);
+  const allFacets = sourceData?.data?.search?.facets;
+  if (!allFacets || typeof allFacets !== "object") {
+    return sourceData;
+  }
+
+  const filteredFacets = Object.fromEntries(
+    Object.entries(allFacets).filter(([facetKey]) => allowed.has(facetKey))
+  );
+
+  return {
+    ...sourceData,
+    data: {
+      ...(sourceData?.data || {}),
+      search: {
+        ...(sourceData?.data?.search || {}),
+        facets: filteredFacets,
+      },
+    },
+  };
+}
+
+async function generateCompleteSuiteOnTheFly(facetKeys?: string[]): Promise<GeneratedFacetSuite> {
   const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const sourceData = readJson(sourceDataPath);
-  return buildComplete(sourceData);
+  const scopedSourceData = filterFacetsInApiResponse(sourceData, facetKeys || []);
+  return buildComplete(scopedSourceData);
 }
 
 async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
@@ -63,9 +94,10 @@ async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
 }
 
 export async function loadFacetCompleteSuite(
-  fallbackHints?: AiEvaluationHints
+  fallbackHints?: AiEvaluationHints,
+  facetKeys?: string[]
 ): Promise<FixedQueryCase[]> {
-  const suite = await generateCompleteSuiteOnTheFly();
+  const suite = await generateCompleteSuiteOnTheFly(facetKeys);
   const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
   await saveFacetCompleteSuite(normalizedSuite);
   return normalizedSuite;

@@ -446,9 +446,9 @@
         <thead>
           <tr>
             <th>#</th>
-            <th>query.tr</th>
+            <th>query.local</th>
             <th>query.en</th>
-            <th>response.tr</th>
+            <th>response.local</th>
             <th>response.en</th>
             <th>evaluation</th>
             <th>facets</th>
@@ -548,6 +548,31 @@
         .replaceAll(">", "&gt;")
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#39;");
+    }
+
+    function getLocalizedText(textMap) {
+      if (!textMap || typeof textMap !== "object") {
+        return "";
+      }
+
+      if (textMap.tr) {
+        return textMap.tr;
+      }
+
+      const keys = Object.keys(textMap);
+      const nonEnglishKey = keys.find((key) => key && key.toLowerCase() !== "en");
+      if (nonEnglishKey && textMap[nonEnglishKey]) {
+        return textMap[nonEnglishKey];
+      }
+
+      return textMap.en || keys.map((key) => textMap[key]).find((value) => String(value || "").trim() !== "") || "";
+    }
+
+    function getEnglishText(textMap) {
+      if (!textMap || typeof textMap !== "object") {
+        return "";
+      }
+      return textMap.en || "";
     }
 
     async function copyToClipboard(text) {
@@ -685,17 +710,19 @@
       const evaluation = rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-";
       const evaluationClass = toBadgeClass(evaluation);
       rowViewTitle.textContent = "Selected Row View: #" + (selectedRowIndex + 1);
-      const queryTr = rowData && rowData.query && rowData.query.tr ? rowData.query.tr : "-";
-      const queryEn = rowData && rowData.query && rowData.query.en ? rowData.query.en : "-";
+      const queryLocal = getLocalizedText(rowData && rowData.query) || "-";
+      const queryEn = getEnglishText(rowData && rowData.query) || "-";
+      const responseLocal = getLocalizedText(rowData && rowData.response) || "-";
+      const responseEn = getEnglishText(rowData && rowData.response) || "-";
       rowViewPane.innerHTML =
         "<div class=\"detailBlock\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\"><span class=\"chip " + evaluationClass + "\">" + escapeHtml(evaluation) + "</span></div></div>" +
         "<div class=\"langGrid\">" +
-          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryTr) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryTr) + "</div></div>" +
+          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
           "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
         "</div>" +
         "<div class=\"langGrid\">" +
-          "<div class=\"detailBlock\"><div class=\"detailLabel\">Response</div><div class=\"detailText\">" + escapeHtml(rowData && rowData.response && rowData.response.tr ? rowData.response.tr : "-") + "</div></div>" +
-          "<div class=\"detailBlock\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><div class=\"detailText\">" + escapeHtml(rowData && rowData.response && rowData.response.en ? rowData.response.en : "-") + "</div></div>" +
+          "<div class=\"detailBlock\"><div class=\"detailLabel\">Response</div><div class=\"detailText\">" + escapeHtml(responseLocal) + "</div></div>" +
+          "<div class=\"detailBlock\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><div class=\"detailText\">" + escapeHtml(responseEn) + "</div></div>" +
         "</div>" +
         "<div class=\"detailBlock\"><div class=\"detailLabel\">Facets</div><div class=\"chipRow\">" + formatFacetChips(rowData ? rowData.facets : undefined) + "</div></div>" +
         "<div class=\"detailGrid\">" +
@@ -724,10 +751,10 @@
       renderFileMeta(rows);
       tableTitle.textContent = "Results Table: " + rows.length + " row(s)";
       const html = rows.map((item, index) => {
-        const queryTr = item && item.query && item.query.tr ? item.query.tr : "";
-        const queryEn = item && item.query && item.query.en ? item.query.en : "";
-        const responseTr = item && item.response && item.response.tr ? item.response.tr : "";
-        const responseEn = item && item.response && item.response.en ? item.response.en : "";
+        const queryLocal = getLocalizedText(item && item.query);
+        const queryEn = getEnglishText(item && item.query);
+        const responseLocal = getLocalizedText(item && item.response);
+        const responseEn = getEnglishText(item && item.response);
         const facetsText = compactFacets(item ? item.facets : undefined);
         const isError = item && item.hasError;
         const indexClass = isError === true ? "indexCellError" : (isError === false ? "indexCellOk" : "indexCellUnknown");
@@ -736,9 +763,9 @@
 
         return "<tr data-row-index=\"" + index + "\" class=\"" + selectedClass + "\">" +
           "<td class=\"mono " + indexClass + "\">" + (index + 1) + "</td>" +
-          "<td><span class=\"truncate\" title=\"" + escapeHtml(queryTr) + "\">" + escapeHtml(queryTr) + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(queryLocal) + "\">" + escapeHtml(queryLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(queryEn) + "\">" + escapeHtml(queryEn) + "</span></td>" +
-          "<td><span class=\"truncate\" title=\"" + escapeHtml(responseTr) + "\">" + escapeHtml(responseTr) + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(responseLocal) + "\">" + escapeHtml(responseLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseEn) + "\">" + escapeHtml(responseEn) + "</span></td>" +
           "<td>" + escapeHtml(item && item.openaiEvaluation ? item.openaiEvaluation : "") + "</td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(facetsText) + "\">" + escapeHtml(facetsText) + "</span></td>" +
