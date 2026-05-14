@@ -147,6 +147,12 @@
         "formattedValue": "VITO",
         "value": "VITO",
         "tags": []
+      },
+      {
+        "label": "Model",
+        "formattedValue": "EQV",
+        "value": "EQV",
+        "tags": []
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -455,6 +461,9 @@
       },
       {
         "value": "CLA 220 4MATIC"
+      },
+      {
+        "value": "EQV 300"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1617,6 +1626,26 @@
       {
         "formattedValue": "하이빔 어시스트",
         "value": "e9461151"
+      },
+      {
+        "formattedValue": "AMG 세라믹 고성능 복합 브레이크 시스템",
+        "value": "f4ae240e"
+      },
+      {
+        "formattedValue": "AMG 에어로다이내믹 패키지",
+        "value": "d5dd18a8"
+      },
+      {
+        "formattedValue": "AMG 트랙 페이스",
+        "value": "a0830de0"
+      },
+      {
+        "formattedValue": "AMG 퍼포먼스 시트",
+        "value": "d544102e"
+      },
+      {
+        "formattedValue": "프로젝션 기능 포함 LED DIGITAL LIGHT 조명 시스템",
+        "value": "ae2622ea"
       }
     ],
     "facetType": "MULTI_VALUE"

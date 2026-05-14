@@ -239,7 +239,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: "sentence-by-filter-options",
+        testType: `by-filter-complete`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -430,7 +430,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
       const allQueries = mergeQueries(fixedQueries, queries);
 
-      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
@@ -458,7 +457,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
       const allQueries = mergeQueries(fixedQueries, queries);
 
-      
       await runTestsAndSaveResults({
         queries: allQueries,
         testDescribe: describeName,
@@ -485,7 +483,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         ? []
         : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
       const allQueries = mergeQueries(fixedQueries, queries);
-
       
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -513,7 +510,33 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         ? []
         : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
       const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
 
+  test("By Filter Facets ('motorization')", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "motorization";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
       
       await runTestsAndSaveResults({
         queries: allQueries,
