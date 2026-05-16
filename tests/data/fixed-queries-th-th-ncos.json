@@ -125,7 +125,17 @@
     {
       "value": "ฉันกำลังมองหารถสำหรับครอบครัว",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "SUV_OFFROADER"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends family-suitable vehicles in Thai or English.",

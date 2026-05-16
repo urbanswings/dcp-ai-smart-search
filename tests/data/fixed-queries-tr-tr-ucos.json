@@ -187,7 +187,17 @@
     {
       "value": "Aile arabası arıyorum",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "color": [
+              "SUV_OFFROADER"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": true
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends a spacious, family-suitable vehicle (SUV, MPV, or larger sedan) and presents relevant listings.",
