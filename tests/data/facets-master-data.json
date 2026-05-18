@@ -823,6 +823,22 @@
       {
         "formattedValue": "Gray/Blue",
         "value": "UPHOLSTERY_COLOR_GREY_BLUE"
+      },
+      {
+        "formattedValue": "Bej",
+        "value": "e71032d"
+      },
+      {
+        "formattedValue": "Gri",
+        "value": "eaa033e"
+      },
+      {
+        "formattedValue": "Kahverengi",
+        "value": "30410620"
+      },
+      {
+        "formattedValue": "Siyah",
+        "value": "167a041a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1730,6 +1746,22 @@
       {
         "formattedValue": "Sarı",
         "value": "PAINT_COLOR_YELLOW"
+      },
+      {
+        "formattedValue": "Beyaz",
+        "value": "16240417"
+      },
+      {
+        "formattedValue": "Gri",
+        "value": "eaa033e"
+      },
+      {
+        "formattedValue": "Mavi",
+        "value": "123e03a9"
+      },
+      {
+        "formattedValue": "Siyah",
+        "value": "167a041a"
       }
     ],
     "facetType": "MULTI_VALUE"

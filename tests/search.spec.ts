@@ -700,6 +700,77 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   );
 });
 
+test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
+  const describeName = "Vehicles MB (-ve)";
+  test.beforeEach(async ({}, testInfo) => {
+    const env = ENVIRONMENT;
+    const country = COUNTRY;
+    const product = PRODUCT;
+    const vehicleCategory = VEHICLE_CATEGORY;
+    const project = getProject();
+    const browserType = "chromium";
+    const timestamp = new Date().toISOString();
+    await logTestContext({
+      describeName,
+      testInfo,
+      browserType,
+      env,
+      country,
+      product,
+      vehicleCategory,
+      project,
+      timestamp,
+      language,
+    });
+    testInfo.annotations.push({
+      type: "context",
+      description: JSON.stringify({
+        env,
+        country,
+        product,
+        vehicleCategory,
+        project,        
+        browserType,
+        timestamp,
+      }),
+    });
+  });
+  test.afterEach(async ({}, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+      console.warn(`Test failed: ${testInfo.title}`);
+    } else {
+      console.log(`Test passed: ${testInfo.title}`);
+    }
+  });
+
+  test("By Filter Facets ('modelIdentifier')(-ve)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "modelIdentifier";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+});
+
 test.describe("AI Smart Search - Vehicles Non-MB", () => {
   const describeName = "Vehicles Non-MB";
   test.beforeEach(async ({}, testInfo) => {

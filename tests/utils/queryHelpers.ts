@@ -93,11 +93,109 @@ async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
   return buildMatrix(sourceData);
 }
 
+function extractFacetValues(sourceData: any, facetKey: string): Array<{ rawValue: string; formattedValue: string }> {
+  const facetValues = sourceData?.data?.search?.facets?.[facetKey]?.values || sourceData?.[facetKey]?.values;
+  if (!Array.isArray(facetValues)) {
+    return [];
+  }
+
+  const seen = new Set<string>();
+  const values: Array<{ rawValue: string; formattedValue: string }> = [];
+
+  for (const entry of facetValues) {
+    const raw =
+      typeof entry === "string" || typeof entry === "number"
+        ? String(entry)
+        : String(entry?.value ?? "");
+    const rawValue = raw.trim();
+    if (!rawValue || rawValue.toUpperCase() === "UNDEFINED") {
+      continue;
+    }
+
+    if (seen.has(rawValue)) {
+      continue;
+    }
+    seen.add(rawValue);
+
+    const formattedValue =
+      typeof entry === "object" && entry !== null && entry?.formattedValue
+        ? String(entry.formattedValue).trim()
+        : rawValue;
+
+    values.push({
+      rawValue,
+      formattedValue: formattedValue || rawValue,
+    });
+  }
+
+  return values;
+}
+
+function createMissingModelIdentifierHint(modelLabel: string): AiEvaluationHints {
+  return {
+    overwrite: true,
+    value: [
+      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable model ${modelLabel}.`,
+      `Respond with "PASS" if the response clearly says this model is not available in current stock (or equivalent wording such as unavailable / not found / no stock).`,
+      `Respond with "PASS" if the response either asks for clarification or suggests valid available alternatives instead of claiming this exact unavailable model is in stock.`,
+      `If the response claims ${modelLabel} is currently in stock, respond with "FAIL: unavailable model incorrectly treated as available".`,
+      `If the response is off-topic, unsafe, or ignores the unavailable-model intent, respond with "FAIL: off-topic or incorrect unavailable-model handling".`,
+      "Response with failure reason otherwise response with 'PASS' only",
+    ],
+  };
+}
+
+async function generateMissingModelIdentifierSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+  const masterDataPath = path.join(DATA_DIR, "facets-master-data.json");
+  const stockDataPath = path.join(DATA_DIR, "emh-api-response.json");
+
+  const masterData = JSON.parse(await fs.readFile(masterDataPath, "utf-8"));
+  const stockData = readJson(stockDataPath);
+
+  const allModels = extractFacetValues(masterData, "modelIdentifier");
+  const stockModels = new Set(
+    extractFacetValues(stockData, "modelIdentifier").map((entry) => entry.rawValue)
+  );
+
+  const missingModels = allModels.filter((entry) => !stockModels.has(entry.rawValue));
+
+  const regressionQueries: FixedQueryCase[] = missingModels.map((entry) => {
+    const modelLabel = entry.formattedValue;
+    return {
+      value: `show me ${modelLabel} models`,
+      facet: "modelIdentifier",
+      filterValue: entry.rawValue,
+      shouldRecommend: false,
+      shouldFilter: {
+        include: [],
+        exclude: [{ modelIdentifier: [entry.rawValue] }],
+        strict: false,
+      },
+      aiEvaluationHints: createMissingModelIdentifierHint(modelLabel),
+    };
+  });
+
+  return {
+    generatedAt: new Date().toISOString(),
+    sourcePath: `tests/data/${path.basename(masterDataPath)} - tests/data/${path.basename(stockDataPath)}`,
+    queryCount: regressionQueries.length,
+    regressionQueries,
+    informativeHintsByQuery: {},
+  };
+}
+
 export async function loadFacetCompleteSuite(
   fallbackHints?: AiEvaluationHints,
   facetKeys?: string[]
 ): Promise<FixedQueryCase[]> {
-  const suite = await generateCompleteSuiteOnTheFly(facetKeys);
+  const isModelIdentifierNegativeSuite =
+    Array.isArray(facetKeys) &&
+    facetKeys.length === 1 &&
+    facetKeys[0] === "modelIdentifier";
+
+  const suite = isModelIdentifierNegativeSuite
+    ? await generateMissingModelIdentifierSuiteOnTheFly()
+    : await generateCompleteSuiteOnTheFly(facetKeys);
   const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
   await saveFacetCompleteSuite(normalizedSuite);
   return normalizedSuite;
