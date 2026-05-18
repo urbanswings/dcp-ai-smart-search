@@ -49,6 +49,7 @@ import {
   normalizeFixedQueries,
   loadFacetCompleteSuite,
   loadFacetMatrixSuite,
+  loadMissingFacetValuesSuite,
 } from "./utils/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -752,7 +753,7 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
         : aiEvaluationRules;
       const queries = isFixedQueriesOnly()
         ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
       const allQueries = mergeQueries(fixedQueries, queries);
       
       await runTestsAndSaveResults({
@@ -779,7 +780,7 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
         : aiEvaluationRules;
       const queries = isFixedQueriesOnly()
         ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
       const allQueries = mergeQueries(fixedQueries, queries);
       
       await runTestsAndSaveResults({

@@ -131,47 +131,54 @@ function extractFacetValues(sourceData: any, facetKey: string): Array<{ rawValue
   return values;
 }
 
-function createMissingModelIdentifierHint(modelLabel: string): AiEvaluationHints {
+function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): AiEvaluationHints {
   return {
     overwrite: true,
     value: [
-      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable model ${modelLabel}.`,
-      `Respond with "PASS" if the response clearly says this model is not available in current stock (or equivalent wording such as unavailable / not found / no stock).`,
-      `Respond with "PASS" if the response either asks for clarification or suggests valid available alternatives instead of claiming this exact unavailable model is in stock.`,
-      `If the response claims ${modelLabel} is currently in stock, respond with "FAIL: unavailable model incorrectly treated as available".`,
-      `If the response is off-topic, unsafe, or ignores the unavailable-model intent, respond with "FAIL: off-topic or incorrect unavailable-model handling".`,
-      "Response with failure reason otherwise response with 'PASS' only",
+      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable ${facetKey} ${valueLabel}.`,
+      `Respond with "PASS" if the response clearly says this ${facetKey} is not available in current stock (or equivalent wording such as unavailable / not found / no stock).`,
+      `Respond with "PASS" if the response either asks for clarification or suggests valid available alternatives instead of claiming this exact unavailable ${facetKey} is in stock.`,
+      `If the response claims ${valueLabel} is currently in stock, respond with "FAIL: unavailable ${facetKey} incorrectly treated as available".`,
+      `If the response is off-topic, unsafe, or ignores the unavailable-${facetKey} intent, respond with "FAIL: off-topic or incorrect unavailable-${facetKey} handling".`,
+      "Respond with failure reason otherwise respond with 'PASS' only",
     ],
   };
 }
 
-async function generateMissingModelIdentifierSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+function extractMissingFacetValues(
+  facetKey: string,
+  masterData: any,
+  stockData: any
+): Array<{ rawValue: string; formattedValue: string }> {
+  const allValues = extractFacetValues(masterData, facetKey);
+  const stockValues = new Set(
+    extractFacetValues(stockData, facetKey).map((entry) => entry.rawValue)
+  );
+  return allValues.filter((entry) => !stockValues.has(entry.rawValue));
+}
+
+async function generateMissingFacetValuesSuiteOnTheFly(facetKey: string): Promise<GeneratedFacetSuite> {
   const masterDataPath = path.join(DATA_DIR, "facets-master-data.json");
   const stockDataPath = path.join(DATA_DIR, "emh-api-response.json");
 
   const masterData = JSON.parse(await fs.readFile(masterDataPath, "utf-8"));
   const stockData = readJson(stockDataPath);
 
-  const allModels = extractFacetValues(masterData, "modelIdentifier");
-  const stockModels = new Set(
-    extractFacetValues(stockData, "modelIdentifier").map((entry) => entry.rawValue)
-  );
+  const missingValues = extractMissingFacetValues(facetKey, masterData, stockData);
 
-  const missingModels = allModels.filter((entry) => !stockModels.has(entry.rawValue));
-
-  const regressionQueries: FixedQueryCase[] = missingModels.map((entry) => {
-    const modelLabel = entry.formattedValue;
+  const regressionQueries: FixedQueryCase[] = missingValues.map((entry) => {
+    const valueLabel = entry.formattedValue;
     return {
-      value: `show me ${modelLabel} models`,
-      facet: "modelIdentifier",
+      value: `show me ${valueLabel} ${facetKey}`,
+      facet: facetKey,
       filterValue: entry.rawValue,
       shouldRecommend: false,
       shouldFilter: {
         include: [],
-        exclude: [{ modelIdentifier: [entry.rawValue] }],
+        exclude: [{ [facetKey]: [entry.rawValue] }],
         strict: false,
       },
-      aiEvaluationHints: createMissingModelIdentifierHint(modelLabel),
+      aiEvaluationHints: createUnavailableFacetValueHint(facetKey, valueLabel),
     };
   });
 
@@ -188,14 +195,17 @@ export async function loadFacetCompleteSuite(
   fallbackHints?: AiEvaluationHints,
   facetKeys?: string[]
 ): Promise<FixedQueryCase[]> {
-  const isModelIdentifierNegativeSuite =
-    Array.isArray(facetKeys) &&
-    facetKeys.length === 1 &&
-    facetKeys[0] === "modelIdentifier";
+  const suite = await generateCompleteSuiteOnTheFly(facetKeys);
+  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+  await saveFacetCompleteSuite(normalizedSuite);
+  return normalizedSuite;
+}
 
-  const suite = isModelIdentifierNegativeSuite
-    ? await generateMissingModelIdentifierSuiteOnTheFly()
-    : await generateCompleteSuiteOnTheFly(facetKeys);
+export async function loadMissingFacetValuesSuite(
+  facetKey: string,
+  fallbackHints?: AiEvaluationHints
+): Promise<FixedQueryCase[]> {
+  const suite = await generateMissingFacetValuesSuiteOnTheFly(facetKey);
   const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
   await saveFacetCompleteSuite(normalizedSuite);
   return normalizedSuite;
