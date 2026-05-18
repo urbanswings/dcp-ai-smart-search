@@ -16,7 +16,7 @@
     "chrome:cdp:clone-default": "rm -rf /tmp/chrome-dev-profile && mkdir -p /tmp/chrome-dev-profile && cp -R \"$HOME/Library/Application Support/Google/Chrome/Default\" \"/tmp/chrome-dev-profile/Default\" && open -na \"Google Chrome\" --args --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-dev-profile --profile-directory=Default",
     "report": "node generate-results-html.js && open $(ls -t results/html/*.html | head -1)",
     "clean": "./clean-old-results.sh",
-    "convert-facets": "node tests/utils/facetToJson.js",
+    "generate-facet-master-data": "node generate-facet-master-data.js",
     "annotate-screenshots": "node add-translations-to-screenshots.js"
   },
   "keywords": [],

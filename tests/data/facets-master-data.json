@@ -464,6 +464,48 @@
       },
       {
         "value": "EQV 300"
+      },
+      {
+        "value": "SL 55 4MATIC+"
+      },
+      {
+        "value": "E 300 e"
+      },
+      {
+        "value": "EQA 250"
+      },
+      {
+        "value": "EQB 350 4MATIC"
+      },
+      {
+        "value": "EQS 500 4MATIC"
+      },
+      {
+        "value": "A 180"
+      },
+      {
+        "value": "EQE 300"
+      },
+      {
+        "value": "S 450 e"
+      },
+      {
+        "value": "E 300"
+      },
+      {
+        "value": "C 220 d"
+      },
+      {
+        "value": "E 220 d"
+      },
+      {
+        "value": "GLC 220 d 4MATIC"
+      },
+      {
+        "value": "S 580 e"
+      },
+      {
+        "value": "eVito Tourer 126 Extralang"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -627,6 +669,18 @@
       {
         "formattedValue": "Marketing campaign 1",
         "value": "7ce7095c"
+      },
+      {
+        "formattedValue": "Own Your Instinct- May 2026",
+        "value": "be1e0ad6"
+      },
+      {
+        "formattedValue": "Defining Electric Offer",
+        "value": "44d81470"
+      },
+      {
+        "formattedValue": "Star of the Month Offer",
+        "value": "307e13be"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -839,6 +893,10 @@
       {
         "formattedValue": "Siyah",
         "value": "167a041a"
+      },
+      {
+        "formattedValue": "Gray/Brown",
+        "value": "UPHOLSTERY_COLOR_GREY_BROWN"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2704,6 +2762,99 @@
       },
       {
         "value": "GS0062209"
+      },
+      {
+        "value": "GS0004093"
+      },
+      {
+        "value": "GS0004098"
+      },
+      {
+        "value": "GS0004185"
+      },
+      {
+        "value": "GS00106648"
+      },
+      {
+        "value": "GS00109843"
+      },
+      {
+        "value": "GS0026112"
+      },
+      {
+        "value": "GS0043956"
+      },
+      {
+        "value": "GS0044961"
+      },
+      {
+        "value": "GS0047570"
+      },
+      {
+        "value": "GS0048913"
+      },
+      {
+        "value": "GS0052668"
+      },
+      {
+        "value": "GS0052671"
+      },
+      {
+        "value": "GS0053744"
+      },
+      {
+        "value": "GS0042562"
+      },
+      {
+        "value": "string"
+      },
+      {
+        "value": "GS00113398"
+      },
+      {
+        "value": "GS00113400"
+      },
+      {
+        "value": "GS00113502"
+      },
+      {
+        "value": "GS00111070"
+      },
+      {
+        "value": "GS00111078"
+      },
+      {
+        "value": "GS00112402"
+      },
+      {
+        "value": "GS00111816"
+      },
+      {
+        "value": "GS00112266"
+      },
+      {
+        "value": "GS00112620"
+      },
+      {
+        "value": "GS00112915"
+      },
+      {
+        "value": "GS00113144 "
+      },
+      {
+        "value": "GS00113288"
+      },
+      {
+        "value": "GS00113368"
+      },
+      {
+        "value": "GS00113541"
+      },
+      {
+        "value": "GS0004059"
+      },
+      {
+        "value": "GS0035287"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2780,6 +2931,9 @@
       },
       {
         "value": 11
+      },
+      {
+        "value": 48
       }
     ],
     "facetType": "MULTI_VALUE"

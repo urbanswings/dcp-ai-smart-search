@@ -743,6 +743,33 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
     }
   });
 
+  test("By Filter Facets ('bodyType')(-ve)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const targetFacet = "bodyType";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("By Filter Facets ('modelIdentifier')(-ve)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const targetFacet = "modelIdentifier";
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
