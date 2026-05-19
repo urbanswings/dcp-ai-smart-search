@@ -77,7 +77,7 @@
 
     .row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 12px;
     }
 
@@ -256,6 +256,69 @@
       margin-top: 10px;
     }
 
+    .selectedRowSplit {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .selectedRowLeft > * + * {
+      margin-top: 10px;
+    }
+
+    .selectedRowRight {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px;
+      min-width: 0;
+    }
+
+    .screenshotStage {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: #f8fafc;
+      overflow: auto;
+      max-height: 620px;
+      display: grid;
+      place-items: center;
+      min-height: 200px;
+      margin-bottom: 8px;
+    }
+
+    .screenshotImg {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .screenshotImg {
+      cursor: default;
+    }
+
+    .screenshotHint {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .screenshotPath {
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      background: #fbfcfe;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      padding: 8px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
     .detailGrid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -376,6 +439,32 @@
       border-color: #fecaca;
     }
 
+    .screenshotPopover {
+      position: fixed;
+      z-index: 100;
+      display: none;
+      pointer-events: none;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(15, 23, 42, 0.22);
+      padding: 8px;
+      max-width: min(1100px, 78vw);
+    }
+
+    .screenshotPopover.visible {
+      display: block;
+    }
+
+    .screenshotPopoverImg {
+      display: block;
+      width: 100%;
+      height: auto;
+      max-height: min(900px, 92vh);
+      object-fit: contain;
+      border-radius: 6px;
+    }
+
     @media (max-width: 700px) {
       .row {
         grid-template-columns: 1fr;
@@ -390,6 +479,10 @@
       }
 
       .langGrid {
+        grid-template-columns: 1fr;
+      }
+
+      .selectedRowSplit {
         grid-template-columns: 1fr;
       }
     }
@@ -469,6 +562,10 @@
     <pre class="preview" id="previewPane">Select a file to preview JSON.</pre>
   </main>
 
+  <div class="screenshotPopover" id="screenshotPopover" aria-hidden="true">
+    <img class="screenshotPopoverImg" id="screenshotPopoverImg" alt="Screenshot preview" />
+  </div>
+
   <script>
     const pickBtn = document.getElementById("pickBtn");
     const folderSelect = document.getElementById("folderSelect");
@@ -485,6 +582,8 @@
     const previewPane = document.getElementById("previewPane");
     const rowViewTitle = document.getElementById("rowViewTitle");
     const rowViewPane = document.getElementById("rowViewPane");
+    const screenshotPopover = document.getElementById("screenshotPopover");
+    const screenshotPopoverImg = document.getElementById("screenshotPopoverImg");
 
     let rootLabel = "selected-root";
     let selectedFiles = [];
@@ -492,6 +591,8 @@
     let currentRows = [];
     let selectedRowIndex = -1;
     let pendingRestoreRelativePath = "";
+    let currentScreenshotObjectUrl = "";
+    let currentVisibleFiles = [];
 
     function normalizePath(pathValue) {
       return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
@@ -533,7 +634,7 @@
 
       const folderRows = [];
       for (const [name, fileList] of folderMap.entries()) {
-        fileList.sort((a, b) => a.localeCompare(b));
+        fileList.sort((a, b) => b.localeCompare(a));
         folderRows.push({ name, files: fileList });
       }
       folderRows.sort((a, b) => b.name.localeCompare(a.name));
@@ -659,9 +760,50 @@
     }
 
     function resetRowView() {
+      if (currentScreenshotObjectUrl) {
+        URL.revokeObjectURL(currentScreenshotObjectUrl);
+        currentScreenshotObjectUrl = "";
+      }
       selectedRowIndex = -1;
       rowViewTitle.textContent = "Selected Row View";
       rowViewPane.innerHTML = "Click a table row to view that row's data.";
+    }
+
+    function releaseScreenshotObjectUrl() {
+      if (currentScreenshotObjectUrl) {
+        URL.revokeObjectURL(currentScreenshotObjectUrl);
+        currentScreenshotObjectUrl = "";
+      }
+    }
+
+    function buildScreenshotPathCandidates(rawScreenshotPath) {
+      const normalized = normalizePath(String(rawScreenshotPath || "").replace(/^\.\//, ""));
+      if (!normalized) {
+        return [];
+      }
+
+      const candidates = new Set([normalized]);
+      if (normalized.startsWith("results/")) {
+        candidates.add(normalized.slice("results/".length));
+      }
+      return [...candidates];
+    }
+
+    function resolveScreenshotFile(rowData) {
+      const screenshotPath = rowData && rowData.screenshotPath ? String(rowData.screenshotPath) : "";
+      if (!screenshotPath) {
+        return { screenshotPath: "", fileObj: null };
+      }
+
+      const candidates = buildScreenshotPathCandidates(screenshotPath);
+      const fileObj = selectedFiles.find((file) => {
+        const selectedPathValue = normalizePath(file.webkitRelativePath || file.name);
+        return candidates.some((candidate) => {
+          return selectedPathValue === candidate || selectedPathValue === normalizePath(rootLabel + "/" + candidate);
+        });
+      }) || null;
+
+      return { screenshotPath, fileObj };
     }
 
     function toBadgeClass(evaluation) {
@@ -706,6 +848,8 @@
         return;
       }
 
+      releaseScreenshotObjectUrl();
+
       const rowData = currentRows[selectedRowIndex];
       const evaluation = rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-";
       const evaluationClass = toBadgeClass(evaluation);
@@ -714,22 +858,60 @@
       const queryEn = getEnglishText(rowData && rowData.query) || "-";
       const responseLocal = getLocalizedText(rowData && rowData.response) || "-";
       const responseEn = getEnglishText(rowData && rowData.response) || "-";
+
+      const screenshotResolution = resolveScreenshotFile(rowData);
+      const screenshotPath = screenshotResolution.screenshotPath;
+      const screenshotFile = screenshotResolution.fileObj;
+      let screenshotStageHtml = "";
+
+      if (screenshotFile) {
+        currentScreenshotObjectUrl = URL.createObjectURL(screenshotFile);
+        screenshotStageHtml =
+          "<div class=\"screenshotStage\">" +
+            "<img class=\"screenshotImg\" src=\"" + escapeHtml(currentScreenshotObjectUrl) + "\" alt=\"Screenshot for selected query\" data-screenshot-hover=\"1\" />" +
+          "</div>";
+      } else if (screenshotPath) {
+        screenshotStageHtml =
+          "<div class=\"screenshotStage\">" +
+            "<div class=\"screenshotHint\">Screenshot not found in the currently selected folder scope.\nPick a folder that includes results/screenshots to view image previews.</div>" +
+          "</div>";
+      } else {
+        screenshotStageHtml =
+          "<div class=\"screenshotStage\">" +
+            "<div class=\"screenshotHint\">No screenshot path is available for this row.</div>" +
+          "</div>";
+      }
+
+      const screenshotPathHtml = screenshotPath
+        ? "<div class=\"screenshotPath\">" + escapeHtml(screenshotPath) + "</div>"
+        : "<div class=\"screenshotPath\">-</div>";
+
       rowViewPane.innerHTML =
-        "<div class=\"detailBlock\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\"><span class=\"chip " + evaluationClass + "\">" + escapeHtml(evaluation) + "</span></div></div>" +
-        "<div class=\"langGrid\">" +
-          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
-          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
-        "</div>" +
-        "<div class=\"langGrid\">" +
-          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Response</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseLocal) + "\" title=\"Copy Response\" aria-label=\"Copy Response\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseLocal) + "</div></div>" +
-          "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseEn) + "\" title=\"Copy Response (EN)\" aria-label=\"Copy Response (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseEn) + "</div></div>" +
-        "</div>" +
-        "<div class=\"detailBlock\"><div class=\"detailLabel\">Facets</div><div class=\"chipRow\">" + formatFacetChips(rowData ? rowData.facets : undefined) + "</div></div>" +
-        "<div class=\"detailGrid\">" +
-          "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.timestampSG ? rowData.timestampSG : (rowData && rowData.timestamp ? rowData.timestamp : "-")) + "</div></div>" +
-          "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.resultCount !== undefined ? rowData.resultCount : "-") + "</div></div>" +
-          "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.responseTime !== undefined ? rowData.responseTime : "-") + "</div></div>" +
-          "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.statusCode !== undefined ? rowData.statusCode : "-") + "</div></div>" +
+        "<div class=\"selectedRowSplit\">" +
+          "<div class=\"selectedRowLeft\">" +
+            "<div class=\"detailBlock\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\"><span class=\"chip " + evaluationClass + "\">" + escapeHtml(evaluation) + "</span></div></div>" +
+            "<div class=\"langGrid\">" +
+              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
+              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
+            "</div>" +
+            "<div class=\"langGrid\">" +
+              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Response</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseLocal) + "\" title=\"Copy Response\" aria-label=\"Copy Response\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseLocal) + "</div></div>" +
+              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseEn) + "\" title=\"Copy Response (EN)\" aria-label=\"Copy Response (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseEn) + "</div></div>" +
+            "</div>" +
+            "<div class=\"detailBlock\"><div class=\"detailLabel\">Facets</div><div class=\"chipRow\">" + formatFacetChips(rowData ? rowData.facets : undefined) + "</div></div>" +
+            "<div class=\"detailGrid\">" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.timestampSG ? rowData.timestampSG : (rowData && rowData.timestamp ? rowData.timestamp : "-")) + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.resultCount !== undefined ? rowData.resultCount : "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.responseTime !== undefined ? rowData.responseTime : "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.statusCode !== undefined ? rowData.statusCode : "-") + "</div></div>" +
+            "</div>" +
+          "</div>" +
+          "<div class=\"selectedRowRight\">" +
+            "<div class=\"detailLabel\">Screenshot" + (screenshotFile ? " <span style=\"font-weight:400;text-transform:none;font-size:11px;color:var(--muted)\">(hover to preview)</span>" : "") + "</div>" +
+            screenshotStageHtml +
+            "<div class=\"detailLabel\">Screenshot Path</div>" +
+            screenshotPathHtml +
+          "</div>" +
         "</div>";
     }
 
@@ -866,6 +1048,42 @@
       renderFiles(Number(folderSelect.value), preferred ? preferred.fileName : "");
     }
 
+    function renderFileOptions(folder, preferredFileName = "") {
+      fileSelect.innerHTML = "";
+      currentVisibleFiles = folder.files.slice();
+
+      if (!currentVisibleFiles.length) {
+        fileSelect.innerHTML = "<option>(no files)</option>";
+        infoText.textContent = folder.name + ": 0 files";
+        selectedPath.textContent = "No file selected.";
+        resetFileMeta();
+        currentRows = [];
+        resetRowView();
+        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        previewTitle.textContent = "Preview";
+        previewPane.textContent = "Select a file to preview JSON.";
+        return;
+      }
+
+      currentVisibleFiles.forEach((fileName) => {
+        const opt = document.createElement("option");
+        opt.value = fileName;
+        opt.textContent = fileName;
+        fileSelect.appendChild(opt);
+      });
+
+      if (preferredFileName && currentVisibleFiles.includes(preferredFileName)) {
+        fileSelect.value = preferredFileName;
+      } else {
+        fileSelect.value = currentVisibleFiles[0];
+      }
+
+      infoText.textContent = folder.name + ": " + currentVisibleFiles.length + " file(s) shown";
+      updateSelectedPath();
+      void renderPreview();
+    }
+
     function renderFiles(folderIndex, preferredFileName = "") {
       const folder = folders[folderIndex];
       fileSelect.innerHTML = "";
@@ -884,22 +1102,7 @@
         return;
       }
 
-      folder.files.forEach((fileName) => {
-        const opt = document.createElement("option");
-        opt.value = fileName;
-        opt.textContent = fileName;
-        fileSelect.appendChild(opt);
-      });
-
-      if (preferredFileName && folder.files.includes(preferredFileName)) {
-        fileSelect.value = preferredFileName;
-      } else {
-        fileSelect.value = folder.files[0];
-      }
-
-      infoText.textContent = folder.name + ": " + folder.files.length + " files";
-      updateSelectedPath();
-      void renderPreview();
+      renderFileOptions(folder, preferredFileName);
     }
 
     function updateSelectedPath() {
@@ -982,21 +1185,21 @@
 
     rowViewPane.addEventListener("click", async (event) => {
       const button = event.target.closest("button[data-copy-text]");
-      if (!button) {
+      if (button) {
+        const textToCopy = button.getAttribute("data-copy-text") || "";
+        try {
+          await copyToClipboard(textToCopy);
+          const original = button.innerHTML;
+          button.textContent = "OK";
+          setTimeout(() => {
+            button.innerHTML = original;
+          }, 900);
+        } catch {
+          button.textContent = "ERR";
+        }
         return;
       }
 
-      const textToCopy = button.getAttribute("data-copy-text") || "";
-      try {
-        await copyToClipboard(textToCopy);
-        const original = button.innerHTML;
-        button.textContent = "OK";
-        setTimeout(() => {
-          button.innerHTML = original;
-        }, 900);
-      } catch {
-        button.textContent = "ERR";
-      }
     });
 
     folderSelect.addEventListener("change", () => {
@@ -1036,6 +1239,40 @@
 
       readRootFromSelectedFiles(pendingRestoreRelativePath);
       pendingRestoreRelativePath = "";
+    });
+
+    rowViewPane.addEventListener("mouseover", (event) => {
+      const img = event.target.closest("img[data-screenshot-hover='1']");
+      if (img && currentScreenshotObjectUrl) {
+        screenshotPopoverImg.src = currentScreenshotObjectUrl;
+        screenshotPopover.classList.add("visible");
+        screenshotPopover.setAttribute("aria-hidden", "false");
+      }
+    });
+
+    rowViewPane.addEventListener("mousemove", (event) => {
+      if (!screenshotPopover.classList.contains("visible")) {
+        return;
+      }
+      const margin = 14;
+      const popW = screenshotPopover.offsetWidth || 400;
+      const popH = screenshotPopover.offsetHeight || 300;
+      let left = event.clientX + margin;
+      if (left + popW > window.innerWidth - margin) {
+        left = event.clientX - popW - margin;
+      }
+      let top = event.clientY - Math.round(popH / 2);
+      top = Math.max(margin, Math.min(top, window.innerHeight - popH - margin));
+      screenshotPopover.style.left = left + "px";
+      screenshotPopover.style.top = top + "px";
+    });
+
+    rowViewPane.addEventListener("mouseout", (event) => {
+      const img = event.target.closest("img[data-screenshot-hover='1']");
+      if (img) {
+        screenshotPopover.classList.remove("visible");
+        screenshotPopover.setAttribute("aria-hidden", "true");
+      }
     });
 
   </script>
