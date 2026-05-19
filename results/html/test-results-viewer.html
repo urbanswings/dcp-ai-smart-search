@@ -862,9 +862,9 @@
     }
 
     function getCurrentQueryValues() {
-      return currentRows
+      return [...new Set(currentRows
         .filter((row) => row && typeof row === "object" && Object.prototype.hasOwnProperty.call(row, "query"))
-        .map((row) => getIicImportQueryValue(row.query));
+        .map((row) => getIicImportQueryValue(row.query)))];
     }
 
     function buildIicImportPayload() {
