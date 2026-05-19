@@ -2855,6 +2855,21 @@
       },
       {
         "value": "GS0035287"
+      },
+      {
+        "value": "GS00112666"
+      },
+      {
+        "value": "GS00112386"
+      },
+      {
+        "value": "GS00113247"
+      },
+      {
+        "value": "GS00112593"
+      },
+      {
+        "value": "GS00112661"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -3396,6 +3411,14 @@
       {
         "formattedValue": "이리디움 실버",
         "value": "LU-775"
+      },
+      {
+        "formattedValue": "MANUFAKTUR metalik zeytin yeşili",
+        "value": "LU-255"
+      },
+      {
+        "formattedValue": "Çelik mavisi",
+        "value": "LU-5389"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4288,6 +4311,82 @@
       {
         "formattedValue": "Mercedes-Maybach S 580 e Premium",
         "value": "f2b44f86"
+      },
+      {
+        "formattedValue": "CLA 220 4MATIC AMG",
+        "value": "4ec40657"
+      },
+      {
+        "formattedValue": "CLE 300 4MATIC Cabriolet AMG",
+        "value": "a4dc0a0f"
+      },
+      {
+        "formattedValue": "CLE 300 4MATIC Coupé AMG",
+        "value": "8af2097d"
+      },
+      {
+        "formattedValue": "E 180 AMG",
+        "value": "203b040f"
+      },
+      {
+        "formattedValue": "EQA 250+ FL Night Edition",
+        "value": "8a07098d"
+      },
+      {
+        "formattedValue": "EQE 280 AMG",
+        "value": "2a3804a6"
+      },
+      {
+        "formattedValue": "EQS 450 4MATIC Inspiration",
+        "value": "96ae0a30"
+      },
+      {
+        "formattedValue": "EQV 300",
+        "value": "1aa103bb"
+      },
+      {
+        "formattedValue": "EQV 300 EU",
+        "value": "26540475"
+      },
+      {
+        "formattedValue": "G 450 d Heritage",
+        "value": "47a906e9"
+      },
+      {
+        "formattedValue": "GLA 200 FL AMG",
+        "value": "37da0549"
+      },
+      {
+        "formattedValue": "GLB 200 FL AMG",
+        "value": "37e7054a"
+      },
+      {
+        "formattedValue": "GLB 200+ AMG",
+        "value": "2deb04c3"
+      },
+      {
+        "formattedValue": "GLC 180 AMG",
+        "value": "29fd04a0"
+      },
+      {
+        "formattedValue": "GLC 300 d 4MATIC AMG",
+        "value": "5c4906e0"
+      },
+      {
+        "formattedValue": "Mercedes-AMG G 63 Performance",
+        "value": "cc9b0bc8"
+      },
+      {
+        "formattedValue": "S 450 d 4MATIC L Inspiration",
+        "value": "a4230a8a"
+      },
+      {
+        "formattedValue": "V 300 d Exclusive",
+        "value": "50570781"
+      },
+      {
+        "formattedValue": "V 300 d Exclusive EU",
+        "value": "675c083b"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4724,6 +4823,29 @@
       {
         "formattedValue": "Leather - black / space grey",
         "value": "AU-231"
+      },
+      {
+        "value": "AU-VY9"
+      },
+      {
+        "formattedValue": "Bej lugano deri koltuk",
+        "value": "AU-VX9"
+      },
+      {
+        "formattedValue": "İki tonlu siyah / kırmızı ARTICO deri",
+        "value": "AU-151"
+      },
+      {
+        "formattedValue": "İnci beyazı ARTICO deri / DINAMICA mikrofiber kumaş, kırmızı dikişli, siyah konsol",
+        "value": "AU-681"
+      },
+      {
+        "formattedValue": "MANUFAKTUR Siyah nappa deri, kırmızı dikişli, siyah konsol",
+        "value": "AU-907"
+      },
+      {
+        "formattedValue": "Neva grisi deri, biscay mavisi konsol",
+        "value": "AU-249"
       }
     ],
     "facetType": "MULTI_VALUE"
