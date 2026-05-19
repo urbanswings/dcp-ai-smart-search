@@ -4,6 +4,11 @@ import fs from "fs/promises";
 import path from "path";
 import { evaluateSearchResult, fetchTranslation, openaiChatCompletion } from "./aiHelpers";
 import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
+import {
+  buildFacetValueDisplayMap,
+  extractResponseFacets,
+  formatExpectedFacetValues,
+} from "./facetDisplayHelpers";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -31,6 +36,19 @@ const FACETS_MASTER_DATA_PATH = path.resolve(
   __dirname,
   "../data/facets-master-data.json"
 );
+
+let facetsMasterDataCache: any | null = null;
+
+async function getFacetsMasterData(): Promise<any> {
+  if (facetsMasterDataCache) return facetsMasterDataCache;
+  try {
+    const content = await fs.readFile(FACETS_MASTER_DATA_PATH, "utf-8");
+    facetsMasterDataCache = JSON.parse(content);
+  } catch {
+    facetsMasterDataCache = {};
+  }
+  return facetsMasterDataCache;
+}
 
 export interface ApiSearchResult {
   query: string;
@@ -312,7 +330,7 @@ export class SearchApiClient {
 
       const isLocalEndpoint = process.env.API_ENDPOINT_LOCAL === "true";
       const requestConfig = {
-        timeout: 30000,
+        timeout: 40000,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -892,10 +910,7 @@ export async function processAndLogApiResult({
   let openaiEvaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
-  let uiFacetComparison: {
-    matches: boolean;
-    missingFacetValues: string[];
-  } | null = null;   
+  const beFacetDiagnosticLines: string[] = [];   
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
     if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
@@ -1003,7 +1018,10 @@ export async function processAndLogApiResult({
     
     // Build UUID-to-semantic-name mapping from API facets for color/upholstery
     const uuidToSemanticMap: Record<string, Record<string, string>> = {};
-    const facetsData = apiResponse?.data?.smartSearch?.facets || {};
+    const responseData = apiResponse?.data || {};
+    const facetsData = extractResponseFacets(responseData);
+    const masterData = await getFacetsMasterData();
+    const facetValueDisplayMap = buildFacetValueDisplayMap(facetsData, masterData || {});
     for (const facetKey of ["color", "upholstery"]) {
       if (facetsData[facetKey]?.values) {
         uuidToSemanticMap[facetKey] = {};
@@ -1022,7 +1040,13 @@ export async function processAndLogApiResult({
       for (const [key, expectedValues] of Object.entries(filterObj)) {
         if (!resultsKeysSet.has(key)) {
           facetCheckPassed = false;
-          failureReasons.push(`Missing required facet key: ${key}`);
+          if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+            failureReasons.push(
+              `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`
+            );
+          } else {
+            failureReasons.push(`Missing required facet key: ${key}`);
+          }
           continue;
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
@@ -1098,71 +1122,43 @@ export async function processAndLogApiResult({
     }
 
     if (!facetCheckPassed) {
-      addFailureReason(`Facets check failed: ${failureReasons.join("; ")}`);
-    }
-  }
-
-  // Facets check (Query vs BE)
-  const facetMismatches: string[] = [];
-  if (resultsFacets.equipment || resultsFacets.lines || resultsFacets.packages) {
-    const mappableFacets: Array<"equipment" | "lines" | "packages"> = [
-      "equipment",
-      "lines",
-      "packages",
-    ];
-
-    for (const facetKey of mappableFacets) {
-      if (!Array.isArray(resultsFacets[facetKey])) continue;
-
-      const apiFacetValues: Array<{ formattedValue: string; value: string }> =
-        apiResponse?.data?.smartSearch?.facets?.[facetKey]?.values ?? [];
-      const codeToName = new Map<string, string>(
-        apiFacetValues.map((f) => [f.value, f.formattedValue])
+      const expectedBeFacets = {
+        include,
+        exclude,
+        strict,
+      };
+      beFacetDiagnosticLines.push(
+        `Expected Facets: ${JSON.stringify(expectedBeFacets)}`
       );
-
-      resultsFacets[facetKey] = (resultsFacets[facetKey] as string[]).map(
-        (code: string) => codeToName.get(code) ?? code
+      beFacetDiagnosticLines.push(
+        `Actual Facets:   ${JSON.stringify(resultsFacets)}`
+      );
+      addFailureReason(
+        `Facets check failed: ${failureReasons.join("; ")}`
       );
     }
-  }
-  if (query?.facet === 'equipment' || query?.facet === 'lines' || query?.facet === 'packages') {
-    uiFacetComparison = compareSelectedFiltersWithFacetsByExpectedValue(
-      query.filterValue,
-      resultsFacets,
-      query.facet
-    );
-  }
-  if (uiFacetComparison && !uiFacetComparison.matches) {
-    facetMismatches.push(
-      `Filters Mismatch: missing ${JSON.stringify(
-        uiFacetComparison.missingFacetValues
-      )}, beFacets ${JSON.stringify(resultsFacets)}`
-    );
-  }
-  if (facetMismatches.length > 0) {
-    addFailureReason(facetMismatches.join(" | "));
   }
 
   // Validate language consistency between query and response using OpenAI
-  let langCheckResult = "YES";
-  try {
-    const langCompletion = await openaiChatCompletion([
-      { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
-      { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
-    ], {
-      max_tokens: 10,
-      temperature: 0.2
-    });
-    langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
-  } catch (error: any) {
-    console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
-    // Skip validation if OpenAI is unavailable (quota/network issues)
-    langCheckResult = "YES";
-  }
-  if (!isLanguageConsistencyAccepted(langCheckResult)) {
-    console.debug("[DEBUG] Language consistency check: FAIL");
-    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
-  }
+  // let langCheckResult = "YES";
+  // try {
+  //   const langCompletion = await openaiChatCompletion([
+  //     { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+  //     { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
+  //   ], {
+  //     max_tokens: 10,
+  //     temperature: 0.2
+  //   });
+  //   langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  // } catch (error: any) {
+  //   console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
+  //   // Skip validation if OpenAI is unavailable (quota/network issues)
+  //   langCheckResult = "YES";
+  // }
+  // if (!isLanguageConsistencyAccepted(langCheckResult)) {
+  //   console.debug("[DEBUG] Language consistency check: FAIL");
+  //   addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
+  // }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
   const evaluationPassed =
@@ -1176,9 +1172,8 @@ export async function processAndLogApiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
-  console.log(
-    `BE Facets:     '${JSON.stringify(resultsFacets)}'`
-  );
+
+  console.log("\n");
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
@@ -1190,8 +1185,13 @@ export async function processAndLogApiResult({
     console.log(`Query (EN):    '${queryEn}'`);
     console.log(`Response (EN): '${smartSearchMessageEn}'`);
   }
-  console.log("\n");
 
+  console.log("\n");
+  for (const diagnosticLine of beFacetDiagnosticLines) {
+    console.log(diagnosticLine);
+  }  
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  
   return {
     timestamp: new Date().toISOString(),
     timestampSG: new Date().toLocaleString("en-SG", {

@@ -1,17 +1,40 @@
 import { Browser, Page } from "@playwright/test";
 import { chromium } from "playwright";
 import fs from "fs/promises";
+import path from "path";
 import {
   evaluateSearchResult,
   fetchTranslation,
   openaiChatCompletion,
 } from "./aiHelpers";
 import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
+import {
+  buildFacetValueDisplayMap,
+  extractResponseFacets,
+  formatExpectedFacetValues,
+} from "./facetDisplayHelpers";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
 export const LANGUAGE = process.env.LANGUAGE;
 export const PRODUCT = process.env.PRODUCT;
+
+const FACETS_MASTER_DATA_PATH = path.resolve(
+  __dirname,
+  "../data/facets-master-data.json"
+);
+let facetsMasterDataCache: any | null = null;
+
+async function getFacetsMasterData(): Promise<any> {
+  if (facetsMasterDataCache) return facetsMasterDataCache;
+  try {
+    const content = await fs.readFile(FACETS_MASTER_DATA_PATH, "utf-8");
+    facetsMasterDataCache = JSON.parse(content);
+  } catch {
+    facetsMasterDataCache = {};
+  }
+  return facetsMasterDataCache;
+}
 
 export interface UiSearchResult {
   query: string;
@@ -872,7 +895,10 @@ export async function processAndLogUiResult({
     
     // Build UUID-to-semantic-name mapping from API facets for color/upholstery
     const uuidToSemanticMap: Record<string, Record<string, string>> = {};
-    const facetsData = results.results.responseData?.data?.smartSearch?.facets || {};
+    const responseData = results.results.responseData?.data || {};
+    const facetsData = extractResponseFacets(responseData);
+    const masterData = await getFacetsMasterData();
+    const facetValueDisplayMap = buildFacetValueDisplayMap(facetsData, masterData || {});
     for (const facetKey of ["color", "upholstery"]) {
       if (facetsData[facetKey]?.values) {
         uuidToSemanticMap[facetKey] = {};
@@ -891,7 +917,13 @@ export async function processAndLogUiResult({
       for (const [key, expectedValues] of Object.entries(filterObj)) {
         if (!resultsKeysSet.has(key)) {
           facetCheckPassed = false;
-          failureReasons.push(`Missing required facet key: ${key}`);
+          if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+            failureReasons.push(
+              `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`
+            );
+          } else {
+            failureReasons.push(`Missing required facet key: ${key}`);
+          }
           continue;
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
