@@ -1,11 +1,12 @@
 import "dotenv/config";
 import { test } from "@playwright/test";
-import { runTestsAndSaveResults } from "./utils/shared";
+import { runTestsAndSaveResults, runTestsRepeatedAndSaveResults } from "./utils/shared";
 import { performUISmartSearchAndGetResults, processAndLogUiResult, setupContextAndPage } from "./utils/uiHelpers";
 import { fetchEmhApiResponse, performApiSmartSearchAndGetResults, processAndLogApiResult } from "./utils/apiHelpers";
 import {
   loadRegressionQueriesFromDescription,
   summarizeRegressionRunWithAI,
+  loadIntermittencyQueries,
 } from "./utils/regressionHelpers";
 import path from "path";
 import fs from "fs/promises";
@@ -48,6 +49,23 @@ test.describe("Regression Tests", () => {
       performApiSmartSearchAndGetResults,
       processAndLogApiResult,
       postRunAnalysis: summarizeRegressionRunWithAI,
+    });
+  });
+
+  test("Intermittent Issues Check (IIC)", { tag: ["@regression", "@intermittent"] }, async ({ browser }) => {
+    const queries = await loadIntermittencyQueries();
+
+    await runTestsRepeatedAndSaveResults({
+      queries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      testType: "intermittency-check",
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
     });
   });
 });

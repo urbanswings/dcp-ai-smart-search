@@ -1,4 +1,4 @@
-import { fetchTranslation, isSemanticallySimilarOpenAI } from "./aiHelpers";
+import { fetchTranslation, generateOpenAIQuery } from "./aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
@@ -51,6 +51,59 @@ export function isLanguageConsistencyAccepted(result: string): boolean {
   if (!codes || codes.length < 2) return false;
 
   return codes[0] === codes[1];
+}
+
+export async function areAllResponsesConsistentOneShot(
+  responses: string[]
+): Promise<{ isConsistent: boolean; reason: string }> {
+  const normalizedResponses = responses
+    .map((value) => String(value || "").trim())
+    .filter(Boolean);
+
+  if (normalizedResponses.length <= 1) {
+    return { isConsistent: true, reason: "" };
+  }
+
+  const systemPrompt = [
+    "You are a strict QA evaluator for search response consistency.",
+    "You will receive multiple responses for the same user query.",
+    "Decide whether all responses are semantically consistent with each other.",
+    "Ignore minor wording differences and sentence order.",
+    "Return exactly two lines:",
+    "RESULT: YES or NO",
+    "REASON: short reason (only when RESULT is NO; otherwise REASON: N/A).",
+  ].join("\n");
+
+  const userPrompt = [
+    "Evaluate consistency for the following responses:",
+    ...normalizedResponses.map((value, index) => `Response ${index + 1}: ${value}`),
+    "",
+    "Output format:",
+    "RESULT: YES or NO",
+    "REASON: <short reason>",
+  ].join("\n");
+
+  try {
+    const answer = await generateOpenAIQuery(systemPrompt, userPrompt, 80, 0.1, "NO");
+    const raw = String(answer || "").trim();
+    const normalized = raw.toUpperCase();
+    const isConsistent = normalized.includes("YES");
+
+    if (isConsistent) {
+      return { isConsistent: true, reason: "" };
+    }
+
+    const reasonMatch = raw.match(/REASON\s*:\s*([\s\S]*)/i);
+    const parsedReason = reasonMatch?.[1]?.trim();
+
+    return {
+      isConsistent: false,
+      reason: parsedReason || "AI marked responses inconsistent but did not provide a reason.",
+    };
+  } catch (error) {
+    console.warn("⚠️  One-shot AI consistency check failed:", error);
+    return { isConsistent: false, reason: "One-shot AI consistency check failed." };
+  }
 }
 
 export function getTestMode(): "ui" | "api" | "both" {
@@ -262,7 +315,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
     setupContextAndPage,
   } = params;
 
-  const lang = LANGUAGE?.toLowerCase() || "en";  
+  const lang = LANGUAGE?.toLowerCase() || "en";
   const uiResults: any[][] = [];
   const apiResults: any[][] = [];
 
@@ -286,57 +339,65 @@ export async function runTestsRepeatedAndSaveResults(params: {
       const firstResult = resultsForQuery[0];
       const firstString = firstResult?.response?.[lang];
       const firstFacets = firstResult?.facets;
+      const responseValues = resultsForQuery
+        .map((result) => result?.response?.[lang])
+        .filter((value): value is string => typeof value === "string" && value.trim() !== "");
+      const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
+        await areAllResponsesConsistentOneShot(responseValues);
       const line = '────────────────────────────────────────────────────────────';
       let matchCount = 0;
-      console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
-      console.info(`${line}`);
-      console.info(`\nResponse:\n  ${firstString}`);
-      console.info(`\nFacets:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      let facetMatchCount = 0;
+      const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
         const compareString = resultsForQuery[i]?.response?.[lang];
         const compareFacets = resultsForQuery[i]?.facets;
-        let stringMatch = firstString === compareString;
-        let semanticMatch = false;
-        if (!stringMatch && firstString && compareString) {
-          // Use OpenAI to check semantic similarity
-          try {
-            semanticMatch = await isSemanticallySimilarOpenAI(firstString, compareString);
-          } catch (e) {
-            console.warn('⚠️  OpenAI semantic check failed:', e);
-          }
-        }
         const facetsMatch = deepEqual(firstFacets, compareFacets);
-        if (stringMatch || semanticMatch) matchCount++;
-        console.info(`\n${line}`);
-        console.info(`• \x1b[1mRun #${i + 1}:\x1b[0m`);
-        if (stringMatch) {
-          console.info('  ✅ Response string matches');
-        } else if (semanticMatch) {
-          console.info('  ✅ Response string semantically matches');
-        } else {
-          console.info('  ❌ Response string does NOT match');
-          console.info(`      Response:      '${compareString}'`);
-          if (lang !== "en") {
-            const compareStringEn = await fetchTranslation(compareString, "en");            
-            console.info(`      Response (EN): '${compareStringEn}'`);
-          }          
-        }
-        if (facetsMatch) {
-          console.info('  ✅ Facets matches');
-        } else {
-          console.info('  ❌ Facets do NOT match');
-          console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
+        const runMatched = aiResponseConsistent && facetsMatch;
+        if (runMatched) matchCount++;
+        if (facetsMatch) facetMatchCount++;
+        if (!runMatched) {
+          failedRuns.push({ runNum: i + 1, compareString, compareFacets, facetsMatch });
         }
       }
       const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      const facetPercent = ((facetMatchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
       // Add consistencyRating to each result in resultsForQuery
       for (const result of resultsForQuery) {
         result.consistencyRating = Number(percent);
       }
       const icon = percent === '100' ? '✅' : '❌';
-      console.info(`\n${line}`);      
+      const responseIcon = aiResponseConsistent ? '✅' : '❌';
+      const facetIcon = facetPercent === '100' ? '✅' : '❌';
+      console.info(`\n${line}`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
+      console.info(`${line}`);
+      console.info(`\nResponse Summary:\n  ${firstString}`);
+      console.info(`\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      if (!aiResponseConsistent && aiInconsistencyReason) {
+        console.info(`\nAI Reason:\n  ${aiInconsistencyReason}`);
+      }
+      if (failedRuns.length > 0) {
+        console.info(`\nFailed Runs:`);
+        for (const failed of failedRuns) {
+          console.info(`\n• Run #${failed.runNum}:`);
+          if (!aiResponseConsistent) {
+            console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
+            console.info(`      Response: '${failed.compareString}'`);
+            if (lang !== "en") {
+              const compareStringEn = await fetchTranslation(failed.compareString, "en");
+              console.info(`      Response (EN): '${compareStringEn}'`);
+            }
+          }
+          if (!failed.facetsMatch) {
+            console.info('  ❌ Facets do NOT match');
+            console.info(`      ${JSON.stringify(failed.compareFacets, null, 2)}`);
+          }
+        }
+      }
+      console.info(`\n${line}`);
       console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
+      console.info(`• ${responseIcon} Response: ${aiResponseConsistent ? 'Consistent' : 'NOT Consistent'}`);
+      console.info(`• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`);
       console.info(`${line}\n`);
       uiResults.push(resultsForQuery);
     }
@@ -360,57 +421,65 @@ export async function runTestsRepeatedAndSaveResults(params: {
       const firstResult = resultsForQuery[0];
       const firstString = firstResult?.response?.[lang];
       const firstFacets = firstResult?.facets;
+      const responseValues = resultsForQuery
+        .map((result) => result?.response?.[lang])
+        .filter((value): value is string => typeof value === "string" && value.trim() !== "");
+      const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
+        await areAllResponsesConsistentOneShot(responseValues);
       const line = '────────────────────────────────────────────────────────────';
       let matchCount = 0;
-      console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
-      console.info(`${line}`);
-      console.info(`\nResponse:\n  ${firstString}`);
-      console.info(`\nFacets:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      let facetMatchCount = 0;
+      const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
         const compareString = resultsForQuery[i]?.response?.[lang];
         const compareFacets = resultsForQuery[i]?.facets;
-        let stringMatch = firstString === compareString;
-        let semanticMatch = false;
-        if (!stringMatch && firstString && compareString) {
-          // Use OpenAI to check semantic similarity
-          try {
-            semanticMatch = await isSemanticallySimilarOpenAI(firstString, compareString);
-          } catch (e) {
-            console.warn('⚠️  OpenAI semantic check failed:', e);
-          }
-        }
         const facetsMatch = deepEqual(firstFacets, compareFacets);
-        if (stringMatch || semanticMatch) matchCount++;
-        console.info(`\n${line}`);
-        console.info(`• \x1b[1mRun #${i + 1}:\x1b[0m`);
-        if (stringMatch) {
-          console.info('  ✅ Response string matches');
-        } else if (semanticMatch) {
-          console.info('  ✅ Response string semantically matches');
-        } else {
-          console.info('  ❌ Response string does NOT match');
-          console.info(`      Response:      '${compareString}'`);
-          if (lang !== "en") {
-            const compareStringEn = await fetchTranslation(compareString, "en");            
-            console.info(`      Response (EN): '${compareStringEn}'`);
-          }  
-        }
-        if (facetsMatch) {
-          console.info('  ✅ Facets matches');
-        } else {
-          console.info('  ❌ Facets do NOT match');
-          console.info(`      ${JSON.stringify(compareFacets, null, 2)}`);
+        const runMatched = aiResponseConsistent && facetsMatch;
+        if (runMatched) matchCount++;
+        if (facetsMatch) facetMatchCount++;
+        if (!runMatched) {
+          failedRuns.push({ runNum: i + 1, compareString, compareFacets, facetsMatch });
         }
       }
       const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      const facetPercent = ((facetMatchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
       // Add consistencyRating to each result in resultsForQuery
       for (const result of resultsForQuery) {
         result.consistencyRating = Number(percent);
       }
       const icon = percent === '100' ? '✅' : '❌';
-      console.info(`\n${line}`);      
+      const responseIcon = aiResponseConsistent ? '✅' : '❌';
+      const facetIcon = facetPercent === '100' ? '✅' : '❌';
+      console.info(`\n${line}`);
+      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
+      console.info(`${line}`);
+      console.info(`\nResponse Summary:\n  ${firstString}`);
+      console.info(`\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      if (!aiResponseConsistent && aiInconsistencyReason) {
+        console.info(`\nAI Reason:\n  ${aiInconsistencyReason}`);
+      }
+      if (failedRuns.length > 0) {
+        console.info(`\nFailed Runs:`);
+        for (const failed of failedRuns) {
+          console.info(`\n• Run #${failed.runNum}:`);
+          if (!aiResponseConsistent) {
+            console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
+            console.info(`      Response: '${failed.compareString}'`);
+            if (lang !== "en") {
+              const compareStringEn = await fetchTranslation(failed.compareString, "en");
+              console.info(`      Response (EN): '${compareStringEn}'`);
+            }
+          }
+          if (!failed.facetsMatch) {
+            console.info('  ❌ Facets do NOT match');
+            console.info(`      ${JSON.stringify(failed.compareFacets, null, 2)}`);
+          }
+        }
+      }
+      console.info(`\n${line}`);
       console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
+      console.info(`• ${responseIcon} Response: ${aiResponseConsistent ? 'Consistent' : 'NOT Consistent'}`);
+      console.info(`• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`);
       console.info(`${line}\n`);
       apiResults.push(resultsForQuery);
     }

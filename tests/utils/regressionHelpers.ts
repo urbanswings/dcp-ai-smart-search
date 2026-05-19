@@ -7,6 +7,7 @@ const REGRESSION_DESCRIPTION_PATH = path.join(__dirname, "../regression.descipti
 const REGRESSION_TESTDATA_PATH = path.join(__dirname, "../data/regression.testdata.json");
 const REGRESSION_RUN_SUMMARY_PATH = path.join(__dirname, "../data/regression.run-summary.json");
 const EMH_API_RESPONSE_PATH = path.join(__dirname, "../data/emh-api-response.json");
+const INTERMITTENCY_QUERIES_PATH = path.join(__dirname, "../data/intermittency-queries.json");
 
 const SYSTEM_PROMPT = `You are a test-case engineer for a Mercedes-Benz vehicle search AI.
 Given a plain-text description of a search bug or regression scenario, generate a JSON array of regression test scenarios with evaluation decisions.
@@ -297,4 +298,47 @@ export async function summarizeRegressionRunWithAI(params: {
 
   console.log("[regressionHelpers] Appended AI run summary/findings to regression.desciption.txt");
   console.log(`[regressionHelpers] Saved AI run summary to: ${REGRESSION_RUN_SUMMARY_PATH}`);
+}
+
+/**
+ * Loads queries from intermittency-queries.json for repeated-run consistency testing.
+ * The file is a JSON array of query strings or FixedQueryCase objects.
+ * Example:
+ *   ["white family cars", "sedan under 50000", { "value": "black suv", "shouldRecommend": true }]
+ */
+export async function loadIntermittencyQueries(): Promise<FixedQueryCase[]> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(INTERMITTENCY_QUERIES_PATH, "utf-8");
+  } catch (e) {
+    console.warn("[regressionHelpers] Could not read intermittency-queries.json:", e);
+    return [];
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    console.warn("[regressionHelpers] intermittency-queries.json is not valid JSON:", e);
+    return [];
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    console.warn("[regressionHelpers] intermittency-queries.json is empty or not an array.");
+    return [];
+  }
+
+  const queries: FixedQueryCase[] = parsed.map((item: unknown) => {
+    if (typeof item === "string") {
+      return { value: item } as FixedQueryCase;
+    }
+    if (typeof item === "object" && item !== null && "value" in item) {
+      return item as FixedQueryCase;
+    }
+    console.warn("[regressionHelpers] Skipping invalid entry in intermittency-queries.json:", item);
+    return null;
+  }).filter((q): q is FixedQueryCase => q !== null);
+
+  console.log(`[regressionHelpers] Loaded ${queries.length} intermittency query/queries.`);
+  return queries;
 }

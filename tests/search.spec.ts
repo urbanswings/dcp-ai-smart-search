@@ -473,6 +473,34 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       });
     }
   ); 
+
+  test("By Filter Facets ('color')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "color";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
   
   test("By Filter Facets ('lines')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
       const targetFacet = "lines";

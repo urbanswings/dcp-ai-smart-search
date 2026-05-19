@@ -75,6 +75,11 @@
       color: #fff;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -465,6 +470,75 @@
       border-radius: 6px;
     }
 
+    .modalOverlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15, 23, 42, 0.48);
+      z-index: 120;
+    }
+
+    .modalOverlay.visible {
+      display: flex;
+    }
+
+    .modalCard {
+      width: min(960px, 100%);
+      max-height: min(80vh, 900px);
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .modalHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 12px;
+    }
+
+    .modalTitle {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .modalText {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .modalActions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .modalPreview {
+      margin: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #f8fafc;
+      padding: 12px;
+      overflow: auto;
+      max-height: calc(80vh - 180px);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
     @media (max-width: 700px) {
       .row {
         grid-template-columns: 1fr;
@@ -499,6 +573,7 @@
 
     <div class="actions">
       <button id="pickBtn" class="primary">Pick Root Folder</button>
+      <button id="iicImportBtn" type="button" disabled>IIC Import</button>
     </div>
     <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
 
@@ -566,8 +641,25 @@
     <img class="screenshotPopoverImg" id="screenshotPopoverImg" alt="Screenshot preview" />
   </div>
 
+  <div class="modalOverlay" id="iicImportModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="iicImportTitle">
+    <div class="modalCard">
+      <div class="modalHeader">
+        <div>
+          <h2 class="modalTitle" id="iicImportTitle">IIC Import</h2>
+          <p class="modalText" id="iicImportMeta">Query array from the currently selected JSON file.</p>
+        </div>
+      </div>
+      <pre class="modalPreview" id="iicImportPreview">[]</pre>
+      <div class="modalActions">
+        <button id="iicImportCopyBtn" class="primary" type="button">Copy to Clipboard</button>
+        <button id="iicImportCloseBtn" type="button">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const pickBtn = document.getElementById("pickBtn");
+    const iicImportBtn = document.getElementById("iicImportBtn");
     const folderSelect = document.getElementById("folderSelect");
     const fileSelect = document.getElementById("fileSelect");
     const infoText = document.getElementById("infoText");
@@ -584,6 +676,11 @@
     const rowViewPane = document.getElementById("rowViewPane");
     const screenshotPopover = document.getElementById("screenshotPopover");
     const screenshotPopoverImg = document.getElementById("screenshotPopoverImg");
+    const iicImportModal = document.getElementById("iicImportModal");
+    const iicImportMeta = document.getElementById("iicImportMeta");
+    const iicImportPreview = document.getElementById("iicImportPreview");
+    const iicImportCopyBtn = document.getElementById("iicImportCopyBtn");
+    const iicImportCloseBtn = document.getElementById("iicImportCloseBtn");
 
     let rootLabel = "selected-root";
     let selectedFiles = [];
@@ -593,6 +690,7 @@
     let pendingRestoreRelativePath = "";
     let currentScreenshotObjectUrl = "";
     let currentVisibleFiles = [];
+    let currentIicImportPayload = "[]";
 
     function normalizePath(pathValue) {
       return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
@@ -736,6 +834,59 @@
       return "Mixed (" + unique.length + ")";
     }
 
+    function updateIicImportAvailability() {
+      iicImportBtn.disabled = currentRows.length === 0;
+    }
+
+    function getIicImportQueryValue(queryValue) {
+      if (typeof queryValue === "string") {
+        return queryValue;
+      }
+
+      if (!queryValue || typeof queryValue !== "object") {
+        return "";
+      }
+
+      const keys = Object.keys(queryValue);
+      const nonEnglishKey = keys.find((key) => key && key.toLowerCase() !== "en" && String(queryValue[key] || "").trim() !== "");
+      if (nonEnglishKey) {
+        return String(queryValue[nonEnglishKey]);
+      }
+
+      if (String(queryValue.en || "").trim() !== "") {
+        return String(queryValue.en);
+      }
+
+      const firstPopulatedKey = keys.find((key) => String(queryValue[key] || "").trim() !== "");
+      return firstPopulatedKey ? String(queryValue[firstPopulatedKey]) : "";
+    }
+
+    function getCurrentQueryValues() {
+      return currentRows
+        .filter((row) => row && typeof row === "object" && Object.prototype.hasOwnProperty.call(row, "query"))
+        .map((row) => getIicImportQueryValue(row.query));
+    }
+
+    function buildIicImportPayload() {
+      return JSON.stringify(getCurrentQueryValues(), null, 2);
+    }
+
+    function openIicImportModal() {
+      currentIicImportPayload = buildIicImportPayload();
+      const relativePath = getSelectedRelativePath();
+      iicImportMeta.textContent = relativePath
+        ? "Query array from " + relativePath
+        : "Query array from the currently selected JSON file.";
+      iicImportPreview.textContent = currentIicImportPayload;
+      iicImportModal.classList.add("visible");
+      iicImportModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeIicImportModal() {
+      iicImportModal.classList.remove("visible");
+      iicImportModal.setAttribute("aria-hidden", "true");
+    }
+
     function renderFileMeta(rows) {
       modeValue.textContent = toStaticValue(rows.map((item) => item && item.testMode));
       describeValue.textContent = toStaticValue(rows.map((item) => item && item.testDescribe));
@@ -757,6 +908,7 @@
       describeValue.textContent = "-";
       titleValue.textContent = "-";
       passRateValue.textContent = "-";
+      updateIicImportAvailability();
     }
 
     function resetRowView() {
@@ -923,6 +1075,7 @@
         resetRowView();
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows in selected JSON.</td></tr>";
         tableTitle.textContent = "Results Table";
+        updateIicImportAvailability();
         return;
       }
 
@@ -931,6 +1084,7 @@
       }
 
       renderFileMeta(rows);
+      updateIicImportAvailability();
       tableTitle.textContent = "Results Table: " + rows.length + " row(s)";
       const html = rows.map((item, index) => {
         const queryLocal = getLocalizedText(item && item.query);
@@ -993,6 +1147,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">Select a file to load results.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
+        updateIicImportAvailability();
         return;
       }
 
@@ -1012,6 +1167,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to load rows.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Read error: " + reason;
+        updateIicImportAvailability();
       }
     }
 
@@ -1033,6 +1189,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
+        updateIicImportAvailability();
         return;
       }
 
@@ -1063,6 +1220,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
+        updateIicImportAvailability();
         return;
       }
 
@@ -1099,6 +1257,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
+        updateIicImportAvailability();
         return;
       }
 
@@ -1147,6 +1306,7 @@
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to locate selected file.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Unable to locate selected file in current browser selection.";
+        updateIicImportAvailability();
         return;
       }
 
@@ -1164,8 +1324,45 @@
         tableTitle.textContent = "Results Table";
         resultsTbody.innerHTML = "<tr><td colspan=\"11\">Selected file is not valid JSON.</td></tr>";
         previewPane.textContent = text;
+        updateIicImportAvailability();
       }
     }
+
+    iicImportBtn.addEventListener("click", () => {
+      if (!currentRows.length) {
+        return;
+      }
+      openIicImportModal();
+    });
+
+    iicImportCopyBtn.addEventListener("click", async () => {
+      try {
+        await copyToClipboard(currentIicImportPayload);
+        const originalLabel = iicImportCopyBtn.textContent;
+        iicImportCopyBtn.textContent = "Copied";
+        setTimeout(() => {
+          iicImportCopyBtn.textContent = originalLabel;
+        }, 900);
+      } catch {
+        iicImportCopyBtn.textContent = "Copy failed";
+      }
+    });
+
+    iicImportCloseBtn.addEventListener("click", () => {
+      closeIicImportModal();
+    });
+
+    iicImportModal.addEventListener("click", (event) => {
+      if (event.target === iicImportModal) {
+        closeIicImportModal();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && iicImportModal.classList.contains("visible")) {
+        closeIicImportModal();
+      }
+    });
 
     resultsTbody.addEventListener("click", (event) => {
       const row = event.target.closest("tr[data-row-index]");
