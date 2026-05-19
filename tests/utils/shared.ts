@@ -316,13 +316,40 @@ export async function runTestsRepeatedAndSaveResults(params: {
   } = params;
 
   const lang = LANGUAGE?.toLowerCase() || "en";
+  const normalizeRepeatedQuery = (item: any): any | null => {
+    if (typeof item === "string") {
+      const trimmed = item.trim();
+      return trimmed ? { value: trimmed } : null;
+    }
+
+    if (item && typeof item === "object" && "value" in item) {
+      const normalizedValue = String((item as any).value ?? "").trim();
+      if (!normalizedValue) return null;
+      return {
+        ...item,
+        value: normalizedValue,
+      };
+    }
+
+    return null;
+  };
+
+  const normalizedQueries = (queries || [])
+    .map((query) => normalizeRepeatedQuery(query))
+    .filter((query): query is any => query !== null);
+
+  if (normalizedQueries.length === 0) {
+    console.warn("[runTestsRepeatedAndSaveResults] No valid queries found to execute.");
+    return;
+  }
+
   const uiResults: any[][] = [];
   const apiResults: any[][] = [];
 
   // Run UI tests if enabled
   if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
     const page = await setupContextAndPage(browser);
-    for (const query of queries) {
+    for (const query of normalizedQueries) {
       const resultsForQuery = [];
       for (let i = 0; i < REPEAT_COUNT; i++) {
         const results = await performUISmartSearchAndGetResults(page, query);
@@ -405,7 +432,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
 
   // Run API tests if enabled
   if (shouldRunApiTests() && performApiSmartSearchAndGetResults && processAndLogApiResult) {
-    for (const query of queries) {
+    for (const query of normalizedQueries) {
       const resultsForQuery = [];
       for (let i = 0; i < REPEAT_COUNT; i++) {
         const results = await performApiSmartSearchAndGetResults(query);
