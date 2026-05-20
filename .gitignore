@@ -46,3 +46,4 @@ tests/data/generated-facet-complete-suite.json
 tests/data/generated-queries-*.json
 tests/data/regression.testdata.json
 tests/data/regression.run-summary.json
+tests/data/intermittency-queries.json
