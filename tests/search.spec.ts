@@ -867,7 +867,88 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: `by-filter-${targetFacet}`,
+        testType: `by-filter-${targetFacet}_-ve`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('fuelType')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
+      const targetFacet = "fuelType";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}_-ve`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('upholstery')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
+      const targetFacet = "upholstery";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}_-ve`,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('color')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
+      const targetFacet = "color";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData.byFilterFacetsComplete || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        testType: `by-filter-${targetFacet}_-ve`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -894,7 +975,7 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: `by-filter-${targetFacet}`,
+        testType: `by-filter-${targetFacet}_-ve`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
@@ -921,7 +1002,7 @@ test.describe("AI Smart Search - Vehicles MB (-ve)", () => {
         queries: allQueries,
         testDescribe: describeName,
         testTitle: test.info().title,
-        testType: `by-filter-${targetFacet}`,
+        testType: `by-filter-${targetFacet}_-ve`,
         browser,
         setupContextAndPage,
         performUISmartSearchAndGetResults,
