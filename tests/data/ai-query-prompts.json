@@ -1,10 +1,10 @@
 {
   "byFilterFacetsRandom": {
     "count": 1,
-    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in vehicles and wants the system to filter/show vehicles, mentioning the filter facet(s) and value(s) in context. Only return the sentence.",
     "userPromptTemplate": "Facet(s): {comboText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me Mercedes-Benz vehicles with {comboText}",
+    "fallback": "Show me vehicles with {comboText}",
     "filterOptions": {
       "model": [
         "B-CLASS",
@@ -81,7 +81,7 @@
   },
   "byFilterFacetsComplete": {
     "count": 1,
-    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search sentence that describes your interest in vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter facet and value in context. Only return the sentence.",
     "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
     "fallback": "Show me vehicles with {filterText}"
@@ -95,7 +95,7 @@
   },
   "byFilterFacetsCompleteEquipment": {
     "count": 1,
-    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search short sentence that describes your interest in Mercedes-Benz vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter name. Only return the sentence.",
+    "systemPrompt": "You are a curious car shopper. Generate a natural, human-like search short sentence that describes your interest in vehicles and wants the system to filter/show/recommend vehicles, mentioning the filter name. Only return the sentence.",
     "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
     "fallback": "Show me vehicles with {filterText}"
@@ -109,10 +109,10 @@
   },
   "byBrandModel": {
     "count": 8,
-    "systemPrompt": "You are a car shopper. Generate a natural, human-like sentence mentioning Mercedes-Benz and a specific model. CRITICAL: Each sentence MUST use a completely different structure and tone. Examples by category (choose one to generate): short/direct queries ('Do you have a GLC?'), ownership intent ('I want to buy a C-Class'), availability ('Are there any AMG GT in stock?'), feature-driven ('Looking for a Mercedes with heated seats'), test drive requests ('Can I test drive an EQE?'), conversational ('Thinking about getting the new S-Class'), or casual slang ('Any deals on a Benz SUV?'). Never start two sentences the same way. Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz model search in a single sentence with a different structure and tone each time for {keyword}. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a car shopper. Generate a natural, human-like sentence about a specific car model. CRITICAL: Each sentence MUST use a completely different structure and tone. Examples by category (choose one to generate): short/direct queries ('Do you have a GLC?'), ownership intent ('I want to buy a C-Class'), availability ('Are there any AMG GT in stock?'), feature-driven ('Looking for a car with heated seats'), test drive requests ('Can I test drive an EQE?'), conversational ('Thinking about getting the new S-Class'), or casual slang ('Any deals on an SUV?'). Never start two sentences the same way. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique car model search in a single sentence with a different structure and tone each time for {keyword}. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 40,
-    "fallback": "Do you have the Mercedes-Benz C-Class available?"
+    "fallback": "Do you have the C-Class available?"
   },
   "recommendationModel": {
     "count": 8,
@@ -123,11 +123,11 @@
   },
   "superlative": {
     "count": 8,
-    "systemPrompt": "You are a real car shopper speaking naturally. Generate ONE superlative Mercedes-Benz search sentence per request. CRITICAL DIVERSITY RULES: each sentence must use a different structure and opening. Rotate styles across outputs: direct question, short command, comparison request, preference statement, and conversational ask. Use varied superlatives (best, most comfortable, safest, quickest, most affordable to maintain, most practical, highest range, etc.). Keep wording simple and human, not formal or robotic. Avoid repeating these openings across outputs: 'What is the most', 'Which is the most', 'What is the best'. Do not reuse the same adjective pair (for example, 'luxurious and technologically advanced'). Only return the sentence.",
-    "userPromptTemplate": "Generate a unique, natural Mercedes-Benz superlative search sentence with a fresh opening and different wording from previous attempts. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a real car shopper speaking naturally. Generate ONE superlative car search sentence per request. CRITICAL DIVERSITY RULES: each sentence must use a different structure and opening. Rotate styles across outputs: direct question, short command, comparison request, preference statement, and conversational ask. Use varied superlatives (best, most comfortable, safest, quickest, most affordable to maintain, most practical, highest range, etc.). Keep wording simple and human, not formal or robotic. Avoid repeating these openings across outputs: 'What is the most', 'Which is the most', 'What is the best'. Do not reuse the same adjective pair (for example, 'luxurious and technologically advanced'). Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, natural superlative car search sentence with a fresh opening and different wording from previous attempts. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
     "temperature": 0.95,
-    "fallback": "Which Mercedes has the best fuel efficiency and lowest maintenance cost?"
+    "fallback": "Which car has the best fuel efficiency and lowest maintenance cost?"
   },
   "bySpecs": {
     "count": 8,
@@ -138,24 +138,24 @@
   },
   "multiIntent": {
     "count": 8,
-    "systemPrompt": "You are a car shopper with multiple needs. Generate a search sentence that expresses more than one intent or requirement for Mercedes-Benz vehicles. Only return the sentence.",
-    "userPromptTemplate": "Generate a multi-intent Mercedes-Benz vehicle search sentence. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a car shopper with multiple needs. Generate a search sentence that expresses more than one intent or requirement for vehicles. Only return the sentence.",
+    "userPromptTemplate": "Generate a multi-intent vehicle search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "I want a Mercedes-Benz SUV for family trips, city driving, and it should have advanced safety features."
+    "fallback": "I want an SUV for family trips, city driving, and it should have advanced safety features."
   },
   "clarification": {
     "count": 8,
-    "systemPrompt": "You are a car shopper seeking clarification. Generate a search sentence that asks for clarification or more information about Mercedes-Benz vehicles. Only return the sentence.",
-    "userPromptTemplate": "Generate a clarification question about Mercedes-Benz vehicles. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a car shopper seeking clarification. Generate a search sentence that asks for clarification or more information about vehicles. Only return the sentence.",
+    "userPromptTemplate": "Generate a clarification question about vehicles. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Can you tell me more about Mercedes-Benz safety features?"
+    "fallback": "Can you tell me more about vehicle safety features?"
   },
   "dateNumeric": {
     "count": 8,
-    "systemPrompt": "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz vehicle search sentence using date/numeric filters. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique vehicle search sentence using date/numeric filters. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me Mercedes-Benz SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000."
+    "fallback": "Show me SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000."
   },
   "noBrandModel": {
     "count": 10,
@@ -180,73 +180,73 @@
   },
   "negativeContradictory": {
     "count": 8,
-    "systemPrompt": "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz vehicle search sentence with negative or contradictory filters. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
+    "userPromptTemplate": "Generate a unique vehicle search sentence with negative or contradictory filters. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me a Mercedes-Benz convertible with diesel engine and manual gearbox registered in 2030."
+    "fallback": "Show me a convertible with diesel engine and manual gearbox registered in 2030."
   },
   "localization": {
     "count": 7,
-    "systemPrompt": "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz vehicle search sentence in Korean, English, or mixed language.",
+    "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique vehicle search sentence in Korean, English, or mixed language.",
     "maxTokens": 32,
-    "fallback": "2023년 이후 등록된 검정색 벤츠 SUV를 찾아주세요."
+    "fallback": "2023년 이후 등록된 검정색 SUV를 찾아주세요."
   },
   "misspelledFuzzy": {
     "count": 7,
-    "systemPrompt": "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles with intentional misspellings, typos, or fuzzy matching of brand/model/type/color. Only return the sentence.",
-    "userPromptTemplate": "Generate a unique Mercedes-Benz vehicle search sentence with misspellings or fuzzy matching. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles with intentional misspellings, typos, or fuzzy matching of model/type/color. Only return the sentence.",
+    "userPromptTemplate": "Generate a unique vehicle search sentence with misspellings or fuzzy matching. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me a Mercedez-Bens GLB Sedn in Night Blak."
+    "fallback": "Show me a GLB Sedn in Night Blak."
   },
   "noResults": {
     "count": 8,
-    "systemPrompt": "You are a creative car shopper. Generate a search sentence for Mercedes-Benz vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
-    "userPromptTemplate": "Generate a unique, highly unlikely Mercedes-Benz vehicle search sentence. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
+    "userPromptTemplate": "Generate a unique, highly unlikely vehicle search sentence. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me a Mercedes-Benz sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975."
+    "fallback": "Show me a sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975."
   },
   "personalData": {
     "count": 8,
-    "systemPrompt": "You are a car shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.",
-    "userPromptTemplate": "Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a car shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.",
+    "userPromptTemplate": "Generate a vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me Mercedes-Benz sedans under my name John, born on January 1, 1960, living outside the city."
+    "fallback": "Show me sedans under my name John, born on January 1, 1960, living outside the city."
   },
   "nsfw": {
     "count": 8,
-    "systemPrompt": "You are a idiotic crazy shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.",
-    "userPromptTemplate": "Generate a Mercedes-Benz vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a idiotic crazy shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.",
+    "userPromptTemplate": "Generate a vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me Mercedes-Benz cars for sale in adult entertainment venues."
+    "fallback": "Show me cars for sale in adult entertainment venues."
   },
   "codeAndScripts": {
     "count": 8,
-    "systemPrompt": "You are a malicious hacker. Generate a search sentence on your interest to shop for Mercedes-Benz vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.",
-    "userPromptTemplate": "Generate a Mercedes-Benz vehicle search sentence and include code or scripts. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a malicious hacker. Generate a search sentence on your interest to shop for vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.",
+    "userPromptTemplate": "Generate a vehicle search sentence and include code or scripts. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me Mercedes-Benz cars for sale with <script>alert('Buy!')</script> in the description."
+    "fallback": "Show me cars for sale with <script>alert('Buy!')</script> in the description."
   },
   "biasAndManipulation": {
     "count": 8,
-    "systemPrompt": "You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in Mercedes-Benz vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.",
-    "userPromptTemplate": "Generate a customer search sentence with biased or opinionated content about Mercedes-Benz. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.",
+    "userPromptTemplate": "Generate a customer search sentence with biased or opinionated content about cars. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "I think Mercedes-Benz has better quality than most brands, but I'm concerned about the price."
+    "fallback": "I think these cars have better quality than most brands, but I'm concerned about the price."
   },
   "conflictingFilterFacets": {
     "count": 8,
-    "systemPrompt": "You are a confused car shopper. Generate a natural, human-like search sentence for Mercedes-Benz vehicles that includes conflicting or impossible filter combinations (e.g., 'electric diesel', 'convertible SUV', 'manual automatic', '2-door 7-seater', 'sports car with high fuel efficiency and low power', etc.). Sound like a real customer who is confused or doesn't understand specifications.",
-    "userPromptTemplate": "Generate a Mercedes-Benz search sentence with conflicting or impossible filter facets. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a confused car shopper. Generate a natural, human-like search sentence for vehicles that includes conflicting or impossible filter combinations (e.g., 'electric diesel', 'convertible SUV', 'manual automatic', '2-door 7-seater', 'sports car with high fuel efficiency and low power', etc.). Sound like a real customer who is confused or doesn't understand specifications.",
+    "userPromptTemplate": "Generate a vehicle search sentence with conflicting or impossible filter facets. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me a Mercedes-Benz electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people."
+    "fallback": "Show me an electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people."
   },
   "conflictingBrands": {
     "count": 8,
-    "systemPrompt": "You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes Mercedes-Benz with other car brands (e.g., 'Mercedes-Benz with BMW engine', 'AMG Tesla', 'Mercedes Toyota hybrid', 'Benz Audi design', 'Mercedes-Lexus SUV'). Sound like a real customer who is confused about brands and manufacturers.",
-    "userPromptTemplate": "Generate a search sentence mixing Mercedes-Benz with conflicting or incompatible brand names. Generate in '{LANGUAGE}' language only.",
+    "systemPrompt": "You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes car brands in conflicting or impossible ways (e.g., 'a car with BMW engine and Audi design', 'AMG Tesla hybrid', 'Toyota luxury SUV with Porsche performance'). Sound like a real customer who is confused about brands and manufacturers.",
+    "userPromptTemplate": "Generate a search sentence mixing car brands in conflicting or incompatible ways. Generate in '{LANGUAGE}' language only.",
     "maxTokens": 32,
-    "fallback": "Show me a Mercedes-Benz with BMW M series engine and Audi quattro system in a Tesla style."
+    "fallback": "Show me a car with BMW M series engine and Audi quattro system in a Tesla style."
   },
   "responseConsistency": {
     "count": 8,

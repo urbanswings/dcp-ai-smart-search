@@ -681,6 +681,14 @@
       {
         "formattedValue": "Star of the Month Offer",
         "value": "307e13be"
+      },
+      {
+        "formattedValue": "TH-SIT Model with Mandatory-1",
+        "value": "11b91714"
+      },
+      {
+        "formattedValue": "TH-SIT Model with Mandatory-2",
+        "value": "11df1716"
       }
     ],
     "facetType": "MULTI_VALUE"

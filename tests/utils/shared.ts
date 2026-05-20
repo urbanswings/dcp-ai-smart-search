@@ -685,9 +685,38 @@ export function mergeQueries(
   fixedQueries: any[],
   generatedQueries: any[] = []
 ): any[] {
+  const sanitizeQueryText = (text: string): string => {
+    return String(text)
+      .replace(/\bmercedes[\s-]*benz\b/gi, "")
+      .replace(/\bmercedes\b/gi, "")
+      .replace(/\bbenz\b/gi, "")
+      .replace(/벤츠/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .replace(/\s+([,.;:!?])/g, "$1")
+      .trim();
+  };
+
+  const sanitizeQueryEntry = (query: any): any => {
+    if (typeof query === "string") {
+      return sanitizeQueryText(query);
+    }
+
+    if (query && typeof query === "object" && "value" in query) {
+      return {
+        ...query,
+        value: sanitizeQueryText(String(query.value ?? "")),
+      };
+    }
+
+    return query;
+  };
+
+  const safeFixedQueries = (fixedQueries || []).map(sanitizeQueryEntry);
+  const safeGeneratedQueries = (generatedQueries || []).map(sanitizeQueryEntry);
+
   if (isFixedQueriesOnly()) {
-    return [...fixedQueries];
+    return safeFixedQueries;
   }
-  return [...fixedQueries, ...generatedQueries];
+  return [...safeFixedQueries, ...safeGeneratedQueries];
 }
 
