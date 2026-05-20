@@ -869,6 +869,14 @@ export async function processAndLogApiResult({
   testTitle: string;
   expectedStatusCode?: number;
 }): Promise<any> {
+  const isPassEvaluation = (value: string): boolean => {
+    const normalized = (value || "").trim();
+    return (
+      normalized.toUpperCase() === "PASS" ||
+      normalized.startsWith("Expected status code ")
+    );
+  };
+
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
@@ -882,6 +890,8 @@ export async function processAndLogApiResult({
         [`${lang}`]: actualInput,
       },
       openaiEvaluation: `API call failed with error: ${results.error}`,
+      responseResult: "FAIL",
+      facetsResult: "FAIL",
       hasError: true,
     };
   }
@@ -910,6 +920,8 @@ export async function processAndLogApiResult({
   let openaiEvaluation = "No results to evaluate";
   let resultCount = 0;
   let hasError = false;
+  let responseCheckPassed = true;
+  let facetsCheckPassed = true;
   const beFacetDiagnosticLines: string[] = [];   
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
@@ -923,6 +935,7 @@ export async function processAndLogApiResult({
 
   // Check if status code matches expectation (if provided)
   if (expectedStatusCode && results.statusCode !== expectedStatusCode) {
+    responseCheckPassed = false;
     addFailureReason(
       `Status Code Mismatch: Expected ${expectedStatusCode}, got ${results.statusCode}`
     );
@@ -945,6 +958,7 @@ export async function processAndLogApiResult({
 
       // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
       if (resultCount === 0) {
+        responseCheckPassed = false;
         addFailureReason("Payload is zero");
       }
 
@@ -953,9 +967,13 @@ export async function processAndLogApiResult({
         aiEvaluationHints,
         query?.value ?? query
       );
+      if (!isPassEvaluation(openaiEvaluation)) {
+        responseCheckPassed = false;
+      }
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
     // Check for non-400 errors (400 is now treated as valid response with message_to_user)
+    responseCheckPassed = false;
     addFailureReason(
       `API Error: ${results.results?.errors
         ?.map((err: any) => err.message)
@@ -973,6 +991,7 @@ export async function processAndLogApiResult({
 
     // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
     if (resultCount === 0) {
+      responseCheckPassed = false;
       addFailureReason("Payload is zero");
     }
 
@@ -982,12 +1001,16 @@ export async function processAndLogApiResult({
       aiEvaluationHints,
       query?.value ?? query
     );
+    if (!isPassEvaluation(openaiEvaluation)) {
+      responseCheckPassed = false;
+    }
   }
 
   // Facets check (BE vs test-data)
   if (actualFacets === false) {
     // shouldFilter: false — assert no filters were applied
     if (Object.keys(resultsFacets).length > 0) {
+      facetsCheckPassed = false;
       addFailureReason(
         `Expected no filters, but got ${JSON.stringify(resultsFacets)}`
       );
@@ -995,6 +1018,7 @@ export async function processAndLogApiResult({
   } else if (actualFacets === true) {
     // shouldFilter: true — assert at least one filter was applied
     if (Object.keys(resultsFacets).length === 0) {
+      facetsCheckPassed = false;
       addFailureReason(`Expected at least one filter to be applied, but got none`);
     }
   } else if (testFacets && actualFacets && typeof actualFacets === "object") {
@@ -1133,6 +1157,7 @@ export async function processAndLogApiResult({
       `Actual Facets:   ${JSON.stringify(resultsFacets)}`
     );
     if (!facetCheckPassed) {      
+      facetsCheckPassed = false;
       addFailureReason(
         `Facets check failed: ${failureReasons.join("; ")}`
       );
@@ -1157,13 +1182,13 @@ export async function processAndLogApiResult({
   }
   if (!isLanguageConsistencyAccepted(langCheckResult)) {
     console.debug("[DEBUG] Language consistency check: FAIL");
+    responseCheckPassed = false;
     addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
   }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
   const evaluationPassed =
-    normalizedEvaluation.toUpperCase() === "PASS" ||
-    normalizedEvaluation.startsWith("Expected status code ");
+    isPassEvaluation(normalizedEvaluation);
   const displayHasError = hasError || !evaluationPassed;
 
   console.log("\n");
@@ -1215,7 +1240,14 @@ export async function processAndLogApiResult({
     error: results.error,
     // apiResponse,
     openaiEvaluation: openaiEvaluation,
-    facets: resultsFacets,
+    results: {
+      responseResult: responseCheckPassed ? "PASS" : "FAIL",
+      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",      
+    },    
+    facets: {
+      expected: actualFacets,
+      actual: resultsFacets,
+    },
   };
 }
 

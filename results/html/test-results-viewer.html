@@ -250,7 +250,6 @@
       background: slategrey;
       width: 100%;
       min-width: 0;
-      max-height: 420px;
       overflow: auto;
       padding: 12px;
       font-size: 13px;
@@ -361,12 +360,29 @@
       margin-bottom: 10px;
     }
 
+    .facetGrid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
     .detailBlock {
       border: 1px solid var(--border);
       border-radius: 8px;
       background: #ffffff;
       padding: 8px;
       min-width: 0;
+    }
+
+    .detailBlockPass {
+      border-color: #86efac;
+      background: #dcfce7;
+    }
+
+    .detailBlockFail {
+      border-color: #fecaca;
+      background: #fee2e2;
     }
 
     .detailHeader {
@@ -415,8 +431,29 @@
 
     .chipRow {
       display: flex;
+      flex-direction: column;
       gap: 6px;
-      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .chipRow .chip {
+      display: block;
+      width: fit-content;
+      max-width: 100%;
+    }
+
+    .selectedRowLeft .chipRow {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 6px !important;
+    }
+
+    .selectedRowLeft .chipRow > .chip {
+      display: block !important;
+      flex: 0 0 100% !important;
+      max-width: 100% !important;
+      width: fit-content;
     }
 
     .chip {
@@ -427,9 +464,9 @@
       background: #ffffff;
       color: #334155;
       max-width: 100%;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
 
     .badgePass {
@@ -556,6 +593,10 @@
         grid-template-columns: 1fr;
       }
 
+      .facetGrid {
+        grid-template-columns: 1fr;
+      }
+
       .selectedRowSplit {
         grid-template-columns: 1fr;
       }
@@ -619,11 +660,9 @@
             <th>response.local</th>
             <th>response.en</th>
             <th>evaluation</th>
-            <th>facets</th>
             <th>count</th>
             <th>ms</th>
             <th>status</th>
-            <th>timestampSG</th>
           </tr>
         </thead>
         <tbody id="resultsTbody">
@@ -958,15 +997,39 @@
       return { screenshotPath, fileObj };
     }
 
-    function toBadgeClass(evaluation) {
+    function toEvaluationBlockClass(evaluation) {
       const value = String(evaluation || "").toUpperCase();
       if (value === "PASS") {
-        return "badgePass";
+        return "detailBlockPass";
+      }
+      return "detailBlockFail";
+    }
+
+    function toResultDetailClass(resultValue) {
+      const value = String(resultValue || "").trim().toUpperCase();
+      if (value === "PASS") {
+        return "detailBlockPass";
       }
       if (value === "FAIL") {
-        return "badgeFail";
+        return "detailBlockFail";
       }
       return "";
+    }
+
+    function toResultBorderStyle(resultValue) {
+      const value = String(resultValue || "").trim().toUpperCase();
+      if (value === "PASS") {
+        return "border:1px solid #86efac;background:#dcfce7;";
+      }
+      if (value === "FAIL") {
+        return "border:1px solid #fecaca;background:#fee2e2;";
+      }
+      return "";
+    }
+
+    function formatSectionResult(resultValue) {
+      const normalized = String(resultValue || "").trim().toUpperCase();
+      return normalized === "PASS" || normalized === "FAIL" ? normalized : "-";
     }
 
     function formatFacetChips(facets) {
@@ -994,6 +1057,24 @@
       return chips.join("");
     }
 
+    function splitExpectedAndActualFacets(facets) {
+      if (!facets || typeof facets !== "object") {
+        return { expected: null, actual: null };
+      }
+
+      const hasExpected = Object.prototype.hasOwnProperty.call(facets, "expected");
+      const hasActual = Object.prototype.hasOwnProperty.call(facets, "actual");
+
+      if (hasExpected || hasActual) {
+        return {
+          expected: hasExpected ? facets.expected : null,
+          actual: hasActual ? facets.actual : null,
+        };
+      }
+
+      return { expected: facets, actual: null };
+    }
+
     function renderSelectedRowView() {
       if (selectedRowIndex < 0 || selectedRowIndex >= currentRows.length) {
         resetRowView();
@@ -1004,12 +1085,21 @@
 
       const rowData = currentRows[selectedRowIndex];
       const evaluation = rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-";
-      const evaluationClass = toBadgeClass(evaluation);
+      const evaluationBlockClass = toEvaluationBlockClass(evaluation);
       rowViewTitle.textContent = "Selected Row View: #" + (selectedRowIndex + 1);
       const queryLocal = getLocalizedText(rowData && rowData.query) || "-";
       const queryEn = getEnglishText(rowData && rowData.query) || "-";
       const responseLocal = getLocalizedText(rowData && rowData.response) || "-";
       const responseEn = getEnglishText(rowData && rowData.response) || "-";
+      const facetGroups = splitExpectedAndActualFacets(rowData ? rowData.facets : undefined);
+      const responseResult = rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : "");
+      const facetsResult = rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : "");
+      const responseBlockClass = toResultDetailClass(responseResult);
+      const facetsBlockClass = toResultDetailClass(facetsResult);
+      const responseBlockStyle = toResultBorderStyle(responseResult);
+      const facetsBlockStyle = toResultBorderStyle(facetsResult);
+      const responseResultLabel = formatSectionResult(responseResult);
+      const facetsResultLabel = formatSectionResult(facetsResult);
 
       const screenshotResolution = resolveScreenshotFile(rowData);
       const screenshotPath = screenshotResolution.screenshotPath;
@@ -1041,16 +1131,19 @@
       rowViewPane.innerHTML =
         "<div class=\"selectedRowSplit\">" +
           "<div class=\"selectedRowLeft\">" +
-            "<div class=\"detailBlock\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\"><span class=\"chip " + evaluationClass + "\">" + escapeHtml(evaluation) + "</span></div></div>" +
+            "<div class=\"detailBlock " + evaluationBlockClass + "\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\">" + escapeHtml(evaluation) + "</div></div>" +
             "<div class=\"langGrid\">" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
             "</div>" +
             "<div class=\"langGrid\">" +
-              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Response</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseLocal) + "\" title=\"Copy Response\" aria-label=\"Copy Response\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseLocal) + "</div></div>" +
-              "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseEn) + "\" title=\"Copy Response (EN)\" aria-label=\"Copy Response (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseEn) + "</div></div>" +
+              "<div class=\"detailBlock " + responseBlockClass + "\" style=\"" + responseBlockStyle + "\"><div class=\"detailHeader\"><div class=\"detailLabel\">Response [" + escapeHtml(responseResultLabel) + "]</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseLocal) + "\" title=\"Copy Response\" aria-label=\"Copy Response\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseLocal) + "</div></div>" +
+              "<div class=\"detailBlock " + responseBlockClass + "\" style=\"" + responseBlockStyle + "\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:#18212b\">Response (EN) [" + escapeHtml(responseResultLabel) + "]</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(responseEn) + "\" title=\"Copy Response (EN)\" aria-label=\"Copy Response (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(responseEn) + "</div></div>" +
             "</div>" +
-            "<div class=\"detailBlock\"><div class=\"detailLabel\">Facets</div><div class=\"chipRow\">" + formatFacetChips(rowData ? rowData.facets : undefined) + "</div></div>" +
+            "<div class=\"facetGrid\">" +
+              "<div class=\"detailBlock " + facetsBlockClass + "\" style=\"" + facetsBlockStyle + "\"><div class=\"detailLabel\">Expected Facets [" + escapeHtml(facetsResultLabel) + "]</div><div class=\"chipRow\">" + formatFacetChips(facetGroups.expected) + "</div></div>" +
+              "<div class=\"detailBlock " + facetsBlockClass + "\" style=\"" + facetsBlockStyle + "\"><div class=\"detailLabel\">Actual Facets [" + escapeHtml(facetsResultLabel) + "]</div><div class=\"chipRow\">" + formatFacetChips(facetGroups.actual) + "</div></div>" +
+            "</div>" +
             "<div class=\"detailGrid\">" +
               "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.timestampSG ? rowData.timestampSG : (rowData && rowData.timestamp ? rowData.timestamp : "-")) + "</div></div>" +
               "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.resultCount !== undefined ? rowData.resultCount : "-") + "</div></div>" +
@@ -1091,7 +1184,6 @@
         const queryEn = getEnglishText(item && item.query);
         const responseLocal = getLocalizedText(item && item.response);
         const responseEn = getEnglishText(item && item.response);
-        const facetsText = compactFacets(item ? item.facets : undefined);
         const isError = item && item.hasError;
         const indexClass = isError === true ? "indexCellError" : (isError === false ? "indexCellOk" : "indexCellUnknown");
 
@@ -1104,16 +1196,25 @@
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseLocal) + "\">" + escapeHtml(responseLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseEn) + "\">" + escapeHtml(responseEn) + "</span></td>" +
           "<td>" + escapeHtml(item && item.openaiEvaluation ? item.openaiEvaluation : "") + "</td>" +
-          "<td><span class=\"truncate\" title=\"" + escapeHtml(facetsText) + "\">" + escapeHtml(facetsText) + "</span></td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.resultCount !== undefined ? item.resultCount : "") + "</td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.responseTime !== undefined ? item.responseTime : "") + "</td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.statusCode !== undefined ? item.statusCode : "") + "</td>" +
-          "<td class=\"mono\">" + escapeHtml(item && item.timestampSG ? item.timestampSG : (item && item.timestamp ? item.timestamp : "")) + "</td>" +
         "</tr>";
       }).join("");
 
       resultsTbody.innerHTML = html;
       renderSelectedRowView();
+    }
+
+    function focusSelectedTableRow() {
+      if (selectedRowIndex < 0) {
+        return;
+      }
+      const selectedRow = resultsTbody.querySelector("tr[data-row-index=\"" + selectedRowIndex + "\"]");
+      if (!selectedRow) {
+        return;
+      }
+      selectedRow.scrollIntoView({ block: "nearest" });
     }
 
     function findFolderAndFileForRelativePath(relativePath) {
@@ -1361,7 +1462,37 @@
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && iicImportModal.classList.contains("visible")) {
         closeIicImportModal();
+        return;
       }
+
+      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+        return;
+      }
+
+      const target = event.target;
+      const tagName = target && target.tagName ? target.tagName.toLowerCase() : "";
+      const isTypingContext =
+        tagName === "input" ||
+        tagName === "textarea" ||
+        target.isContentEditable;
+      if (isTypingContext || iicImportModal.classList.contains("visible")) {
+        return;
+      }
+
+      if (!currentRows.length || selectedRowIndex < 0) {
+        return;
+      }
+
+      const delta = event.key === "ArrowDown" ? 1 : -1;
+      const nextIndex = Math.min(Math.max(selectedRowIndex + delta, 0), currentRows.length - 1);
+      if (nextIndex === selectedRowIndex) {
+        return;
+      }
+
+      event.preventDefault();
+      selectedRowIndex = nextIndex;
+      renderTableRows(currentRows);
+      focusSelectedTableRow();
     });
 
     resultsTbody.addEventListener("click", (event) => {

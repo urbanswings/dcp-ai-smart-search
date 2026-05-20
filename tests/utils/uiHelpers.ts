@@ -759,6 +759,11 @@ export async function processAndLogUiResult({
   testTitle: string;
   page: Page;
 }): Promise<any> {
+  const isPassEvaluation = (value: string): boolean => {
+    const normalized = (value || "").trim();
+    return normalized.toUpperCase() === "PASS";
+  };
+
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
@@ -772,6 +777,10 @@ export async function processAndLogUiResult({
         [`${lang}`]: actualInput,
       },
       openaiEvaluation: `API call failed with error: ${results.error}`,
+      results: {
+        responseResult: "FAIL",
+        facetsResult: "FAIL",
+      },
       hasError: true,
     };
   }
@@ -810,6 +819,8 @@ export async function processAndLogUiResult({
   }
   let resultCount = 0;
   let hasError = false;
+  let responseCheckPassed = true;
+  let facetsCheckPassed = true;
   let uiFacetComparison: {
     matches: boolean;
     missingFacetValues: string[];
@@ -825,7 +836,12 @@ export async function processAndLogUiResult({
   };
 
   if (!smartSearchMessage?.trim()) {
+    responseCheckPassed = false;
     addFailureReason("UI response bubble text is empty");
+  }
+
+  if (!isPassEvaluation(openaiEvaluation)) {
+    responseCheckPassed = false;
   }
 
   // Handle the new Smart Search + Actual Search response structure
@@ -850,6 +866,7 @@ export async function processAndLogUiResult({
     console.debug("[DEBUG] Could not extract UI vehicle count:", e);
   }
   if (uiVehicleCount === 0 && resultCount > 0) {
+    responseCheckPassed = false;
     addFailureReason("UI is zero");
   }
 
@@ -857,6 +874,7 @@ export async function processAndLogUiResult({
   if (actualFacets === false) {
     // shouldFilter: false — assert no filters were applied
     if (Object.keys(resultsFacets).length > 0) {
+      facetsCheckPassed = false;
       addFailureReason(
         `Expected no filters, but got ${JSON.stringify(resultsFacets)}`
       );
@@ -864,6 +882,7 @@ export async function processAndLogUiResult({
   } else if (actualFacets === true) {
     // shouldFilter: true — assert at least one filter was applied
     if (Object.keys(resultsFacets).length === 0) {
+      facetsCheckPassed = false;
       addFailureReason(`Expected at least one filter to be applied, but got none`);
     }
   } else if (testFacets && actualFacets && typeof actualFacets === "object") {
@@ -1023,6 +1042,7 @@ export async function processAndLogUiResult({
     }
     
     if (!facetCheckPassed) {
+      facetsCheckPassed = false;
       addFailureReason(`BE Facets check failed: ${failureReasons.join("; ")}`);
     }
   }
@@ -1070,6 +1090,7 @@ export async function processAndLogUiResult({
     );
   }
   if (testFacets && facetMismatches.length > 0) {
+    facetsCheckPassed = false;
     addFailureReason(facetMismatches.join(" | "));
   }
 
@@ -1147,7 +1168,15 @@ export async function processAndLogUiResult({
     error: results.error,
     // apiResponse,
     openaiEvaluation,
-    facets: resultsFacets,
+    results: {
+      responseResult: responseCheckPassed ? "PASS" : "FAIL",
+      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
+    },
+    facets: {
+      expected: actualFacets,
+      actual: resultsFacets,
+      ui: uiSelectedFiltersKV,
+    },
     uiSelectedFiltersKV,
     uiFacetComparison,
   };
