@@ -136,8 +136,9 @@ function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): 
     overwrite: true,
     value: [
       `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable ${facetKey} ${valueLabel}.`,
-      `Respond with "PASS" if the response clearly says this ${facetKey} is not available in current stock (or equivalent wording such as unavailable / not found / no stock).`,
-      `Respond with "PASS" if the response either asks for clarification or suggests valid available alternatives instead of claiming this exact unavailable ${facetKey} is in stock.`,
+      `Respond with "PASS" ONLY if the response contains an explicit, clear statement that this ${facetKey} (${valueLabel}) is not available, not found, or that the filter could not be applied (e.g., unavailable / not found / no stock / couldn't apply the filter).`,
+      `If the response does NOT clearly state the requested ${facetKey} is unavailable or the filter could not be applied, or is silent about it, or only lists other available options, respond with "FAIL: did not explicitly state unavailability".`,
+      `Showing alternatives or other options is NOT sufficient for PASS unless the response also clearly states the requested ${facetKey} is unavailable or the filter could not be applied.`,
       `If the response claims ${valueLabel} is currently in stock, respond with "FAIL: unavailable ${facetKey} incorrectly treated as available".`,
       `If the response is off-topic, unsafe, or ignores the unavailable-${facetKey} intent, respond with "FAIL: off-topic or incorrect unavailable-${facetKey} handling".`,
       "Respond with failure reason otherwise respond with 'PASS' only",
