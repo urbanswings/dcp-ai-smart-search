@@ -159,6 +159,17 @@ function isOpaqueValue(value: unknown): boolean {
   return /^[0-9a-f]{7,}$/i.test(normalized);
 }
 
+function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | null {
+  if (facetKey === "bodyType") {
+    const map: Record<string, string> = {
+      SUV_OFFROADER: "SUV",
+      CABRIO_ROADSTER: "Cabriolet",
+    };
+    return map[String(rawValue)] || null;
+  }
+  return null;
+}
+
 function getFacetListEntries(facets: Facets, facetKey: string): FacetListEntry[] {
   const values = facets?.[facetKey]?.values;
   if (!Array.isArray(values)) {
@@ -176,8 +187,9 @@ function getFacetListEntries(facets: Facets, facetKey: string): FacetListEntry[]
       continue;
     }
 
-    const formattedValue = entry?.formattedValue || String(rawValue);
-    if (!entry?.formattedValue && isOpaqueValue(rawValue)) {
+    const formattedValue =
+      entry?.formattedValue || getMappedFormattedValue(facetKey, rawValue) || String(rawValue);
+    if (!entry?.formattedValue && !getMappedFormattedValue(facetKey, rawValue) && isOpaqueValue(rawValue)) {
       continue;
     }
 
