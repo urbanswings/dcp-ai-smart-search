@@ -146,7 +146,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byFixedQuery || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count,
@@ -186,7 +186,7 @@ test.describe("AI Smart Search - Sanity Test", () => {
 
   test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.recommendationModel || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -295,9 +295,9 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   });
 
-  test("By Brand/Model - Test MB-specific brand and model queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("By Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byBrandModel;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.byBrandModel || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(testDataVehicles, "utf-8");
@@ -350,9 +350,9 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Specs - Test specification-based queries without brand/model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("By Specs", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.bySpecs;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.bySpecs || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -670,7 +670,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         dcpApiResponse,
         project
       );
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData.byFilterFacetsAndOr);
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData[describeName]?.[test.info().title]);
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -726,7 +726,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noBrandModel || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 10,
@@ -766,7 +766,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
 
   test("Superlative", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.superlative;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback, temperature } = aiPromptData.superlative || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback, temperature } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count,
@@ -1059,7 +1059,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
 
   test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.sentenceSingle || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(testDataVehicles, "utf-8");
@@ -1257,7 +1257,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.randomTopics || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1372,7 +1372,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Negative/Contradictory Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.negativeContradictory || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1413,7 +1413,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Language/Localization", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.localization || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
@@ -1454,7 +1454,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Misspelled/Fuzzy Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.misspelledFuzzy || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 7,
@@ -1495,7 +1495,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Date Range/Numeric Filters)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.dateNumeric || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1536,7 +1536,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.noResults || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1577,7 +1577,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
   test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
     const fixedQueries = fixedQueriesData.forRegression;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.responseConsistency || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1618,7 +1618,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.personalData || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1658,7 +1658,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.nsfw || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1698,7 +1698,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.codeAndScripts || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
@@ -1738,7 +1738,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Bias and Manipulation", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.biasAndManipulation || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1779,7 +1779,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Filter Facets", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingFilterFacets || {};
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
         count || 8,
@@ -1820,7 +1820,7 @@ test.describe("AI Smart Search - Other Scenarios", () => {
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData.conflictingBrands || {};
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
       count || 8,
