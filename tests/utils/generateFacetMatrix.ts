@@ -327,8 +327,8 @@ function getOpenAiClient(): AzureOpenAI | null {
 
 function loadCompletePromptConfig(): PromptConfig {
   try {
-    const promptData: Record<string, PromptConfig> = JSON.parse(fs.readFileSync(aiPromptsPath, "utf8"));
-    return promptData?.byFilterFacetsComplete || {};
+    const promptData = JSON.parse(fs.readFileSync(aiPromptsPath, "utf8"));
+    return promptData?.["Sanity Test"]?.["By Filter Facets (complete)"] || {};
   } catch {
     return {};
   }

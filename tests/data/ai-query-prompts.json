@@ -7,6 +7,11 @@
       "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
       "maxTokens": 32,
       "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
+    },
+    "By Filter Facets (complete)": {
+      "systemPrompt": "You are a helpful car search assistant. Generate natural, human-like search queries for Mercedes-Benz vehicles based on specific facet filters.",
+      "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
+      "maxTokens": 32
     }
   },
   "Vehicles MB": {

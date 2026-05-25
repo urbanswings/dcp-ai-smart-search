@@ -163,7 +163,7 @@ function getOpenAiClient() {
 function loadCompletePromptConfig() {
   try {
     const promptData = JSON.parse(fs.readFileSync(aiPromptsPath, "utf8"));
-    return promptData?.byFilterFacetsComplete || {};
+    return promptData?.["Sanity Test"]?.["By Filter Facets (complete)"] || {};
   } catch {
     return {};
   }
