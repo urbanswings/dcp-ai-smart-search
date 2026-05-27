@@ -893,19 +893,11 @@ export async function processAndLogUiResult({
     const resultsKeys = Object.keys(resultsFacets);
     const resultsKeysSet = new Set(resultsKeys);
     
-    // Flatten include into a set of facet keys
+    // Flatten include into a set of allowed facet keys for strict mode.
     const includeKeys = new Set<string>();
     for (const filterObj of include) {
       for (const key of Object.keys(filterObj)) {
         includeKeys.add(key);
-      }
-    }
-    
-    // Flatten exclude into a set of facet keys
-    const excludeKeys = new Set<string>();
-    for (const filterObj of exclude) {
-      for (const key of Object.keys(filterObj)) {
-        excludeKeys.add(key);
       }
     }
     
@@ -947,6 +939,9 @@ export async function processAndLogUiResult({
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const rawActuals = new Set(
+            actualValues.map((value) => String(value).trim().toUpperCase())
+          );
           // For color/upholstery, map UUID values to their formattedValue from facets
           const semanticActuals = actualValues.map((v) => {
             const vStr = String(v).toUpperCase();
@@ -965,6 +960,11 @@ export async function processAndLogUiResult({
           }
           
           for (const expected of expectedValues) {
+            const rawExpected = String(expected).trim().toUpperCase();
+            if (rawActuals.has(rawExpected)) {
+              continue;
+            }
+
             // For color/upholstery facets, translate expected value first
             const processedExpected = ["color", "upholstery"].includes(key)
               ? translateColorName(String(expected))
@@ -990,6 +990,9 @@ export async function processAndLogUiResult({
         if (!resultsKeysSet.has(key)) continue;
         if (Array.isArray(excludedValues) && excludedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const rawActuals = new Set(
+            actualValues.map((value) => String(value).trim().toUpperCase())
+          );
           // For color/upholstery, map UUID values to their formattedValue from facets
           const semanticActuals = actualValues.map((v) => {
             const vStr = String(v).toUpperCase();
@@ -1008,6 +1011,13 @@ export async function processAndLogUiResult({
           }
           
           for (const excluded of excludedValues) {
+            const rawExcluded = String(excluded).trim().toUpperCase();
+            if (rawActuals.has(rawExcluded)) {
+              facetCheckPassed = false;
+              failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
+              continue;
+            }
+
             // For color/upholstery facets, translate excluded value first
             const processedExcluded = ["color", "upholstery"].includes(key)
               ? translateColorName(String(excluded))
@@ -1017,7 +1027,7 @@ export async function processAndLogUiResult({
             const hasMatch = excludedCandidates.some(candidate => 
               actualCandidates.has(candidate.toUpperCase())
             );
-            
+
             if (hasMatch) {
               facetCheckPassed = false;
               failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);

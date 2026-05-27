@@ -1075,23 +1075,38 @@ export async function processAndLogApiResult({
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const rawActuals = new Set(
+            actualValues.map((value) => String(value).trim().toUpperCase())
+          );
           // For color/upholstery, map UUID values to translated semantic names
           const semanticActuals = actualValues.map((v) => {
             const vStr = String(v).toUpperCase();
             if (uuidToSemanticMap[key]?.[vStr]) {
-              return uuidToSemanticMap[key][vStr]; // already lowercase and translated
+              return uuidToSemanticMap[key][vStr];
             }
-            return normalizeFacetToken(String(v));
+            return String(v);
           });
-          const actualSet = new Set(semanticActuals);
+          const actualCandidates = new Set<string>();
+          for (const actual of semanticActuals) {
+            const candidates = buildFacetCandidateTokens(actual);
+            candidates.forEach((candidate) => actualCandidates.add(candidate.toUpperCase()));
+          }
           
           for (const expected of expectedValues) {
-            // Normalize and translate expected value for comparison
-            const normalizedExpected = normalizeFacetToken(String(expected));
-            const translatedExpected = translateColorName(String(expected));
-            
-            // Check if either normalized or translated version matches
-            if (!actualSet.has(normalizedExpected) && !actualSet.has(translatedExpected)) {
+            const rawExpected = String(expected).trim().toUpperCase();
+            if (rawActuals.has(rawExpected)) {
+              continue;
+            }
+
+            const processedExpected = ["color", "upholstery"].includes(key)
+              ? translateColorName(String(expected))
+              : String(expected);
+            const expectedCandidates = buildFacetCandidateTokens(processedExpected);
+            const hasMatch = expectedCandidates.some((candidate) =>
+              actualCandidates.has(candidate.toUpperCase())
+            );
+
+            if (!hasMatch) {
               facetCheckPassed = false;
               failureReasons.push(`Missing required facet value: ${key}=${expected}`);
             }
@@ -1106,23 +1121,40 @@ export async function processAndLogApiResult({
         if (!resultsKeysSet.has(key)) continue;
         if (Array.isArray(excludedValues) && excludedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
+          const rawActuals = new Set(
+            actualValues.map((value) => String(value).trim().toUpperCase())
+          );
           // For color/upholstery, map UUID values to translated semantic names
           const semanticActuals = actualValues.map((v) => {
             const vStr = String(v).toUpperCase();
             if (uuidToSemanticMap[key]?.[vStr]) {
-              return uuidToSemanticMap[key][vStr]; // already lowercase and translated
+              return uuidToSemanticMap[key][vStr];
             }
-            return normalizeFacetToken(String(v));
+            return String(v);
           });
-          const actualSet = new Set(semanticActuals);
+          const actualCandidates = new Set<string>();
+          for (const actual of semanticActuals) {
+            const candidates = buildFacetCandidateTokens(actual);
+            candidates.forEach((candidate) => actualCandidates.add(candidate.toUpperCase()));
+          }
           
           for (const excluded of excludedValues) {
-            // Normalize and translate excluded value for comparison
-            const normalizedExcluded = normalizeFacetToken(String(excluded));
-            const translatedExcluded = translateColorName(String(excluded));
-            
-            // Check if either normalized or translated version matches
-            if (actualSet.has(normalizedExcluded) || actualSet.has(translatedExcluded)) {
+            const rawExcluded = String(excluded).trim().toUpperCase();
+            if (rawActuals.has(rawExcluded)) {
+              facetCheckPassed = false;
+              failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
+              continue;
+            }
+
+            const processedExcluded = ["color", "upholstery"].includes(key)
+              ? translateColorName(String(excluded))
+              : String(excluded);
+            const excludedCandidates = buildFacetCandidateTokens(processedExcluded);
+            const hasMatch = excludedCandidates.some((candidate) =>
+              actualCandidates.has(candidate.toUpperCase())
+            );
+
+            if (hasMatch) {
               facetCheckPassed = false;
               failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
             }
