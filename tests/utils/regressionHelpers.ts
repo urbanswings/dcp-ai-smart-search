@@ -340,5 +340,13 @@ export async function loadIntermittencyQueries(): Promise<FixedQueryCase[]> {
   }).filter((q): q is FixedQueryCase => q !== null);
 
   console.log(`[regressionHelpers] Loaded ${queries.length} intermittency query/queries.`);
+  if (queries.length > 0) {
+    console.log(
+      [
+        "[regressionHelpers] Intermittency query values:",
+        ...queries.map((query) => `- ${query.value}`),
+      ].join("\n")
+    );
+  }
   return queries;
 }

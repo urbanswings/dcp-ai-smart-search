@@ -95,7 +95,7 @@ function buildFacetFirstQuery(
 ): string {
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
   const keyLabel = normalizeWhitespace(facetDisplayNameFn(facetKey) || facetKey);
-  return normalizeWhitespace(`${keyLabel} ${valueLabel}`);
+  return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
 }
 
 /**

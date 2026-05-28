@@ -1,14 +1,14 @@
 [
   {
-    "value": "model E-Class",
-    "facet": "modelIdentifier",
-    "filterValue": "E-Class",
+    "value": "Beige/Black upholstery",
+    "facet": "upholstery",
+    "filterValue": "Beige/Black",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "E"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_BEIGE_BLACK"
           ]
         }
       ],
@@ -17,24 +17,26 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: E-Class.",
-        "If the response ignores or contradicts the requested model value (E-Class), respond with \"FAIL: missing or incorrect model value (E-Class)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Beige/Black and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Beige/Black), respond with \"FAIL: missing or incorrect upholstery value (Beige/Black)\".",
+        "If the response says the requested upholstery value (Beige/Black) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Beige/Black)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }
   },
   {
-    "value": "model EQA",
-    "facet": "modelIdentifier",
-    "filterValue": "EQA",
+    "value": "Black upholstery",
+    "facet": "upholstery",
+    "filterValue": "Black",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "EQA"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_BLACK"
           ]
         }
       ],
@@ -43,24 +45,26 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: EQA.",
-        "If the response ignores or contradicts the requested model value (EQA), respond with \"FAIL: missing or incorrect model value (EQA)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Black and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Black), respond with \"FAIL: missing or incorrect upholstery value (Black)\".",
+        "If the response says the requested upholstery value (Black) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Black)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }
   },
   {
-    "value": "model EQB",
-    "facet": "modelIdentifier",
-    "filterValue": "EQB",
+    "value": "Brown upholstery",
+    "facet": "upholstery",
+    "filterValue": "Brown",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "EQB"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_BROWN"
           ]
         }
       ],
@@ -69,24 +73,26 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: EQB.",
-        "If the response ignores or contradicts the requested model value (EQB), respond with \"FAIL: missing or incorrect model value (EQB)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Brown and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Brown), respond with \"FAIL: missing or incorrect upholstery value (Brown)\".",
+        "If the response says the requested upholstery value (Brown) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Brown)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }
   },
   {
-    "value": "model GLC",
-    "facet": "modelIdentifier",
-    "filterValue": "GLC",
+    "value": "Brown/Black upholstery",
+    "facet": "upholstery",
+    "filterValue": "Brown/Black",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "GLC"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_BROWN_BLACK"
           ]
         }
       ],
@@ -95,24 +101,26 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: GLC.",
-        "If the response ignores or contradicts the requested model value (GLC), respond with \"FAIL: missing or incorrect model value (GLC)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Brown/Black and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Brown/Black), respond with \"FAIL: missing or incorrect upholstery value (Brown/Black)\".",
+        "If the response says the requested upholstery value (Brown/Black) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Brown/Black)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }
   },
   {
-    "value": "model GLE",
-    "facet": "modelIdentifier",
-    "filterValue": "GLE",
+    "value": "Grey/Black upholstery",
+    "facet": "upholstery",
+    "filterValue": "Grey/Black",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "GLE"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_GREY_BLACK"
           ]
         }
       ],
@@ -121,24 +129,26 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: GLE.",
-        "If the response ignores or contradicts the requested model value (GLE), respond with \"FAIL: missing or incorrect model value (GLE)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Grey/Black and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Grey/Black), respond with \"FAIL: missing or incorrect upholstery value (Grey/Black)\".",
+        "If the response says the requested upholstery value (Grey/Black) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Grey/Black)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }
   },
   {
-    "value": "model GLS",
-    "facet": "modelIdentifier",
-    "filterValue": "GLS",
+    "value": "Red/Black upholstery",
+    "facet": "upholstery",
+    "filterValue": "Red/Black",
     "shouldRecommend": true,
     "shouldFilter": {
       "include": [
         {
-          "modelIdentifier": [
-            "GLS"
+          "upholstery": [
+            "UPHOLSTERY_COLOR_RED_BLACK"
           ]
         }
       ],
@@ -147,36 +157,12 @@
     },
     "aiEvaluationHints": {
       "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: GLS.",
-        "If the response ignores or contradicts the requested model value (GLS), respond with \"FAIL: missing or incorrect model value (GLS)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
-      ],
-      "overwrite": true
-    }
-  },
-  {
-    "value": "model S-Class",
-    "facet": "modelIdentifier",
-    "filterValue": "S-Class",
-    "shouldRecommend": true,
-    "shouldFilter": {
-      "include": [
-        {
-          "modelIdentifier": [
-            "S"
-          ]
-        }
-      ],
-      "exclude": [],
-      "strict": false
-    },
-    "aiEvaluationHints": {
-      "value": [
-        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested model filter intent.",
-        "Respond with \"PASS\" if the response clearly acknowledges or applies the requested model value: S-Class.",
-        "If the response ignores or contradicts the requested model value (S-Class), respond with \"FAIL: missing or incorrect model value (S-Class)\".",
-        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: off-topic or unsafe response\"."
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested upholstery filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested upholstery value: Red/Black and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested upholstery value (Red/Black), respond with \"FAIL: missing or incorrect upholstery value (Red/Black)\".",
+        "If the response says the requested upholstery value (Red/Black) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"FAIL: no results for requested upholstery value (Red/Black)\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
       ],
       "overwrite": true
     }

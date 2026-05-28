@@ -1229,8 +1229,7 @@ export async function processAndLogApiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
-
-  console.log("\n");
+  
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
@@ -1239,6 +1238,7 @@ export async function processAndLogApiResult({
       smartSearchMessage,
       "en"
     );
+    console.log("\n");
     console.log(`Query (EN):    '${queryEn}'`);
     console.log(`Response (EN): '${smartSearchMessageEn}'`);
   }

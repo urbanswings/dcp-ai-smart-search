@@ -318,6 +318,34 @@ node generate-results-html.js
 
 ```sh
 node generate-results-json.js results/json/<run-folder>
+
+### 6. Run Regression Tests
+
+Use the dedicated regression suite in `tests/regression.spec.ts` for bug-focused validation and repeated-run stability checks.
+
+- Guide: `tests/regression.spec.md`
+- Regression description template: `tests/regression.desciption.txt.example`
+- Intermittency query template: `tests/data/intermittency-queries.example.json`
+
+Examples:
+
+```sh
+# API-only full regression spec
+npm run test:regression
+
+# Only Smart Regression Evaluation (SRE)
+TEST_MODE=api npx playwright test tests/regression.spec.ts --grep "Smart Regression Evaluation \(SRE\)"
+
+# Only Intermittent Issues Check (IIC)
+TEST_MODE=api npx playwright test tests/regression.spec.ts --grep "Intermittent Issues Check \(IIC\)"
+```
+
+Notes:
+
+- `npm run test:regression` forces `TEST_MODE=api`.
+- `SRE` reads `tests/regression.desciption.txt` and generates regression cases from that description.
+- `IIC` reads `tests/data/intermittency-queries.json` and repeats each query 5 times to score consistency.
+- For `IIC`, query data can also be seeded from generated query files created by running `tests/search.spec.ts`, such as `tests/data/generated-queries-sg-en-ncos.json`.
 ```
 
 - Reads result files from the specified run folder, picks the latest run per test type, and writes only non-PASS results to `results/json/results-queries-by-test.json`.

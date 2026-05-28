@@ -1,7 +1,35 @@
-Different results even though query topic is same but in alternate phrasing.
+Regression Title
+Different results for the same intent with alternate phrasing
 
-i typed "white car for families", only the EQA came out.
-but when i typed "white family cars", i had more options
+Environment
+- ENVIRONMENT: PREPROD
+- COUNTRY: AU
+- PRODUCT: NCOS
+- LANGUAGE: en
 
-Expected behaviour
-- Results should be consistent across all related queries
+Problem Summary
+Different results are returned even though the user intent is the same.
+
+Observed Queries
+Q1: white car for families
+Observed result:
+- Only EQA came out
+
+Q2: white family cars
+Observed result:
+- More vehicle options were returned
+
+Expected Behaviour
+- Results should be consistent across related phrasings with the same intent.
+- Vehicle recommendations should not narrow unexpectedly for equivalent wording.
+- If filters are applied, they should stay aligned with the intent: family cars + white color.
+
+Validation Scope
+- Include wording variations for the same intent.
+- Include synonyms such as family car, family vehicle, car for families.
+- Include nearby phrasing changes such as white family SUV, family-friendly white car.
+- Check both recommendation quality and applied filters.
+
+Notes
+- Focus on semantic consistency rather than exact wording.
+- Add RCA and test approach below this line after AI analysis if needed.

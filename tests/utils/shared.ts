@@ -42,6 +42,51 @@ export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   return false;
 }
 
+function getConsistencyResponseText(result: any, lang: string): string | undefined {
+  const response = result?.response;
+
+  if (!response) {
+    return undefined;
+  }
+
+  if (typeof response === "string") {
+    return response.trim() || undefined;
+  }
+
+  if (typeof response === "object") {
+    const preferred = response?.[lang];
+    if (typeof preferred === "string" && preferred.trim()) {
+      return preferred;
+    }
+
+    const english = response?.en;
+    if (typeof english === "string" && english.trim()) {
+      return english;
+    }
+
+    const firstAvailable = Object.values(response).find(
+      (value): value is string => typeof value === "string" && value.trim() !== ""
+    );
+    return firstAvailable;
+  }
+
+  return undefined;
+}
+
+function getConsistencyFacets(result: any): any {
+  const facets = result?.facets;
+
+  if (!facets || typeof facets !== "object") {
+    return facets;
+  }
+
+  if ("actual" in facets) {
+    return facets.actual;
+  }
+
+  return facets;
+}
+
 export function isLanguageConsistencyAccepted(result: string): boolean {
   const normalized = (result || "").trim().toUpperCase();
   if (!normalized) return false;
@@ -363,11 +408,14 @@ export async function runTestsRepeatedAndSaveResults(params: {
         resultsForQuery.push(entry);
       }
       // Consistency check for UI results (response[LANGUAGE] and facets)
-      const firstResult = resultsForQuery[0];
-      const firstString = firstResult?.response?.[lang];
-      const firstFacets = firstResult?.facets;
+      const firstString = resultsForQuery
+        .map((result) => getConsistencyResponseText(result, lang))
+        .find((value): value is string => typeof value === "string" && value.trim() !== "");
+      const firstFacets = resultsForQuery
+        .map((result) => getConsistencyFacets(result))
+        .find((value) => value !== undefined && value !== null);
       const responseValues = resultsForQuery
-        .map((result) => result?.response?.[lang])
+        .map((result) => getConsistencyResponseText(result, lang))
         .filter((value): value is string => typeof value === "string" && value.trim() !== "");
       const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
         await areAllResponsesConsistentOneShot(responseValues);
@@ -376,8 +424,8 @@ export async function runTestsRepeatedAndSaveResults(params: {
       let facetMatchCount = 0;
       const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
-        const compareString = resultsForQuery[i]?.response?.[lang];
-        const compareFacets = resultsForQuery[i]?.facets;
+        const compareString = getConsistencyResponseText(resultsForQuery[i], lang);
+        const compareFacets = getConsistencyFacets(resultsForQuery[i]);
         const facetsMatch = deepEqual(firstFacets, compareFacets);
         const runMatched = aiResponseConsistent && facetsMatch;
         if (runMatched) matchCount++;
@@ -410,7 +458,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
           if (!aiResponseConsistent) {
             console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
             console.info(`      Response: '${failed.compareString}'`);
-            if (lang !== "en") {
+            if (lang !== "en" && failed.compareString) {
               const compareStringEn = await fetchTranslation(failed.compareString, "en");
               console.info(`      Response (EN): '${compareStringEn}'`);
             }
@@ -445,11 +493,14 @@ export async function runTestsRepeatedAndSaveResults(params: {
         resultsForQuery.push(entry);
       }
       // Consistency check for API results (response[LANGUAGE] and facets)
-      const firstResult = resultsForQuery[0];
-      const firstString = firstResult?.response?.[lang];
-      const firstFacets = firstResult?.facets;
+      const firstString = resultsForQuery
+        .map((result) => getConsistencyResponseText(result, lang))
+        .find((value): value is string => typeof value === "string" && value.trim() !== "");
+      const firstFacets = resultsForQuery
+        .map((result) => getConsistencyFacets(result))
+        .find((value) => value !== undefined && value !== null);
       const responseValues = resultsForQuery
-        .map((result) => result?.response?.[lang])
+        .map((result) => getConsistencyResponseText(result, lang))
         .filter((value): value is string => typeof value === "string" && value.trim() !== "");
       const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
         await areAllResponsesConsistentOneShot(responseValues);
@@ -458,8 +509,8 @@ export async function runTestsRepeatedAndSaveResults(params: {
       let facetMatchCount = 0;
       const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
-        const compareString = resultsForQuery[i]?.response?.[lang];
-        const compareFacets = resultsForQuery[i]?.facets;
+        const compareString = getConsistencyResponseText(resultsForQuery[i], lang);
+        const compareFacets = getConsistencyFacets(resultsForQuery[i]);
         const facetsMatch = deepEqual(firstFacets, compareFacets);
         const runMatched = aiResponseConsistent && facetsMatch;
         if (runMatched) matchCount++;
@@ -492,7 +543,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
           if (!aiResponseConsistent) {
             console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
             console.info(`      Response: '${failed.compareString}'`);
-            if (lang !== "en") {
+            if (lang !== "en" && failed.compareString) {
               const compareStringEn = await fetchTranslation(failed.compareString, "en");
               console.info(`      Response (EN): '${compareStringEn}'`);
             }

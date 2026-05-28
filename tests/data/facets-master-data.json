@@ -506,6 +506,9 @@
       },
       {
         "value": "eVito Tourer 126 Extralang"
+      },
+      {
+        "value": "CLA 200+"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -689,6 +692,18 @@
       {
         "formattedValue": "TH-SIT Model with Mandatory-2",
         "value": "11df1716"
+      },
+      {
+        "formattedValue": "V-Serisi'ne Özel Fiyat",
+        "value": "9ae90ae9"
+      },
+      {
+        "formattedValue": "Marketing Campaign 1",
+        "value": "cda111d4"
+      },
+      {
+        "formattedValue": "Marketing Campaign 2",
+        "value": "cdbe11d6"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -905,6 +920,10 @@
       {
         "formattedValue": "Gray/Brown",
         "value": "UPHOLSTERY_COLOR_GREY_BROWN"
+      },
+      {
+        "formattedValue": "เขียว/ดำ",
+        "value": "UPHOLSTERY_COLOR_GREEN_BLACK"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1728,6 +1747,10 @@
       {
         "formattedValue": "프로젝션 기능 포함 LED DIGITAL LIGHT 조명 시스템",
         "value": "ae2622ea"
+      },
+      {
+        "formattedValue": "AMG aerodinamik paketi",
+        "value": "8a410a33"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -3028,6 +3051,10 @@
       },
       {
         "value": "17500f9"
+      },
+      {
+        "formattedValue": "Non-Metallic",
+        "value": "PAINT_TYPE_NON_METALLIC"
       }
     ]
   },
