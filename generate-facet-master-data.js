@@ -22,6 +22,8 @@ const MARKETS = [
   { country: 'TR', product: 'NCOS', language: 'TR' },
   { country: 'AU', product: 'NCOS', language: 'EN' },
   { country: 'IN', product: 'NCOS', language: 'EN' },
+  { country: 'JP', product: 'NCOS', language: 'EN' },
+  { country: 'JP', product: 'NCOS', language: 'JP' },
   { country: 'SG', product: 'NCOS', language: 'EN' },
   { country: 'KR', product: 'NCOS', language: 'KO' },
   { country: 'TH', product: 'NCOS', language: 'EN' },

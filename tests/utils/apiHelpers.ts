@@ -94,6 +94,7 @@ export class SearchApiClient {
     try {
       const countryCode = getCountryCode();
       const locale = getLocale();
+      const languageCode = getLanguageCode();
       const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
@@ -103,7 +104,7 @@ export class SearchApiClient {
         user_query: query,
         country_code: countryCode,
         sales_channel: salesChannel,
-        lang: "tr",
+        lang: languageCode,
       };
 
       const response = await this.client.post(endpoint, payload);
@@ -157,6 +158,7 @@ export class SearchApiClient {
     try {
       const countryCode = getCountryCode();
       const locale = getLocale();
+      const languageCode = getLanguageCode();
       const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
@@ -166,7 +168,7 @@ export class SearchApiClient {
         user_query: query,
         country_code: countryCode,
         sales_channel: salesChannel,
-        lang: "tr",
+        lang: languageCode,
       };
 
       const response = await this.client.post(endpoint, payload);
@@ -223,6 +225,7 @@ export class SearchApiClient {
     try {
       const countryCode = getCountryCode();
       const locale = getLocale();
+      const languageCode = getLanguageCode();
       const salesChannel = getSalesChannel();
 
       const endpoint = `/dcpoto-api/dcp-api/v2/dcp-mp-${locale}/products/getSmartSearchQuery`;
@@ -232,7 +235,7 @@ export class SearchApiClient {
         user_query: query,
         country_code: countryCode,
         sales_channel: salesChannel,
-        lang: "tr",
+        lang: languageCode,
         ...(facets && facets),
       };
 
@@ -285,7 +288,7 @@ export class SearchApiClient {
     try {
       const env = ENVIRONMENT || "INT";
       const country = getCountryCode();
-      const language = country === "IN" ? "en" : LANGUAGE?.toLocaleLowerCase() || "en";
+      const language = getLanguageCode();
       const product = PRODUCT?.toUpperCase() || "UCOS";
       const salesChannel = getSalesChannel();
       const vehicleCategory = VEHICLE_CATEGORY?.toUpperCase() || "PASSENGER-CARS" ;
@@ -482,6 +485,20 @@ export function getLocale(): string {
   return (process.env.COUNTRY || "kr").toLowerCase();
 }
 
+export function getLanguageCode(): string {
+  const country = getCountryCode();
+
+  if (country === "IN") {
+    return "en";
+  }
+
+  if (country === "TR") {
+    return "tr";
+  }
+
+  return (process.env.LANGUAGE || "en").toLowerCase();
+}
+
 export function getSalesChannel(): string {
   return process.env.PRODUCT?.toUpperCase() === "NCOS"
     ? "first_hand"
@@ -604,7 +621,7 @@ export async function fetchEmhApiResponse(): Promise<any> {
   const env = ENVIRONMENT || "INT";
   const country = COUNTRY || "TR";
   const product = PRODUCT || "NCOS";
-  const language = country === "IN" ? "EN" : country === "TR" ? "TR" : LANGUAGE || "TR";
+  const language = getLanguageCode();
   const vehicleCategory = VEHICLE_CATEGORY || "PASSENGER-CARS";
 
   try {
@@ -717,7 +734,7 @@ export async function fetchDcpApiResponse(): Promise<any> {
 
   try {
     const envPrefix = env === "INT" ? "shop-int" : "shop";
-    const apiUrl = `https://${envPrefix}.mercedes-benz.com/dcpoto-api/dcp-api/v2/dcp-mp-${country.toLowerCase()}/products/search?query=%3Arelevance%3AuseProductType%3A${product}%3AallCategories%3Adcp-mp-${country.toLowerCase()}-vehicles&currentPage=0&pageSize=12&fields=FULL&lang=ko`;
+    const apiUrl = `https://${envPrefix}.mercedes-benz.com/dcpoto-api/dcp-api/v2/dcp-mp-${country.toLowerCase()}/products/search?query=%3Arelevance%3AuseProductType%3A${product}%3AallCategories%3Adcp-mp-${country.toLowerCase()}-vehicles&currentPage=0&pageSize=12&fields=FULL&lang=${encodeURIComponent(getLanguageCode())}`;
 
     const graphqlPayload = {};
 

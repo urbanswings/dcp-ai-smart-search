@@ -1312,7 +1312,13 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   }
   const urlsFile = await fs.readFile(urlFilePath, "utf-8");
   const urls = JSON.parse(urlsFile);
-  let url = urls[country]?.[env];
+  const language = (LANGUAGE || "EN").toUpperCase();
+  const marketUrls = urls[country];
+  let url =
+    marketUrls?.[env] ||
+    marketUrls?.[language]?.[env] ||
+    marketUrls?.EN?.[env] ||
+    marketUrls?.JP?.[env];
   if (!url) {
     // fallback to Korea PROD if not found
     url =

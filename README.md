@@ -281,6 +281,7 @@ Edit `.env` to set your test context:
 ```properties
 ENVIRONMENT=PREPROD   # Options: PREPROD, INT, DEV, PROD
 COUNTRY=KR            # Country code, e.g., KR, AU, BR, etc.
+LANGUAGE=EN           # Language code, e.g., EN, KO, TH, JP
 PRODUCT=NCOS          # NCOS for new cars, UCOS for used cars
 AEM_USER_PREPROD=your-username
 AEM_PASS_PREPROD=your-password
@@ -303,7 +304,8 @@ npx playwright test
 Or override environment variables for a single run:
 
 ```sh
-ENVIRONMENT=INT COUNTRY=JP PRODUCT=UCOS npx playwright test
+ENVIRONMENT=INT COUNTRY=JP LANGUAGE=EN PRODUCT=UCOS npx playwright test
+ENVIRONMENT=INT COUNTRY=JP LANGUAGE=JP PRODUCT=UCOS npx playwright test
 ```
 
 ### 4. Generate HTML Report

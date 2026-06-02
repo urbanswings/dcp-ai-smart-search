@@ -1,4 +1,14 @@
 {
+  "JP": {
+    "EN": {
+      "INT": "https://shop-int.mercedes-benz.com/en-jp/shop/vehicle/srp/used",
+      "PROD": "https://shop.mercedes-benz.com/en-jp/shop/vehicle/srp/used"
+    },
+    "JP": {
+      "INT": "https://shop-int.mercedes-benz.com/jp-jp/shop/vehicle/srp/used",
+      "PROD": "https://shop.mercedes-benz.com/jp-jp/shop/vehicle/srp/used"
+    }
+  },
   "KR": {
     "INT": "https://shop-int.mercedes-benz.com/ko-kr/shop/vehicle/srp/used", 
     "PROD": "https://shop.mercedes-benz.com/ko-kr/shop/vehicle/srp/used"
