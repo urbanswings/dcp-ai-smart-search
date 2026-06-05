@@ -7,9 +7,10 @@ const DATA_DIR = path.join(__dirname, "../data");
 // Generate output filename based on execution config
 export function generateOutputFileName(
   country: string = process.env.COUNTRY || "au",
-  language: string = process.env.LANGUAGE || "en"
+  language: string = process.env.LANGUAGE || "en",
+  product: string = process.env.PRODUCT || "ncos"
 ): string {
-  return `generated-queries-${country.toLowerCase()}-${language.toLowerCase()}-ncos.json`;
+  return `generated-queries-${country.toLowerCase()}-${language.toLowerCase()}-${product.toLowerCase()}.json`;
 }
 
 export interface AiEvaluationHints {
@@ -135,13 +136,12 @@ function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): 
   return {
     overwrite: true,
     value: [
-      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable ${facetKey} ${valueLabel}.`,
-      `Respond with "PASS" ONLY if the response contains an explicit, clear statement that this ${facetKey} (${valueLabel}) is not available, not found, or that the filter could not be applied (e.g., unavailable / not found / no stock / couldn't apply the filter).`,
-      `If the response does NOT clearly state the requested ${facetKey} is unavailable or the filter could not be applied, or is silent about it, or only lists other available options, respond with "FAIL: did not explicitly state unavailability".`,
-      `Showing alternatives or other options is NOT sufficient for PASS unless the response also clearly states the requested ${facetKey} is unavailable or the filter could not be applied.`,
-      `If the response claims ${valueLabel} is currently in stock, respond with "FAIL: unavailable ${facetKey} incorrectly treated as available".`,
-      `If the response is off-topic, unsafe, or ignores the unavailable-${facetKey} intent, respond with "FAIL: off-topic or incorrect unavailable-${facetKey} handling".`,
-      "Respond with failure reason otherwise respond with 'PASS' only",
+      `Respond with "PASS" if the response explicitly states the requested ${facetKey} (${valueLabel}) is unavailable, not available, couldn't find, no exact match, not in stock, or similar unavailability language.`,
+      `PASS is acceptable even if alternatives or other recommendations are offered afterward. The key is an upfront explicit unavailability statement.`,
+      `Examples of acceptable PASS responses: "couldn't find exact match", "not available", "no results for ${valueLabel}", "not in stock", "we don't have ${valueLabel}".`,
+      `FAIL only if: (1) response is completely silent about the request without any acknowledgment, OR (2) response only lists alternatives without ever stating the requested ${valueLabel} is unavailable/not found.`,
+      `If the response is off-topic, unsafe, or unrelated to automotive search, respond with "FAIL: off-topic or unsafe response".`,
+      "Explicitly stated unavailability = PASS. Respond with 'PASS' or provide specific failure reason.",
     ],
   };
 }
@@ -152,10 +152,26 @@ function extractMissingFacetValues(
   stockData: any
 ): Array<{ rawValue: string; formattedValue: string }> {
   const allValues = extractFacetValues(masterData, facetKey);
+  const stockValuesArr = extractFacetValues(stockData, facetKey);
+  
+  // For facets that use UUIDs (color, upholstery), normalize by formattedValue
+  // Otherwise, normalize by rawValue
+  const useFormattedValue = ["color", "upholstery"].includes(facetKey);
+  
   const stockValues = new Set(
-    extractFacetValues(stockData, facetKey).map((entry) => entry.rawValue)
+    stockValuesArr.map((entry) => 
+      useFormattedValue 
+        ? String(entry.formattedValue).toLowerCase() 
+        : String(entry.rawValue).toUpperCase()
+    )
   );
-  return allValues.filter((entry) => !stockValues.has(entry.rawValue));
+  
+  return allValues.filter((entry) => {
+    const normalizedValue = useFormattedValue
+      ? String(entry.formattedValue).toLowerCase()
+      : String(entry.rawValue).toUpperCase();
+    return !stockValues.has(normalizedValue);
+  });
 }
 
 async function generateMissingFacetValuesSuiteOnTheFly(facetKey: string): Promise<GeneratedFacetSuite> {

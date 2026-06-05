@@ -924,6 +924,14 @@
       {
         "formattedValue": "เขียว/ดำ",
         "value": "UPHOLSTERY_COLOR_GREEN_BLACK"
+      },
+      {
+        "formattedValue": "Black",
+        "value": "5c9509c2"
+      },
+      {
+        "formattedValue": "Red",
+        "value": "6c500aee"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1851,6 +1859,26 @@
       {
         "formattedValue": "Siyah",
         "value": "167a041a"
+      },
+      {
+        "formattedValue": "Black",
+        "value": "5c9509c2"
+      },
+      {
+        "formattedValue": "Grey",
+        "value": "770e0b97"
+      },
+      {
+        "formattedValue": "Silver",
+        "value": "b60c0e98"
+      },
+      {
+        "formattedValue": "White",
+        "value": "816e0c12"
+      },
+      {
+        "formattedValue": "Yellow",
+        "value": "223a1336"
       }
     ],
     "facetType": "MULTI_VALUE"

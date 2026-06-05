@@ -438,6 +438,7 @@ function getRangePoints(facetKey: string, range: FacetRange): number[] {
 
 async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   const facets = data?.data?.search?.facets || {};
+  setGlobalFacets(facets);
   const queryMap = new Map<string, CompleteQuery>();
   const informativeHintsByQuery: Record<string, string[]> = {};
   const promptConfig = loadCompletePromptConfig();
@@ -576,10 +577,64 @@ function toQueryLabel(facetKey: string, value: unknown): string {
   return titleCaseFromToken(value);
 }
 
+// Cache for UUID maps built from API response
+let uuidMapCache: Record<string, Record<string, string>> = {};
+
+function buildUUIDMapFromFacets(facets: Facets, facetKey: string): Record<string, string> {
+  if (uuidMapCache[facetKey]) {
+    return uuidMapCache[facetKey];
+  }
+
+  const map: Record<string, string> = {};
+  const facetData = facets?.[facetKey];
+  
+  if (facetData && Array.isArray(facetData.values)) {
+    for (const entry of facetData.values) {
+      if (entry && entry.value && entry.formattedValue) {
+        const strValue = String(entry.value).toLowerCase();
+        map[strValue] = String(entry.formattedValue).toLowerCase();
+      }
+    }
+  }
+
+  uuidMapCache[facetKey] = map;
+  return map;
+}
+
+// Global facets reference for UUID map building
+let globalFacets: Facets = {};
+
+function setGlobalFacets(facets: Facets): void {
+  globalFacets = facets;
+  uuidMapCache = {}; // Clear cache when facets change
+}
+
 function toHintLabel(facetKey: string, value: unknown): string {
   if (facetKey === "color") {
+    const colorMap = buildUUIDMapFromFacets(globalFacets, "color");
+    const strValue = String(value).toLowerCase();
+    // Check if it's a UUID first (from API response)
+    if (colorMap[strValue]) {
+      return colorMap[strValue];
+    }
+    // Otherwise, try the old PAINT_COLOR_ format
     const token = String(value).replace(/^PAINT_COLOR_/, "");
     return token.toLowerCase();
+  }
+  if (facetKey === "upholstery") {
+    const upholsteryMap = buildUUIDMapFromFacets(globalFacets, "upholstery");
+    const strValue = String(value).toLowerCase();
+    // Check if it's a UUID first (from API response)
+    if (upholsteryMap[strValue]) {
+      return upholsteryMap[strValue];
+    }
+    // Otherwise, try the old format
+    const token = String(value).replace(/^UPHOLSTERY_/, "");
+    return token.toLowerCase();
+  }
+  if (facetKey === "upholsteryPolish") {
+    // Map to upholstery polish/treatment names
+    return String(value).toLowerCase().replace(/^UPHOLSTERY_/, "");
   }
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
@@ -662,6 +717,7 @@ function pairwise<T>(values: T[]): Array<[T, T]> {
 
 function buildMatrix(data: ApiResponse): GeneratedSuite {
   const facets = data?.data?.search?.facets || {};
+  setGlobalFacets(facets);
 
   const regressionQueries: RegressionQuery[] = [];
   const informativeHintsByQuery: Record<string, string[]> = {};

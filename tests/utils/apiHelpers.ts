@@ -939,7 +939,8 @@ export async function processAndLogApiResult({
   let hasError = false;
   let responseCheckPassed = true;
   let facetsCheckPassed = true;
-  const beFacetDiagnosticLines: string[] = [];   
+  const beFacetDiagnosticLines: string[] = [];
+  const failureReasons: string[] = [];   
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
     if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
@@ -1055,7 +1056,6 @@ export async function processAndLogApiResult({
     }
 
     let facetCheckPassed = true;
-    const failureReasons: string[] = [];
     
     // Build UUID-to-semantic-name mapping from API facets for color/upholstery
     const uuidToSemanticMap: Record<string, Record<string, string>> = {};
@@ -1095,6 +1095,16 @@ export async function processAndLogApiResult({
           const rawActuals = new Set(
             actualValues.map((value) => String(value).trim().toUpperCase())
           );
+          // Also check facet values structure from response for UUID mapping
+          const facetDataForKey = facetsData?.[key];
+          const allFacetValuesFromResponse = (facetDataForKey?.values || [])
+            .map((v: any) => String(v.value || v).trim().toUpperCase())
+            .filter(Boolean);
+          const responseFacetActuals = new Set(allFacetValuesFromResponse);
+          
+          // Combine: actual result values + all values available in the facet structure
+          const allValidValues = new Set([...rawActuals, ...responseFacetActuals]);
+          
           // For color/upholstery, map UUID values to translated semantic names
           const semanticActuals = actualValues.map((v) => {
             const vStr = String(v).toUpperCase();
@@ -1111,7 +1121,8 @@ export async function processAndLogApiResult({
           
           for (const expected of expectedValues) {
             const rawExpected = String(expected).trim().toUpperCase();
-            if (rawActuals.has(rawExpected)) {
+            // Check against both current results and all available facet values from response
+            if (allValidValues.has(rawExpected)) {
               continue;
             }
 
@@ -1296,6 +1307,7 @@ export async function processAndLogApiResult({
     facets: {
       expected: actualFacets,
       actual: resultsFacets,
+      failureReasons: !facetsCheckPassed ? failureReasons : undefined,
     },
   };
 }
