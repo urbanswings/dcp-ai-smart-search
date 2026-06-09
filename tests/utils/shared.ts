@@ -281,6 +281,34 @@ export async function cleanOldScreenshots(keepDays: number = 14): Promise<void> 
   }
 }
 
+function slugifyTestTypeSegment(value: string): string {
+  return String(value || "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/["']/g, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-")
+    .toLowerCase();
+}
+
+export function buildTestType(
+  testDescribe: string,
+  testTitle: string,
+  fallbackTestType: string = ""
+): string {
+  const describeSlug = slugifyTestTypeSegment(testDescribe);
+  const titleSlug = slugifyTestTypeSegment(testTitle);
+  const fallbackSlug = slugifyTestTypeSegment(fallbackTestType);
+
+  if (describeSlug && titleSlug) {
+    return `${describeSlug}_${titleSlug}`;
+  }
+
+  return titleSlug || describeSlug || fallbackSlug || "test";
+}
+
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
@@ -342,7 +370,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
   queries: any[];
   testDescribe: string;
   testTitle: string;
-  testType: string;
+  testType?: string;
   browser?: any;
   performUISmartSearchAndGetResults?: (page: any, query: any) => Promise<any>;
   processAndLogUiResult?: (params: {
@@ -373,6 +401,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
     processAndLogApiResult,
     setupContextAndPage,
   } = params;
+  const resolvedTestType = buildTestType(testDescribe, testTitle, testType);
 
   const lang = LANGUAGE?.toLowerCase() || "en";
   const normalizeRepeatedQuery = (item: any): any | null => {
@@ -583,7 +612,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
 
   // Combine and save results
   const allResults = await combineResults(flatUiResults, flatApiResults);
-  const outputFileName = getOutputFileName(testType);
+  const outputFileName = getOutputFileName(resolvedTestType);
   await ensureDirectoryExists(outputFileName);
   await fs.writeFile(
     outputFileName,
@@ -604,7 +633,7 @@ export async function runTestsAndSaveResults(params: {
   queries: any[];
   testDescribe: string;
   testTitle: string;
-  testType: string;
+  testType?: string;
   browser?: any;
   performUISmartSearchAndGetResults?: (page: any, query: any) => Promise<any>;
   processAndLogUiResult?: (params: {
@@ -643,6 +672,7 @@ export async function runTestsAndSaveResults(params: {
     setupContextAndPage,
     postRunAnalysis,
   } = params;
+  const resolvedTestType = buildTestType(testDescribe, testTitle, testType);
 
   const uiResults = [];
   const apiResults = [];
@@ -664,7 +694,7 @@ export async function runTestsAndSaveResults(params: {
       
       // Take screenshot after each query (viewport only)
       const actualQuery = query?.value ?? query;
-      const screenshotPath = getScreenshotPath(testType, i, actualQuery, runTimestamp);
+      const screenshotPath = getScreenshotPath(resolvedTestType, i, actualQuery, runTimestamp);
       await ensureDirectoryExists(screenshotPath);
       await page.screenshot({ path: screenshotPath });
       console.log(`📸 Screenshot: ${screenshotPath}`);
@@ -701,7 +731,7 @@ export async function runTestsAndSaveResults(params: {
 
   // Combine and save results
   const allResults = await combineResults(uiResults, apiResults);
-  const outputFileName = getOutputFileName(testType);
+  const outputFileName = getOutputFileName(resolvedTestType);
   await ensureDirectoryExists(outputFileName);
   await fs.writeFile(
     outputFileName,
@@ -716,7 +746,7 @@ export async function runTestsAndSaveResults(params: {
         outputFileName,
         testDescribe,
         testTitle,
-        testType,
+        testType: resolvedTestType,
       });
     } catch (e) {
       console.warn(
