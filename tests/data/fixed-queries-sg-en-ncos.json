@@ -142,14 +142,14 @@
       }
     },
     {
-      "value": "my budget is under 200,000 SGD",
+      "value": "my budget is under 300,000 SGD",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 200000
+              "max": 300000
             }
           }
         ],
@@ -158,7 +158,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 200,000 SGD and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 300,000 SGD and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true

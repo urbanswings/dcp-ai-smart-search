@@ -704,6 +704,10 @@
       {
         "formattedValue": "Marketing Campaign 2",
         "value": "cdbe11d6"
+      },
+      {
+        "formattedValue": "Introductory Price",
+        "value": "6e4f0932"
       }
     ],
     "facetType": "MULTI_VALUE"
