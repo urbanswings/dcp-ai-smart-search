@@ -210,7 +210,7 @@
       "shouldFilter": {
         "include": [
           {
-            "color": [
+            "bodyType": [
               "SUV_OFFROADER"
             ]
           }
