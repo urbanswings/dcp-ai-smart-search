@@ -81,8 +81,13 @@
 
     .row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 12px;
+    }
+
+    .rowTwoCol {
+      margin-top: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     label {
@@ -224,6 +229,16 @@
       padding: 8px 10px;
       background: #f8fafc;
       min-width: 0;
+    }
+
+    .metaCardPassRateOk {
+      background: #dcfce7;
+      border-color: #86efac;
+    }
+
+    .metaCardPassRateBad {
+      background: #fee2e2;
+      border-color: #fecaca;
     }
 
     .metaLabel {
@@ -677,7 +692,7 @@
 <body>
   <main class="wrap">
     <h1>Smart Search - Test Results Viewer</h1>
-    <p class="hint" id="versionText">Build: 2026-05-20-01</p>
+    <p class="hint" id="versionText">Build: 2026-06-09-02</p>
     <p class="hint">
       Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder, and this page will build dropdowns dynamically.<br>
       No external JS file required.
@@ -695,8 +710,29 @@
         <select id="folderSelect"></select>
       </div>
       <div>
+        <label for="countrySelect">Country</label>
+        <select id="countrySelect">
+          <option value="ALL">All countries</option>
+        </select>
+      </div>
+      <div>
         <label for="fileSelect">File</label>
         <select id="fileSelect"></select>
+      </div>
+    </div>
+
+    <div class="row rowTwoCol">
+      <div>
+        <label for="describeFilterSelect">testDescribe</label>
+        <select id="describeFilterSelect">
+          <option value="ALL">All testDescribe values</option>
+        </select>
+      </div>
+      <div>
+        <label for="titleFilterSelect">testTitle</label>
+        <select id="titleFilterSelect">
+          <option value="ALL">All testTitle values</option>
+        </select>
       </div>
     </div>
 
@@ -715,7 +751,7 @@
         <div class="metaLabel">Title</div>
         <div class="metaValue" id="titleValue">-</div>
       </div>
-      <div class="metaCard">
+      <div class="metaCard" id="passRateCard">
         <div class="metaLabel">Pass %</div>
         <div class="metaValue" id="passRateValue">-</div>
       </div>
@@ -774,13 +810,17 @@
     const pickBtn = document.getElementById("pickBtn");
     const iicImportBtn = document.getElementById("iicImportBtn");
     const folderSelect = document.getElementById("folderSelect");
+    const countrySelect = document.getElementById("countrySelect");
     const fileSelect = document.getElementById("fileSelect");
+    const describeFilterSelect = document.getElementById("describeFilterSelect");
+    const titleFilterSelect = document.getElementById("titleFilterSelect");
     const infoText = document.getElementById("infoText");
     const selectedPath = document.getElementById("selectedPath");
     const modeValue = document.getElementById("modeValue");
     const describeValue = document.getElementById("describeValue");
     const titleValue = document.getElementById("titleValue");
     const passRateValue = document.getElementById("passRateValue");
+    const passRateCard = document.getElementById("passRateCard");
     const tableTitle = document.getElementById("tableTitle");
     const resultsTbody = document.getElementById("resultsTbody");
     const previewTitle = document.getElementById("previewTitle");
@@ -805,6 +845,7 @@
     let selectedRowIndex = -1;
     let currentScreenshotObjectUrl = "";
     let currentIicImportPayload = "[]";
+    const fileMetadataCache = new Map();
 
     function normalizePath(pathValue) {
       return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
@@ -852,6 +893,106 @@
       folderRows.sort((a, b) => b.name.localeCompare(a.name));
 
       return folderRows;
+    }
+
+    function extractCountryFromFileName(fileName) {
+      const normalizedFileName = normalizePath(fileName).split("/").pop() || "";
+      const match = normalizedFileName.match(/^([A-Za-z]{2,3})_/);
+      return match ? match[1].toUpperCase() : "";
+    }
+
+    function getRelativePathForFolderFile(folder, fileName) {
+      if (!folder || !fileName) {
+        return "";
+      }
+      return folder.name === "(root)" ? fileName : folder.name + "/" + fileName;
+    }
+
+    function findSelectedFileByRelativePath(relativePath) {
+      const normalizedRel = normalizePath(relativePath);
+      if (!normalizedRel) {
+        return null;
+      }
+
+      return selectedFiles.find((file) => {
+        const pathValue = normalizePath(file.webkitRelativePath || file.name);
+        return pathValue === normalizedRel || pathValue === normalizePath(rootLabel + "/" + normalizedRel);
+      }) || null;
+    }
+
+    async function getFileMetadata(folder, fileName) {
+      const relativePath = getRelativePathForFolderFile(folder, fileName);
+      if (!relativePath) {
+        return { testDescribe: "", testTitle: "" };
+      }
+
+      if (fileMetadataCache.has(relativePath)) {
+        return fileMetadataCache.get(relativePath);
+      }
+
+      const fileObj = findSelectedFileByRelativePath(relativePath);
+      if (!fileObj || !String(fileName).toLowerCase().endsWith(".json")) {
+        const emptyMeta = { testDescribe: "", testTitle: "" };
+        fileMetadataCache.set(relativePath, emptyMeta);
+        return emptyMeta;
+      }
+
+      try {
+        const text = await fileObj.text();
+        const parsed = JSON.parse(text);
+        const firstRow = Array.isArray(parsed) ? parsed[0] : parsed;
+        const metadata = {
+          testDescribe: String(firstRow && firstRow.testDescribe || "").trim(),
+          testTitle: String(firstRow && firstRow.testTitle || "").trim(),
+        };
+        fileMetadataCache.set(relativePath, metadata);
+        return metadata;
+      } catch {
+        const emptyMeta = { testDescribe: "", testTitle: "" };
+        fileMetadataCache.set(relativePath, emptyMeta);
+        return emptyMeta;
+      }
+    }
+
+    async function ensureFolderMetadata(folder) {
+      if (!folder || !Array.isArray(folder.files) || !folder.files.length) {
+        return;
+      }
+
+      await Promise.all(folder.files.map((fileName) => getFileMetadata(folder, fileName)));
+    }
+
+    function getCachedFileMetadata(folder, fileName) {
+      const relativePath = getRelativePathForFolderFile(folder, fileName);
+      return fileMetadataCache.get(relativePath) || { testDescribe: "", testTitle: "" };
+    }
+
+    function getVisibleFilesForFolder(folder) {
+      if (!folder || !Array.isArray(folder.files)) {
+        return [];
+      }
+
+      const selectedCountry = String(countrySelect.value || "ALL").toUpperCase();
+      if (selectedCountry === "ALL") {
+        return filterFilesByDescribeAndTitle(folder, folder.files.slice());
+      }
+
+      return filterFilesByDescribeAndTitle(
+        folder,
+        folder.files.filter((fileName) => extractCountryFromFileName(fileName) === selectedCountry)
+      );
+    }
+
+    function filterFilesByDescribeAndTitle(folder, files) {
+      const selectedDescribe = String(describeFilterSelect.value || "ALL");
+      const selectedTitle = String(titleFilterSelect.value || "ALL");
+
+      return files.filter((fileName) => {
+        const metadata = getCachedFileMetadata(folder, fileName);
+        const describeMatches = selectedDescribe === "ALL" || metadata.testDescribe === selectedDescribe;
+        const titleMatches = selectedTitle === "ALL" || metadata.testTitle === selectedTitle;
+        return describeMatches && titleMatches;
+      });
     }
 
     function escapeHtml(value) {
@@ -936,6 +1077,16 @@
       iicImportBtn.disabled = currentRows.length === 0;
     }
 
+    function setPassRateCardState(passPercent) {
+      passRateCard.classList.remove("metaCardPassRateOk", "metaCardPassRateBad");
+
+      if (typeof passPercent !== "number" || Number.isNaN(passPercent)) {
+        return;
+      }
+
+      passRateCard.classList.add(passPercent === 100 ? "metaCardPassRateOk" : "metaCardPassRateBad");
+    }
+
     function getIicImportQueryValue(queryValue) {
       if (typeof queryValue === "string") {
         return queryValue;
@@ -993,12 +1144,14 @@
       const total = rows.length;
       if (!total) {
         passRateValue.textContent = "-";
+        setPassRateCardState();
         return;
       }
 
       const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
       const passPercent = Math.round((passCount / total) * 100);
       passRateValue.textContent = passPercent + "% (" + passCount + "/" + total + ")";
+      setPassRateCardState(passPercent);
     }
 
     function resetFileMeta() {
@@ -1006,6 +1159,7 @@
       describeValue.textContent = "-";
       titleValue.textContent = "-";
       passRateValue.textContent = "-";
+      setPassRateCardState();
       updateIicImportAvailability();
     }
 
@@ -1334,6 +1488,15 @@
       if (!selectedFiles.length) {
         infoText.textContent = "No folder selected.";
         folderSelect.innerHTML = "";
+        countrySelect.innerHTML = "<option value=\"ALL\">All countries</option>";
+        countrySelect.value = "ALL";
+        countrySelect.disabled = false;
+        describeFilterSelect.innerHTML = "<option value=\"ALL\">All testDescribe values</option>";
+        describeFilterSelect.value = "ALL";
+        describeFilterSelect.disabled = false;
+        titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
+        titleFilterSelect.value = "ALL";
+        titleFilterSelect.disabled = false;
         fileSelect.innerHTML = "";
         selectedPath.textContent = "No file selected.";
         resetFileMeta();
@@ -1354,6 +1517,15 @@
         const reason = error && error.message ? error.message : String(error);
         infoText.textContent = "Unable to read selected files: " + reason;
         folderSelect.innerHTML = "";
+        countrySelect.innerHTML = "<option value=\"ALL\">All countries</option>";
+        countrySelect.value = "ALL";
+        countrySelect.disabled = false;
+        describeFilterSelect.innerHTML = "<option value=\"ALL\">All testDescribe values</option>";
+        describeFilterSelect.value = "ALL";
+        describeFilterSelect.disabled = false;
+        titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
+        titleFilterSelect.value = "ALL";
+        titleFilterSelect.disabled = false;
         fileSelect.innerHTML = "";
         selectedPath.textContent = "No file selected.";
         resetFileMeta();
@@ -1375,6 +1547,9 @@
         opt.textContent = "(no subfolders found)";
         opt.value = "";
         folderSelect.appendChild(opt);
+        countrySelect.innerHTML = "<option value=\"ALL\">All countries</option>";
+        describeFilterSelect.innerHTML = "<option value=\"ALL\">All testDescribe values</option>";
+        titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
         fileSelect.innerHTML = "<option>(no files)</option>";
         infoText.textContent = "Selected folder has no subdirectories.";
         selectedPath.textContent = "No file selected.";
@@ -1406,13 +1581,109 @@
       renderFiles(selectedFolderIndex);
     }
 
+    async function renderMetadataFilterOptions(folder, preferredDescribe = "", preferredTitle = "") {
+      describeFilterSelect.innerHTML = "";
+      titleFilterSelect.innerHTML = "";
+
+      const allDescribeOption = document.createElement("option");
+      allDescribeOption.value = "ALL";
+      allDescribeOption.textContent = "All testDescribe values";
+      describeFilterSelect.appendChild(allDescribeOption);
+
+      const allTitleOption = document.createElement("option");
+      allTitleOption.value = "ALL";
+      allTitleOption.textContent = "All testTitle values";
+      titleFilterSelect.appendChild(allTitleOption);
+
+      if (!folder || !Array.isArray(folder.files) || !folder.files.length) {
+        describeFilterSelect.value = "ALL";
+        titleFilterSelect.value = "ALL";
+        describeFilterSelect.disabled = true;
+        titleFilterSelect.disabled = true;
+        return;
+      }
+
+      await ensureFolderMetadata(folder);
+
+      const countryScopedFiles = String(countrySelect.value || "ALL").toUpperCase() === "ALL"
+        ? folder.files.slice()
+        : folder.files.filter((fileName) => extractCountryFromFileName(fileName) === String(countrySelect.value || "ALL").toUpperCase());
+
+      const describeValues = [...new Set(countryScopedFiles
+        .map((fileName) => getCachedFileMetadata(folder, fileName).testDescribe)
+        .filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      describeValues.forEach((describeValueOption) => {
+        const opt = document.createElement("option");
+        opt.value = describeValueOption;
+        opt.textContent = describeValueOption;
+        describeFilterSelect.appendChild(opt);
+      });
+
+      const nextDescribe = preferredDescribe && ["ALL", ...describeValues].includes(preferredDescribe)
+        ? preferredDescribe
+        : "ALL";
+      describeFilterSelect.value = nextDescribe;
+      describeFilterSelect.disabled = describeValues.length === 0;
+
+      const titleSourceFiles = countryScopedFiles.filter((fileName) => {
+        const metadata = getCachedFileMetadata(folder, fileName);
+        return nextDescribe === "ALL" || metadata.testDescribe === nextDescribe;
+      });
+
+      const titleValues = [...new Set(titleSourceFiles
+        .map((fileName) => getCachedFileMetadata(folder, fileName).testTitle)
+        .filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      titleValues.forEach((titleValueOption) => {
+        const opt = document.createElement("option");
+        opt.value = titleValueOption;
+        opt.textContent = titleValueOption;
+        titleFilterSelect.appendChild(opt);
+      });
+
+      const nextTitle = preferredTitle && ["ALL", ...titleValues].includes(preferredTitle)
+        ? preferredTitle
+        : "ALL";
+      titleFilterSelect.value = nextTitle;
+      titleFilterSelect.disabled = titleValues.length === 0;
+    }
+
+    function renderCountryOptions(folder, preferredCountry = "") {
+      countrySelect.innerHTML = "";
+
+      const countryValues = [...new Set(folder.files
+        .map((fileName) => extractCountryFromFileName(fileName))
+        .filter(Boolean))].sort((a, b) => a.localeCompare(b));
+
+      const allOption = document.createElement("option");
+      allOption.value = "ALL";
+      allOption.textContent = "All countries";
+      countrySelect.appendChild(allOption);
+
+      countryValues.forEach((countryCode) => {
+        const opt = document.createElement("option");
+        opt.value = countryCode;
+        opt.textContent = countryCode;
+        countrySelect.appendChild(opt);
+      });
+
+      const nextCountry = preferredCountry && ["ALL", ...countryValues].includes(preferredCountry)
+        ? preferredCountry
+        : "ALL";
+
+      countrySelect.value = nextCountry;
+      countrySelect.disabled = countryValues.length === 0;
+    }
+
     function renderFileOptions(folder, preferredFileName = "") {
       fileSelect.innerHTML = "";
-      const visibleFiles = folder.files.slice();
+      const visibleFiles = getVisibleFilesForFolder(folder);
+      const selectedCountry = String(countrySelect.value || "ALL").toUpperCase();
 
       if (!visibleFiles.length) {
         fileSelect.innerHTML = "<option>(no files)</option>";
-        infoText.textContent = folder.name + ": 0 files";
+        infoText.textContent = folder.name + ": 0 files for " + (selectedCountry === "ALL" ? "all countries" : selectedCountry);
         selectedPath.textContent = "No file selected.";
         resetFileMeta();
         currentRows = [];
@@ -1440,16 +1711,25 @@
         fileSelect.value = jsonFile || visibleFiles[0];
       }
 
-      infoText.textContent = folder.name + ": " + visibleFiles.length + " file(s) shown";
+      infoText.textContent = folder.name + ": " + visibleFiles.length + " file(s) shown" + (selectedCountry === "ALL" ? "" : " for " + selectedCountry);
       updateSelectedPath();
       void renderPreview();
     }
 
-    function renderFiles(folderIndex, preferredFileName = "") {
+    async function renderFiles(folderIndex, preferredFileName = "", preferredCountry = "", preferredDescribe = "", preferredTitle = "") {
       const folder = folders[folderIndex];
       fileSelect.innerHTML = "";
 
       if (!folder || folder.files.length === 0) {
+        countrySelect.innerHTML = "<option value=\"ALL\">All countries</option>";
+        countrySelect.value = "ALL";
+        countrySelect.disabled = true;
+        describeFilterSelect.innerHTML = "<option value=\"ALL\">All testDescribe values</option>";
+        describeFilterSelect.value = "ALL";
+        describeFilterSelect.disabled = true;
+        titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
+        titleFilterSelect.value = "ALL";
+        titleFilterSelect.disabled = true;
         fileSelect.innerHTML = "<option>(no files)</option>";
         infoText.textContent = folder ? folder.name + ": 0 files" : "No folder selected.";
         selectedPath.textContent = "No file selected.";
@@ -1464,6 +1744,12 @@
         return;
       }
 
+      renderCountryOptions(folder, preferredCountry || String(countrySelect.value || "ALL").toUpperCase());
+      await renderMetadataFilterOptions(
+        folder,
+        preferredDescribe || String(describeFilterSelect.value || "ALL"),
+        preferredTitle || String(titleFilterSelect.value || "ALL")
+      );
       renderFileOptions(folder, preferredFileName);
     }
 
@@ -1570,10 +1856,7 @@
       }
 
       const normalizedRel = normalizePath(relPath);
-      const fileObj = selectedFiles.find((file) => {
-        const pathValue = normalizePath(file.webkitRelativePath || file.name);
-        return pathValue === normalizedRel || pathValue === normalizePath(rootLabel + "/" + normalizedRel);
-      });
+      const fileObj = findSelectedFileByRelativePath(normalizedRel);
 
       if (!fileObj) {
         resetFileMeta();
@@ -1761,7 +2044,31 @@
     });
 
     folderSelect.addEventListener("change", () => {
-      renderFiles(Number(folderSelect.value));
+      void renderFiles(Number(folderSelect.value), "", "ALL", "ALL", "ALL");
+    });
+
+    countrySelect.addEventListener("change", () => {
+      void renderFiles(
+        Number(folderSelect.value),
+        fileSelect.value,
+        countrySelect.value,
+        describeFilterSelect.value,
+        titleFilterSelect.value
+      );
+    });
+
+    describeFilterSelect.addEventListener("change", () => {
+      void renderFiles(
+        Number(folderSelect.value),
+        fileSelect.value,
+        countrySelect.value,
+        describeFilterSelect.value,
+        "ALL"
+      );
+    });
+
+    titleFilterSelect.addEventListener("change", () => {
+      renderFileOptions(folders[Number(folderSelect.value)], fileSelect.value);
     });
 
     fileSelect.addEventListener("change", () => {
@@ -1794,7 +2101,7 @@
 
       rootLabel = allShareFirstSegment ? firstSegment : "selected-root";
 
-      readRootFromSelectedFiles();
+      void readRootFromSelectedFiles();
     });
 
     screenshotPrevBtn.addEventListener("click", () => {
