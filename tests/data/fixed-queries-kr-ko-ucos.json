@@ -77,6 +77,7 @@
   "byFixedQuery": [
     {
       "value": "세단 차량을 보여줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -99,6 +100,7 @@
     },
     {
       "value": "구매 가능한 차량을 보여줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -111,6 +113,7 @@
     },
     {
       "value": "곧 출시될 차량을 보여줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -133,6 +136,7 @@
     },
     {
       "value": "CLA 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -155,6 +159,7 @@
     },
     {
       "value": "예산은 100,500,000 원 이하야",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -177,6 +182,7 @@
     },
     {
       "value": "쿠페 차량이 있나요? 2도어 차량이에요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -199,6 +205,7 @@
     },
     {
       "value": "가족용 차량을 찾고 있어요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -221,6 +228,7 @@
     },
     {
       "value": "빠른 스포츠카를 찾아줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -233,6 +241,7 @@
     },
     {
       "value": "보라색 차량만 보여줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -245,6 +254,7 @@
     },
     {
       "value": "전기차를 원해요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -267,6 +277,7 @@
     },
     {
       "value": "세련되고 멋진 컴팩트 차량을 원해요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -279,6 +290,7 @@
     },
     {
       "value": "2020년식 차량이나 은색 차량이 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -301,6 +313,7 @@
     },
     {
       "value": "흰색 차량이 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -323,6 +336,7 @@
     },
     {
       "value": "추천해 줄 수 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -335,6 +349,7 @@
     },
     {
       "value": "컨버터블 차량에 관심 있어요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -357,6 +372,7 @@
     },
     {
       "value": "최고의 자동차 제조사는 어디인가요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -369,6 +385,7 @@
     },
     {
       "value": "차량 반품 정책이 어떻게 되나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -381,6 +398,7 @@
     },
     {
       "value": "금융 옵션을 제공하나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -393,6 +411,7 @@
     },
     {
       "value": "시승 예약을 할 수 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -405,6 +424,7 @@
     },
     {
       "value": "현재 프로모션이 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -417,6 +437,7 @@
     },
     {
       "value": "신차에 어떤 보증을 제공하나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -428,7 +449,21 @@
       }
     },
     {
+      "value": "I'm looking for new cars",
+      "productType": "UCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for used vehicles/cars and declines the new-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show new cars, first-hand inventory, or otherwise treats new-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "디젤 또는 하이브리드가 아닌 차량만 추려줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -452,6 +487,7 @@
     },
     {
       "value": "첨단 안전 기능이 있고 주행거리가 짧은 차량을 찾아줘",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -468,6 +504,7 @@
     },
     {
       "value": "BMW X5를 보여줄 수 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -480,6 +517,7 @@
     },
     {
       "value": "내 주문은 어디에 있나요? 지난주에 구매했는데 업데이트를 못 받았어요",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -492,6 +530,7 @@
     },
     {
       "value": "아직 아무도 연락하지 않았어요",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -504,6 +543,7 @@
     },
     {
       "value": "근처 최고의 피자 맛집을 추천해줘",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -516,6 +556,7 @@
     },
     {
       "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -528,6 +569,7 @@
     },
     {
       "value": "차량 옵션 상담을 위해 123-456-7890으로 전화해줘",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -540,6 +582,7 @@
     },
     {
       "value": "<p>주문하고 싶어요</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -552,6 +595,7 @@
     },
     {
       "value": "CLA 911 GTS에 대해 더 알려줘",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -564,6 +608,7 @@
     },
     {
       "value": "35세 기혼 여성 Sally Jackson에게 맞는 차량",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -576,6 +621,7 @@
     },
     {
       "value": "연비가 좋은 차량을 원해요",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -588,6 +634,7 @@
     },
     {
       "value": "A-Class를 제외한 모든 세단을 보여줘",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -616,6 +663,7 @@
     },
     {
       "value": "내비게이션이 기본 탑재된 차량이 있나요?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

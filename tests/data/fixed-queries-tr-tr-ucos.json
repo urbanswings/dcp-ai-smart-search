@@ -61,6 +61,7 @@
   "byFixedQuery": [
     {
       "value": "bana sedanları göster",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -83,6 +84,7 @@
     },
     {
       "value": "müsait araçları göster",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -95,6 +97,7 @@
     },
     {
       "value": "yakında çıkacak araçları göster",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -117,6 +120,7 @@
     },
     {
       "value": "sınıf 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -142,6 +146,7 @@
     },
     {
       "value": "bütçem 80.000 AUD'nin altında",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -164,6 +169,7 @@
     },
     {
       "value": "Coupe'niz var mı? bu iki kapılı bir araba",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -186,6 +192,7 @@
     },
     {
       "value": "Aile arabası arıyorum",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -208,6 +215,7 @@
     },
     {
       "value": "hızlı bir spor araba bul",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -220,6 +228,7 @@
     },
     {
       "value": "sadece mor arabalar",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -232,6 +241,7 @@
     },
     {
       "value": "Elektrikli araç istiyorum",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -254,6 +264,7 @@
     },
     {
       "value": "Güzel ve şık bir kompakt araç istiyorum",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -266,6 +277,7 @@
     },
     {
       "value": "2020 model veya gümüş rengi bir arabanız var mı?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -288,6 +300,7 @@
     },
     {
       "value": "beyaz bir araban var mı?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -310,6 +323,7 @@
     },
     {
       "value": "bana bir tavsiye verebilir misin?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -322,6 +336,7 @@
     },
     {
       "value": "Cabrio araçlarla ilgileniyorum",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -344,6 +359,7 @@
     },
     {
       "value": "En iyi otomobil üreticileri kimler?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -356,6 +372,7 @@
     },
     {
       "value": "Araçlar için iade politikanız nedir?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -368,6 +385,7 @@
     },
     {
       "value": "Finansman seçenekleri sunuyor musunuz?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -380,6 +398,7 @@
     },
     {
       "value": "Bir test sürüşü planlayabilir miyim?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -392,6 +411,7 @@
     },
     {
       "value": "promosyon var mı?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -404,6 +424,7 @@
     },
     {
       "value": "Yeni araçlara ne gibi garantiler veriyorsunuz?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -415,7 +436,21 @@
       }
     },
     {
+      "value": "I'm looking for new cars",
+      "productType": "UCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for used vehicles/cars and declines the new-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show new cars, first-hand inventory, or otherwise treats new-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "dizel veya hibrit olmayan kısa listedeki arabalar",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -439,6 +474,7 @@
     },
     {
       "value": "gelişmiş güvenlik özelliklerine ve düşük kilometre performansına sahip arabaları bulun",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -455,6 +491,7 @@
     },
     {
       "value": "BMW X5'i benim için listeleyebilir misiniz?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -467,6 +504,7 @@
     },
     {
       "value": "siparişim nerede? Geçen hafta aldım ama güncelleme gelmedi",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -479,6 +517,7 @@
     },
     {
       "value": "henüz kimse benimle iletişime geçmedi",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -491,6 +530,7 @@
     },
     {
       "value": "yakındaki en iyi pizza restoranlarını öner",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -503,6 +543,7 @@
     },
     {
       "value": "bu da bir sorun değil. Ne oldu?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -515,6 +556,7 @@
     },
     {
       "value": "Araç seçeneklerimi görüşmek için beni 123-456-7890 numaralı telefondan arayın",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -527,6 +569,7 @@
     },
     {
       "value": "<p>Sipariş vermek istiyorum</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -539,6 +582,7 @@
     },
     {
       "value": "bana CLA 911 GTS hakkında daha fazla bilgi ver",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -551,6 +595,7 @@
     },
     {
       "value": "35 yaşında evli bir kadın olan Sally Jackson için uygun bir araba",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -563,6 +608,7 @@
     },
     {
       "value": "Yakıt tasarruflu arabalar istiyorum",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -575,6 +621,7 @@
     },
     {
       "value": "A-Serisi hariç tüm sedanları listele",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -603,6 +650,7 @@
     },
     {
       "value": "Dahili navigasyon sistemine sahip herhangi bir araba var mı?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

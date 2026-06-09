@@ -61,6 +61,7 @@
   "byFixedQuery": [
     {
       "value": "எனக்கு சேடன்களைக் காட்டு",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -83,6 +84,7 @@
     },
     {
       "value": "கிடைக்கும் வாகனங்களைக் காட்டு",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -95,6 +97,7 @@
     },
     {
       "value": "விரைவில் வரும் வாகனங்களைக் காட்டு",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -117,6 +120,7 @@
     },
     {
       "value": "கிளா 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -142,6 +146,7 @@
     },
     {
       "value": "எனது பட்ஜெட் ₹ 20,050,000க்கு கீழ் உள்ளது",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -164,6 +169,7 @@
     },
     {
       "value": "உன்னிடம் கூபே இருக்கிறதா? அது இரண்டு கதவுகள் கொண்ட கார்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -186,6 +192,7 @@
     },
     {
       "value": "நான் ஒரு குடும்ப காரைத் தேடுகிறேன்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -208,6 +215,7 @@
     },
     {
       "value": "வேகமான ஸ்போர்ட்ஸ் காரைக் கண்டுபிடி",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -220,6 +228,7 @@
     },
     {
       "value": "ஊதா நிற கார்கள் மட்டுமே",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -232,6 +241,7 @@
     },
     {
       "value": "எனக்கு மின்சார வாகனம் வேண்டும்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -254,6 +264,7 @@
     },
     {
       "value": "எனக்கு அழகான மற்றும் ஸ்டைலான சிறிய வாகனம் வேண்டும்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -266,6 +277,7 @@
     },
     {
       "value": "உங்களிடம் 2020 மாடல் அல்லது சில்வர் கார் இருக்கிறதா?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -288,6 +300,7 @@
     },
     {
       "value": "உங்களிடம் வெள்ளை கார் இருக்கிறதா?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -310,6 +323,7 @@
     },
     {
       "value": "நீங்கள் எனக்கு ஒரு பரிந்துரை கொடுக்க முடியுமா?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -322,6 +336,7 @@
     },
     {
       "value": "நான் மாற்றக்கூடிய வாகனங்களில் ஆர்வமாக உள்ளேன்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -344,6 +359,7 @@
     },
     {
       "value": "சிறந்த கார் உற்பத்தியாளர்கள் யார்?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -356,6 +372,7 @@
     },
     {
       "value": "உங்கள் வாகனங்கள் திரும்பும் கொள்கை என்ன?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -368,6 +385,7 @@
     },
     {
       "value": "நீங்கள் நிதி விருப்பங்களை வழங்குகிறீர்களா?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -380,6 +398,7 @@
     },
     {
       "value": "நான் ஒரு சோதனை ஓட்டத்தை திட்டமிடலாமா?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -392,6 +411,7 @@
     },
     {
       "value": "ஏதேனும் பதவி உயர்வு உள்ளதா?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -404,6 +424,7 @@
     },
     {
       "value": "புதிய வாகனங்களுக்கு என்ன உத்தரவாதங்களை வழங்குகிறீர்கள்?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -415,7 +436,21 @@
       }
     },
     {
+      "value": "I'm looking for used cars",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "டீசல் அல்லது ஹைப்ரிட் இல்லாத கார்களை ஷார்ட்லிஸ்ட் செய்யவும்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -439,6 +474,7 @@
     },
     {
       "value": "மேம்பட்ட பாதுகாப்பு அம்சங்கள் மற்றும் குறைந்த மைலேஜ் கொண்ட கார்களைக் கண்டறியவும்",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -455,6 +491,7 @@
     },
     {
       "value": "எனக்காக BMW X5 பட்டியலிட முடியுமா?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -467,6 +504,7 @@
     },
     {
       "value": "என் ஆர்டர் எங்கே? நான் அதை கடந்த வாரம் வாங்கினேன், ஆனால் எந்த புதுப்பிப்புகளும் கிடைக்கவில்லை",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -479,6 +517,7 @@
     },
     {
       "value": "இதுவரை யாரும் என்னை தொடர்பு கொள்ளவில்லை",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -491,6 +530,7 @@
     },
     {
       "value": "அருகிலுள்ள சிறந்த பீஸ்ஸா உணவகங்களைப் பரிந்துரைக்கவும்",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -503,6 +543,7 @@
     },
     {
       "value": "முழே பதாயோ கி பாரத் கி சட்கோங் கேலியே கவுன் சா மாடல் சரியா?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -515,6 +556,7 @@
     },
     {
       "value": "எனது கார் விருப்பங்களைப் பற்றி விவாதிக்க 123-456-7890 இல் என்னை அழைக்கவும்",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -527,6 +569,7 @@
     },
     {
       "value": "<p>நான் ஆர்டர் செய்ய விரும்புகிறேன்</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -539,6 +582,7 @@
     },
     {
       "value": "CLA 911 GTS பற்றி மேலும் சொல்லுங்கள்",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -551,6 +595,7 @@
     },
     {
       "value": "35 வயது திருமணமான பெண்ணான சாலி ஜாக்சனுக்கு ஏற்ற கார்",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -563,6 +608,7 @@
     },
     {
       "value": "எனக்கு எரிபொருள் திறன் கொண்ட கார்கள் வேண்டும்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -575,6 +621,7 @@
     },
     {
       "value": "ஏ-கிளாஸ் தவிர அனைத்து செடான்களையும் பட்டியலிடுங்கள்",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -603,6 +650,7 @@
     },
     {
       "value": "வழிசெலுத்தல் அமைப்புடன் உள்ளமைக்கப்பட்ட கார்கள் ஏதேனும் உள்ளதா?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

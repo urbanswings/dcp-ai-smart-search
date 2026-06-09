@@ -61,6 +61,7 @@
   "byFixedQuery": [
     {
       "value": "আমাকে সেডান দেখাও",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -83,6 +84,7 @@
     },
     {
       "value": "আমাকে উপলব্ধ যানবাহন দেখান",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -95,6 +97,7 @@
     },
     {
       "value": "আমাকে শীঘ্রই আসছে গাড়ি দেখান",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -117,6 +120,7 @@
     },
     {
       "value": "cla 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -139,6 +143,7 @@
     },
     {
       "value": "আমার বাজেট ₹ 20,050,000 এর নিচে",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -161,6 +166,7 @@
     },
     {
       "value": "তোমার কি কুপ আছে? এটা একটা দুই দরজার গাড়ি",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -183,6 +189,7 @@
     },
     {
       "value": "আমি একটি পারিবারিক গাড়ি খুঁজছি",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -205,6 +212,7 @@
     },
     {
       "value": "একটি দ্রুত স্পোর্টস কার খুঁজুন",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -217,6 +225,7 @@
     },
     {
       "value": "শুধুমাত্র বেগুনি রঙের গাড়ি",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -229,6 +238,7 @@
     },
     {
       "value": "আমি একটি বৈদ্যুতিক গাড়ি চাই",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -251,6 +261,7 @@
     },
     {
       "value": "আমি একটি সুন্দর এবং স্টাইলিশ কমপ্যাক্ট গাড়ি চাই",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -263,6 +274,7 @@
     },
     {
       "value": "আপনার কি 2020 মডেলের নাকি সিলভার কার আছে?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -285,6 +297,7 @@
     },
     {
       "value": "তোমার কি সাদা গাড়ি আছে?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -307,6 +320,7 @@
     },
     {
       "value": "আপনি আমাকে একটি সুপারিশ দিতে পারেন?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -319,6 +333,7 @@
     },
     {
       "value": "আমি পরিবর্তনযোগ্য যানবাহনে আগ্রহী",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -341,6 +356,7 @@
     },
     {
       "value": "সেরা গাড়ি প্রস্তুতকারক কারা?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -353,6 +369,7 @@
     },
     {
       "value": "যানবাহনের জন্য আপনার রিটার্ন নীতি কি?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -365,6 +382,7 @@
     },
     {
       "value": "আপনি কি অর্থায়নের বিকল্পগুলি অফার করেন?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -377,6 +395,7 @@
     },
     {
       "value": "আমি কি একটি টেস্ট ড্রাইভ শিডিউল করতে পারি?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -389,6 +408,7 @@
     },
     {
       "value": "কোন পদোন্নতি আছে?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -401,6 +421,7 @@
     },
     {
       "value": "আপনি নতুন গাড়ির জন্য কি ওয়ারেন্টি প্রদান করেন?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -412,7 +433,21 @@
       }
     },
     {
+      "value": "I'm looking for used cars",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "বাছাই করা গাড়ি যা ডিজেল বা হাইব্রিড নয়",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -436,6 +471,7 @@
     },
     {
       "value": "উন্নত নিরাপত্তা বৈশিষ্ট্য এবং কম মাইলেজ সহ গাড়ি খুঁজুন",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -452,6 +488,7 @@
     },
     {
       "value": "আপনি কি আমার জন্য BMW X5 তালিকাভুক্ত করতে পারেন?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -464,6 +501,7 @@
     },
     {
       "value": "আমার অর্ডার কোথায়? আমি গত সপ্তাহে এটি কিনেছি কিন্তু কোন আপডেট পাইনি",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -476,6 +514,7 @@
     },
     {
       "value": "কেউ এখনো আমার সাথে যোগাযোগ করেনি",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -488,6 +527,7 @@
     },
     {
       "value": "কাছাকাছি সেরা পিৎজা রেস্তোরাঁর সুপারিশ করুন",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -500,6 +540,7 @@
     },
     {
       "value": "আমাকে বলুন যে ভারতের রাস্তার জন্য কে ভালো মডেল?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -512,6 +553,7 @@
     },
     {
       "value": "আমার গাড়ির বিকল্পগুলি নিয়ে আলোচনা করতে আমাকে 123-456-7890 নম্বরে কল করুন",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -524,6 +566,7 @@
     },
     {
       "value": "<p>আমি একটি অর্ডার দিতে চাই</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -536,6 +579,7 @@
     },
     {
       "value": "CLA 911 GTS সম্পর্কে আমাকে আরও বলুন",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -548,6 +592,7 @@
     },
     {
       "value": "স্যালি জ্যাকসনের জন্য একটি উপযুক্ত গাড়ি, একজন 35 বছর বয়সী বিবাহিত মহিলা৷",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -560,6 +605,7 @@
     },
     {
       "value": "আমি জ্বালানি সাশ্রয়ী গাড়ি চাই",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -572,6 +618,7 @@
     },
     {
       "value": "A-ক্লাস ব্যতীত সমস্ত সেডানের তালিকা করুন",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -600,6 +647,7 @@
     },
     {
       "value": "বিল্ট ইন ন্যাভিগেশন সিস্টেম দিয়ে সজ্জিত কোন গাড়ি আছে?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

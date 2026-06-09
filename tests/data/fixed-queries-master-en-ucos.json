@@ -1,4 +1,20 @@
 {
+  "forRegression": [
+    "मैं फैमिली कार खोज रहा हूँ",
+    "एक तेज़ स्पोर्ट्स कार ढूँढो",
+    "CLA 911 GTS के बारे में और जानकारी दो",
+    "find a fast sports car",
+    "I'm looking for a spacious vehicle with excellent fuel efficiency and the latest safety features",
+    "Do you have a model with adaptive cruise control?",
+    "Which Mercedes is best for someone who loves performance cars?",
+    "Recommend a hybrid or electric vehicle",
+    "Which Mercedes is best for city driving?",
+    "Do you have vehicles with SUV or coupe body type, especially the EQE model?",
+    "aile arabası arıyorum",
+    "güzel ve şık bir kompakt araç istiyorum",
+    "Which Mercedes is suitable for a small family?",
+    "Küçük aileye uygun Mercedes hangisi?"
+  ],
   "multiIntent": [
     "Show me SUVs, and we can also look at financing.",
     "I'm looking at sedans or coupes, are there any discounts?",
@@ -61,7 +77,7 @@
   "byFixedQuery": [
     {
       "value": "show me sedans",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -84,7 +100,7 @@
     },
     {
       "value": "show me available vehicles",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -97,7 +113,7 @@
     },
     {
       "value": "show me coming soon vehicles",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -120,7 +136,7 @@
     },
     {
       "value": "cla 200",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -142,14 +158,14 @@
       }
     },
     {
-      "value": "my budget is under 200,000 SGD",
-      "productType": "NCOS",
+      "value": "my budget is under AUD80,000",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 200000
+              "max": 80000
             }
           }
         ],
@@ -158,7 +174,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 200,000 SGD and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of AUD 80,000 and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true
@@ -166,7 +182,7 @@
     },
     {
       "value": "do you have a coupe? it's a two-door car",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -189,7 +205,7 @@
     },
     {
       "value": "I'm looking for a family car",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -212,7 +228,7 @@
     },
     {
       "value": "find a fast sports car",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -225,7 +241,7 @@
     },
     {
       "value": "only purple cars",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -238,7 +254,7 @@
     },
     {
       "value": "I want an electric vehicle",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -261,7 +277,7 @@
     },
     {
       "value": "I want a nice and stylish compact vehicle",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -274,7 +290,7 @@
     },
     {
       "value": "do you have a 2020 model or a silver car?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -297,7 +313,7 @@
     },
     {
       "value": "do you have a white car?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -320,7 +336,7 @@
     },
     {
       "value": "can you give me a recommendation?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -333,7 +349,7 @@
     },
     {
       "value": "I'm interested in convertible vehicles",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -356,7 +372,7 @@
     },
     {
       "value": "who are the best car manufacturers?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -369,7 +385,7 @@
     },
     {
       "value": "what is your return policy for vehicles?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -382,7 +398,7 @@
     },
     {
       "value": "do you offer financing options?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -395,7 +411,7 @@
     },
     {
       "value": "can I schedule a test drive?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -408,7 +424,7 @@
     },
     {
       "value": "is there any promotion?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -421,7 +437,7 @@
     },
     {
       "value": "what warranties do you provide for new vehicles?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -433,21 +449,21 @@
       }
     },
     {
-      "value": "I'm looking for used cars",
-      "productType": "NCOS",
+      "value": "I'm looking for new cars",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
-          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for used vehicles/cars and declines the new-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show new cars, first-hand inventory, or otherwise treats new-car search as supported in this channel."
         ],
         "overwrite": true
       }
     },
     {
       "value": "shortlist cars that are not diesel or hybrid",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -471,7 +487,7 @@
     },
     {
       "value": "find cars with advanced safety features and low mileage",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -488,7 +504,7 @@
     },
     {
       "value": "can you list the BMW X5 for me?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -501,7 +517,7 @@
     },
     {
       "value": "where is my order? I bought it last week but received no updates",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -514,7 +530,7 @@
     },
     {
       "value": "no one has contacted me yet",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -527,7 +543,7 @@
     },
     {
       "value": "recommend the best pizza restaurants nearby",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -540,7 +556,7 @@
     },
     {
       "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -553,7 +569,7 @@
     },
     {
       "value": "call me at 123-456-7890 to discuss my car options",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -566,7 +582,7 @@
     },
     {
       "value": "<p>I want to place an order</p>",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -579,7 +595,7 @@
     },
     {
       "value": "tell me more about CLA 911 GTS",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -592,7 +608,7 @@
     },
     {
       "value": "a suitable car for Sally Jackson, a 35-year-old married woman",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -605,7 +621,7 @@
     },
     {
       "value": "I want fuel efficient cars",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -618,7 +634,7 @@
     },
     {
       "value": "list all sedans except A-Class",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -647,7 +663,7 @@
     },
     {
       "value": "is there any cars equipped with built in with navigation system?",
-      "productType": "NCOS",
+      "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -661,17 +677,17 @@
   ],
   "recommendationModel": [
     "Do you have a Mercedes SUV suitable for a family of five?",
-    "Which Mercedes is best for city driving in Singapore?",
+    "Which Mercedes is best for city driving?",
     "Can you recommend a fuel-efficient Mercedes sedan?",
-    "Which Mercedes model is most comfortable for frequent tropical driving?",
+    "Which Mercedes model is most comfortable for long trips?",
     "Recommend a luxurious coupe with strong safety features.",
     "I'm buying my first car, which Mercedes should I get?",
     "Can you recommend a car with a panoramic roof and leather seats?",
-    "Which model is best for comfortable tropical weather driving?",
+    "Which model is best for comfortable winter driving?",
     "Recommend a Mercedes with lots of technology features.",
     "Which Mercedes is best for someone who loves performance cars?",
     "Recommend an SUV that's easy to park in the city.",
-    "Which Mercedes is fuel-efficient in tropical conditions?",
+    "Which Mercedes is fuel-efficient on long drives?",
     "Recommend a model with a large trunk.",
     "Which Mercedes is suitable for a small family?",
     "Recommend a hybrid or electric vehicle.",
@@ -1054,7 +1070,7 @@
     "I heard a Mercedes-Benz G-Class from the 1950s can go over 1000 miles per hour."
   ],
   "localization": [
-    "2024年以降の登録車両を白色で表示してください",
+    "2024 sonrası tescilli beyaz Mercedes-Benz araçları göster.",
     "검은색 인테리어를 갖춘 메르세데스-벤츠 차량을 보여주세요.",
     "Beyaz renkli Mercedes-Benz GLS SUV"
   ],

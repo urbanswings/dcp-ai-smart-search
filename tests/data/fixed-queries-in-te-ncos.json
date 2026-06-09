@@ -61,6 +61,7 @@
   "byFixedQuery": [
     {
       "value": "నాకు సెడాన్‌లను చూపించు",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -83,6 +84,7 @@
     },
     {
       "value": "అందుబాటులో ఉన్న వాహనాలను నాకు చూపించు",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -95,6 +97,7 @@
     },
     {
       "value": "త్వరలో వచ్చే వాహనాలను నాకు చూపించు",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -117,6 +120,7 @@
     },
     {
       "value": "క్లా 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -142,6 +146,7 @@
     },
     {
       "value": "నా బడ్జెట్ ₹ 20,050,000 లోపు ఉంది",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -164,6 +169,7 @@
     },
     {
       "value": "నీ దగ్గర కూపే ఉందా? అది రెండు డోర్ల కారు",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -186,6 +192,7 @@
     },
     {
       "value": "నేను కుటుంబ కారు కోసం చూస్తున్నాను",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -208,6 +215,7 @@
     },
     {
       "value": "వేగవంతమైన స్పోర్ట్స్ కారును కనుగొనండి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -220,6 +228,7 @@
     },
     {
       "value": "ఊదా రంగు కార్లు మాత్రమే",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -232,6 +241,7 @@
     },
     {
       "value": "నాకు ఎలక్ట్రిక్ వాహనం కావాలి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -254,6 +264,7 @@
     },
     {
       "value": "నాకు చక్కని మరియు స్టైలిష్ కాంపాక్ట్ వాహనం కావాలి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -266,6 +277,7 @@
     },
     {
       "value": "మీ దగ్గర 2020 మోడల్ లేదా వెండి కారు ఉందా?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -288,6 +300,7 @@
     },
     {
       "value": "మీకు తెల్లటి కారు ఉందా?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -310,6 +323,7 @@
     },
     {
       "value": "మీరు నాకు సిఫార్సు ఇవ్వగలరా?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -322,6 +336,7 @@
     },
     {
       "value": "నాకు కన్వర్టిబుల్ వాహనాలపై ఆసక్తి ఉంది",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -344,6 +359,7 @@
     },
     {
       "value": "ఉత్తమ కార్ల తయారీదారులు ఎవరు?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -356,6 +372,7 @@
     },
     {
       "value": "వాహనాల కోసం మీ రిటర్న్ పాలసీ ఏమిటి?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -368,6 +385,7 @@
     },
     {
       "value": "మీరు ఫైనాన్సింగ్ ఎంపికలను అందిస్తారా?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -380,6 +398,7 @@
     },
     {
       "value": "నేను టెస్ట్ డ్రైవ్ షెడ్యూల్ చేయవచ్చా?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -392,6 +411,7 @@
     },
     {
       "value": "ఏదైనా ప్రమోషన్ ఉందా?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -404,6 +424,7 @@
     },
     {
       "value": "కొత్త వాహనాలకు మీరు ఏ హామీలు అందిస్తారు?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -415,7 +436,21 @@
       }
     },
     {
+      "value": "I'm looking for used cars",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "డీజిల్ లేదా హైబ్రిడ్ లేని కార్లను షార్ట్‌లిస్ట్ చేయండి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -439,6 +474,7 @@
     },
     {
       "value": "అధునాతన భద్రతా ఫీచర్లు మరియు తక్కువ మైలేజీ ఉన్న కార్లను కనుగొనండి",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -455,6 +491,7 @@
     },
     {
       "value": "మీరు నా కోసం BMW X5ని జాబితా చేయగలరా?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -467,6 +504,7 @@
     },
     {
       "value": "నా ఆర్డర్ ఎక్కడ ఉంది? నేను గత వారం కొనుగోలు చేసాను కానీ ఎటువంటి అప్‌డేట్‌లు అందుకోలేదు",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -479,6 +517,7 @@
     },
     {
       "value": "నన్ను ఇంకా ఎవరూ సంప్రదించలేదు",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -491,6 +530,7 @@
     },
     {
       "value": "సమీపంలోని ఉత్తమ పిజ్జా రెస్టారెంట్‌లను సిఫార్సు చేయండి",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -503,6 +543,7 @@
     },
     {
       "value": "ముజె బతాయో కి భారత్ కి సడన్‌లు ఎలా ఉన్నాయి?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -515,6 +556,7 @@
     },
     {
       "value": "నా కారు ఎంపికలను చర్చించడానికి 123-456-7890కి కాల్ చేయండి",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -527,6 +569,7 @@
     },
     {
       "value": "<p>నేను ఆర్డర్ చేయాలనుకుంటున్నాను</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -539,6 +582,7 @@
     },
     {
       "value": "నాకు CLA 911 GTS గురించి మరింత చెప్పండి",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -551,6 +595,7 @@
     },
     {
       "value": "35 ఏళ్ల వివాహిత అయిన సాలీ జాక్సన్‌కి తగిన కారు",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -563,6 +608,7 @@
     },
     {
       "value": "నాకు ఇంధన సామర్థ్యం గల కార్లు కావాలి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -575,6 +621,7 @@
     },
     {
       "value": "A-క్లాస్ మినహా అన్ని సెడాన్‌లను జాబితా చేయండి",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -603,6 +650,7 @@
     },
     {
       "value": "నావిగేషన్ సిస్టమ్‌తో అంతర్నిర్మిత కార్లు ఏవైనా ఉన్నాయా?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

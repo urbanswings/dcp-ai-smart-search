@@ -77,6 +77,7 @@
   "byFixedQuery": [
     {
       "value": "show me sedans",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -99,6 +100,7 @@
     },
     {
       "value": "show me available vehicles",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -111,6 +113,7 @@
     },
     {
       "value": "show me coming soon vehicles",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -133,6 +136,7 @@
     },
     {
       "value": "cla 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -155,6 +159,7 @@
     },
     {
       "value": "my budget is under AUD80,000",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -177,6 +182,7 @@
     },
     {
       "value": "do you have a coupe? it's a two-door car",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -199,6 +205,7 @@
     },
     {
       "value": "I'm looking for a family car",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -221,6 +228,7 @@
     },
     {
       "value": "find a fast sports car",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -233,6 +241,7 @@
     },
     {
       "value": "only purple cars",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -245,6 +254,7 @@
     },
     {
       "value": "I want an electric vehicle",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -267,6 +277,7 @@
     },
     {
       "value": "I want a nice and stylish compact vehicle",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -279,6 +290,7 @@
     },
     {
       "value": "do you have a 2020 model or a silver car?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -301,6 +313,7 @@
     },
     {
       "value": "do you have a white car?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -323,6 +336,7 @@
     },
     {
       "value": "can you give me a recommendation?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -335,6 +349,7 @@
     },
     {
       "value": "I'm interested in convertible vehicles",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -357,6 +372,7 @@
     },
     {
       "value": "who are the best car manufacturers?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -369,6 +385,7 @@
     },
     {
       "value": "what is your return policy for vehicles?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -381,6 +398,7 @@
     },
     {
       "value": "do you offer financing options?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -393,6 +411,7 @@
     },
     {
       "value": "can I schedule a test drive?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -405,6 +424,7 @@
     },
     {
       "value": "is there any promotion?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -417,6 +437,7 @@
     },
     {
       "value": "what warranties do you provide for new vehicles?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -428,7 +449,21 @@
       }
     },
     {
+      "value": "I'm looking for used cars",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "shortlist cars that are not diesel or hybrid",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -452,6 +487,7 @@
     },
     {
       "value": "find cars with advanced safety features and low mileage",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -468,6 +504,7 @@
     },
     {
       "value": "can you list the BMW X5 for me?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -480,6 +517,7 @@
     },
     {
       "value": "where is my order? I bought it last week but received no updates",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -492,6 +530,7 @@
     },
     {
       "value": "no one has contacted me yet",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -504,6 +543,7 @@
     },
     {
       "value": "recommend the best pizza restaurants nearby",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -516,6 +556,7 @@
     },
     {
       "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -528,6 +569,7 @@
     },
     {
       "value": "call me at 123-456-7890 to discuss my car options",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -540,6 +582,7 @@
     },
     {
       "value": "<p>I want to place an order</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -552,6 +595,7 @@
     },
     {
       "value": "tell me more about CLA 911 GTS",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -564,6 +608,7 @@
     },
     {
       "value": "a suitable car for Sally Jackson, a 35-year-old married woman",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -576,6 +621,7 @@
     },
     {
       "value": "I want fuel efficient cars",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -588,6 +634,7 @@
     },
     {
       "value": "list all sedans except A-Class",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -616,6 +663,7 @@
     },
     {
       "value": "is there any cars equipped with built in with navigation system?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {

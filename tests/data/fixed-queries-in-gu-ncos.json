@@ -61,6 +61,7 @@
   "byFixedQuery": [
     {
       "value": "મને સેડાન બતાવો",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -83,6 +84,7 @@
     },
     {
       "value": "મને ઉપલબ્ધ વાહનો બતાવો",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -95,6 +97,7 @@
     },
     {
       "value": "મને જલ્દી આવતા વાહનો બતાવો",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -117,6 +120,7 @@
     },
     {
       "value": "cla 200",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -139,6 +143,7 @@
     },
     {
       "value": "મારું બજેટ ₹ 20,050,000 ની નીચે છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -161,6 +166,7 @@
     },
     {
       "value": "શું તમારી પાસે કૂપ છે? તે બે દરવાજાવાળી કાર છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -183,6 +189,7 @@
     },
     {
       "value": "હું ફેમિલી કાર શોધી રહ્યો છું",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -205,6 +212,7 @@
     },
     {
       "value": "ઝડપી સ્પોર્ટ્સ કાર શોધો",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -217,6 +225,7 @@
     },
     {
       "value": "માત્ર જાંબલી કાર",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -229,6 +238,7 @@
     },
     {
       "value": "મારે ઇલેક્ટ્રિક વાહન જોઈએ છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -251,6 +261,7 @@
     },
     {
       "value": "મને એક સરસ અને સ્ટાઇલિશ કોમ્પેક્ટ વાહન જોઈએ છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -263,6 +274,7 @@
     },
     {
       "value": "શું તમારી પાસે 2020 મોડલ છે કે સિલ્વર કાર?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -285,6 +297,7 @@
     },
     {
       "value": "શું તમારી પાસે સફેદ કાર છે?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -307,6 +320,7 @@
     },
     {
       "value": "શું તમે મને ભલામણ કરી શકો છો?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -319,6 +333,7 @@
     },
     {
       "value": "મને કન્વર્ટિબલ વાહનોમાં રસ છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -341,6 +356,7 @@
     },
     {
       "value": "શ્રેષ્ઠ કાર ઉત્પાદકો કોણ છે?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -353,6 +369,7 @@
     },
     {
       "value": "વાહનો માટે તમારી રીટર્ન પોલિસી શું છે?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -365,6 +382,7 @@
     },
     {
       "value": "શું તમે ધિરાણ વિકલ્પો ઓફર કરો છો?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -377,6 +395,7 @@
     },
     {
       "value": "શું હું ટેસ્ટ ડ્રાઈવ શેડ્યૂલ કરી શકું?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -389,6 +408,7 @@
     },
     {
       "value": "શું કોઈ પ્રમોશન છે?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -401,6 +421,7 @@
     },
     {
       "value": "નવા વાહનો માટે તમે કઈ વોરંટી આપો છો?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -412,7 +433,21 @@
       }
     },
     {
+      "value": "I'm looking for used cars",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "શોર્ટલિસ્ટ કાર કે જે ડીઝલ અથવા હાઇબ્રિડ નથી",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [],
@@ -436,6 +471,7 @@
     },
     {
       "value": "અદ્યતન સલામતી સુવિધાઓ અને ઓછી માઇલેજવાળી કાર શોધો",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
         "include": [],
@@ -452,6 +488,7 @@
     },
     {
       "value": "શું તમે મારા માટે BMW X5 ની યાદી આપી શકો છો?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -464,6 +501,7 @@
     },
     {
       "value": "મારો ઓર્ડર ક્યાં છે? મેં તેને ગયા અઠવાડિયે ખરીદ્યું હતું પરંતુ કોઈ અપડેટ્સ પ્રાપ્ત થયા નથી",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -476,6 +514,7 @@
     },
     {
       "value": "હજુ સુધી કોઈએ મારો સંપર્ક કર્યો નથી",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -488,6 +527,7 @@
     },
     {
       "value": "નજીકના શ્રેષ્ઠ પિઝા રેસ્ટોરન્ટની ભલામણ કરો",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -500,6 +540,7 @@
     },
     {
       "value": "મને કહો કે ભારતની રસ્તાઓ માટે કોણ સાદું મોડેલ સારું છે?",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -512,6 +553,7 @@
     },
     {
       "value": "મારા કારના વિકલ્પોની ચર્ચા કરવા માટે મને 123-456-7890 પર કૉલ કરો",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -524,6 +566,7 @@
     },
     {
       "value": "<p>મારે ઓર્ડર આપવાનો છે</p>",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -536,6 +579,7 @@
     },
     {
       "value": "મને CLA 911 GTS વિશે વધુ કહો",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -548,6 +592,7 @@
     },
     {
       "value": "સેલી જેક્સન, 35 વર્ષની પરિણીત મહિલા માટે યોગ્ય કાર",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
       "aiEvaluationHints": {
@@ -560,6 +605,7 @@
     },
     {
       "value": "મને ઇંધણ કાર્યક્ષમ કાર જોઈએ છે",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
       "aiEvaluationHints": {
@@ -572,6 +618,7 @@
     },
     {
       "value": "A-ક્લાસ સિવાય તમામ સેડાનની યાદી બનાવો",
+      "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
@@ -600,6 +647,7 @@
     },
     {
       "value": "શું બિલ્ટ-ઇન નેવિગેશન સિસ્ટમથી સજ્જ કોઈ કાર છે?",
+      "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
       "aiEvaluationHints": {
