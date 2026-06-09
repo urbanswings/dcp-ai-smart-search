@@ -193,7 +193,7 @@ export async function resolveFixedQueriesFilePath(dataDir: string): Promise<{
     `fixed-queries-${country}-${language}-ncos.json`,
     `fixed-queries-${country}-en-${product}.json`,
     `fixed-queries-${country}-en-ncos.json`,
-    "fixed-queries-en-ncos.json",
+    "fixed-queries-master-en-ncos.json",
   ];
 
   for (let index = 0; index < fallbackCandidates.length; index += 1) {

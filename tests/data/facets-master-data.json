@@ -509,6 +509,48 @@
       },
       {
         "value": "CLA 200+"
+      },
+      {
+        "value": "A 200 d"
+      },
+      {
+        "value": "B 200 d"
+      },
+      {
+        "value": "C 200 T-Modell"
+      },
+      {
+        "value": "C 220 d 4MATIC"
+      },
+      {
+        "value": "CLA 200 d"
+      },
+      {
+        "value": "E 53 4MATIC+ T-Modell"
+      },
+      {
+        "value": "EQE 350 4MATIC"
+      },
+      {
+        "value": "GLA 200 d 4MATIC"
+      },
+      {
+        "value": "GLA 45 S 4MATIC+"
+      },
+      {
+        "value": "GLB 200 d 4MATIC"
+      },
+      {
+        "value": "GT 53 4MATIC+"
+      },
+      {
+        "value": "GT 63 PRO 4MATIC+"
+      },
+      {
+        "value": "S 500 4MATIC"
+      },
+      {
+        "value": "V 220"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -566,6 +608,16 @@
       {
         "label": "Gövde Tipi",
         "value": "UNDEFINED"
+      },
+      {
+        "label": "ボディタイプ",
+        "formattedValue": "ロングセダン",
+        "value": "LONG_SEDAN"
+      },
+      {
+        "label": "ボディタイプ",
+        "formattedValue": "シューティングブレーク",
+        "value": "SHOOTING_BRAKE"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -708,6 +760,46 @@
       {
         "formattedValue": "Introductory Price",
         "value": "6e4f0932"
+      },
+      {
+        "formattedValue": "CLA 45 S 限定車",
+        "value": "66270a59"
+      },
+      {
+        "formattedValue": "E 300 限定車",
+        "value": "532d0985"
+      },
+      {
+        "formattedValue": "E 53 限定車",
+        "value": "4edf095a"
+      },
+      {
+        "formattedValue": "GLA 35 限定車",
+        "value": "5b2009e9"
+      },
+      {
+        "formattedValue": "GLC 43 限定車",
+        "value": "5b3309ea"
+      },
+      {
+        "formattedValue": "GT 53 限定車",
+        "value": "55b409b0"
+      },
+      {
+        "formattedValue": "Urban Stars",
+        "value": "333f0626"
+      },
+      {
+        "formattedValue": "全国の販売店で商談可能",
+        "value": "e4051985"
+      },
+      {
+        "formattedValue": "新ラインアップ GLE Core",
+        "value": "721112ec"
+      },
+      {
+        "formattedValue": "新ラインアップ Night Edition",
+        "value": "db021551"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -981,6 +1073,22 @@
       {
         "formattedValue": "프리미엄 플러스 패키지",
         "value": "b7eb178f"
+      },
+      {
+        "formattedValue": "Avantgarde Plusパッケージ",
+        "value": "193711f7"
+      },
+      {
+        "formattedValue": "アドバンスドプラスパッケージ",
+        "value": "c4f21e72"
+      },
+      {
+        "formattedValue": "プレミアムパッケージ",
+        "value": "83871657"
+      },
+      {
+        "formattedValue": "プレミアムプラスパッケージ",
+        "value": "6e221c81"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1078,6 +1186,30 @@
       {
         "formattedValue": "Electric Art",
         "value": "3b7a068e"
+      },
+      {
+        "formattedValue": "AMGライン",
+        "value": "48050907"
+      },
+      {
+        "formattedValue": "Mercedes-AMG インテリア",
+        "value": "f2fd1070"
+      },
+      {
+        "formattedValue": "アバンギャルドライン",
+        "value": "85b11664"
+      },
+      {
+        "formattedValue": "エクスクルーシブ",
+        "value": "d00129f"
+      },
+      {
+        "formattedValue": "エレクトリック・アート・ライン",
+        "value": "2ce920b9"
+      },
+      {
+        "formattedValue": "メルセデス AMG エクステリア",
+        "value": "23c5199b"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1763,6 +1895,222 @@
       {
         "formattedValue": "AMG aerodinamik paketi",
         "value": "8a410a33"
+      },
+      {
+        "formattedValue": "360°カメラ",
+        "value": "5a0a0a32"
+      },
+      {
+        "formattedValue": "AMG エアロダイナミクスパッケージ",
+        "value": "f7b21f68"
+      },
+      {
+        "formattedValue": "AMG セラミック製高性能複合式ブレーキシステム",
+        "value": "c9b62c7e"
+      },
+      {
+        "formattedValue": "AMG ダイナミックプラスパッケージ",
+        "value": "efc41f36"
+      },
+      {
+        "formattedValue": "AMG トラックペース",
+        "value": "edcd1130"
+      },
+      {
+        "formattedValue": "AMGドライバーズパッケージ",
+        "value": "ee411949"
+      },
+      {
+        "formattedValue": "AMGパフォーマンスシート",
+        "value": "a73c175f"
+      },
+      {
+        "formattedValue": "AMGパフォーマンスシートパッケージ Advanced",
+        "value": "95cc24ca"
+      },
+      {
+        "formattedValue": "AMGパフォーマンスシートパッケージ High-End",
+        "value": "94522478"
+      },
+      {
+        "formattedValue": "AR",
+        "value": "a9d0294"
+      },
+      {
+        "formattedValue": "Burmester®3Dサラウンドサウンドシステム",
+        "value": "909a2236"
+      },
+      {
+        "formattedValue": "Distronic アダプティブ・クルーズ・コントロール",
+        "value": "64432ab7"
+      },
+      {
+        "formattedValue": "EASY-PACK自動開閉テールゲート",
+        "value": "efaf18f5"
+      },
+      {
+        "formattedValue": "ENERGIZING パッケージ",
+        "value": "cd5f0f48"
+      },
+      {
+        "formattedValue": "LED DIGITAL LIGHT ライトシステム",
+        "value": "814f14de"
+      },
+      {
+        "formattedValue": "LED MULTIBEAM ライトシステム",
+        "value": "55dd13e8"
+      },
+      {
+        "formattedValue": "LEDライトシステム（全て）",
+        "value": "f2d7198b"
+      },
+      {
+        "formattedValue": "MBUXマルチメディアシステム",
+        "value": "fc221968"
+      },
+      {
+        "formattedValue": "PRE-SAFE",
+        "value": "1e9e0434"
+      },
+      {
+        "formattedValue": "アドバンスド・サウンドシステム",
+        "value": "2a20208d"
+      },
+      {
+        "formattedValue": "アンビエントライト",
+        "value": "44161434"
+      },
+      {
+        "formattedValue": "エアバランス",
+        "value": "a32b0e51"
+      },
+      {
+        "formattedValue": "キーレスゴー",
+        "value": "a6ae0ea0"
+      },
+      {
+        "formattedValue": "クライメートコントロール",
+        "value": "1fd61aa9"
+      },
+      {
+        "formattedValue": "サウンドシステム（全て）",
+        "value": "222a1add"
+      },
+      {
+        "formattedValue": "シートクライメートコントロール",
+        "value": "31f920d5"
+      },
+      {
+        "formattedValue": "シートヒーター 後方",
+        "value": "5ae31511"
+      },
+      {
+        "formattedValue": "シートヒーター前部",
+        "value": "484b149c"
+      },
+      {
+        "formattedValue": "ステアリングアシスト",
+        "value": "8836167f"
+      },
+      {
+        "formattedValue": "ステアリングヒータ",
+        "value": "4589148e"
+      },
+      {
+        "formattedValue": "スマートフォン連携機能（Apple CarPlay™ / Android Auto™)",
+        "value": "c52228fa"
+      },
+      {
+        "formattedValue": "スーパースクリーン",
+        "value": "4b3b14d7"
+      },
+      {
+        "formattedValue": "テレビチューナー",
+        "value": "429121e"
+      },
+      {
+        "formattedValue": "トラフィックサインアシスト",
+        "value": "6bd31c69"
+      },
+      {
+        "formattedValue": "ドライビング・アシスタンス・パッケージ",
+        "value": "f4ff2942"
+      },
+      {
+        "formattedValue": "ナイトパッケージ",
+        "value": "30d121d"
+      },
+      {
+        "formattedValue": "ナビゲーションシステム",
+        "value": "d0301891"
+      },
+      {
+        "formattedValue": "ハイパースクリーン",
+        "value": "44d21495"
+      },
+      {
+        "formattedValue": "ハイビームアシスト",
+        "value": "4310144f"
+      },
+      {
+        "formattedValue": "パノラミックスライディングルーフ",
+        "value": "8aa32284"
+      },
+      {
+        "formattedValue": "ブラインドスポットアシスト",
+        "value": "6cd21c44"
+      },
+      {
+        "formattedValue": "ヘッドアップディスプレイ",
+        "value": "e6519ef"
+      },
+      {
+        "formattedValue": "マルチコントロールシート",
+        "value": "1ca41a8e"
+      },
+      {
+        "formattedValue": "ミラーパッケージ",
+        "value": "8dd126c"
+      },
+      {
+        "formattedValue": "メモリー機能付き電動調整シート",
+        "value": "44dd21b0"
+      },
+      {
+        "formattedValue": "リアアクスルステアリング",
+        "value": "20841ab1"
+      },
+      {
+        "formattedValue": "リアエンターテインメントシステム",
+        "value": "9aaa22cc"
+      },
+      {
+        "formattedValue": "リアビューカメラ",
+        "value": "9391264"
+      },
+      {
+        "formattedValue": "レーンキーピングアシスト",
+        "value": "26a61ad9"
+      },
+      {
+        "formattedValue": "加熱したフロントウインドウ",
+        "value": "70b21c68"
+      },
+      {
+        "formattedValue": "投影機能付き LED DIGITAL LIGHT ライトシステム",
+        "value": "2e5521d4"
+      },
+      {
+        "formattedValue": "車上荒らしおよび盗難防止警報システム",
+        "value": "84bc277b"
+      },
+      {
+        "formattedValue": "運転席ディスプレイ",
+        "value": "4be414b0"
+      },
+      {
+        "formattedValue": "駐車支援システム",
+        "value": "12a512cc"
       }
     ],
     "facetType": "MULTI_VALUE"

@@ -99,7 +99,10 @@ export async function evaluateSearchResult(
 
   // Handle aiEvaluationHints if provided
   if (aiEvaluationHints && aiEvaluationHints.value && aiEvaluationHints.value.length > 0) {
-    const hintsText = aiEvaluationHints.value.map(line => (typeof line === 'string' ? line.trim() : '')).filter(Boolean).join('\n');
+    const hintsText = [
+      ...aiEvaluationHints.value.map(line => (typeof line === 'string' ? line.trim() : '')).filter(Boolean),
+      "If the correct evaluation is FAIL, provide the reason in the response."
+    ].join('\n');
 
     if (aiEvaluationHints.overwrite === true) {
       // Use only the hints as system prompt
