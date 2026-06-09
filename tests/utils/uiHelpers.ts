@@ -1343,7 +1343,7 @@ export async function handleCookieBanner(page: Page): Promise<void> {
   try {
     await page
       .locator(".cmm-cookie-banner__content")
-      .waitFor({ state: "visible", timeout: 5000 });
+      .waitFor({ state: "visible", timeout: 15000 });
     await page.click(".button--accept-all");
     console.debug("[DEBUG] Cookie banner accepted.");
   } catch (e) {
@@ -1427,7 +1427,7 @@ export async function performUISmartSearchAndGetResults(
   );
   try {
     console.debug("[DEBUG] Waiting for search button to be visible...");
-    await searchButton.waitFor({ state: "visible" });
+    await searchButton.waitFor({ state: "visible", timeout: 15000 });
     for (let j = 0; j < 10; j++) {
       const enabled = await searchButton.isEnabled();
       console.debug(

@@ -1,0 +1,234 @@
+[
+  {
+    "value": "beige upholstery",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "upholstery": [
+            "5c9509c2"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles with beige upholstery.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm interested in exploring Mercedes-Benz vehicles that feature beige upholstery, could you please show me those options?",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "upholstery": [
+            "5c9509c2"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles with beige upholstery.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "vehicles that are either petrol or electric",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "fuelType": [
+            "PETROL",
+            "ELECTRIC"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles with petrol or electric fuel types.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm looking for Mercedes-Benz vehicles that are either petrol or electric, so please show me options filtered by fuel type.",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "fuelType": [
+            "PETROL",
+            "ELECTRIC"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles with petrol or electric fuel types.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "vehicles under ₺15.000.000",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles under ₺15.000.000.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm interested in exploring Mercedes-Benz vehicles, specifically looking for options around the price range of under ₺15.000.000",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles under ₺15.000.000.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm really interested in exploring Mercedes-Maybach vehicles",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "brand": [
+            "Mercedes-Benz"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles from the Mercedes-Maybach brand.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm really interested in exploring Mercedes-Maybach vehicles, so could you please show me the options available from that brand?",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "brand": [
+            "Mercedes-Benz"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles from the Mercedes-Maybach brand.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm really interested in exploring Mercedes-Benz vehicles, specifically looking for models that fall under the GLA",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "modelIdentifier": [
+            "GLA"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles that are GLA models.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm really interested in exploring Mercedes-Benz vehicles, specifically looking for models that fall under the GLA category; could you help me find some recommendations?",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "modelIdentifier": [
+            "GLA"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles that are GLA models.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  },
+  {
+    "value": "I'm really interested in exploring the range of Mercedes-Benz vehicles, so could you please show me options that are specifically from this brand?",
+    "shouldRecommend": true,
+    "shouldFilter": {
+      "include": [
+        {
+          "brand": [
+            "Mercedes-Benz"
+          ]
+        }
+      ],
+      "exclude": [],
+      "strict": false
+    },
+    "aiEvaluationHints": {
+      "value": [
+        "Response must include vehicles from the Mercedes-Benz brand.",
+        "Response with failure reason otherwise response with 'PASS' only"
+      ],
+      "overwrite": true
+    }
+  }
+]

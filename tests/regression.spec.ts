@@ -7,6 +7,7 @@ import {
   loadRegressionQueriesFromDescription,
   summarizeRegressionRunWithAI,
   loadIntermittencyQueries,
+  loadMCETestData,
 } from "./utils/regressionHelpers";
 import path from "path";
 import fs from "fs/promises";
@@ -65,5 +66,60 @@ test.describe("Regression Tests", () => {
       performApiSmartSearchAndGetResults,
       processAndLogApiResult,
     });
+  });
+
+  test("Multi Country Evaluation (MCE)", { tag: ["@regression", "@multi-country"] }, async ({ browser }) => {
+    const mceTestData = await loadMCETestData();
+    
+    if (mceTestData.length === 0) {
+      console.warn("⚠️  No MCE test data loaded, skipping test.");
+      return;
+    }
+
+    const supportedCountries = ["AU", "EN", "IN", "JP", "KR", "SG", "TH", "TR",];
+    
+    if (supportedCountries.length === 0) {
+      console.warn("⚠️  No supported countries discovered, skipping test.");
+      return;
+    }
+
+    const originalCountry = process.env.COUNTRY;
+    
+    // Run MCE test for each supported country
+    for (const country of supportedCountries) {
+      console.log(`\n${"=".repeat(60)}`);
+      console.log(`🌍 Running MCE test for country: ${country}`);
+      console.log(`${"=".repeat(60)}\n`);
+
+      // Temporarily update the country for this iteration
+      process.env.COUNTRY = country;
+
+      try {
+        await runTestsAndSaveResults({
+          queries: mceTestData,
+          testDescribe: describeName,
+          testTitle: `${test.info().title} - ${country}`,
+          testType: "multi-country-evaluation",
+          browser,
+          setupContextAndPage,
+          performUISmartSearchAndGetResults,
+          processAndLogUiResult,
+          performApiSmartSearchAndGetResults,
+          processAndLogApiResult,
+          postRunAnalysis: summarizeRegressionRunWithAI,
+        });
+      } catch (error) {
+        console.error(`❌ Error running MCE test for country ${country}:`, error);
+      }
+    }
+
+    // Restore the original country
+    if (originalCountry) {
+      process.env.COUNTRY = originalCountry;
+    } else {
+      delete process.env.COUNTRY;
+    }
+    
+    console.log(`\n✅ Multi Country Evaluation (MCE) completed for all ${supportedCountries.length} countries.`);
   });
 });

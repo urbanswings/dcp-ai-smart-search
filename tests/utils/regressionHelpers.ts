@@ -8,6 +8,8 @@ const REGRESSION_TESTDATA_PATH = path.join(__dirname, "../data/regression.testda
 const REGRESSION_RUN_SUMMARY_PATH = path.join(__dirname, "../data/regression.run-summary.json");
 const EMH_API_RESPONSE_PATH = path.join(__dirname, "../data/emh-api-response.json");
 const INTERMITTENCY_QUERIES_PATH = path.join(__dirname, "../data/intermittency-queries.json");
+const MCE_TESTDATA_PATH = path.join(__dirname, "../data/regression.testdata-mce.json");
+const DATA_DIR_PATH = path.join(__dirname, "../data");
 
 const SYSTEM_PROMPT = `You are a test-case engineer for a Mercedes-Benz vehicle search AI.
 Given a plain-text description of a search bug or regression scenario, generate a JSON array of regression test scenarios with evaluation decisions.
@@ -349,4 +351,84 @@ export async function loadIntermittencyQueries(): Promise<FixedQueryCase[]> {
     );
   }
   return queries;
+}
+
+/**
+ * Loads test data from regression.testdata-mce.json for Multi Country Evaluation (MCE) testing.
+ * Each test case should have a "value" field that will be executed across all supported countries.
+ * The file is a JSON array of FixedQueryCase objects.
+ * Example:
+ *   [{ "value": "beige upholstery", "shouldRecommend": true, ... }, ...]
+ */
+export async function loadMCETestData(): Promise<FixedQueryCase[]> {
+  let raw: string;
+  try {
+    raw = await fs.readFile(MCE_TESTDATA_PATH, "utf-8");
+  } catch (e) {
+    console.warn("[regressionHelpers] Could not read regression.testdata-mce.json:", e);
+    return [];
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (e) {
+    console.warn("[regressionHelpers] regression.testdata-mce.json is not valid JSON:", e);
+    return [];
+  }
+
+  if (!Array.isArray(parsed) || parsed.length === 0) {
+    console.warn("[regressionHelpers] regression.testdata-mce.json is empty or not an array.");
+    return [];
+  }
+
+  const queries: FixedQueryCase[] = parsed
+    .map((item: unknown) => {
+      if (typeof item === "object" && item !== null && "value" in item) {
+        return item as FixedQueryCase;
+      }
+      console.warn("[regressionHelpers] Skipping invalid entry in regression.testdata-mce.json:", item);
+      return null;
+    })
+    .filter((q): q is FixedQueryCase => q !== null);
+
+  console.log(`[regressionHelpers] Loaded ${queries.length} MCE test case(s).`);
+  if (queries.length > 0) {
+    console.log(
+      [
+        "[regressionHelpers] MCE test values:",
+        ...queries.map((query) => `- ${query.value}`),
+      ].join("\n")
+    );
+  }
+  return queries;
+}
+
+/**
+ * Discovers supported countries from available fixed-queries data files.
+ * Returns an array of country codes (e.g., ['AU', 'TH', 'KR', 'JP', 'SG', 'TR', 'IN']).
+ * Country detection is based on fixed-queries files in tests/data/ directory.
+ */
+export async function getSupportedCountries(): Promise<string[]> {
+  const supportedCountries = new Set<string>();
+
+  try {
+    const files = await fs.readdir(DATA_DIR_PATH);
+
+    for (const file of files) {
+      // Match files like: fixed-queries-th-en-ncos.json, fixed-queries-in-hi-ncos.json
+      const match = file.match(/^fixed-queries-([a-z]{2})-/i);
+      if (match) {
+        const countryCode = match[1].toUpperCase();
+        supportedCountries.add(countryCode);
+      }
+    }
+
+    const countries = Array.from(supportedCountries).sort();
+    console.log(`[regressionHelpers] Discovered ${countries.length} supported country/countries:`, countries.join(", "));
+    return countries;
+  } catch (e) {
+    console.warn("[regressionHelpers] Failed to discover supported countries:", e);
+    return [];
+  }
 }
