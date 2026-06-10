@@ -140,7 +140,7 @@ function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): 
       `PASS is acceptable even if alternatives or other recommendations are offered afterward. The key is an upfront explicit unavailability statement.`,
       `Examples of acceptable PASS responses: "couldn't find exact match", "not available", "no results for ${valueLabel}", "not in stock", "we don't have ${valueLabel}".`,
       `FAIL only if: (1) response is completely silent about the request without any acknowledgment, OR (2) response only lists alternatives without ever stating the requested ${valueLabel} is unavailable/not found.`,
-      `If the response is off-topic, unsafe, or unrelated to automotive search, respond with "FAIL: off-topic or unsafe response".`,
+      `If the response is off-topic, unsafe, or unrelated to automotive search, respond with "MSG FAIL: off-topic or unsafe response".`,
       "Explicitly stated unavailability = PASS. Respond with 'PASS' or provide specific failure reason.",
     ],
   };

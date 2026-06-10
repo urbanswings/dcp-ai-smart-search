@@ -224,6 +224,29 @@
       }
     },
     {
+      "value": "i want performance cars",
+      "productType": "NCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "brand": [
+              "Mercedes-AMG"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
+          "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "only purple cars",
       "productType": "NCOS",
       "shouldRecommend": true,

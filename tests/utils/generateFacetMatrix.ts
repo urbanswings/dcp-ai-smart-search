@@ -393,9 +393,9 @@ function createCompleteValueHints(facetKey: string, valueLabel: string): string[
   return [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
     `Respond with "PASS" only if the response clearly acknowledges or applies the requested ${facetName} value: ${valueLabel} and indicates matching vehicles are available.`,
-    `If the response ignores or contradicts the requested ${facetName} value (${valueLabel}), respond with "FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
-    `If the response says the requested ${facetName} value (${valueLabel}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "FAIL: no results for requested ${facetName} value (${valueLabel})".`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: invalid response".`,
+    `If the response ignores or contradicts the requested ${facetName} value (${valueLabel}), respond with "MSG FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
+    `If the response says the requested ${facetName} value (${valueLabel}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} value (${valueLabel})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
     `Respond with failure reason otherwise respond with "PASS" only.`,
   ];
 }
@@ -416,9 +416,9 @@ function createCompleteRangeHints(facetKey: string, numericValue: unknown): stri
   return [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} range intent.`,
     `Respond with "PASS" only if the response references vehicles around ${facetName} ${targetValue} (exact number not required) and indicates matching vehicles are available.`,
-    `If the response ignores the requested ${facetName} target (${targetValue}) or provides clearly unrelated values, respond with "FAIL: missing or incorrect ${facetName} target (${targetValue})".`,
-    `If the response says the requested ${facetName} target (${targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "FAIL: no results for requested ${facetName} target (${targetValue})".`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
+    `If the response ignores the requested ${facetName} target (${targetValue}) or provides clearly unrelated values, respond with "MSG FAIL: missing or incorrect ${facetName} target (${targetValue})".`,
+    `If the response says the requested ${facetName} target (${targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} target (${targetValue})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
     `Respond with failure reason otherwise respond with "PASS" only.`,
   ];
 }
@@ -687,8 +687,8 @@ function createExclusionHints(
     `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and recommends vehicles for this exclusion intent.`,
     `Respond with \"PASS\" when the requested ${facetName} exclusion is respected: exclude ${excludedText}.`,
     `Respond with \"PASS\" when any mentioned ${facetName} values align with the allowed inventory set: ${allowedText}.`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
-    `If the response includes the excluded ${facetName} value (${excludedText}) as part of recommendations, respond with "FAIL: included excluded ${facetName} (${excludedText})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
+    `If the response includes the excluded ${facetName} value (${excludedText}) as part of recommendations, respond with "MSG FAIL: included excluded ${facetName} (${excludedText})".`,
   ];
 }
 
@@ -700,8 +700,8 @@ function createInclusionHints(facetKey: string, a: unknown, b: unknown): string[
     `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and gives recommendations for this multi-value intent.`,
     `Respond with \"PASS\" if the response addresses both requested ${facetName} values: ${aText} and ${bText}.`,
     `Respond with \"PASS\" if the response is concise but still explicitly references both requested ${facetName} values, optionally with result counts.`,
-    `If one of the requested ${facetName} values is ignored, respond with "FAIL: missing ${facetName} value" and specify which value (${aText} or ${bText}) was not addressed.`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "FAIL: off-topic or unsafe response".`,
+    `If one of the requested ${facetName} values is ignored, respond with "MSG FAIL: missing ${facetName} value" and specify which value (${aText} or ${bText}) was not addressed.`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
   ];
 }
 

@@ -50,11 +50,252 @@ interface GenerationOptions {
   maxTokens?: number;
 }
 
+const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
+  bodyType: {
+    tr: "gövde tipi",
+    th: "ประเภทรถ",
+    ko: "바디타입",
+    ja: "ボディタイプ",
+    hi: "बॉडी टाइप",
+    ta: "பாடி வகை",
+    te: "బాడీ టైప్",
+    bn: "বডি টাইপ",
+    gu: "બોડી પ્રકાર",
+    kn: "ಬಾಡಿ ಟೈಪ್",
+    ml: "ബോഡി ടൈപ്പ്",
+    mr: "बॉडी टाइप",
+  },
+  fuelType: {
+    tr: "yakıt tipi",
+    th: "ประเภทเชื้อเพลิง",
+    ko: "연료타입",
+    ja: "燃料タイプ",
+    hi: "फ्यूल टाइप",
+    ta: "எரிபொருள் வகை",
+    te: "ఇంధన రకం",
+    bn: "জ্বালানির ধরন",
+    gu: "ઇંધણ પ્રકાર",
+    kn: "ಇಂಧನ ಪ್ರಕಾರ",
+    ml: "ഇന്ധന തരം",
+    mr: "इंधन प्रकार",
+  },
+  color: {
+    tr: "renk",
+    th: "สี",
+    ko: "색상",
+    ja: "色",
+    hi: "रंग",
+    ta: "நிறம்",
+    te: "రంగు",
+    bn: "রং",
+    gu: "રંગ",
+    kn: "ಬಣ್ಣ",
+    ml: "നിറം",
+    mr: "रंग",
+  },
+  upholstery: {
+    tr: "döşeme",
+    th: "สีภายใน",
+    ko: "내장 색상",
+    ja: "内装色",
+    hi: "अपहोल्स्ट्री",
+    ta: "உள் அலங்கார நிறம்",
+    te: "అప్హోల్స్టరీ",
+    bn: "আপহোলস্টারি",
+    gu: "અપહોલ્સ્ટરી",
+    kn: "ಅಪ್ಹೋಲ್ಸ್ಟರಿ",
+    ml: "അപ്ഹോൾസ്റ്ററി",
+    mr: "अपहोल्स्ट्री",
+  },
+  upholsteryPolish: {
+    tr: "döşeme kaplaması",
+    th: "วัสดุตกแต่งภายใน",
+    ko: "내장 마감",
+    ja: "内装仕上げ",
+    hi: "अपहोल्स्ट्री फिनिश",
+    ta: "உள் அலங்கார முடிப்பு",
+    te: "అప్హోల్స్టరీ ఫినిష్",
+    bn: "আপহোলস্টারি ফিনিশ",
+    gu: "અપહોલ્સ્ટરી ફિનિશ",
+    kn: "ಅಪ್ಹೋಲ್ಸ್ಟರಿ ಫಿನಿಷ್",
+    ml: "അപ്ഹോൾസ്റ്ററി ഫിനിഷ്",
+    mr: "अपहोल्स्ट्री फिनिश",
+  },
+  stockType: {
+    tr: "stok tipi",
+    th: "ประเภทสต็อก",
+    ko: "재고 유형",
+    ja: "在庫タイプ",
+    hi: "स्टॉक टाइप",
+    ta: "ஸ்டாக் வகை",
+    te: "స్టాక్ రకం",
+    bn: "স্টক টাইপ",
+    gu: "સ્ટોક પ્રકાર",
+    kn: "ಸ್ಟಾಕ್ ಪ್ರಕಾರ",
+    ml: "സ്റ്റോക്ക് തരം",
+    mr: "स्टॉक प्रकार",
+  },
+  brand: {
+    tr: "marka",
+    th: "แบรนด์",
+    ko: "브랜드",
+    ja: "ブランド",
+    hi: "ब्रांड",
+    ta: "பிராண்ட்",
+    te: "బ్రాండ్",
+    bn: "ব্র্যান্ড",
+    gu: "બ્રાન્ડ",
+    kn: "ಬ್ರ್ಯಾಂಡ್",
+    ml: "ബ്രാൻഡ്",
+    mr: "ब्रँड",
+  },
+  price: {
+    tr: "fiyat",
+    th: "ราคา",
+    ko: "가격",
+    ja: "価格",
+    hi: "कीमत",
+    ta: "விலை",
+    te: "ధర",
+    bn: "দাম",
+    gu: "કિંમત",
+    kn: "ಬೆಲೆ",
+    ml: "വില",
+    mr: "किंमत",
+  },
+  monthlyRate: {
+    tr: "aylık taksit",
+    th: "ค่างวดรายเดือน",
+    ko: "월 납입금",
+    ja: "月額支払",
+    hi: "मासिक किस्त",
+    ta: "மாத தவணை",
+    te: "నెలవారీ చెల్లింపు",
+    bn: "মাসিক কিস্তি",
+    gu: "માસિક હપ્તો",
+    kn: "ಮಾಸಿಕ ಕಂತು",
+    ml: "മാസതവണ",
+    mr: "मासिक हप्ता",
+  },
+  seats: {
+    tr: "koltuk sayısı",
+    th: "จำนวนที่นั่ง",
+    ko: "좌석 수",
+    ja: "座席数",
+    hi: "सीटों की संख्या",
+    ta: "இருப்பிட எண்ணிக்கை",
+    te: "సీట్ల సంఖ్య",
+    bn: "আসনের সংখ্যা",
+    gu: "સીટોની સંખ્યા",
+    kn: "ಸೀಟುಗಳ ಸಂಖ್ಯೆ",
+    ml: "സീറ്റുകളുടെ എണ്ണം",
+    mr: "सीट संख्या",
+  },
+  modelIdentifier: {
+    tr: "model",
+    th: "รุ่น",
+    ko: "모델",
+    ja: "モデル",
+    hi: "मॉडल",
+    ta: "மாடல்",
+    te: "మోడల్",
+    bn: "মডেল",
+    gu: "મોડેલ",
+    kn: "ಮಾದರಿ",
+    ml: "മോഡൽ",
+    mr: "मॉडेल",
+  },
+  motorization: {
+    tr: "varyant",
+    th: "รุ่นย่อย",
+    ko: "세부 모델",
+    ja: "グレード",
+    hi: "वैरिएंट",
+    ta: "வேரியன்ட்",
+    te: "వేరియంట్",
+    bn: "ভ্যারিয়েন্ট",
+    gu: "વેરિઅન્ટ",
+    kn: "ವೆರಿಯಂಟ್",
+    ml: "വേരിയന്റ്",
+    mr: "व्हेरियंट",
+  },
+  modelYear: {
+    tr: "model yılı",
+    th: "ปีรุ่น",
+    ko: "연식",
+    ja: "年式",
+    hi: "मॉडल वर्ष",
+    ta: "மாடல் ஆண்டு",
+    te: "మోడల్ సంవత్సరం",
+    bn: "মডেল বছর",
+    gu: "મોડેલ વર્ષ",
+    kn: "ಮಾದರಿ ವರ್ಷ",
+    ml: "മോഡൽ വർഷം",
+    mr: "मॉडेल वर्ष",
+  },
+  mileage: {
+    tr: "kilometre",
+    th: "ระยะทาง",
+    ko: "주행거리",
+    ja: "走行距離",
+    hi: "माइलेज",
+    ta: "மைலேஜ்",
+    te: "మైలేజ్",
+    bn: "মাইলেজ",
+    gu: "માઇલેજ",
+    kn: "ಮೈಲೇಜ್",
+    ml: "മൈലേജ്",
+    mr: "मायलेज",
+  },
+  equipment: {
+    tr: "donanım",
+    th: "อุปกรณ์",
+    ko: "옵션사양",
+    ja: "装備",
+    hi: "उपकरण",
+    ta: "உபகரணங்கள்",
+    te: "పరికరాలు",
+    bn: "উপকরণ",
+    gu: "ઉપકરણો",
+    kn: "ಉಪಕರಣಗಳು",
+    ml: "ഉപകരണങ്ങൾ",
+    mr: "उपकरणे",
+  },
+  gearbox: {
+    tr: "şanzıman",
+    th: "เกียร์",
+    ko: "변속기",
+    ja: "トランスミッション",
+    hi: "गियरबॉक्स",
+    ta: "கியர்பாக்ஸ்",
+    te: "గేర్‌బాక్స్",
+    bn: "গিয়ারবক্স",
+    gu: "ગિયરબોક્સ",
+    kn: "ಗಿಯರ್‌ಬಾಕ್ಸ್",
+    ml: "ഗിയർബോക്സ്",
+    mr: "गिअरबॉक्स",
+  },
+};
+
 /**
  * Normalize whitespace in a string
  */
 function normalizeWhitespace(value: unknown): string {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function normalizeLanguageCode(language: string): string {
+  return normalizeWhitespace(language).toLowerCase().split(/[-_]/)[0] || "en";
+}
+
+function getLocalizedFacetLabel(
+  facetKey: string,
+  facetDisplayNameFn: (key: string) => string,
+  language: string
+): string {
+  const normalizedLanguage = normalizeLanguageCode(language);
+  const localizedLabel = LOCALIZED_FACET_LABELS[facetKey]?.[normalizedLanguage];
+  return normalizeWhitespace(localizedLabel || facetDisplayNameFn(facetKey) || facetKey);
 }
 
 /**
@@ -91,10 +332,11 @@ function buildFacetFirstQuery(
   facetKey: string,
   formattedValue: string,
   rawValue: unknown,
-  facetDisplayNameFn: (key: string) => string
+  facetDisplayNameFn: (key: string) => string,
+  language: string
 ): string {
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
-  const keyLabel = normalizeWhitespace(facetDisplayNameFn(facetKey) || facetKey);
+  const keyLabel = getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language);
   return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
 }
 
@@ -106,10 +348,11 @@ function buildVariedFallbackPhrase(
   formattedValue: string,
   rawValue: unknown,
   facetDisplayNameFn: (key: string) => string,
+  language: string,
   context: PromptContext
 ): string {
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
-  const keyLabel = facetDisplayNameFn(facetKey);
+  const keyLabel = getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language);
   const templates = [
     `${valueLabel} options`,
     `${valueLabel} vehicles`,
@@ -145,11 +388,12 @@ function enforceCompleteQueryVariation(
   formattedValue: string,
   rawValue: unknown,
   facetDisplayNameFn: (key: string) => string,
+  language: string,
   context: PromptContext
 ): string {
   const normalized = normalizeWhitespace(generated);
   if (!normalized) {
-    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
+    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
     recordOpening(context, getOpeningSignature(fallback));
     return fallback;
   }
@@ -161,7 +405,7 @@ function enforceCompleteQueryVariation(
   const seenRecently = context.recentOpenings.includes(opening);
 
   if (startsRepetitive || matchesRepetitivePattern || seenRecently) {
-    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
+    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
     recordOpening(context, getOpeningSignature(fallback));
     return fallback;
   }
@@ -221,17 +465,17 @@ async function generateQueryWithVariation(
   options: GenerationOptions = {}
 ): Promise<string> {
   const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
-  const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn);
+  const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn, language);
   const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
 
   if (!client || !systemPrompt || !userPromptTemplate) {
-    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
+    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
   }
 
   try {
     const filterText = filterTextFn
       ? filterTextFn(facetKey, formattedValue, rawValue)
-      : `${facetDisplayNameFn(facetKey)} ${formattedValue}`;
+      : `${getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language)} ${formattedValue}`;
 
     const styleHint = pickNextCompleteStyle(context);
     const resolvedSystemPrompt = String(systemPrompt).replace(/\{LANGUAGE\}/g, language);
@@ -257,7 +501,7 @@ async function generateQueryWithVariation(
     // return generatedVariation;
   } catch (error) {
     console.error(`[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`);
-    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, context);
+    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
   }
 }
 

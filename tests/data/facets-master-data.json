@@ -800,6 +800,18 @@
       {
         "formattedValue": "新ラインアップ Night Edition",
         "value": "db021551"
+      },
+      {
+        "formattedValue": "July Bonanza",
+        "value": "3a76069d"
+      },
+      {
+        "formattedValue": "Limited Price Offer",
+        "value": "70ac08fd"
+      },
+      {
+        "formattedValue": "Year End Sale",
+        "value": "3e0e067d"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1028,6 +1040,10 @@
       {
         "formattedValue": "Red",
         "value": "6c500aee"
+      },
+      {
+        "formattedValue": "블루/블랙",
+        "value": "UPHOLSTERY_COLOR_BLUE_BLACK"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1210,6 +1226,10 @@
       {
         "formattedValue": "メルセデス AMG エクステリア",
         "value": "23c5199b"
+      },
+      {
+        "formattedValue": "프로그레시브",
+        "value": "ab360eeb"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2111,6 +2131,30 @@
       {
         "formattedValue": "駐車支援システム",
         "value": "12a512cc"
+      },
+      {
+        "formattedValue": "AMG 드라이버 패키지",
+        "value": "a051228"
+      },
+      {
+        "formattedValue": "AMG 퍼포먼스 시트 패키지 하이엔드",
+        "value": "fcdb1f3d"
+      },
+      {
+        "formattedValue": "어드밴스드 사운드 시스템",
+        "value": "b7819cc"
+      },
+      {
+        "formattedValue": "트레일러 적재량 증가",
+        "value": "757f15ac"
+      },
+      {
+        "formattedValue": "트레일러 커플링",
+        "value": "ec231158"
+      },
+      {
+        "formattedValue": "후방 카메라",
+        "value": "89660d45"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2231,6 +2275,10 @@
       {
         "formattedValue": "Yellow",
         "value": "223a1336"
+      },
+      {
+        "formattedValue": "베이지",
+        "value": "PAINT_COLOR_BEIGE"
       }
     ],
     "facetType": "MULTI_VALUE"
