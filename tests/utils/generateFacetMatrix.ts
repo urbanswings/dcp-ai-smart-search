@@ -17,10 +17,12 @@ const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "sea
 const EXCLUDE_FACETS = [
   "dealerId",
   "driveType",
-  "campaigns",
   "generation",
   "registrationType",
   "dealerFittedOptions",
+  "chargeTimeDCHigh",
+  "energyContent",
+  "wltpRangeTotalAllIndividual"
 ];
 
 // Facets to include in query generation (allowlist — empty means all)
@@ -33,6 +35,7 @@ const INCLUDE_FACETS = [
   "enginePowerHP",
   "enginePowerKW",
   "equipment",
+  "firstRegistrationDate",
   "fuelType",
   "lines",
   "mileage",
