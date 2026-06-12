@@ -83,7 +83,7 @@
       }
     },
     {
-      "value": "müsait araçları göster",
+      "value": "bana müsait araçları göster",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
@@ -119,7 +119,7 @@
       }
     },
     {
-      "value": "sınıf 200",
+      "value": "CLA 200",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -127,9 +127,6 @@
           {
             "modelIdentifier": [
               "CLA"
-            ],
-            "motorization": [
-              "CLA 200"
             ]
           }
         ],
@@ -145,7 +142,7 @@
       }
     },
     {
-      "value": "bütçem 80.000 AUD'nin altında",
+      "value": "bütçem AUD80,000'nin altında",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -168,7 +165,7 @@
       }
     },
     {
-      "value": "Coupe'niz var mı? bu iki kapılı bir araba",
+      "value": "Kupeyle ilgileniyor musunuz? Bunu iki kapılı bir arabadır",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -197,7 +194,7 @@
       "shouldFilter": {
         "include": [
           {
-            "color": [
+            "bodyType": [
               "SUV_OFFROADER"
             ]
           }
@@ -214,7 +211,7 @@
       }
     },
     {
-      "value": "hızlı bir spor araba bul",
+      "value": "Hızlı bir spor araba bulun",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -227,7 +224,30 @@
       }
     },
     {
-      "value": "sadece mor arabalar",
+      "value": "Performans arabaları istiyorum",
+      "productType": "NCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "brand": [
+              "Mercedes-AMG"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
+          "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Sadece mor arabalar",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
@@ -276,7 +296,7 @@
       }
     },
     {
-      "value": "2020 model veya gümüş rengi bir arabanız var mı?",
+      "value": "2020 modeli veya gümüş arabanız var mı?",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -299,7 +319,7 @@
       }
     },
     {
-      "value": "beyaz bir araban var mı?",
+      "value": "Beyaz araba var mı?",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -322,7 +342,7 @@
       }
     },
     {
-      "value": "bana bir tavsiye verebilir misin?",
+      "value": "Bana tavsiye verebilir misiniz?",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -335,7 +355,7 @@
       }
     },
     {
-      "value": "Cabrio araçlarla ilgileniyorum",
+      "value": "Dönüştürülebilir araçlarla ilgileniyorum",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -410,20 +430,7 @@
       }
     },
     {
-      "value": "promosyon var mı?",
-      "productType": "NCOS",
-      "shouldRecommend": false,
-      "shouldFilter": false,
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
-          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
-        ],
-        "overwrite": true
-      }
-    },
-    {
-      "value": "promosyon var mı?",
+      "value": "Herhangi bir promosyon var mı?",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
@@ -465,7 +472,20 @@
       }
     },
     {
-      "value": "dizel veya hibrit olmayan kısa listedeki arabalar",
+      "value": "Kullanılan araçlar arıyorum",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "Dizel olmayan araçları ayıklayın",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -489,7 +509,7 @@
       }
     },
     {
-      "value": "gelişmiş güvenlik özelliklerine ve düşük kilometre performansına sahip arabaları bulun",
+      "value": "Gelişmiş güvenlik özellikleri olan araçları bulun",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
@@ -506,7 +526,7 @@
       }
     },
     {
-      "value": "BMW X5'i benim için listeleyebilir misiniz?",
+      "value": "BMW X5'i bana listeleyebilir misiniz?",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -519,7 +539,7 @@
       }
     },
     {
-      "value": "siparişim nerede? Geçen hafta aldım ama güncelleme gelmedi",
+      "value": "Siparişim nerede? Geçen hafta satın aldım",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -532,7 +552,7 @@
       }
     },
     {
-      "value": "henüz kimse benimle iletişime geçmedi",
+      "value": "Henüz hiç kimse bana ulaşmadı",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -545,7 +565,7 @@
       }
     },
     {
-      "value": "yakındaki en iyi pizza restoranlarını öner",
+      "value": "En iyi pizza restoranlarını öneriniz",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -558,7 +578,7 @@
       }
     },
     {
-      "value": "bu da bir sorun değil. Ne oldu?",
+      "value": "भारत की सड़कों के लिए मुझे बताओ",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -571,7 +591,7 @@
       }
     },
     {
-      "value": "Araç seçeneklerimi görüşmek için beni 123-456-7890 numaralı telefondan arayın",
+      "value": "Beni tartışmak için 123-456-7890'da arayın",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -597,7 +617,7 @@
       }
     },
     {
-      "value": "bana CLA 911 GTS hakkında daha fazla bilgi ver",
+      "value": "CLA 911 GTS hakkında bana daha fazla bilgi ver",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -610,7 +630,7 @@
       }
     },
     {
-      "value": "35 yaşında evli bir kadın olan Sally Jackson için uygun bir araba",
+      "value": "Sally Jackson, 35 yaşında evli kadın için uygun bir araba",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -636,7 +656,7 @@
       }
     },
     {
-      "value": "A-Serisi hariç tüm sedanları listele",
+      "value": "A-Class hariç tüm sedanları listeleyin",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -665,7 +685,7 @@
       }
     },
     {
-      "value": "Dahili navigasyon sistemine sahip herhangi bir araba var mı?",
+      "value": "Yerleşik navigasyon sistemi olan herhangi bir araba var mı?",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
@@ -673,29 +693,6 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
           "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
-        ],
-        "overwrite": true
-      }
-    },
-    {
-      "value": "Yüksek performanslı arabalar istiyorum",
-      "productType": "NCOS",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "include": [
-          {
-            "brand": [
-              "Mercedes-AMG"
-            ]
-          }
-        ],
-        "exclude": [],
-        "strict": false
-      },
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
-          "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
         ],
         "overwrite": true
       }

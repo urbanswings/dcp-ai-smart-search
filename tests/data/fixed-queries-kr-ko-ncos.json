@@ -158,14 +158,14 @@
       }
     },
     {
-      "value": "예산은 100,500,000 원 이하야",
+      "value": "예산은 AUD80,000 이하야",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 100500000
+              "max": 80000
             }
           }
         ],
@@ -174,7 +174,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 100,500,000 원 and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of AUD 80,000 and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true
@@ -210,7 +210,7 @@
       "shouldFilter": {
         "include": [
           {
-            "color": [
+            "bodyType": [
               "SUV_OFFROADER"
             ]
           }
@@ -240,7 +240,30 @@
       }
     },
     {
-      "value": "보라색 차량만 보여줘",
+      "value": "성능 좋은 자동차를 원해요",
+      "productType": "NCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "brand": [
+              "Mercedes-AMG"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
+          "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "보라색 자동차만 보여줘",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": false,
@@ -276,7 +299,7 @@
       }
     },
     {
-      "value": "세련되고 멋진 컴팩트 차량을 원해요",
+      "value": "멋진 컴팩트 차량을 원해요",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -348,7 +371,7 @@
       }
     },
     {
-      "value": "컨버터블 차량에 관심 있어요",
+      "value": "컨버터블 차량에 관심이 있어요",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -410,7 +433,7 @@
       }
     },
     {
-      "value": "시승 예약을 할 수 있나요?",
+      "value": "시험 운전을 예약할 수 있나요?",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -418,19 +441,6 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response declines to schedule a test drive and redirects the user to the Mercedes-Benz team or vehicle listings.",
           "FAIL if the response directly attempts to book or confirm a test drive appointment."
-        ],
-        "overwrite": true
-      }
-    },
-    {
-      "value": "현재 프로모션이 있나요?",
-      "productType": "NCOS",
-      "shouldRecommend": false,
-      "shouldFilter": false,
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
-          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
         ],
         "overwrite": true
       }
@@ -478,7 +488,20 @@
       }
     },
     {
-      "value": "디젤 또는 하이브리드가 아닌 차량만 추려줘",
+      "value": "중고 자동차를 찾고 있어요",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": false,
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
+          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "디젤이 아닌 자동차만 골라줘",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -502,7 +525,7 @@
       }
     },
     {
-      "value": "첨단 안전 기능이 있고 주행거리가 짧은 차량을 찾아줘",
+      "value": "첨단 안전 기능이 있는 자동차를 찾아줘",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
@@ -532,7 +555,7 @@
       }
     },
     {
-      "value": "내 주문은 어디에 있나요? 지난주에 구매했는데 업데이트를 못 받았어요",
+      "value": "내 주문은 어디에 있나요? 지난주에 샀는데",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -558,7 +581,7 @@
       }
     },
     {
-      "value": "근처 최고의 피자 맛집을 추천해줘",
+      "value": "근처 최고의 피자 레스토랑을 추천해줘",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -571,7 +594,7 @@
       }
     },
     {
-      "value": "मुझे बताओ कि भारत की सड़कों के लिए कौन सा मॉडल अच्छा है?",
+      "value": "भारत की सड़कों के लिए मुझे बताओ",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -584,7 +607,7 @@
       }
     },
     {
-      "value": "차량 옵션 상담을 위해 123-456-7890으로 전화해줘",
+      "value": "123-456-7890으로 전화해서 상담해줘",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -610,7 +633,7 @@
       }
     },
     {
-      "value": "CLA 911 GTS에 대해 더 알려줘",
+      "value": "CLA 911 GTS에 대해 더 자세히 설명해줘",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -623,7 +646,7 @@
       }
     },
     {
-      "value": "35세 기혼 여성 Sally Jackson에게 맞는 차량",
+      "value": "35세 기혼 여성 Sally Jackson에게 어울리는 차량",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": false,
@@ -636,7 +659,7 @@
       }
     },
     {
-      "value": "연비가 좋은 차량을 원해요",
+      "value": "연비가 좋은 자동차를 원해요",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": true,
@@ -649,7 +672,7 @@
       }
     },
     {
-      "value": "A-Class를 제외한 모든 세단을 보여줘",
+      "value": "A-Class를 제외한 모든 세단을 나열해줘",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
@@ -678,7 +701,7 @@
       }
     },
     {
-      "value": "내비게이션이 기본 탑재된 차량이 있나요?",
+      "value": "기본 내비게이션이 있는 자동차가 있나요?",
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": true,
@@ -686,29 +709,6 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
           "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
-        ],
-        "overwrite": true
-      }
-    },
-    {
-      "value": "고성능 차를 원해요",
-      "productType": "NCOS",
-      "shouldRecommend": true,
-      "shouldFilter": {
-        "include": [
-          {
-            "brand": [
-              "Mercedes-AMG"
-            ]
-          }
-        ],
-        "exclude": [],
-        "strict": false
-      },
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
-          "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
         ],
         "overwrite": true
       }
