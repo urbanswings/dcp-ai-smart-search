@@ -759,10 +759,6 @@ export async function processAndLogUiResult({
   testTitle: string;
   page: Page;
 }): Promise<any> {
-  console.log(`\n[DEBUG] ===== processAndLogUiResult START =====`);
-  console.log(`[DEBUG] testTitle: ${testTitle}`);
-  console.log(`[DEBUG] results.error: ${results.error}`);
-
   const isPassEvaluation = (value: string): boolean => {
     const normalized = (value || "").trim();
     return normalized.toUpperCase() === "PASS";
@@ -771,8 +767,6 @@ export async function processAndLogUiResult({
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
-  console.log(`[DEBUG] actualInput: "${actualInput}"`);
-  console.log(`[DEBUG] actualFacets: ${JSON.stringify(actualFacets)}`);
   
   if (results.error) {
     console.error(`UI call failed with error: ${results.error}`);
@@ -858,7 +852,6 @@ export async function processAndLogUiResult({
       searchResults.navigation?.totalResults ||
       searchResults.results?.length ||
       0;
-    console.log(`[DEBUG] UI branch - resultCount: ${resultCount}, navigation.totalResults: ${searchResults.navigation?.totalResults}, results.length: ${searchResults.results?.length}`);
   } 
 
   // Extract UI vehicle count if page is provided
@@ -881,16 +874,14 @@ export async function processAndLogUiResult({
   // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
   // But skip this check if facets are being validated (empty results can be valid for faceted queries)
   if (resultCount === 0 && !actualFacets) {
-    console.log(`[DEBUG] UI branch - resultCount is 0, setting responseCheckPassed = false`);
     responseCheckPassed = false;
     addFailureReason("Payload is zero");
   } else if (resultCount === 0 && actualFacets) {
-    console.log(`[DEBUG] UI branch - resultCount is 0 BUT actualFacets present, skipping "Payload is zero" check`);
+    // Skip "Payload is zero" when facets are being validated
   }
 
   // Facets check (test-data vs BE)  
   if (actualFacets === false) {
-    console.log(`[DEBUG] Facets check: actualFacets === false`);
     // shouldFilter: false — assert no filters were applied
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
@@ -899,25 +890,18 @@ export async function processAndLogUiResult({
       );
     }
   } else if (actualFacets === true) {
-    console.log(`[DEBUG] Facets check: actualFacets === true`);
     // shouldFilter: true — assert at least one filter was applied
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
       addFailureReason(`Expected at least one filter to be applied, but got none`);
     }
   } else if (testFacets && actualFacets && typeof actualFacets === "object") {
-    console.log(`[DEBUG] Facets check: Complex object format with testFacets=${testFacets}`);
     // New format: { include: [], exclude: [], strict: boolean }
     const include = actualFacets.include || [];
     const exclude = actualFacets.exclude || [];
     const strict = actualFacets.strict ?? false;
     const resultsKeys = Object.keys(resultsFacets);
     const resultsKeysSet = new Set(resultsKeys);
-
-    console.log(`[DEBUG] Facets - include: ${JSON.stringify(include)}`);
-    console.log(`[DEBUG] Facets - exclude: ${JSON.stringify(exclude)}`);
-    console.log(`[DEBUG] Facets - strict: ${strict}`);
-    console.log(`[DEBUG] Facets - resultsFacets keys: ${JSON.stringify(resultsKeys)}`);
     
     // Flatten include into a set of allowed facet keys for strict mode.
     const includeKeys = new Set<string>();
@@ -1134,18 +1118,6 @@ export async function processAndLogUiResult({
   const evaluationPassed = normalizedEvaluation.toUpperCase() === "PASS";
   const displayHasError = hasError || !evaluationPassed;
 
-  console.log(`\n[DEBUG] ===== FINAL STATE =====`);
-  console.log(`[DEBUG] responseCheckPassed: ${responseCheckPassed}`);
-  console.log(`[DEBUG] facetsCheckPassed: ${facetsCheckPassed}`);
-  console.log(`[DEBUG] hasError: ${hasError}`);
-  console.log(`[DEBUG] evaluationPassed: ${evaluationPassed}`);
-  console.log(`[DEBUG] normalizedEvaluation: "${normalizedEvaluation}"`);
-  console.log(`[DEBUG] displayHasError: ${displayHasError}`);
-  console.log(`[DEBUG] resultCount: ${resultCount}`);
-  console.log(`[DEBUG] uiVehicleCount: ${uiVehicleCount}`);
-  console.log(`[DEBUG] openaiEvaluation: "${openaiEvaluation}"`);
-  console.log(`[DEBUG] ===== END FINAL STATE =====\n`);
-
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
@@ -1172,8 +1144,6 @@ export async function processAndLogUiResult({
   }
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("\n");
-
-  console.log(`[DEBUG] ===== processAndLogUiResult END =====\n`);
 
   return {
     timestamp: new Date().toISOString(),

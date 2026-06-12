@@ -909,6 +909,7 @@ export async function processAndLogApiResult({
   const lang = LANGUAGE?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  
   if (results.error) {
     console.error(`API call failed with error for '${actualInput}': ${results.error}`);
     return {
@@ -1020,9 +1021,12 @@ export async function processAndLogApiResult({
     }
 
     // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
-    if (resultCount === 0) {
+    // But skip this check if facets are being validated (empty results can be valid for faceted queries)
+    if (resultCount === 0 && !actualFacets) {
       responseCheckPassed = false;
       addFailureReason("Payload is zero");
+    } else if (resultCount === 0 && actualFacets) {
+      // Skip "Payload is zero" when facets are being validated
     }
 
     const smartSearchResponse = results.results.resultText;
@@ -1107,48 +1111,25 @@ export async function processAndLogApiResult({
           const rawActuals = new Set(
             actualValues.map((value) => String(value).trim().toUpperCase())
           );
-          // Also check facet values structure from response for UUID mapping
-          const facetDataForKey = facetsData?.[key];
-          const allFacetValuesFromResponse = (facetDataForKey?.values || [])
-            .map((v: any) => String(v.value || v).trim().toUpperCase())
-            .filter(Boolean);
-          const responseFacetActuals = new Set(allFacetValuesFromResponse);
           
-          // Combine: actual result values + all values available in the facet structure
-          const allValidValues = new Set([...rawActuals, ...responseFacetActuals]);
-          
-          // For color/upholstery, map UUID values to translated semantic names
-          const semanticActuals = actualValues.map((v) => {
-            const vStr = String(v).toUpperCase();
-            if (uuidToSemanticMap[key]?.[vStr]) {
-              return uuidToSemanticMap[key][vStr];
-            }
-            return String(v);
-          });
-          const actualCandidates = new Set<string>();
-          for (const actual of semanticActuals) {
-            const candidates = buildFacetCandidateTokens(actual);
-            candidates.forEach((candidate) => actualCandidates.add(candidate.toUpperCase()));
-          }
-          
+          // Check: all expected values must be present
           for (const expected of expectedValues) {
             const rawExpected = String(expected).trim().toUpperCase();
-            // Check against both current results and all available facet values from response
-            if (allValidValues.has(rawExpected)) {
-              continue;
-            }
-
-            const processedExpected = ["color", "upholstery"].includes(key)
-              ? translateColorName(String(expected))
-              : String(expected);
-            const expectedCandidates = buildFacetCandidateTokens(processedExpected);
-            const hasMatch = expectedCandidates.some((candidate) =>
-              actualCandidates.has(candidate.toUpperCase())
-            );
-
-            if (!hasMatch) {
+            if (!rawActuals.has(rawExpected)) {
               facetCheckPassed = false;
               failureReasons.push(`Missing required facet value: ${key}=${expected}`);
+            }
+          }
+          
+          // Check: no extra values beyond expected (when specific values are listed, they should be the only ones)
+          const expectedSet = new Set(
+            expectedValues.map((v) => String(v).trim().toUpperCase())
+          );
+          for (const actual of actualValues) {
+            const rawActual = String(actual).trim().toUpperCase();
+            if (!expectedSet.has(rawActual)) {
+              facetCheckPassed = false;
+              failureReasons.push(`Unexpected facet value in ${key}: ${actual} (expected only: ${expectedValues.join(", ")})`);
             }
           }
         }
