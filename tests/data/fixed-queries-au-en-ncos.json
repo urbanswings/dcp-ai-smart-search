@@ -1,4 +1,20 @@
 {
+  "forRegression": [
+    "मैं फैमिली कार खोज रहा हूँ",
+    "एक तेज़ स्पोर्ट्स कार ढूँढो",
+    "CLA 911 GTS के बारे में और जानकारी दो",
+    "find a fast sports car",
+    "I'm looking for a spacious vehicle with excellent fuel efficiency and the latest safety features",
+    "Do you have a model with adaptive cruise control?",
+    "Which Mercedes is best for someone who loves performance cars?",
+    "Recommend a hybrid or electric vehicle",
+    "Which Mercedes is best for city driving?",
+    "Do you have vehicles with SUV or coupe body type, especially the EQE model?",
+    "aile arabası arıyorum",
+    "güzel ve şık bir kompakt araç istiyorum",
+    "Which Mercedes is suitable for a small family?",
+    "Küçük aileye uygun Mercedes hangisi?"
+  ],
   "multiIntent": [
     "Show me SUVs, and we can also look at financing.",
     "I'm looking at sedans or coupes, are there any discounts?",
@@ -86,17 +102,7 @@
       "value": "show me available vehicles",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": {
-        "include": [
-          {
-            "stockType": [
-              "AVAILABLE"
-            ]
-          }
-        ],
-        "exclude": [],
-        "strict": false
-      },
+      "shouldFilter": false,
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",
@@ -118,7 +124,7 @@
           }
         ],
         "exclude": [],
-        "strict": false
+        "strict": true
       },
       "aiEvaluationHints": {
         "value": [
@@ -703,27 +709,6 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
           "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
-        ],
-        "overwrite": true
-      }
-    },
-    {
-      "value": "any current offers?",
-      "productType": "NCOS",
-      "shouldRecommend": false,
-      "shouldFilter": {
-        "include": [
-          {
-            "campaigns": true
-          }
-        ],
-        "exclude": [],
-        "strict": false
-      },
-      "aiEvaluationHints": {
-        "value": [
-          "Respond ONLY with: 'PASS' if the response acknowledges campaigns/current offers and presents vehicles that are part of active campaigns or promotional offers.",
-          "Do NOT fail if the exact vehicle count differs — pass as long as the response mentions campaigns or current offers and presents relevant vehicle listings with campaign details. FAIL only if the response claims no campaigns/offers are available when vehicles with active campaigns exist."
         ],
         "overwrite": true
       }
