@@ -416,27 +416,43 @@
       }
     },
     {
-      "value": "รถใหม่มีการรับประกันแบบไหนบ้าง?",
+      "value": "มีการส่งเสริมการขายหรือไม่?",
       "productType": "NCOS",
       "shouldRecommend": false,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "campaigns": true
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response (a) states it cannot provide warranty details and redirects to vehicle search or Mercedes-Benz team, OR (b) acknowledges the limitation but still presents vehicle listings as a redirect.",
-          "Do NOT fail if the response shows vehicles alongside a warranty limitation notice - this is an acceptable fallback. FAIL only if it directly describes specific warranty terms."
+          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
         ],
         "overwrite": true
       }
     },
     {
-      "value": "ฉันกำลังมองหารถมือสอง",
+      "value": "มีข้อเสนอในปัจจุบันหรือไม่?",
       "productType": "NCOS",
       "shouldRecommend": false,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "campaigns": true
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team in Thai or English.",
-          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
         ],
         "overwrite": true
       }

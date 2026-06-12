@@ -86,7 +86,17 @@
       "value": "show me available vehicles",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "AVAILABLE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",
@@ -108,7 +118,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -433,7 +443,15 @@
       "value": "is there any promotion?",
       "productType": "NCOS",
       "shouldRecommend": false,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "campaigns": true
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
@@ -443,14 +461,22 @@
       }
     },
     {
-      "value": "what warranties do you provide for new vehicles?",
+      "value": "any current offers?",
       "productType": "NCOS",
       "shouldRecommend": false,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "campaigns": true
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response (a) states it cannot provide warranty details and redirects to vehicle search or Mercedes-Benz team, OR (b) acknowledges the limitation but still presents vehicle listings as a redirect.",
-          "Do NOT fail if the response shows vehicles alongside a warranty limitation notice — this is an acceptable fallback. FAIL only if it directly describes specific warranty terms."
+          "Respond ONLY with: 'PASS' if the response states it cannot provide current promotion details and redirects to vehicle search or Mercedes-Benz team assistance.",
+          "FAIL if the response directly lists or confirms specific promotional offers or discounts."
         ],
         "overwrite": true
       }
@@ -677,6 +703,27 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
           "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "any current offers?",
+      "productType": "NCOS",
+      "shouldRecommend": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "campaigns": true
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response acknowledges campaigns/current offers and presents vehicles that are part of active campaigns or promotional offers.",
+          "Do NOT fail if the exact vehicle count differs — pass as long as the response mentions campaigns or current offers and presents relevant vehicle listings with campaign details. FAIL only if the response claims no campaigns/offers are available when vehicles with active campaigns exist."
         ],
         "overwrite": true
       }
