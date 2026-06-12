@@ -824,6 +824,18 @@
       {
         "formattedValue": "Test Marketing",
         "value": "47c50763"
+      },
+      {
+        "formattedValue": "July Bonanza",
+        "value": "3a070696"
+      },
+      {
+        "formattedValue": "Limited Price Offer",
+        "value": "700c08f6"
+      },
+      {
+        "formattedValue": "Year End Sale",
+        "value": "3d980676"
       }
     ],
     "facetType": "MULTI_VALUE"

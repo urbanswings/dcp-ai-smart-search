@@ -647,6 +647,32 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
+  test("By Filter Facets ('campaigns')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "campaigns";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
@@ -1124,7 +1150,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(10, 2, 5);
+      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(20, 1, 1);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
