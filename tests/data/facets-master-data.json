@@ -836,6 +836,10 @@
       {
         "formattedValue": "Year End Sale",
         "value": "3d980676"
+      },
+      {
+        "formattedValue": "Test Retail Campaign",
+        "value": "7882096a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2179,6 +2183,10 @@
       {
         "formattedValue": "후방 카메라",
         "value": "89660d45"
+      },
+      {
+        "formattedValue": "22 kW AC charger",
+        "value": "47c006ef"
       }
     ],
     "facetType": "MULTI_VALUE"

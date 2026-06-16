@@ -54,7 +54,7 @@ function normalizeFacetToken(value: string): string {
     .replace(/ı/g, "i")
     .replace(/^paint[_-]?color[_-]?/i, "")
     .replace(/^upholstery[_-]?color[_-]?/i, "")
-    .replace(/[^a-z0-9가-힣]/g, "");
+    .replace(/[^a-z0-9가-힣ぁ-ゖァ-ヺー一-龯]/g, "");
 }
 
 // Color name translations for multi-language support
@@ -208,6 +208,10 @@ const facetValueAliasMap: Record<string, string[]> = {
   "쿠페": ["coupe"],
   "왜건": ["station", "estate"],
   "해치백": ["hatchback", "hatches"],
+  // JP body type display names -> BE codes
+  "セダン": ["limousine"],
+  "クーペ": ["coupe"],
+  "ステーションワゴン": ["station", "estate"],
   // KR native color names
   "검정": ["black"],
   "검은색": ["black"],
@@ -329,18 +333,27 @@ function mapUiLabelToFacetKey(label: string): string | null {
   const rawLabelMap: Record<string, string> = {
     "바디타입": "bodyType",
     "차체타입": "bodyType",
+    "ボディタイプ": "bodyType",
     "연료타입": "fuelType",
     "연료유형": "fuelType",
+    "燃料タイプ": "fuelType",
     "모델": "modelIdentifier",
     "모델클래스": "modelIdentifier",
     "모델라인": "modelIdentifier",
+    "モデル": "modelIdentifier",
     "브랜드": "brand",
+    "ブランド": "brand",
     "색상": "color",
+    "色": "color",
     "내장색상": "upholstery",
+    "内装色": "upholstery",
     "연식": "modelYear",
+    "年式": "modelYear",
     "가격": "price",
+    "価格": "price",
     "차량": "brand",
     "옵션사양": "equipment",
+    "装備": "equipment",
     // Thai UI label mappings
     "ประเภทรถ": "bodyType",
     "ประเภทเชื้อเพลิง": "fuelType",
@@ -449,6 +462,7 @@ function parseUiSelectedFiltersToKeyValue(
   uiSelectedFilters: UiSelectedFilterPill[]
 ): Record<string, string[]> {
   const keyValueFilters: Record<string, string[]> = {};
+  const seenValuesByFacetKey: Record<string, Set<string>> = {};
 
   for (const filterPill of uiSelectedFilters) {
     const cleanText = filterPill.text.replace(/\s+/g, " ").trim();
@@ -474,12 +488,22 @@ function parseUiSelectedFiltersToKeyValue(
     // Always register the key so the empty-key guard in comparison fires.
     if (!keyValueFilters[facetKey]) {
       keyValueFilters[facetKey] = [];
+      seenValuesByFacetKey[facetKey] = new Set<string>();
     }
 
     if (!value) {
       // Pill is present but value is empty (e.g. "Marka :") — key is registered
       // with an empty array so compareUiSelectedFiltersWithFacets skips it.
       continue;
+    }
+
+    const normalizedValue = normalizeFacetToken(value);
+    if (normalizedValue && seenValuesByFacetKey[facetKey]?.has(normalizedValue)) {
+      continue;
+    }
+
+    if (normalizedValue) {
+      seenValuesByFacetKey[facetKey]?.add(normalizedValue);
     }
 
     keyValueFilters[facetKey].push(value);

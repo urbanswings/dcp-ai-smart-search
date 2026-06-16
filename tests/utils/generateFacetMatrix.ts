@@ -391,8 +391,66 @@ function buildCompleteShouldFilter(
   return { include: [{ [facetKey]: [rawValue] }], exclude: [], strict: false };
 }
 
-function createCompleteValueHints(facetKey: string, valueLabel: string): string[] {
+function buildAcceptedFacetValueLabels(
+  facetKey: string,
+  valueLabel: string,
+  formattedValue: string,
+  rawValue: unknown
+): string[] {
+  const labels = new Set<string>();
+  const add = (value: unknown) => {
+    const text = String(value || "").trim();
+    if (text) labels.add(text);
+  };
+
+  add(valueLabel);
+  add(formattedValue);
+
+  if (facetKey === "bodyType") {
+    const bodyTypeAliases: Record<string, string[]> = {
+      LIMOUSINE: ["sedan", "sedans", "limousine"],
+      SUV_OFFROADER: ["suv", "suvs", "sport utility vehicle"],
+      HATCHBACK: ["hatchback", "hatchbacks"],
+      COUPE: ["coupe", "coupes"],
+      CABRIO_ROADSTER: ["cabriolet", "cabriolets", "roadster", "roadsters"],
+      PEOPLE_CARRIER: ["people carrier", "people carriers", "mpv", "mpvs"],
+      STATION: ["estate", "estates", "station wagon", "station wagons"],
+    };
+
+    for (const alias of bodyTypeAliases[String(rawValue)] || []) {
+      add(alias);
+    }
+  }
+
+  return Array.from(labels);
+}
+
+function createCompleteValueHints(
+  facetKey: string,
+  valueLabel: string,
+  formattedValue: string,
+  rawValue: unknown
+): string[] {
   const facetName = facetDisplayName(facetKey);
+  const acceptedLabels = buildAcceptedFacetValueLabels(
+    facetKey,
+    valueLabel,
+    formattedValue,
+    rawValue
+  );
+  const acceptedLabelText = acceptedLabels.join(" / ");
+
+  if (facetKey === "bodyType" && acceptedLabels.length > 1) {
+    return [
+      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
+      `Respond with "PASS" only if the response clearly acknowledges or applies the requested ${facetName} value and indicates matching vehicles are available. Treat equivalent localized or singular/plural wording as valid, including: ${acceptedLabelText}.`,
+      `If the response ignores or contradicts all accepted forms of the requested ${facetName} value (${acceptedLabelText}), respond with "MSG FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
+      `If the response says the requested ${facetName} value (${acceptedLabelText}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} value (${valueLabel})".`,
+      `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+      `Respond with failure reason otherwise respond with "PASS" only.`,
+    ];
+  }
+
   return [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
     `Respond with "PASS" only if the response clearly acknowledges or applies the requested ${facetName} value: ${valueLabel} and indicates matching vehicles are available.`,
@@ -485,7 +543,9 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
       );
       informativeHintsByQuery[query] = createCompleteValueHints(
         facetKey,
-        toCompleteHintValueLabel(facetKey, entry.formattedValue, entry.rawValue)
+        toCompleteHintValueLabel(facetKey, entry.formattedValue, entry.rawValue),
+        entry.formattedValue,
+        entry.rawValue
       );
     }
 
