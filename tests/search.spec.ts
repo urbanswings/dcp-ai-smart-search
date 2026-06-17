@@ -1253,6 +1253,45 @@ test.describe("AI Smart Search - Other Scenarios", () => {
     }
   });
 
+  test("Sales", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+    const fixedQueries = fixedQueriesData.sales;
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
+      count || 8,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback
+    );
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: aiEvaluationRules,
+          };
+    });
+
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  });
+
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
     const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};

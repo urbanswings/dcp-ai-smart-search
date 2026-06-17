@@ -551,6 +551,9 @@
       },
       {
         "value": "V 220"
+      },
+      {
+        "value": "GLB 220 4MATIC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -840,6 +843,22 @@
       {
         "formattedValue": "Test Retail Campaign",
         "value": "7882096a"
+      },
+      {
+        "formattedValue": "$4,000 Deposit Contribution",
+        "value": "a7220b35"
+      },
+      {
+        "formattedValue": "1.4% p.a. comparison rate",
+        "value": "91bb0a35"
+      },
+      {
+        "formattedValue": "EQA Offer",
+        "value": "242304f2"
+      },
+      {
+        "formattedValue": "Own Your Instinct 2026",
+        "value": "89fc0962"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2187,6 +2206,10 @@
       {
         "formattedValue": "22 kW AC charger",
         "value": "47c006ef"
+      },
+      {
+        "formattedValue": "22 kW AC şarj cihazı",
+        "value": "82800a6b"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4092,6 +4115,10 @@
       },
       {
         "value": "17500f9"
+      },
+      {
+        "formattedValue": "Exclusive Leather",
+        "value": "UPHOLSTERY_TYPE_LEATHER_EXCLUSIVE"
       }
     ]
   },

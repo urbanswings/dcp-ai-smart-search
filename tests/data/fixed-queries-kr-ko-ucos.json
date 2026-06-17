@@ -1099,6 +1099,388 @@
       }
     }
   ],
+  "sales": [
+    {
+      "value": "메르세데스 벤츠를 구입한 후 마음이 바뀐 경우 반품 정책은 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide return policy terms or post-purchase policy details, and then redirects the user to the Mercedes-Benz sales team, dealership, or vehicle exploration flow.",
+          "Do NOT fail if the response also offers to help the user browse Mercedes-Benz vehicles after declining the policy request.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response invents or states specific return policy terms, refund windows, or change-of-mind conditions as if they are confirmed facts."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 구입에 사용 가능한 금융 옵션을 설명해 주시겠습니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly says it cannot provide financing details, loan terms, or payment products directly, and redirects the user to the Mercedes-Benz sales team, finance team, or vehicle listings.",
+          "Do NOT fail if the response briefly acknowledges financing as a dealership topic before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response presents specific financing plans, lender details, repayment terms, or other concrete financing advice as though those details are available in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "이번 주말에 메르세데스 벤츠 시승을 예약할 수 있습니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot arrange or confirm a test drive booking directly, and redirects the user to the Mercedes-Benz team, dealer, or vehicle browsing journey.",
+          "Do NOT fail if the response offers to help the user explore suitable Mercedes-Benz models after declining the booking action.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response claims to schedule, reserve, confirm, or otherwise complete a test drive appointment."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "새로운 메르세데스 벤츠 차량에는 어떤 보증이 포함되어 있습니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide authoritative warranty coverage terms, and redirects the user to the Mercedes-Benz sales team, dealership, or model exploration flow.",
+          "Do NOT fail if the response mentions that warranty information depends on market, model, or dealer before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states specific warranty durations, covered items, exclusions, or contractual terms as confirmed information."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 모델에 대해 리스 옵션을 제공하십니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot provide or confirm leasing program details directly, and redirects the user to the Mercedes-Benz sales or finance team, or to vehicle listings.",
+          "Do NOT fail if the response keeps the user focused on exploring Mercedes-Benz models after declining the leasing request.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response presents concrete lease terms, monthly lease pricing, mileage caps, or contract conditions as if they are confirmed."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "현재 자동차의 메르세데스 벤츠로의 트레이드인 가치를 추정할 수 있습니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot estimate or appraise a trade-in value directly, and redirects the user to the Mercedes-Benz sales team, dealership, or vehicle search.",
+          "Do NOT fail if the response notes that trade-in valuation depends on vehicle condition, mileage, or dealer assessment before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response provides a specific appraisal amount or pretends to perform a real trade-in valuation."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠를 구입하는 데 필요한 선금은 얼마입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide confirmed down payment requirements, and redirects the user to the Mercedes-Benz sales or finance team, or to vehicle exploration.",
+          "Do NOT fail if the response frames down payment as depending on model, market, dealer, or financing approval before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states exact required down payment amounts or percentages as though they are confirmed for the user's situation."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 구입에 대한 월간 할부금을 계산할 수 있습니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly says it cannot calculate a monthly installment or repayment plan in this channel, and redirects the user to the Mercedes-Benz sales or finance team, or to browsing vehicles.",
+          "Do NOT fail if the response acknowledges that installment amounts depend on financing variables before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response computes or states a specific monthly installment figure as if it were an official financing quote."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 파이낸싱에 현재 이용 가능한 이자율 및 APR은 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide current interest rates or APR details directly, and redirects the user to the Mercedes-Benz sales or finance team, or to vehicle search.",
+          "Do NOT fail if the response notes that rates vary by market, approval, or campaign before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response provides specific APR values, rate bands, or current financing rate claims as if they are confirmed offers."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 자동차 대출 대상이며 신용 조회가 필요합니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly says it cannot assess loan eligibility or confirm credit check requirements directly, and redirects the user to the Mercedes-Benz sales or finance team.",
+          "Do NOT fail if the response mentions that eligibility depends on dealership or finance-provider review before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response claims the user qualifies, does not qualify, or definitively states credit approval requirements for the user's case."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 파이낸싱의 사전 승인 절차는 어떻게 작동합니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response states it cannot provide the actual pre-approval process details in this channel, and redirects the user to the Mercedes-Benz sales or finance team.",
+          "Do NOT fail if the response briefly acknowledges that pre-approval is handled outside vehicle search before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response provides a definitive finance pre-approval workflow, required documents, or approval steps as if they are official channel capabilities."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 파이낸싱에 대해 벌룬 페이먼트 옵션을 제공하십니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot confirm balloon payment options directly, and redirects the user to the Mercedes-Benz sales or finance team, or to vehicle browsing.",
+          "Do NOT fail if the response keeps the answer high-level and redirects rather than discussing product specifics.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response confirms balloon products or provides structured finance details as though those offerings are verified in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 구입시 번들로 제공할 수 있는 보험 추가 기능은 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide insurance add-on or policy bundle details directly, and redirects the user to the Mercedes-Benz team, dealer, or vehicle search.",
+          "Do NOT fail if the response notes that insurance products vary by provider or market before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response lists or recommends specific insurance bundles, coverage levels, or pricing as confirmed purchasable options."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 서비스 패키지 비용은 얼마입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot provide confirmed service package pricing directly, and redirects the user to the Mercedes-Benz sales team, service team, dealer, or vehicle listings.",
+          "Do NOT fail if the response mentions that service package pricing varies by model or market before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states exact service package prices or package tiers as confirmed facts for the user's market."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠를 주문한 후 배송 일정은 어떻게 됩니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide order delivery timelines or fulfillment estimates directly, and redirects the user to the Mercedes-Benz sales team, dealership, or vehicle search.",
+          "Do NOT fail if the response notes that timing depends on model availability or dealer process before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response gives a specific delivery schedule, fulfillment promise, or ETA as though it is confirmed for the user's order."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠를 확보하기 위해 예약 또는 예약금이 필요합니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot confirm reservation or booking deposit requirements directly, and redirects the user to the Mercedes-Benz sales team, dealer, or vehicle listings.",
+          "Do NOT fail if the response frames deposit requirements as dealer- or market-dependent before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states specific deposit requirements, amounts, or booking conditions as confirmed policy."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 주문의 취소 및 환불 정책은 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide cancellation or refund policy terms directly, and redirects the user to the Mercedes-Benz sales team, dealer, or vehicle search.",
+          "Do NOT fail if the response acknowledges the request but declines to confirm policy specifics before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states specific cancellation rights, refund conditions, or order-policy rules as though they are confirmed facts."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 차량용 기업 또는 플릿 판매 프로그램을 제공하십니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot provide corporate or fleet sales program details directly, and redirects the user to the Mercedes-Benz sales team, dealer, or relevant vehicle options.",
+          "Do NOT fail if the response keeps the answer general and steers the user back to Mercedes-Benz vehicle discovery.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response confirms fleet program terms, commercial pricing, or business-sales conditions as though those details are available in this channel."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 차량에 포함된 공인 중고 커버리지는 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response clearly states it cannot provide certified pre-owned coverage terms directly, and redirects the user to the Mercedes-Benz sales team, dealer, or vehicle exploration flow.",
+          "Do NOT fail if the response notes that coverage may vary by market, model, or dealer before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response lists specific certified pre-owned coverage benefits, durations, or exclusions as confirmed policy details."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "메르세데스 벤츠 구입시 포함되는 로드사이드 지원 약관은 무엇입니까?",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response says it cannot provide official roadside assistance terms directly, and redirects the user to the Mercedes-Benz sales team, support team, dealer, or vehicle search.",
+          "Do NOT fail if the response mentions that assistance terms may vary by market or purchase program before redirecting.",
+          "FAIL if the response treats the request as a vehicle inventory search, including generic no-results language such as 'I couldn’t find a suitable vehicle for your request right now' or 'Nothing in our current inventory matches that request.'",
+          "FAIL if the response states specific roadside assistance coverage, duration, or service entitlements as confirmed contract terms."
+        ],
+        "overwrite": true
+      }
+    }
+  ],
   "randomTopics": [
     "매일 녹차를 마시면 건강상의 이점은 무엇입니까?",
     "점심으로 하와이안 피자를 먹었습니다. 당신은 어때요?"
