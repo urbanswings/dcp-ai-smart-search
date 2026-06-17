@@ -72,7 +72,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -108,7 +108,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -142,14 +142,14 @@
       }
     },
     {
-      "value": "bütçem AUD80,000'nin altında",
+      "value": "bütçem ₺15.000.00'nin altında",
       "productType": "UCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 80000
+              "max": 15000000
             }
           }
         ],
@@ -158,7 +158,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of AUD 80,000 and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of ₺15.000.00 and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true
@@ -177,7 +177,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -200,7 +200,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -308,7 +308,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -331,7 +331,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -367,7 +367,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [

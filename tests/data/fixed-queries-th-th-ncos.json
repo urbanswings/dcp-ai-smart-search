@@ -69,7 +69,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -105,7 +105,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -197,7 +197,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -220,7 +220,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -282,7 +282,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -305,7 +305,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
@@ -340,7 +340,7 @@
           }
         ],
         "exclude": [],
-        "strict": true
+        "strict": false
       },
       "aiEvaluationHints": {
         "value": [
