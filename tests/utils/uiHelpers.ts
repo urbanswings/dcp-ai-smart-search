@@ -788,7 +788,7 @@ export async function processAndLogUiResult({
     return normalized.toUpperCase() === "PASS";
   };
 
-  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
+  const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   
@@ -1327,7 +1327,7 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   }
   const urlsFile = await fs.readFile(urlFilePath, "utf-8");
   const urls = JSON.parse(urlsFile);
-  const language = (LANGUAGE || "EN").toUpperCase();
+  const language = (process.env.LANGUAGE || LANGUAGE || "EN").toUpperCase();
   const marketUrls = urls[country];
   let url =
     marketUrls?.[env] ||

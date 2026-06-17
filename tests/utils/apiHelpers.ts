@@ -510,16 +510,14 @@ export function getLocale(): string {
 
 export function getLanguageCode(): string {
   const country = getCountryCode();
+  const languageByCountry: Record<string, string> = {
+    IN: "hi",
+    KR: "ko",
+    TH: "th",
+    TR: "tr",
+  };
 
-  if (country === "IN") {
-    return "en";
-  }
-
-  if (country === "TR") {
-    return "tr";
-  }
-
-  return (process.env.LANGUAGE || "en").toLowerCase();
+  return (languageByCountry[country] || process.env.LANGUAGE || "en").toLowerCase();
 }
 
 export function getSalesChannel(): string {
@@ -642,7 +640,7 @@ async function syncFacetsMasterDataFromEmhResponse(
 
 export async function fetchEmhApiResponse(): Promise<any> {
   const env = ENVIRONMENT || "INT";
-  const country = COUNTRY || "TR";
+  const country = process.env.COUNTRY || COUNTRY || "TR";
   const product = PRODUCT || "NCOS";
   const language = getLanguageCode();
   const vehicleCategory = VEHICLE_CATEGORY || "PASSENGER-CARS";
@@ -906,7 +904,7 @@ export async function processAndLogApiResult({
     );
   };
 
-  const lang = LANGUAGE?.toLocaleLowerCase() || "en";
+  const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
   

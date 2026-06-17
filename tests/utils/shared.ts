@@ -174,8 +174,8 @@ export function getProject(): string {
 }
 
 export function getLanguageLocale(): string {
-  const lang = LANGUAGE?.toLowerCase() || "en";
-  const country = COUNTRY?.toUpperCase() || "KR";
+  const lang = (process.env.LANGUAGE || LANGUAGE)?.toLowerCase() || "en";
+  const country = (process.env.COUNTRY || COUNTRY)?.toUpperCase() || "KR";
   return `${lang}-${country}`;
 }
 
@@ -184,8 +184,8 @@ export async function resolveFixedQueriesFilePath(dataDir: string): Promise<{
   fixedQueriesPath: string;
   usedFallback: boolean;
 }> {
-  const country = COUNTRY?.toLowerCase() || "kr";
-  const language = LANGUAGE?.toLowerCase() || "en";
+  const country = (process.env.COUNTRY || COUNTRY)?.toLowerCase() || "kr";
+  const language = (process.env.LANGUAGE || LANGUAGE)?.toLowerCase() || "en";
   const product = PRODUCT?.toLowerCase() || "ncos";
 
   const fallbackCandidates = [
@@ -312,9 +312,9 @@ export function buildTestType(
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
-  const env = ENVIRONMENT;
-  const country = COUNTRY;
-  const product = PRODUCT;
+  const env = process.env.ENVIRONMENT || ENVIRONMENT;
+  const country = process.env.COUNTRY || COUNTRY;
+  const product = process.env.PRODUCT || PRODUCT;
   const mode = getTestMode();
   let filename = `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${timestamp}.json`;
   if (mode === "both") {
@@ -326,9 +326,9 @@ export function getOutputFileName(testType: string): string {
 
 export function getScreenshotPath(testType: string, queryIndex: number, query: string, runTimestamp: string): string {
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(runTimestamp));
-  const env = ENVIRONMENT;
-  const country = COUNTRY;
-  const product = PRODUCT;
+  const env = process.env.ENVIRONMENT || ENVIRONMENT;
+  const country = process.env.COUNTRY || COUNTRY;
+  const product = process.env.PRODUCT || PRODUCT;
   
   // Sanitize query for filename (remove special characters, limit length)
   const sanitizedQuery = query
@@ -403,7 +403,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
   } = params;
   const resolvedTestType = buildTestType(testDescribe, testTitle, testType);
 
-  const lang = LANGUAGE?.toLowerCase() || "en";
+  const lang = (process.env.LANGUAGE || LANGUAGE)?.toLowerCase() || "en";
   const normalizeRepeatedQuery = (item: any): any | null => {
     if (typeof item === "string") {
       const trimmed = item.trim();
@@ -814,4 +814,3 @@ export function mergeQueries(
   }
   return [...safeFixedQueries, ...safeGeneratedQueries];
 }
-

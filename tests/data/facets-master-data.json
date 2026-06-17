@@ -554,6 +554,9 @@
       },
       {
         "value": "GLB 220 4MATIC"
+      },
+      {
+        "value": "S 680 4MATIC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1281,6 +1284,14 @@
       {
         "formattedValue": "프로그레시브",
         "value": "ab360eeb"
+      },
+      {
+        "formattedValue": "Mercedes-AMG エクステリア",
+        "value": "2a6b128d"
+      },
+      {
+        "formattedValue": "エクスクルーシブライン",
+        "value": "d5e318d0"
       }
     ],
     "facetType": "MULTI_VALUE"
