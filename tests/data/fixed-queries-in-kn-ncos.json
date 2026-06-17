@@ -86,7 +86,17 @@
       "value": "ಲಭ್ಯವಿರುವ ವಾಹನಗಳನ್ನು ನನಗೆ ತೋರಿಸಿ",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "AVAILABLE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",

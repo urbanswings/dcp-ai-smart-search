@@ -102,7 +102,17 @@
       "value": "購入可能な車両を見せてください",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "AVAILABLE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",

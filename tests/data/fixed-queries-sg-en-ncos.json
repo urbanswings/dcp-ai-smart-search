@@ -86,7 +86,17 @@
       "value": "show me available vehicles",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "AVAILABLE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase.",
@@ -142,14 +152,14 @@
       }
     },
     {
-      "value": "my budget is under 300,000 SGD",
+      "value": "my budget is under 500,000 SGD",
       "productType": "NCOS",
       "shouldRecommend": true,
       "shouldFilter": {
         "include": [
           {
             "price": {
-              "max": 300000
+              "max": 500000
             }
           }
         ],
@@ -158,7 +168,7 @@
       },
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 300,000 SGD and presents available vehicles within that budget.",
+          "Respond ONLY with: 'PASS' if the response filters by a price ceiling of 500,000 SGD and presents available vehicles within that budget.",
           "Do NOT fail if the exact recommended model differs from the expected shouldFilter — inventory varies. Pass as long as a price-based filter is applied and results are within the stated budget."
         ],
         "overwrite": true

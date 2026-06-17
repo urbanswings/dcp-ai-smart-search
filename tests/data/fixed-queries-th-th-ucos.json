@@ -43,7 +43,17 @@
       "value": "แสดงรถที่พร้อมจำหน่ายให้ฉันดู",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": false,
+      "shouldFilter": {
+        "include": [
+          {
+            "stockType": [
+              "AVAILABLE"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response filters by AVAILABLE stock type and presents vehicles that are currently available for purchase in Thai or English.",
