@@ -34,6 +34,12 @@ const TEST_TYPE_MAP = {
   'sanity-test_by-fixed-query':   { group: 'Sanity',            title: 'By Fixed Query' },
   'sanity-test_recommendation-model': { group: 'Sanity',        title: 'Recommendation Model' },
   'sanity-test_by-filter-facets-complete': { group: 'Sanity',   title: 'By Filter Facets (complete)' },
+  'regression_smart-regression-evaluation-sre': { group: 'Regression', title: 'Smart Regression Evaluation (SRE)' },
+  'regression_intermittent-issues-check-iic': { group: 'Regression', title: 'Intermittent Issues Check (IIC)' },
+  'multi-country-evaluation':    { group: 'Regression',        title: 'Multi Country Evaluation (MCE)' },
+  'multi-country-facet-evaluation': { group: 'Regression',     title: 'Multi Country Facet Evaluation (MCFE)' },
+  'regression-tests_smart-regression-evaluation-sre': { group: 'Regression', title: 'Smart Regression Evaluation (SRE)' },
+  'regression-tests_intermittent-issues-check-iic': { group: 'Regression', title: 'Intermittent Issues Check (IIC)' },
   'sentence-by-brand-model':     { group: 'Vehicles MB',        title: 'By Brand/Model' },
   'buyer-sentence-by-specs':     { group: 'Vehicles MB',        title: 'By Specs' },
   'sentence-by-filter-options':  null, // shared — resolved by testTitle in records
