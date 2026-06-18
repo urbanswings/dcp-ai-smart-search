@@ -466,52 +466,68 @@ Total: ~504 queries (excluding variable facet-based tests)
 
 Breakdown Count by category:
 
-Sanity Test (63 queries):
+Sanity (63 queries):
 - By Fixed Query: 35 queries (fixed only)
 - Recommendation Model: 28 queries (20 fixed + 8 AI)
 
 Vehicles MB (114 queries + variable):
-- By Brand/Model: 82 queries (2 fixed + 80 AI [10 random MB vehicles × 8 AI each])
-- By Specs: 10 queries (2 fixed + 8 AI)
-- By Filter Facets (random): 10 queries (2 fixed + 8 AI)
 - By Filter Facets (complete): **Variable** (depends on API facets)
 - By Filter Facets (Equipment): **Variable** (depends on equipment facets)
 - By Filter Facets (AND/OR): **Variable** (5 fixed + AI depends on API facets)
+- By Filter Facets (matrix): **Variable** (depends on generated facet matrix)
+- By Brand/Model: 82 queries (2 fixed + 80 AI [10 random MB vehicles × 8 AI each])
+- By Specs: 10 queries (2 fixed + 8 AI)
 - No Brand/Model: 12 queries (2 fixed + 10 AI)
+- Superlative: 10 queries (2 fixed + 8 AI)
+
+Vehicles MB - Negative Facets (variable):
+- By Filter Facets (bodyType)(-ve): **Variable**
+- By Filter Facets (modelIdentifier)(-ve): **Variable**
+- By Filter Facets (fuelType)(-ve): **Variable**
+- By Filter Facets (motorization)(-ve): **Variable**
+- By Filter Facets (color)(-ve): **Variable**
+- By Filter Facets (upholstery)(-ve): **Variable**
 
 Vehicles Non-MB (56 queries):
 - By Brand/Model (Sentence|Single): 12 queries (2 fixed + 10 AI)
-- By Brand/Model (Keyword|Mix): 12 queries (2 fixed + 10 random vehicle combos)
 - By Brand/Model (Keyword|Single): 12 queries (2 fixed + 10 random vehicle combos)
+- By Brand/Model (Keyword|Mix): 12 queries (2 fixed + 10 random vehicle combos)
 - By Non-MB Features: 20 queries (fixed only)
 
-Other Scenarios (230 queries):
-- Random Topics: 10 queries (2 fixed + 8 AI)
+Input Robustness (95 queries):
 - Edge Case Queries: 17 queries (hardcoded)
-- Negative/Contradictory: 10 queries (2 fixed + 8 AI)
-- Language/Localization: 10 queries (3 fixed + 7 AI)
+- Random Numbers: 52 queries (fixed only)
 - Misspelled/Fuzzy: 10 queries (3 fixed + 7 AI)
+- Language/Localization: 10 queries (3 fixed + 7 AI)
+- Unusual Units: 6 queries (fixed only)
+
+Constraint Handling (56 queries):
 - Date Range/Numeric: 10 queries (2 fixed + 8 AI)
-- No Results Scenario: 10 queries (2 fixed + 8 AI)
-- Response Consistency: 22 queries (14 fixed + 8 AI)
-- Personal Data: 14 queries (6 fixed + 8 AI)
-- NSFW: 13 queries (5 fixed + 8 AI)
-- Code and Scripts: 13 queries (5 fixed + 8 AI)
-- Bias and Manipulation: 13 queries (5 fixed + 8 AI)
+- Negative/Contradictory: 10 queries (2 fixed + 8 AI)
 - Conflicting Filter Facets: 13 queries (5 fixed + 8 AI)
 - Conflicting Brands: 13 queries (5 fixed + 8 AI)
-- Random Numbers: 52 queries (fixed only)
+- No Results Scenario: 10 queries (2 fixed + 8 AI)
 
-Special Scenarios (41 queries):
+Conversational Behavior (55 queries):
 - Multi-Intent: 6 queries (fixed only)
 - Clarification: 6 queries (fixed only)
 - Price Negotiation: 8 queries (fixed only)
-- Unusual Units: 6 queries (fixed only)
+- Sales: 20 queries (fixed only)
 - Joke/Humor: 3 queries (fixed only)
 - Repeat/Looping: 3 queries (fixed only)
 - Brand Loyalty/Switching: 3 queries (fixed only)
 - Accessibility Needs: 3 queries (fixed only)
 - Environmental Concerns: 3 queries (fixed only)
+
+Safety / Policy / Abuse (63 queries):
+- Personal Data: 14 queries (6 fixed + 8 AI)
+- NSFW: 13 queries (5 fixed + 8 AI)
+- Code and Scripts: 13 queries (5 fixed + 8 AI)
+- Bias and Manipulation: 13 queries (5 fixed + 8 AI)
+- Random Topics: 10 queries (2 fixed + 8 AI)
+
+Reliability (22 queries):
+- Response Consistency: 22 queries (14 fixed + 8 AI)
 
 ---
 
@@ -672,7 +688,7 @@ npx playwright test --project=cdp
 Run with custom options for a single test run:
 
 ```sh
-ENVIRONMENT=INT COUNTRY=TR PRODUCT=NCOS TEST_MODE=api npx playwright test -g "AI Smart Search - Sanity Test"
+ENVIRONMENT=INT COUNTRY=TR PRODUCT=NCOS TEST_MODE=api npx playwright test -g "AI Smart Search - Sanity"
 ```
 
 ---
