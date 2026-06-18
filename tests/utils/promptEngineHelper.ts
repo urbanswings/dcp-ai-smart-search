@@ -54,7 +54,7 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
   bodyType: {
     tr: "gövde tipi",
     th: "ประเภทรถ",
-    ko: "바디타입",
+    ko: "바디 타입",
     ja: "ボディタイプ",
     hi: "बॉडी टाइप",
     ta: "பாடி வகை",
@@ -68,7 +68,7 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
   fuelType: {
     tr: "yakıt tipi",
     th: "ประเภทเชื้อเพลิง",
-    ko: "연료타입",
+    ko: "연료 타입",
     ja: "燃料タイプ",
     hi: "फ्यूल टाइप",
     ta: "எரிபொருள் வகை",
@@ -274,6 +274,14 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     kn: "ಗಿಯರ್‌ಬಾಕ್ಸ್",
     ml: "ഗിയർബോക്സ്",
     mr: "गिअरबॉक्स",
+  },
+  packages: {
+    "kr": "패키지",
+    "tr": "donanım paketi"
+  },
+  lines: {
+    "kr": "라인",
+    "tr": "tasarım konsepti"
   },
 };
 

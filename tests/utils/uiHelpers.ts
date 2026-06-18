@@ -331,10 +331,10 @@ function mapUiLabelToFacetKey(label: string): string | null {
     .replace(/\s+/g, "");
 
   const rawLabelMap: Record<string, string> = {
-    "바디타입": "bodyType",
+    "바디 타입": "bodyType",
     "차체타입": "bodyType",
     "ボディタイプ": "bodyType",
-    "연료타입": "fuelType",
+    "연료연료 타입타입": "fuelType",
     "연료유형": "fuelType",
     "燃料タイプ": "fuelType",
     "모델": "modelIdentifier",
