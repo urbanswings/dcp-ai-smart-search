@@ -283,6 +283,21 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     "kr": "라인",
     "tr": "tasarım konsepti"
   },
+  colorPolish: {
+    "kr": "실내 장식품 (소재)",
+    "th": "เบาะ",
+    "tr": "döşeme"
+  },
+  enginePowerHP: {
+    "en": "horsepower",
+    "kr": "엔진 출력(마력)",
+    "tr": "motor gücü (HP)"
+  },
+  enginePowerKW: {
+    "en": "kilowatts",
+    "kr": "엔진 출력(킬로와트)",
+    "tr": "motor gücü (kW)"
+  },
 };
 
 /**

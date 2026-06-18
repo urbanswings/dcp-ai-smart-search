@@ -1292,6 +1292,10 @@
       {
         "formattedValue": "エクスクルーシブライン",
         "value": "d5e318d0"
+      },
+      {
+        "formattedValue": "AMG 라인",
+        "value": "3424078a"
       }
     ],
     "facetType": "MULTI_VALUE"

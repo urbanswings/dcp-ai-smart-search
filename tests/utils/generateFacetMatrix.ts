@@ -9,7 +9,6 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const rootDir = process.cwd();
 const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
 const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
-const COUNTRY = (process.env.COUNTRY || "AU").toUpperCase();
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
@@ -31,6 +30,7 @@ const INCLUDE_FACETS = [
   "brand",
   "campaigns",
   "color",
+  "colorPolish",
   "contextType",
   "enginePowerHP",
   "enginePowerKW",
@@ -231,8 +231,12 @@ function formatLocalizedInteger(value: unknown, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(numericValue);
 }
 
+function getCountryCode(): string {
+  return (process.env.COUNTRY || "AU").toUpperCase();
+}
+
 function formatLocalizedPriceValue(value: unknown): string {
-  switch (COUNTRY) {
+  switch (getCountryCode()) {
     case "TR":
       return `₺${formatLocalizedInteger(value, "tr-TR")}`;
     case "AU":
@@ -484,17 +488,8 @@ function createCompleteRangeHints(facetKey: string, numericValue: unknown): stri
   ];
 }
 
-function getRangePoints(facetKey: string, range: FacetRange): number[] {
-  if (facetKey === "price" || facetKey === "monthlyRate") {
-    const spread = range.max - range.min;
-    const interiorPoints = [0.25, 0.5, 0.75]
-      .map((ratio) => Math.round(range.min + spread * ratio))
-      .filter((value) => value > range.min && value < range.max);
-
-    return [...new Set(interiorPoints)];
-  }
-
-  return [...new Set([range.min, Math.round((range.min + range.max) / 2), range.max])];
+function getRangePoints(_facetKey: string, range: FacetRange): number[] {
+  return [Math.round((range.min + range.max) / 2)];
 }
 
 async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {

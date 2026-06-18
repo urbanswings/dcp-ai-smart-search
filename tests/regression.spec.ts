@@ -162,7 +162,7 @@ test.describe("Regression Tests", () => {
   });
 
   test("Multi Country Facet Evaluation (MCFE)", { tag: ["@regression", "@multi-country", "@facet"] }, async ({ browser }) => {
-    const targetFacet = process.env.MCFE_TARGET_FACET || "modelIdentifier";
+    const targetFacet = process.env.MCFE_TARGET_FACET || "bodyType";
 
     if (supportedCountries.length === 0) {
       console.warn("⚠️  No supported countries discovered, skipping test.");

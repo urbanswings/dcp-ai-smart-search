@@ -293,6 +293,483 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   });
 
+  test("By Filter Facets ('bodyType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "bodyType";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('campaigns')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "campaigns";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('color')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "color";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('colorPolish')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "colorPolish";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('enginePowerHP')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "enginePowerHP";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('enginePowerKW')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "enginePowerKW";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('equipment')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "equipment";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('fuelType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "fuelType";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('lines')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "lines";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('mileage')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "mileage";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('modelIdentifier')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "modelIdentifier";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('motorization')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "motorization";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('packages')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "packages";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('price')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "price";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('upholstery')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "upholstery";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets ('upholsteryPolish')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+      const targetFacet = "upholsteryPolish";
+      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      const allQueries = mergeQueries(fixedQueries, queries);
+      
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      // Fetch facets dynamically from API based on environment settings
+      const project = getProject();
+      const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData[describeName]?.[test.info().title]);
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: aiEvaluationRules,
+            };
+      });
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );  
+
+  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
+      const matrixQueries = isFixedQueriesOnly()
+        ? []
+        : await loadFacetMatrixSuite();
+      const allQueries = mergeQueries(fixedQueries, matrixQueries);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
   test("By Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byBrandModel;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
@@ -372,353 +849,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
               aiEvaluationHints: aiEvaluationRules,
             };
       });
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('modelIdentifier')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "modelIdentifier";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('bodyType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "bodyType";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('fuelType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "fuelType";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('upholstery')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "upholstery";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('upholsteryPolish')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "upholsteryPolish";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  ); 
-
-  test("By Filter Facets ('color')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "color";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-  
-  test("By Filter Facets ('lines')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "lines";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('packages')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "packages";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('equipment')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "equipment";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('motorization')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "motorization";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('campaigns')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "campaigns";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-      
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      // Fetch facets dynamically from API based on environment settings
-      const project = getProject();
-      const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
-      const facets = await fetchAndConvertFacets(
-        emhApiResponse,
-        dcpApiResponse,
-        project
-      );
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData[describeName]?.[test.info().title]);
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: aiEvaluationRules,
-            };
-      });
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );  
-
-  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
-      const matrixQueries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetMatrixSuite();
-      const allQueries = mergeQueries(fixedQueries, matrixQueries);
 
       await runTestsAndSaveResults({
         queries: allQueries,

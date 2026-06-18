@@ -118,6 +118,33 @@ function collectPrimitiveFacetValues(value: any): string[] {
   return [String(value)];
 }
 
+function getFacetRangeBounds(value: any): { min: number; max: number } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const min = Number(value.min);
+  const max = Number(value.max);
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return null;
+  }
+
+  return min <= max ? { min, max } : { min: max, max: min };
+}
+
+function isExpectedValueWithinFacetRange(
+  expected: unknown,
+  range: { min: number; max: number }
+): boolean {
+  const numericExpected = Number(expected);
+  return (
+    Number.isFinite(numericExpected) &&
+    numericExpected >= range.min &&
+    numericExpected <= range.max
+  );
+}
+
 function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
   return (
     ["upholstery", "color"].includes(facetKey) &&
@@ -972,6 +999,19 @@ export async function processAndLogUiResult({
           continue;
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+          const rangeBounds = getFacetRangeBounds(resultsFacets[key]);
+          if (rangeBounds) {
+            for (const expected of expectedValues) {
+              if (!isExpectedValueWithinFacetRange(expected, rangeBounds)) {
+                facetCheckPassed = false;
+                failureReasons.push(
+                  `Expected facet value outside range: ${key}=${expected} (actual range: ${rangeBounds.min}-${rangeBounds.max})`
+                );
+              }
+            }
+            continue;
+          }
+
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
           const rawActuals = new Set(
             actualValues.map((value) => String(value).trim().toUpperCase())
