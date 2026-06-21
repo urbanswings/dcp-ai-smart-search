@@ -69,6 +69,13 @@ interface FacetRange {
   max: number;
 }
 
+interface RangeQueryCase {
+  formattedValue: string;
+  rawValue: number;
+  filterValue: string;
+  expectedValue: number;
+}
+
 interface Facets {
   [key: string]: {
     values?: FacetValue[] | { min: number; max: number };
@@ -263,6 +270,9 @@ function formatFacetValueForQuery(facetKey: string, formattedValue: string, rawV
 
 function fallbackCompleteQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
   const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
+  if (/^(less than|more than|between)\b/i.test(String(formattedValue).trim())) {
+    return `vehicles with ${facetDisplayName(facetKey)} ${formattedValue}`;
+  }
   if (facetKey === "modelIdentifier") {
     return `list me all ${formattedValue}`;
   }
@@ -300,7 +310,13 @@ function addCompleteQuery(
   filterValue: unknown,
   shouldFilter: ShouldFilter
 ): void {
-  const displayFilterValue = formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
+  const isNumericFilterValue =
+    typeof filterValue === "number" ||
+    (typeof filterValue === "string" && Number.isFinite(Number(filterValue)));
+  const displayFilterValue =
+    (facetKey === "price" || facetKey === "monthlyRate") && !isNumericFilterValue
+      ? String(filterValue)
+      : formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
   if (queryMap.has(query)) {
     return;
   }
@@ -343,7 +359,7 @@ function loadCompletePromptConfig(): PromptConfig {
 
 function buildCompleteFilterText(facetKey: string, formattedValue: string, rawValue: unknown): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return `'category'='${facetDisplayName(facetKey)}' 'value'='${formatLocalizedPriceValue(rawValue)}'`;
+    return `'category'='${facetDisplayName(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
   }
   return `'category'='${facetDisplayName(facetKey)}' 'value'='${formattedValue}'`;
 }
@@ -475,12 +491,19 @@ function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawV
   return String(formattedValue || rawValue);
 }
 
-function createCompleteRangeHints(facetKey: string, numericValue: unknown): string[] {
+function createCompleteRangeHints(
+  facetKey: string,
+  numericValue: unknown,
+  valueLabel?: string
+): string[] {
   const facetName = facetDisplayName(facetKey);
-  const targetValue = toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
+  const targetValue = valueLabel || toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
+  const targetVerb = /^(less than|more than|between)\b/i.test(targetValue)
+    ? `references vehicles with ${facetName} ${targetValue}`
+    : `references vehicles around ${facetName} ${targetValue} (exact number not required)`;
   return [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} range intent.`,
-    `Respond with "PASS" only if the response references vehicles around ${facetName} ${targetValue} (exact number not required) and indicates matching vehicles are available.`,
+    `Respond with "PASS" only if the response ${targetVerb} and indicates matching vehicles are available.`,
     `If the response ignores the requested ${facetName} target (${targetValue}) or provides clearly unrelated values, respond with "MSG FAIL: missing or incorrect ${facetName} target (${targetValue})".`,
     `If the response says the requested ${facetName} target (${targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} target (${targetValue})".`,
     `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
@@ -488,8 +511,30 @@ function createCompleteRangeHints(facetKey: string, numericValue: unknown): stri
   ];
 }
 
-function getRangePoints(_facetKey: string, range: FacetRange): number[] {
-  return [Math.round((range.min + range.max) / 2)];
+function getRangeValueMatrix(facetKey: string, range: FacetRange): RangeQueryCase[] {
+  const midpoint = Math.round((range.min + range.max) / 2);
+  const formattedMidpoint = formatFacetValueForQuery(facetKey, String(midpoint), midpoint);
+
+  return [
+    {
+      formattedValue: formattedMidpoint,
+      rawValue: midpoint,
+      filterValue: formattedMidpoint,
+      expectedValue: midpoint,
+    },
+    {
+      formattedValue: `less than ${formattedMidpoint}`,
+      rawValue: midpoint,
+      filterValue: `less than ${formattedMidpoint}`,
+      expectedValue: midpoint,
+    },
+    {
+      formattedValue: `more than ${formattedMidpoint}`,
+      rawValue: midpoint,
+      filterValue: `more than ${formattedMidpoint}`,
+      expectedValue: midpoint,
+    },
+  ];
 }
 
 async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
@@ -546,14 +591,13 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
 
     const range = getFacetRange(facets, facetKey);
     if (range) {
-      const rangePoints = getRangePoints(facetKey, range);
-      for (const value of rangePoints) {
-        const formattedRangeValue = formatFacetValueForQuery(facetKey, String(value), value);
+      const rangeValueMatrix = getRangeValueMatrix(facetKey, range);
+      for (const rangeValue of rangeValueMatrix) {
         const query = await promptEngine.generateQueryWithVariation(
           getOpenAiClient(),
           facetKey,
-          formattedRangeValue,
-          value,
+          rangeValue.formattedValue,
+          rangeValue.rawValue,
           promptConfig.systemPrompt,
           promptConfig.userPromptTemplate,
           facetDisplayName,
@@ -569,10 +613,14 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
           queryMap,
           query,
           facetKey,
-          value,
-          { include: [{ [facetKey]: [value] }], exclude: [], strict: false }
+          rangeValue.filterValue,
+          { include: [{ [facetKey]: [rangeValue.expectedValue] }], exclude: [], strict: false }
         );
-        informativeHintsByQuery[query] = createCompleteRangeHints(facetKey, value);
+        informativeHintsByQuery[query] = createCompleteRangeHints(
+          facetKey,
+          rangeValue.rawValue,
+          rangeValue.filterValue
+        );
       }
     }
   }
