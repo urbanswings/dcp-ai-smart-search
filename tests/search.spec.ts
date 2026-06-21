@@ -63,6 +63,15 @@ let aiEvaluationRulesData: any = {};
 let emhApiResponse: any = null;
 let dcpApiResponse: any = null;
 
+const RANGE_FACETS = [
+  "price",
+  "monthlyRate",
+  "mileage",
+  "enginePowerHP",
+  "enginePowerKW",
+  "modelYear",
+];
+
 function registerSmartSearchSuiteHooks(describeName: string): void {
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
@@ -987,6 +996,38 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       });
     }
   );
+});
+
+test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
+  const describeName = "Vehicles MB - Range Facets";
+  registerSmartSearchSuiteHooks(describeName);
+
+  for (const targetFacet of RANGE_FACETS) {
+    test(`By Filter Facets ('${targetFacet}')`, { tag: ["@ui", "@api", "@facet", "@range"] }, async ({ browser }) => {
+        const fixedQueries = fixedQueriesData.byFilterFacetsRange || [];
+        const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+        const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+          ? undefined
+          : aiEvaluationRules;
+        const queries = isFixedQueriesOnly()
+          ? []
+          : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+        const allQueries = mergeQueries(fixedQueries, queries);
+
+        await runTestsAndSaveResults({
+          queries: allQueries,
+          testDescribe: describeName,
+          testTitle: test.info().title,
+          browser,
+          setupContextAndPage,
+          performUISmartSearchAndGetResults,
+          processAndLogUiResult,
+          performApiSmartSearchAndGetResults,
+          processAndLogApiResult,
+        });
+      }
+    );
+  }
 });
 
 test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
