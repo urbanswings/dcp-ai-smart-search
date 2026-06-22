@@ -174,6 +174,7 @@
       "value": [
         "Respond ONLY with: PASS if the assistant response correctly handles numeric unit shorthand and expanded unit expressions in Mercedes-Benz Smart Search.",
         "PASS if equivalent numeric expressions such as 500,000, 500k, and 500 thousand are interpreted as the same numeric constraint.",
+        "PASS if currency or unit expressions such as ₺100,000, 100,000 lira, THB 100,000, 100,000 km, or similar market-specific unit forms are interpreted as the same numeric constraint.",
         "PASS if equivalent mileage or monthly payment expressions such as 50k and 50 thousand are interpreted as the same numeric constraint.",
         "PASS if the response applies or acknowledges the requested price, monthly payment, or mileage range and provides relevant Mercedes-Benz vehicles.",
         "FAIL if the response treats k/thousand as a literal nonnumeric token, ignores the numeric constraint, or applies a clearly different value.",

@@ -137,6 +137,60 @@ function formatExpandedThousands(value: number): string {
   return `${Math.round(value / 1000)} thousand`;
 }
 
+function getCountryCode(): string {
+  return (process.env.COUNTRY || "AU").toUpperCase();
+}
+
+function uniqueValues(values: string[]): string[] {
+  return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
+}
+
+function getCurrencyUnitVariants(value: number): string[] {
+  const formattedValue = formatWithThousandsSeparator(value);
+
+  switch (getCountryCode()) {
+    case "TR":
+      return [`₺${formattedValue}`, `${formattedValue} lira`];
+    case "TH":
+      return [`THB ${formattedValue}`, `${formattedValue} baht`, `฿${formattedValue}`];
+    case "KR":
+      return [`${formattedValue} 원`, `KRW ${formattedValue}`];
+    case "JP":
+      return [`¥${formattedValue}`, `${formattedValue} yen`, `${formattedValue}円`];
+    case "SG":
+      return [`${formattedValue} SGD`, `SGD ${formattedValue}`, `S$${formattedValue}`];
+    case "AU":
+      return [`A$ ${formattedValue}`, `AUD ${formattedValue}`];
+    case "IN":
+      return [`₹ ${formattedValue}`, `${formattedValue} rupees`, `INR ${formattedValue}`];
+    default:
+      return [];
+  }
+}
+
+function getNumericUnitValueVariants(facetKey: string, value: number): string[] {
+  const baseVariants = [
+    formatWithThousandsSeparator(value),
+    formatCompactThousands(value),
+    formatExpandedThousands(value),
+  ];
+
+  if (facetKey === "price" || facetKey === "monthlyRate") {
+    return uniqueValues([...baseVariants, ...getCurrencyUnitVariants(value)]);
+  }
+
+  if (facetKey === "mileage") {
+    return uniqueValues([
+      ...baseVariants,
+      `${formatWithThousandsSeparator(value)} km`,
+      `${formatCompactThousands(value)} km`,
+      `${formatExpandedThousands(value)} km`,
+    ]);
+  }
+
+  return uniqueValues(baseVariants);
+}
+
 function numericUnitVariationQueryText(facetKey: string, valueText: string): string {
   switch (facetKey) {
     case "price":
@@ -167,17 +221,14 @@ async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFac
       continue;
     }
 
-    const valueVariants = [
-      formatWithThousandsSeparator(targetValue),
-      formatCompactThousands(targetValue),
-      formatExpandedThousands(targetValue),
-    ];
+    const valueVariants = getNumericUnitValueVariants(facetKey, targetValue);
 
     for (const valueText of valueVariants) {
       regressionQueries.push({
         value: numericUnitVariationQueryText(facetKey, valueText),
         facet: facetKey,
         filterValue: valueText,
+        skipOpenAiEvaluation: true,
         shouldRecommend: true,
         shouldFilter: {
           include: [{ [facetKey]: [targetValue] }],
@@ -409,4 +460,3 @@ export function normalizeGeneratedFacetCompleteSuite(
     return query;
   });
 }
-
