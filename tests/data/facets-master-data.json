@@ -133,11 +133,6 @@
       },
       {
         "label": "Model",
-        "value": "UNDEFINED",
-        "tags": []
-      },
-      {
-        "label": "Model",
         "formattedValue": "Sprinter",
         "value": "SPRINTER",
         "tags": []
@@ -924,11 +919,6 @@
         "label": "Transmission",
         "formattedValue": "Automatic",
         "value": "AUTOMATIC"
-      },
-      {
-        "label": "변속기",
-        "formattedValue": "",
-        "value": "UNDEFINED"
       },
       {
         "label": "전송",
