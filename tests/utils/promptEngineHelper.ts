@@ -383,7 +383,7 @@ function buildVariedFallbackPhrase(
     `find ${valueLabel}`,
     `only ${valueLabel}`,
     `${valueLabel} lineup`,
-    `compare ${valueLabel}`,
+    `show ${valueLabel}`,
     `${valueLabel} recommendations`,
   ];
   const idx = context.templateCursor % templates.length;
@@ -490,8 +490,9 @@ async function generateQueryWithVariation(
   const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
   const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn, language);
   const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
-
+  
   if (!client || !systemPrompt || !userPromptTemplate) {
+    // return normalizeWhitespace(formattedValue);
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
   }
 
@@ -512,16 +513,17 @@ async function generateQueryWithVariation(
     if (styleHint.includes("'<facet name> <filter value>'")) return normalizeWhitespace(exactQuery);
     
     const generated = await generateOpenAiQuery(client, resolvedSystemPrompt, resolvedUserPrompt, maxTokens);
-    return generated;
-    // const generatedVariation = enforceCompleteQueryVariation(
-    //   generated || fallback,
-    //   facetKey,
-    //   formattedValue,
-    //   rawValue,
-    //   facetDisplayNameFn,
-    //   context
-    // );
-    // return generatedVariation;
+    // return generated;
+    const generatedVariation = enforceCompleteQueryVariation(
+      generated || fallback,
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context
+    );
+    return generatedVariation;
   } catch (error) {
     console.error(`[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`);
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);

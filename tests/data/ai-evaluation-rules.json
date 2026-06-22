@@ -60,108 +60,6 @@
     "maxTokens": 20,
     "temperature": 0
   },
-  "Vehicles MB": {
-    "By Filter Facets ('modelIdentifier')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by modelIdentifier facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected modelIdentifier filter and its values.",
-        "PASS if results show vehicles matching the selected model.",
-        "FAIL if the response omits or misrepresents the modelIdentifier filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('bodyType')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by bodyType facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected bodyType filter and its values.",
-        "PASS if results show vehicles matching the selected body type.",
-        "FAIL if the response omits or misrepresents the bodyType filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('fuelType')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by fuelType facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected fuelType filter and its values.",
-        "PASS if results show vehicles matching the selected fuel type.",
-        "FAIL if the response omits or misrepresents the fuelType filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('upholstery')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by upholstery facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected upholstery filter and its values.",
-        "PASS if results show vehicles matching the selected upholstery.",
-        "FAIL if the response omits or misrepresents the upholstery filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('upholsteryPolish')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by upholsteryPolish facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected upholsteryPolish filter and its values.",
-        "PASS if results show vehicles matching the selected upholstery polish.",
-        "FAIL if the response omits or misrepresents the upholsteryPolish filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('color')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by color facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected color filter and its values.",
-        "PASS if results show vehicles matching the selected color.",
-        "FAIL if the response omits or misrepresents the color filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('lines')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by lines facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected lines filter and its values.",
-        "PASS if results show vehicles matching the selected lines.",
-        "FAIL if the response omits or misrepresents the lines filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('packages')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by packages facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected packages filter and its values.",
-        "PASS if results show vehicles matching the selected packages.",
-        "FAIL if the response omits or misrepresents the packages filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('equipment')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by equipment facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected equipment filter and its values.",
-        "PASS if results show vehicles matching the selected equipment.",
-        "FAIL if the response omits or misrepresents the equipment filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    },
-    "By Filter Facets ('motorization')": {
-      "value": [
-        "Respond ONLY with: PASS if the assistant response correctly filters and shows vehicles by motorization facet in Mercedes-Benz Smart Search.",
-        "PASS if the response accurately reflects the selected motorization filter and its values.",
-        "PASS if results show vehicles matching the selected motorization.",
-        "FAIL if the response omits or misrepresents the motorization filter.",
-        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
-      ],
-      "overwrite": true
-    }
-  },
   "Vehicles Non-MB": {
     "By Brand/Model (Sentence|Single)": {
       "value": [
@@ -497,6 +395,50 @@
         "Do not fail only because the recommended model does not perfectly match every stated preference, or because the result count is unexpectedly high or low. Evaluate whether the response meaningfully addresses the user's preferences with Mercedes-Benz vehicles."
       ],
       "overwrite": true
+    }
+  },
+  "facetMatrix": {
+    "genericHints": {
+      "completeValue": [
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested {facetName} filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested {facetName} value: {valueLabel} and indicates matching vehicles are available.",
+        "If the response ignores or contradicts the requested {facetName} value ({valueLabel}), respond with \"MSG FAIL: missing or incorrect {facetName} value ({valueLabel})\".",
+        "If the response says the requested {facetName} value ({valueLabel}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"MSG FAIL: no results for requested {facetName} value ({valueLabel})\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
+      ],
+      "completeRange": [
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested {facetName} range intent.",
+        "Respond with \"PASS\" only if the response {targetVerb} and indicates matching vehicles are available.",
+        "If the response ignores the requested {facetName} target ({targetValue}) or provides clearly unrelated values, respond with \"MSG FAIL: missing or incorrect {facetName} target ({targetValue})\".",
+        "If the response says the requested {facetName} target ({targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"MSG FAIL: no results for requested {facetName} target ({targetValue})\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: off-topic or unsafe response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
+      ],
+      "exclusion": [
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and recommends vehicles for this exclusion intent.",
+        "Respond with \"PASS\" when the requested {facetName} exclusion is respected: exclude {excludedText}.",
+        "Respond with \"PASS\" when any mentioned {facetName} values align with the allowed inventory set: {allowedText}.",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: off-topic or unsafe response\".",
+        "If the response includes the excluded {facetName} value ({excludedText}) as part of recommendations, respond with \"MSG FAIL: included excluded {facetName} ({excludedText})\"."
+      ],
+      "inclusion": [
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and gives recommendations for this multi-value intent.",
+        "Respond with \"PASS\" if the response addresses both requested {facetName} values: {aText} and {bText}.",
+        "Respond with \"PASS\" if the response is concise but still explicitly references both requested {facetName} values, optionally with result counts.",
+        "If one of the requested {facetName} values is ignored, respond with \"MSG FAIL: missing {facetName} value\" and specify which value ({aText} or {bText}) was not addressed.",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: off-topic or unsafe response\"."
+      ]
+    },
+    "bodyTypeHints": {
+      "completeValue": [
+        "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested {facetName} filter intent.",
+        "Respond with \"PASS\" only if the response clearly acknowledges or applies the requested {facetName} value and indicates matching vehicles are available. Treat equivalent localized or singular/plural wording as valid, including: {acceptedLabelText}.",
+        "If the response ignores or contradicts all accepted forms of the requested {facetName} value ({acceptedLabelText}), respond with \"MSG FAIL: missing or incorrect {facetName} value ({valueLabel})\".",
+        "If the response says the requested {facetName} value ({acceptedLabelText}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"MSG FAIL: no results for requested {facetName} value ({valueLabel})\".",
+        "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: invalid response\".",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
+      ]
     }
   }
 }
