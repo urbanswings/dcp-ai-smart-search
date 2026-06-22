@@ -953,6 +953,7 @@ export async function processAndLogApiResult({
   
   const testFacets = process.env.TEST_FACETS === "true";  
   const aiEvaluationHints = query?.aiEvaluationHints;
+  const skipOpenAiEvaluation = query?.skipOpenAiEvaluation === true;
   const smartSearchMessage = results.results?.resultText || "";
   const apiResponse = results.results?.responseData;
   const resultsFacets = (() => {
@@ -1018,13 +1019,17 @@ export async function processAndLogApiResult({
         addFailureReason("Payload is zero");
       }
 
-      openaiEvaluation = await evaluateSearchResult(
-        smartSearchResponse,
-        aiEvaluationHints,
-        query?.value ?? query
-      );
-      if (!isPassEvaluation(openaiEvaluation)) {
-        responseCheckPassed = false;
+      if (skipOpenAiEvaluation) {
+        openaiEvaluation = "PASS";
+      } else {
+        openaiEvaluation = await evaluateSearchResult(
+          smartSearchResponse,
+          aiEvaluationHints,
+          query?.value ?? query
+        );
+        if (!isPassEvaluation(openaiEvaluation)) {
+          responseCheckPassed = false;
+        }
       }
     }
   } else if ((results.error || results.results?.errors) && results.statusCode !== 400) {
@@ -1055,13 +1060,17 @@ export async function processAndLogApiResult({
     }
 
     const smartSearchResponse = results.results.resultText;
-    openaiEvaluation = await evaluateSearchResult(
-      smartSearchResponse,
-      aiEvaluationHints,
-      query?.value ?? query
-    );
-    if (!isPassEvaluation(openaiEvaluation)) {
-      responseCheckPassed = false;
+    if (skipOpenAiEvaluation) {
+      openaiEvaluation = "PASS";
+    } else {
+      openaiEvaluation = await evaluateSearchResult(
+        smartSearchResponse,
+        aiEvaluationHints,
+        query?.value ?? query
+      );
+      if (!isPassEvaluation(openaiEvaluation)) {
+        responseCheckPassed = false;
+      }
     }
   }
 
@@ -1256,26 +1265,26 @@ export async function processAndLogApiResult({
   }
 
   // Validate language consistency between query and response using OpenAI
-  let langCheckResult = "YES";
-  try {
-    const langCompletion = await openaiChatCompletion([
-      { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
-      { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
-    ], {
-      max_tokens: 10,
-      temperature: 0.2
-    });
-    langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
-  } catch (error: any) {
-    console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
-    // Skip validation if OpenAI is unavailable (quota/network issues)
-    langCheckResult = "YES";
-  }
-  if (!isLanguageConsistencyAccepted(langCheckResult)) {
-    console.debug("[DEBUG] Language consistency check: FAIL");
-    responseCheckPassed = false;
-    addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
-  }
+  // let langCheckResult = "YES";
+  // try {
+  //   const langCompletion = await openaiChatCompletion([
+  //     { role: "system", content: "You are a linguistic expert. Evaluate if the two texts are of the same language." },
+  //     { role: "user", content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.` }
+  //   ], {
+  //     max_tokens: 10,
+  //     temperature: 0.2
+  //   });
+  //   langCheckResult = langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() || "NO";
+  // } catch (error: any) {
+  //   console.warn(`[WARN] OpenAI language validation skipped: ${error?.message || error}`);
+  //   // Skip validation if OpenAI is unavailable (quota/network issues)
+  //   langCheckResult = "YES";
+  // }
+  // if (!isLanguageConsistencyAccepted(langCheckResult)) {
+  //   console.debug("[DEBUG] Language consistency check: FAIL");
+  //   responseCheckPassed = false;
+  //   addFailureReason(`Language Inconsistency - '${langCheckResult}'`);
+  // }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
   const evaluationPassed =

@@ -612,10 +612,6 @@
         "value": "TOURER"
       },
       {
-        "label": "Gövde Tipi",
-        "value": "UNDEFINED"
-      },
-      {
         "label": "ボディタイプ",
         "formattedValue": "ロングセダン",
         "value": "LONG_SEDAN"
@@ -894,13 +890,13 @@
       },
       {
         "label": "연료 유형",
-        "formattedValue": "N/A",
-        "value": "UNDEFINED"
+        "formattedValue": "하이브리드(경유+전기)",
+        "value": "DIESEL_ELECTRIC_PLUGIN_HYBRID"
       },
       {
         "label": "연료 유형",
-        "formattedValue": "하이브리드(경유+전기)",
-        "value": "DIESEL_ELECTRIC_PLUGIN_HYBRID"
+        "formattedValue": "N/A",
+        "value": "UNDEFINED"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -914,11 +910,6 @@
   },
   "driveType": {
     "values": [
-      {
-        "label": "Drive type",
-        "formattedValue": "",
-        "value": "UNDEFINED"
-      },
       {
         "label": "Drive type",
         "formattedValue": "Rear-wheel drive",
@@ -1005,79 +996,8 @@
         "value": "UPHOLSTERY_COLOR_GREY"
       },
       {
-        "value": "17500f9"
-      },
-      {
-        "formattedValue": "그레이 ",
-        "value": "461a08d9"
-      },
-      {
-        "formattedValue": "레드  ",
-        "value": "2f60067d"
-      },
-      {
-        "formattedValue": "베이지 ",
-        "value": "45a208bd"
-      },
-      {
-        "formattedValue": "브라운 ",
-        "value": "45ba08dd"
-      },
-      {
-        "formattedValue": "블랙  ",
-        "value": "309f06a9"
-      },
-      {
-        "formattedValue": "블루  ",
-        "value": "30f406bd"
-      },
-      {
-        "formattedValue": "화이트 ",
-        "value": "448b08b6"
-      },
-      {
-        "formattedValue": "그레이",
-        "value": "3d9e08b9"
-      },
-      {
-        "formattedValue": "레드",
-        "value": "2340063d"
-      },
-      {
-        "formattedValue": "베이지",
-        "value": "3d42089d"
-      },
-      {
-        "formattedValue": "브라운",
-        "value": "3d3a08bd"
-      },
-      {
-        "formattedValue": "블랙",
-        "value": "24270669"
-      },
-      {
-        "formattedValue": "블루",
-        "value": "2454067d"
-      },
-      {
         "formattedValue": "Gray/Blue",
         "value": "UPHOLSTERY_COLOR_GREY_BLUE"
-      },
-      {
-        "formattedValue": "Bej",
-        "value": "e71032d"
-      },
-      {
-        "formattedValue": "Gri",
-        "value": "eaa033e"
-      },
-      {
-        "formattedValue": "Kahverengi",
-        "value": "30410620"
-      },
-      {
-        "formattedValue": "Siyah",
-        "value": "167a041a"
       },
       {
         "formattedValue": "Gray/Brown",
@@ -1086,14 +1006,6 @@
       {
         "formattedValue": "เขียว/ดำ",
         "value": "UPHOLSTERY_COLOR_GREEN_BLACK"
-      },
-      {
-        "formattedValue": "Black",
-        "value": "5c9509c2"
-      },
-      {
-        "formattedValue": "Red",
-        "value": "6c500aee"
       },
       {
         "formattedValue": "블루/블랙",
@@ -2268,87 +2180,8 @@
         "value": "PAINT_COLOR_WHITE"
       },
       {
-        "value": "17500f9"
-      },
-      {
-        "formattedValue": "그레이",
-        "value": "3d9e08b9"
-      },
-      {
-        "formattedValue": "그린",
-        "value": "251406aa"
-      },
-      {
-        "formattedValue": "레드",
-        "value": "2340063d"
-      },
-      {
-        "formattedValue": "블랙",
-        "value": "24270669"
-      },
-      {
-        "formattedValue": "블루",
-        "value": "2454067d"
-      },
-      {
-        "formattedValue": "실버",
-        "value": "2382064c"
-      },
-      {
-        "formattedValue": "옐로우",
-        "value": "3bb40882"
-      },
-      {
-        "formattedValue": "화이트 ",
-        "value": "448b08b6"
-      },
-      {
-        "formattedValue": "기타 색상",
-        "value": "60720a5a"
-      },
-      {
-        "formattedValue": "화이트",
-        "value": "3c320896"
-      },
-      {
         "formattedValue": "Sarı",
         "value": "PAINT_COLOR_YELLOW"
-      },
-      {
-        "formattedValue": "Beyaz",
-        "value": "16240417"
-      },
-      {
-        "formattedValue": "Gri",
-        "value": "eaa033e"
-      },
-      {
-        "formattedValue": "Mavi",
-        "value": "123e03a9"
-      },
-      {
-        "formattedValue": "Siyah",
-        "value": "167a041a"
-      },
-      {
-        "formattedValue": "Black",
-        "value": "5c9509c2"
-      },
-      {
-        "formattedValue": "Grey",
-        "value": "770e0b97"
-      },
-      {
-        "formattedValue": "Silver",
-        "value": "b60c0e98"
-      },
-      {
-        "formattedValue": "White",
-        "value": "816e0c12"
-      },
-      {
-        "formattedValue": "Yellow",
-        "value": "223a1336"
       },
       {
         "formattedValue": "베이지",
@@ -4133,9 +3966,6 @@
         "value": "UPHOLSTERY_TYPE_FABRIC"
       },
       {
-        "value": "17500f9"
-      },
-      {
         "formattedValue": "Exclusive Leather",
         "value": "UPHOLSTERY_TYPE_LEATHER_EXCLUSIVE"
       }
@@ -4163,9 +3993,6 @@
       {
         "formattedValue": "Özel boya",
         "value": "PAINT_TYPE_SPECIAL"
-      },
-      {
-        "value": "17500f9"
       },
       {
         "formattedValue": "Non-Metallic",

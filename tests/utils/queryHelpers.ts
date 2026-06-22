@@ -307,23 +307,14 @@ function extractMissingFacetValues(
 ): Array<{ rawValue: string; formattedValue: string }> {
   const allValues = extractFacetValues(masterData, facetKey);
   const stockValuesArr = extractFacetValues(stockData, facetKey);
-  
-  // For facets that use UUIDs (color, upholstery), normalize by formattedValue
-  // Otherwise, normalize by rawValue
-  const useFormattedValue = ["color", "upholstery"].includes(facetKey);
-  
+
+  // Compare only the internal facet code (`value`). Labels/formatted values are localized per market.
   const stockValues = new Set(
-    stockValuesArr.map((entry) => 
-      useFormattedValue 
-        ? String(entry.formattedValue).toLowerCase() 
-        : String(entry.rawValue).toUpperCase()
-    )
+    stockValuesArr.map((entry) => String(entry.rawValue).toUpperCase())
   );
-  
+
   return allValues.filter((entry) => {
-    const normalizedValue = useFormattedValue
-      ? String(entry.formattedValue).toLowerCase()
-      : String(entry.rawValue).toUpperCase();
+    const normalizedValue = String(entry.rawValue).toUpperCase();
     return !stockValues.has(normalizedValue);
   });
 }
