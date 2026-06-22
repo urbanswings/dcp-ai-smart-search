@@ -42,6 +42,11 @@ export interface GeneratedFacetSuite {
   informativeHintsByQuery?: Record<string, string[]>;
 }
 
+interface RangeFacetBounds {
+  min: number;
+  max: number;
+}
+
 export async function loadGeneratedFacetSuite(
   filePath: string,
   fallbackHints?: AiEvaluationHints
@@ -92,6 +97,104 @@ async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
   const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const sourceData = readJson(sourceDataPath);
   return buildMatrix(sourceData);
+}
+
+function getRangeFacetBounds(sourceData: any, facetKey: string): RangeFacetBounds | null {
+  const values = sourceData?.data?.search?.facets?.[facetKey]?.values;
+  if (!values || typeof values !== "object" || Array.isArray(values)) {
+    return null;
+  }
+
+  const min = Number(values.min);
+  const max = Number(values.max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) {
+    return null;
+  }
+  return { min, max };
+}
+
+function pickUnitVariationTarget(range: RangeFacetBounds): number | null {
+  const roundedMidpoint = Math.round(((range.min + range.max) / 2) / 1000) * 1000;
+  const roundedMin = Math.ceil(range.min / 1000) * 1000;
+  const roundedMax = Math.floor(range.max / 1000) * 1000;
+  const target = Math.min(Math.max(roundedMidpoint, roundedMin), roundedMax);
+
+  if (!Number.isFinite(target) || target <= 0 || target < range.min || target > range.max) {
+    return null;
+  }
+  return target;
+}
+
+function formatWithThousandsSeparator(value: number): string {
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+}
+
+function formatCompactThousands(value: number): string {
+  return `${Math.round(value / 1000)}k`;
+}
+
+function formatExpandedThousands(value: number): string {
+  return `${Math.round(value / 1000)} thousand`;
+}
+
+function numericUnitVariationQueryText(facetKey: string, valueText: string): string {
+  switch (facetKey) {
+    case "price":
+      return `Show Mercedes-Benz vehicles under ${valueText}`;
+    case "monthlyRate":
+      return `Show Mercedes-Benz vehicles with monthly payment under ${valueText}`;
+    case "mileage":
+      return `Show Mercedes-Benz vehicles with mileage below ${valueText}`;
+    default:
+      return `Show Mercedes-Benz vehicles with ${facetKey} under ${valueText}`;
+  }
+}
+
+async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
+  const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
+  const sourceData = readJson(sourceDataPath);
+  const targetFacets = ["price", "monthlyRate", "mileage"];
+  const regressionQueries: FixedQueryCase[] = [];
+
+  for (const facetKey of targetFacets) {
+    const range = getRangeFacetBounds(sourceData, facetKey);
+    if (!range) {
+      continue;
+    }
+
+    const targetValue = pickUnitVariationTarget(range);
+    if (targetValue === null) {
+      continue;
+    }
+
+    const valueVariants = [
+      formatWithThousandsSeparator(targetValue),
+      formatCompactThousands(targetValue),
+      formatExpandedThousands(targetValue),
+    ];
+
+    for (const valueText of valueVariants) {
+      regressionQueries.push({
+        value: numericUnitVariationQueryText(facetKey, valueText),
+        facet: facetKey,
+        filterValue: valueText,
+        shouldRecommend: true,
+        shouldFilter: {
+          include: [{ [facetKey]: [targetValue] }],
+          exclude: [],
+          strict: false,
+        },
+      });
+    }
+  }
+
+  return {
+    generatedAt: new Date().toISOString(),
+    sourcePath: `tests/data/${path.basename(sourceDataPath)}`,
+    queryCount: regressionQueries.length,
+    regressionQueries,
+    informativeHintsByQuery: {},
+  };
 }
 
 function extractFacetValues(sourceData: any, facetKey: string): Array<{ rawValue: string; formattedValue: string }> {
@@ -244,6 +347,13 @@ export async function loadFacetMatrixSuite(): Promise<FixedQueryCase[]> {
   return normalizeGeneratedFacetCompleteSuite(suite);
 }
 
+export async function loadNumericUnitVariationSuite(
+  fallbackHints?: AiEvaluationHints
+): Promise<FixedQueryCase[]> {
+  const suite = await generateNumericUnitVariationSuiteOnTheFly();
+  return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+}
+
 export function normalizeFixedQuery(
   query: FixedQueryInput,
   defaults: Partial<Pick<FixedQueryCase, "shouldRecommend" | "shouldFilter" | "aiEvaluationHints">> = {}
@@ -299,5 +409,4 @@ export function normalizeGeneratedFacetCompleteSuite(
     return query;
   });
 }
-
 

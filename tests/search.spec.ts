@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { test, Page } from "@playwright/test";
+import { test, Page, TestInfo } from "@playwright/test";
 import fs from "fs/promises";
 import path from "path";
 import {
@@ -51,6 +51,7 @@ import {
   loadFacetCompleteSuite,
   loadFacetMatrixSuite,
   loadMissingFacetValuesSuite,
+  loadNumericUnitVariationSuite,
 } from "./utils/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -71,6 +72,29 @@ const RANGE_FACETS = [
   "enginePowerKW",
   "modelYear",
 ];
+
+const DEFAULT_TEST_TIMEOUT_MS = 10 * 60000;
+const QUERY_TIMEOUT_BUFFER_MS = 2 * 60000;
+const QUERY_TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS || 45000);
+const MAX_QUERY_SCALED_TIMEOUT_MS = Number(process.env.MAX_QUERY_TIMEOUT_MS || 60 * 60000);
+
+function extendTimeoutForQueryCount(testInfo: TestInfo, queryCount: number): void {
+  if (!Number.isFinite(queryCount) || queryCount <= 0) {
+    return;
+  }
+
+  const scaledTimeout = Math.min(
+    Math.max(DEFAULT_TEST_TIMEOUT_MS, QUERY_TIMEOUT_BUFFER_MS + queryCount * QUERY_TIMEOUT_MS),
+    MAX_QUERY_SCALED_TIMEOUT_MS
+  );
+
+  if (scaledTimeout > testInfo.timeout) {
+    testInfo.setTimeout(scaledTimeout);
+    console.log(
+      `[timeout] Extended "${testInfo.title}" timeout to ${Math.round(scaledTimeout / 1000)}s for ${queryCount} queries.`
+    );
+  }
+}
 
 function registerSmartSearchSuiteHooks(describeName: string): void {
   test.beforeEach(async ({}, testInfo) => {
@@ -276,7 +300,7 @@ test.describe("AI Smart Search - Sanity", () => {
     }
   );
 
-  test("By Filter Facets (complete)", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
+  test("By Filter Facets (complete)", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }, testInfo) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const fallbackHints = Object.keys(aiEvaluationRules).length === 0
@@ -286,6 +310,7 @@ test.describe("AI Smart Search - Sanity", () => {
         ? []
         : await loadFacetCompleteSuite(fallbackHints);
       const allQueries = mergeQueries(fixedQueries, queries);
+      extendTimeoutForQueryCount(testInfo, allQueries.length);
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -801,12 +826,13 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   );
 
-  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
       const matrixQueries = isFixedQueriesOnly()
         ? []
         : await loadFacetMatrixSuite();
       const allQueries = mergeQueries(fixedQueries, matrixQueries);
+      extendTimeoutForQueryCount(testInfo, allQueries.length);
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1676,6 +1702,27 @@ test.describe("AI Smart Search - Constraint Handling", () => {
               aiEvaluationHints: aiEvaluationRules,
             };
       });
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("Numeric Unit Variations", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const allQueries = await loadNumericUnitVariationSuite(fallbackHints);
 
       await runTestsAndSaveResults({
         queries: allQueries,
