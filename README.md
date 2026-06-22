@@ -316,6 +316,15 @@ node generate-results-html.js
 
 - Output: `results/html/search-results-all-<timestamp>.html`
 
+### 4b. Generate Shareable Standalone Viewer (Embedded JSON)
+
+```sh
+node embed-results-into-viewer.js results/json/<run-folder> results/html/test-results-viewer-standalone.html
+```
+
+- Output: `results/html/test-results-viewer-standalone.html`
+- This embeds JSON directly into the HTML so the file can be shared and opened on another machine without selecting a local folder.
+
 ### 5. Generate Non-Pass Results JSON
 
 ```sh

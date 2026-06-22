@@ -257,6 +257,104 @@
       text-overflow: ellipsis;
     }
 
+    .chartGrid {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .chartCard {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      min-width: 0;
+    }
+
+    .chartTitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .chartValue {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .barTrack {
+      height: 10px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .barFill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
+
+    .barFillPass {
+      background: #22c55e;
+    }
+
+    .barFillNeutral {
+      background: #0f766e;
+    }
+
+    .metricList {
+      display: grid;
+      gap: 6px;
+    }
+
+    .metricItem {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .metricLabel {
+      font-size: 12px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .metricCount {
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .metricBar {
+      grid-column: 1 / -1;
+      height: 6px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .metricBarFill {
+      height: 100%;
+      border-radius: 999px;
+      background: #0891b2;
+      transition: width 0.2s ease;
+    }
+
+    .metricEmpty {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .rowDetailPane {
       margin-top: 8px;
       border: 1px solid var(--border);
@@ -671,6 +769,10 @@
         grid-template-columns: 1fr;
       }
 
+      .chartGrid {
+        grid-template-columns: 1fr;
+      }
+
       .detailGrid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -695,6 +797,7 @@
     <p class="hint" id="versionText">Build: 2026-06-09-02</p>
     <p class="hint">
       Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder, and this page will build dropdowns dynamically.<br>
+      Embedded mode: if <strong>embeddedResultsData</strong> contains JSON files, they load automatically on open.<br>
       No external JS file required.
     </p>
 
@@ -756,6 +859,27 @@
         <div class="metaValue" id="passRateValue">-</div>
       </div>
     </div>
+    <div class="info" id="chartTitle">Quick Summary</div>
+    <div class="chartGrid">
+      <div class="chartCard">
+        <div class="chartTitle">Pass Rate</div>
+        <div class="chartValue" id="chartPassRateValue">-</div>
+        <div class="barTrack"><div class="barFill barFillPass" id="chartPassRateFill" style="width:0%"></div></div>
+      </div>
+      <div class="chartCard">
+        <div class="chartTitle">Queries Ran</div>
+        <div class="chartValue" id="chartQueryCountValue">-</div>
+        <div class="barTrack"><div class="barFill barFillNeutral" id="chartQueryCountFill" style="width:100%"></div></div>
+      </div>
+      <div class="chartCard">
+        <div class="chartTitle">Evaluation Split</div>
+        <div class="metricList" id="chartEvaluationList"><div class="metricEmpty">No data</div></div>
+      </div>
+      <div class="chartCard">
+        <div class="chartTitle">Response Time Buckets</div>
+        <div class="metricList" id="chartLatencyList"><div class="metricEmpty">No data</div></div>
+      </div>
+    </div>
     <div class="info" id="tableTitle">Results Table</div>
     <div class="tableWrap">
       <table id="resultsTable">
@@ -806,6 +930,13 @@
     </div>
   </div>
 
+  <script id="embeddedResultsData" type="application/json">
+    {
+      "rootLabel": "",
+      "files": []
+    }
+  </script>
+
   <script>
     const pickBtn = document.getElementById("pickBtn");
     const iicImportBtn = document.getElementById("iicImportBtn");
@@ -821,6 +952,11 @@
     const titleValue = document.getElementById("titleValue");
     const passRateValue = document.getElementById("passRateValue");
     const passRateCard = document.getElementById("passRateCard");
+    const chartPassRateValue = document.getElementById("chartPassRateValue");
+    const chartPassRateFill = document.getElementById("chartPassRateFill");
+    const chartQueryCountValue = document.getElementById("chartQueryCountValue");
+    const chartEvaluationList = document.getElementById("chartEvaluationList");
+    const chartLatencyList = document.getElementById("chartLatencyList");
     const tableTitle = document.getElementById("tableTitle");
     const resultsTbody = document.getElementById("resultsTbody");
     const previewTitle = document.getElementById("previewTitle");
@@ -837,6 +973,7 @@
     const iicImportPreview = document.getElementById("iicImportPreview");
     const iicImportCopyBtn = document.getElementById("iicImportCopyBtn");
     const iicImportCloseBtn = document.getElementById("iicImportCloseBtn");
+    const embeddedResultsData = document.getElementById("embeddedResultsData");
 
     let rootLabel = "selected-root";
     let selectedFiles = [];
@@ -849,6 +986,99 @@
 
     function normalizePath(pathValue) {
       return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
+    }
+
+    function asJsonText(value) {
+      if (typeof value === "string") {
+        return value;
+      }
+      return JSON.stringify(value, null, 2);
+    }
+
+    function createVirtualFile(rootName, relativePath, content) {
+      const normalizedRelativePath = normalizePath(relativePath);
+      const fullPath = normalizePath((rootName ? rootName + "/" : "") + normalizedRelativePath);
+      const fileName = normalizedRelativePath.split("/").pop() || "embedded-results.json";
+      const textContent = asJsonText(content);
+
+      return {
+        name: fileName,
+        webkitRelativePath: fullPath,
+        text: async () => textContent,
+      };
+    }
+
+    function parseEmbeddedPayload() {
+      if (!embeddedResultsData) {
+        return null;
+      }
+
+      const payloadText = String(embeddedResultsData.textContent || "").trim();
+      if (!payloadText) {
+        return null;
+      }
+
+      let parsed;
+      try {
+        parsed = JSON.parse(payloadText);
+      } catch {
+        infoText.textContent = "Embedded payload is not valid JSON. Falling back to folder mode.";
+        return null;
+      }
+
+      if (!parsed || typeof parsed !== "object") {
+        return null;
+      }
+
+      const embeddedRootLabel = normalizePath(parsed.rootLabel || "embedded-results") || "embedded-results";
+      const files = Array.isArray(parsed.files) ? parsed.files : [];
+      if (!files.length) {
+        return null;
+      }
+
+      const virtualFiles = files
+        .map((entry, index) => {
+          if (!entry || typeof entry !== "object") {
+            return null;
+          }
+
+          const entryPath = normalizePath(entry.path || "");
+          const entryContent = Object.prototype.hasOwnProperty.call(entry, "content")
+            ? entry.content
+            : (Object.prototype.hasOwnProperty.call(entry, "rows") ? entry.rows : null);
+
+          if (!entryPath || entryContent === null) {
+            return null;
+          }
+
+          return createVirtualFile(embeddedRootLabel, entryPath, entryContent);
+        })
+        .filter(Boolean);
+
+      if (!virtualFiles.length) {
+        return null;
+      }
+
+      return {
+        rootLabel: embeddedRootLabel,
+        files: virtualFiles,
+      };
+    }
+
+    function loadEmbeddedResultsIfPresent() {
+      const embeddedPayload = parseEmbeddedPayload();
+      if (!embeddedPayload) {
+        return false;
+      }
+
+      fileMetadataCache.clear();
+      rootLabel = embeddedPayload.rootLabel;
+      selectedFiles = embeddedPayload.files;
+      pickBtn.disabled = true;
+      pickBtn.textContent = "Embedded Mode";
+      infoText.textContent = "Embedded results loaded: " + selectedFiles.length + " file(s).";
+      void readRootFromSelectedFiles();
+      return true;
     }
 
     function buildFolderMap(files, rootSegmentToStrip) {
@@ -1087,6 +1317,89 @@
       passRateCard.classList.add(passPercent === 100 ? "metaCardPassRateOk" : "metaCardPassRateBad");
     }
 
+    function toNumberOrNull(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function renderMetricList(container, rows, totalCount) {
+      if (!rows.length || totalCount <= 0) {
+        container.innerHTML = "<div class=\"metricEmpty\">No data</div>";
+        return;
+      }
+
+      container.innerHTML = rows.map((row) => {
+        const pct = Math.max(0, Math.min(100, Math.round((row.count / totalCount) * 100)));
+        return "<div class=\"metricItem\">" +
+          "<div class=\"metricLabel\" title=\"" + escapeHtml(row.label) + "\">" + escapeHtml(row.label) + "</div>" +
+          "<div class=\"metricCount\">" + row.count + " (" + pct + "%)</div>" +
+          "<div class=\"metricBar\"><div class=\"metricBarFill\" style=\"width:" + pct + "%\"></div></div>" +
+        "</div>";
+      }).join("");
+    }
+
+    function updateCharts(rows) {
+      const total = rows.length;
+      if (!total) {
+        chartPassRateValue.textContent = "-";
+        chartPassRateFill.style.width = "0%";
+        chartQueryCountValue.textContent = "-";
+        renderMetricList(chartEvaluationList, [], 0);
+        renderMetricList(chartLatencyList, [], 0);
+        return;
+      }
+
+      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
+      const passPercent = Math.round((passCount / total) * 100);
+      chartPassRateValue.textContent = passPercent + "% (" + passCount + "/" + total + ")";
+      chartPassRateFill.style.width = passPercent + "%";
+      chartQueryCountValue.textContent = String(total);
+
+      const evalCounts = new Map();
+      rows.forEach((row) => {
+        const raw = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+        const label = raw === "PASS" || raw === "FAIL" ? raw : "OTHER";
+        evalCounts.set(label, (evalCounts.get(label) || 0) + 1);
+      });
+      const evalRows = ["PASS", "FAIL", "OTHER"]
+        .filter((label) => evalCounts.has(label))
+        .map((label) => ({ label, count: evalCounts.get(label) || 0 }));
+      renderMetricList(chartEvaluationList, evalRows, total);
+
+      const latencyCounts = new Map([
+        ["< 300 ms", 0],
+        ["300-699 ms", 0],
+        ["700-1199 ms", 0],
+        [">= 1200 ms", 0],
+        ["Unknown", 0],
+      ]);
+      rows.forEach((row) => {
+        const responseTime = toNumberOrNull(row && row.responseTime);
+        if (responseTime === null) {
+          latencyCounts.set("Unknown", (latencyCounts.get("Unknown") || 0) + 1);
+          return;
+        }
+        if (responseTime < 300) {
+          latencyCounts.set("< 300 ms", (latencyCounts.get("< 300 ms") || 0) + 1);
+          return;
+        }
+        if (responseTime < 700) {
+          latencyCounts.set("300-699 ms", (latencyCounts.get("300-699 ms") || 0) + 1);
+          return;
+        }
+        if (responseTime < 1200) {
+          latencyCounts.set("700-1199 ms", (latencyCounts.get("700-1199 ms") || 0) + 1);
+          return;
+        }
+        latencyCounts.set(">= 1200 ms", (latencyCounts.get(">= 1200 ms") || 0) + 1);
+      });
+
+      const latencyRows = [...latencyCounts.entries()]
+        .filter(([, count]) => count > 0)
+        .map(([label, count]) => ({ label, count }));
+      renderMetricList(chartLatencyList, latencyRows, total);
+    }
+
     function getIicImportQueryValue(queryValue) {
       if (typeof queryValue === "string") {
         return queryValue;
@@ -1160,6 +1473,7 @@
       titleValue.textContent = "-";
       passRateValue.textContent = "-";
       setPassRateCardState();
+      updateCharts([]);
       updateIicImportAvailability();
     }
 
@@ -1444,6 +1758,7 @@
       }
 
       renderFileMeta(rows);
+      updateCharts(rows);
       updateIicImportAvailability();
       tableTitle.textContent = "Results Table: " + rows.length + " row(s)";
       const html = rows.map((item, index) => {
@@ -1485,6 +1800,7 @@
     }
 
     function readRootFromSelectedFiles() {
+      fileMetadataCache.clear();
       if (!selectedFiles.length) {
         infoText.textContent = "No folder selected.";
         folderSelect.innerHTML = "";
@@ -2103,6 +2419,8 @@
 
       void readRootFromSelectedFiles();
     });
+
+    loadEmbeddedResultsIfPresent();
 
     screenshotPrevBtn.addEventListener("click", () => {
       navigateSelectedRow(-1);
