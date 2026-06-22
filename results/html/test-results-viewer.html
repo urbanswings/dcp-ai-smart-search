@@ -982,6 +982,7 @@
     let selectedRowIndex = -1;
     let currentScreenshotObjectUrl = "";
     let currentIicImportPayload = "[]";
+    let embeddedScreenshots = new Map();
     const fileMetadataCache = new Map();
 
     function normalizePath(pathValue) {
@@ -1059,9 +1060,22 @@
         return null;
       }
 
+      const screenshots = new Map();
+      const screenshotData = Object.prototype.hasOwnProperty.call(parsed, "screenshots")
+        ? parsed.screenshots
+        : {};
+      if (typeof screenshotData === "object" && screenshotData !== null) {
+        for (const [path, dataUri] of Object.entries(screenshotData)) {
+          if (typeof dataUri === "string" && dataUri.startsWith("data:")) {
+            screenshots.set(normalizePath(path), dataUri);
+          }
+        }
+      }
+
       return {
         rootLabel: embeddedRootLabel,
         files: virtualFiles,
+        screenshots,
       };
     }
 
@@ -1074,9 +1088,11 @@
       fileMetadataCache.clear();
       rootLabel = embeddedPayload.rootLabel;
       selectedFiles = embeddedPayload.files;
+      embeddedScreenshots = embeddedPayload.screenshots || new Map();
       pickBtn.disabled = true;
       pickBtn.textContent = "Embedded Mode";
-      infoText.textContent = "Embedded results loaded: " + selectedFiles.length + " file(s).";
+      const screenshotCount = embeddedScreenshots.size > 0 ? " (" + embeddedScreenshots.size + " screenshot(s))" : "";
+      infoText.textContent = "Embedded results loaded: " + selectedFiles.length + " file(s)" + screenshotCount + ".";
       void readRootFromSelectedFiles();
       return true;
     }
@@ -1510,10 +1526,18 @@
     function resolveScreenshotFile(rowData) {
       const screenshotPath = rowData && rowData.screenshotPath ? String(rowData.screenshotPath) : "";
       if (!screenshotPath) {
-        return { screenshotPath: "", fileObj: null };
+        return { screenshotPath: "", fileObj: null, embeddedDataUri: null };
       }
 
       const candidates = buildScreenshotPathCandidates(screenshotPath);
+      
+      for (const candidate of candidates) {
+        const normalized = normalizePath(candidate);
+        if (embeddedScreenshots.has(normalized)) {
+          return { screenshotPath, fileObj: null, embeddedDataUri: embeddedScreenshots.get(normalized) };
+        }
+      }
+
       const fileObj = selectedFiles.find((file) => {
         const selectedPathValue = normalizePath(file.webkitRelativePath || file.name);
         return candidates.some((candidate) => {
@@ -1521,7 +1545,7 @@
         });
       }) || null;
 
-      return { screenshotPath, fileObj };
+      return { screenshotPath, fileObj, embeddedDataUri: null };
     }
 
     function toEvaluationBlockClass(evaluation) {
@@ -1675,6 +1699,7 @@
       const screenshotResolution = resolveScreenshotFile(rowData);
       const screenshotPath = screenshotResolution.screenshotPath;
       const screenshotFile = screenshotResolution.fileObj;
+      const embeddedDataUri = screenshotResolution.embeddedDataUri;
       const hasPreviousRow = selectedRowIndex > 0;
       const hasNextRow = selectedRowIndex < currentRows.length - 1;
       const screenshotNavHtml = currentRows.length > 1
@@ -1685,7 +1710,13 @@
         : "";
       let screenshotStageHtml = "";
 
-      if (screenshotFile) {
+      if (embeddedDataUri) {
+        currentScreenshotObjectUrl = embeddedDataUri;
+        screenshotStageHtml =
+          "<div class=\"screenshotStage\">" +
+            "<img class=\"screenshotImg\" src=\"" + escapeHtml(currentScreenshotObjectUrl) + "\" alt=\"Screenshot for selected query\" data-screenshot-hover=\"1\" title=\"Click to view fullscreen\" />" +
+          "</div>";
+      } else if (screenshotFile) {
         currentScreenshotObjectUrl = URL.createObjectURL(screenshotFile);
         screenshotStageHtml =
           "<div class=\"screenshotStage\">" +

@@ -35,7 +35,64 @@ function loadJsonOrText(filePath) {
   }
 }
 
-function buildEmbeddedPayload(sourcePath) {
+function listImageFilesRecursively(inputPath) {
+  if (!fs.existsSync(inputPath)) {
+    return [];
+  }
+
+  const entries = fs.readdirSync(inputPath, { withFileTypes: true });
+  const out = [];
+
+  for (const entry of entries) {
+    const fullPath = path.join(inputPath, entry.name);
+    if (entry.isDirectory()) {
+      out.push(...listImageFilesRecursively(fullPath));
+      continue;
+    }
+    if (entry.isFile()) {
+      const ext = path.extname(entry.name).toLowerCase();
+      if ([".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(ext)) {
+        out.push(fullPath);
+      }
+    }
+  }
+
+  return out;
+}
+
+function findScreenshotFiles(sourcePath, dateEnv) {
+  const screenshots = new Map();
+  const screenshotsDir = path.join(path.dirname(sourcePath), "..", "screenshots", dateEnv);
+  
+  if (!fs.existsSync(screenshotsDir)) {
+    return screenshots;
+  }
+
+  const imageFiles = listImageFilesRecursively(screenshotsDir);
+  
+  for (const filePath of imageFiles) {
+    try {
+      const fileContent = fs.readFileSync(filePath);
+      const ext = path.extname(filePath).toLowerCase();
+      const mimeType = 
+        ext === ".png" ? "image/png" :
+        ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
+        ext === ".gif" ? "image/gif" :
+        ext === ".webp" ? "image/webp" :
+        "image/png";
+      
+      const base64 = fileContent.toString("base64");
+      const normalizedRelativePath = normalizePath(path.relative(screenshotsDir, filePath));
+      screenshots.set(normalizedRelativePath, `data:${mimeType};base64,${base64}`);
+    } catch (err) {
+      console.warn(`Warning: could not read screenshot ${filePath}:`, err.message);
+    }
+  }
+  
+  return screenshots;
+}
+
+function buildEmbeddedPayload(sourcePath, dateEnv) {
   const absoluteSourcePath = path.isAbsolute(sourcePath)
     ? sourcePath
     : path.join(workspaceRoot, sourcePath);
@@ -50,26 +107,35 @@ function buildEmbeddedPayload(sourcePath) {
   if (stats.isDirectory()) {
     const jsonFiles = listJsonFilesRecursively(absoluteSourcePath).sort((a, b) => a.localeCompare(b));
     for (const fullPath of jsonFiles) {
+      const content = loadJsonOrText(fullPath);
       files.push({
         path: normalizePath(path.relative(absoluteSourcePath, fullPath)),
-        content: loadJsonOrText(fullPath),
+        content,
       });
     }
 
+    const resolvedDateEnv = dateEnv || path.basename(absoluteSourcePath);
+    const screenshots = findScreenshotFiles(absoluteSourcePath, resolvedDateEnv);
     return {
       rootLabel: path.basename(absoluteSourcePath),
       files,
+      screenshots: Object.fromEntries(screenshots),
     };
   }
 
+  const content = loadJsonOrText(absoluteSourcePath);
   files.push({
     path: path.basename(absoluteSourcePath),
-    content: loadJsonOrText(absoluteSourcePath),
+    content,
   });
+
+  const resolvedDateEnv = dateEnv || path.basename(path.dirname(absoluteSourcePath));
+  const screenshots = findScreenshotFiles(absoluteSourcePath, resolvedDateEnv);
 
   return {
     rootLabel: path.basename(path.dirname(absoluteSourcePath)) || "embedded-results",
     files,
+    screenshots: Object.fromEntries(screenshots),
   };
 }
 
@@ -109,6 +175,7 @@ function main() {
 
   console.log("Embedded viewer created:", absoluteOutPath);
   console.log("Files embedded:", payload.files.length);
+  console.log("Screenshots embedded:", Object.keys(payload.screenshots).length);
   console.log("Root label:", payload.rootLabel);
 }
 
