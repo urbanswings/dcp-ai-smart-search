@@ -13,8 +13,8 @@ import {
 import path from "path";
 import fs from "fs/promises";
 
-test.describe("Regression Tests", () => {
-  const describeName = "Regression Tests";
+test.describe("AI Smart Search - Regression", () => {
+  const describeName = "Regression";
   const emhApiResponsePath = path.join(__dirname, "data/emh-api-response.json");
   const supportedCountries = ["AU", "IN", "JP", "KR", "SG", "TH", "TR"];
   const languageByCountry: Record<string, string> = {
@@ -114,7 +114,7 @@ test.describe("Regression Tests", () => {
 
   test("Multi Country Evaluation (MCE)", { tag: ["@regression", "@multi-country"] }, async ({ browser }) => {
     const mceTestData = await loadMCETestData();
-    
+
     if (mceTestData.length === 0) {
       console.warn("⚠️  No MCE test data loaded, skipping test.");
       return;
@@ -127,7 +127,7 @@ test.describe("Regression Tests", () => {
 
     const originalCountry = process.env.COUNTRY;
     const originalLanguage = process.env.LANGUAGE;
-    
+
     // Run MCE test for each supported country
     for (const country of supportedCountries) {
       console.log(`\n${"=".repeat(60)}`);
@@ -157,12 +157,12 @@ test.describe("Regression Tests", () => {
     }
 
     restoreCountryAndLanguage(originalCountry, originalLanguage);
-    
+
     console.log(`\n✅ Multi Country Evaluation (MCE) completed for all ${supportedCountries.length} countries.`);
   });
 
   test("Multi Country Facet Evaluation (MCFE)", { tag: ["@regression", "@multi-country", "@facet"] }, async ({ browser }) => {
-    const targetFacet = process.env.MCFE_TARGET_FACET || "modelIdentifier";
+    const targetFacet = process.env.MCFE_TARGET_FACET || "bodyType";
 
     if (supportedCountries.length === 0) {
       console.warn("⚠️  No supported countries discovered, skipping test.");

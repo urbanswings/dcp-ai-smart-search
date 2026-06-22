@@ -54,7 +54,7 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
   bodyType: {
     tr: "gövde tipi",
     th: "ประเภทรถ",
-    ko: "바디타입",
+    ko: "바디 타입",
     ja: "ボディタイプ",
     hi: "बॉडी टाइप",
     ta: "பாடி வகை",
@@ -68,7 +68,7 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
   fuelType: {
     tr: "yakıt tipi",
     th: "ประเภทเชื้อเพลิง",
-    ko: "연료타입",
+    ko: "연료 타입",
     ja: "燃料タイプ",
     hi: "फ्यूल टाइप",
     ta: "எரிபொருள் வகை",
@@ -275,6 +275,29 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     ml: "ഗിയർബോക്സ്",
     mr: "गिअरबॉक्स",
   },
+  packages: {
+    "kr": "패키지",
+    "tr": "donanım paketi"
+  },
+  lines: {
+    "kr": "라인",
+    "tr": "tasarım konsepti"
+  },
+  colorPolish: {
+    "kr": "실내 장식품 (소재)",
+    "th": "เบาะ",
+    "tr": "döşeme"
+  },
+  enginePowerHP: {
+    "en": "horsepower",
+    "kr": "엔진 출력(마력)",
+    "tr": "motor gücü (HP)"
+  },
+  enginePowerKW: {
+    "en": "kilowatts",
+    "kr": "엔진 출력(킬로와트)",
+    "tr": "motor gücü (kW)"
+  },
 };
 
 /**
@@ -360,7 +383,7 @@ function buildVariedFallbackPhrase(
     `find ${valueLabel}`,
     `only ${valueLabel}`,
     `${valueLabel} lineup`,
-    `compare ${valueLabel}`,
+    `show ${valueLabel}`,
     `${valueLabel} recommendations`,
   ];
   const idx = context.templateCursor % templates.length;
@@ -467,8 +490,9 @@ async function generateQueryWithVariation(
   const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
   const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn, language);
   const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
-
+  
   if (!client || !systemPrompt || !userPromptTemplate) {
+    // return normalizeWhitespace(formattedValue);
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
   }
 
@@ -489,16 +513,17 @@ async function generateQueryWithVariation(
     if (styleHint.includes("'<facet name> <filter value>'")) return normalizeWhitespace(exactQuery);
     
     const generated = await generateOpenAiQuery(client, resolvedSystemPrompt, resolvedUserPrompt, maxTokens);
-    return generated;
-    // const generatedVariation = enforceCompleteQueryVariation(
-    //   generated || fallback,
-    //   facetKey,
-    //   formattedValue,
-    //   rawValue,
-    //   facetDisplayNameFn,
-    //   context
-    // );
-    // return generatedVariation;
+    // return generated;
+    const generatedVariation = enforceCompleteQueryVariation(
+      generated || fallback,
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context
+    );
+    return generatedVariation;
   } catch (error) {
     console.error(`[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`);
     return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);

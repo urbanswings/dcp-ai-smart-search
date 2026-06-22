@@ -9,7 +9,7 @@ dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 const rootDir = process.cwd();
 const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
 const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
-const COUNTRY = (process.env.COUNTRY || "AU").toUpperCase();
+const aiEvaluationRulesPath = path.resolve(rootDir, "tests/data/ai-evaluation-rules.json");
 
 const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
 
@@ -31,6 +31,7 @@ const INCLUDE_FACETS = [
   "brand",
   "campaigns",
   "color",
+  "colorPolish",
   "contextType",
   "enginePowerHP",
   "enginePowerKW",
@@ -67,6 +68,13 @@ interface FacetListEntry {
 interface FacetRange {
   min: number;
   max: number;
+}
+
+interface RangeQueryCase {
+  formattedValue: string;
+  rawValue: number;
+  filterValue: string;
+  expectedValue: number;
 }
 
 interface Facets {
@@ -131,9 +139,48 @@ interface GenerationOptions {
   maxTokens?: number;
 }
 
+interface FacetMatrixHintRules {
+  genericHints?: Record<string, string[]>;
+  rangeHints?: Record<string, string[]>;
+  bodyTypeHints?: Record<string, string[]>;
+}
+
+let facetMatrixHintRulesCache: FacetMatrixHintRules | null = null;
+
 // Utility functions
 function readJson(filePath: string): ApiResponse {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function loadFacetMatrixHintRules(): FacetMatrixHintRules {
+  if (facetMatrixHintRulesCache) {
+    return facetMatrixHintRulesCache;
+  }
+
+  let rules: FacetMatrixHintRules;
+  try {
+    const evaluationRules = JSON.parse(fs.readFileSync(aiEvaluationRulesPath, "utf8"));
+    rules = evaluationRules?.facetMatrix || {};
+  } catch {
+    rules = {};
+  }
+  facetMatrixHintRulesCache = rules;
+  return facetMatrixHintRulesCache;
+}
+
+function renderHintTemplates(
+  templates: string[] | undefined,
+  values: Record<string, unknown>
+): string[] {
+  if (!Array.isArray(templates)) {
+    return [];
+  }
+  return templates.map((template) =>
+    template.replace(/\{([A-Za-z0-9_]+)\}/g, (match, key) => {
+      const value = values[key];
+      return value === undefined || value === null ? match : String(value);
+    })
+  );
 }
 
 function titleCaseFromToken(value: unknown): string {
@@ -231,8 +278,20 @@ function formatLocalizedInteger(value: unknown, locale: string): string {
   return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(numericValue);
 }
 
+function getCountryCode(): string {
+  return (process.env.COUNTRY || "AU").toUpperCase();
+}
+
+function getLanguageCode(): string {
+  const language = (process.env.LANGUAGE || "EN").toLowerCase().split(/[-_]/)[0];
+  const country = getCountryCode().toLowerCase();
+  if (language === "kr" || country === "kr") return "ko";
+  if (language === "jp" || country === "jp") return "ja";
+  return language;
+}
+
 function formatLocalizedPriceValue(value: unknown): string {
-  switch (COUNTRY) {
+  switch (getCountryCode()) {
     case "TR":
       return `₺${formatLocalizedInteger(value, "tr-TR")}`;
     case "AU":
@@ -257,8 +316,186 @@ function formatFacetValueForQuery(facetKey: string, formattedValue: string, rawV
   return String(formattedValue || rawValue);
 }
 
+type RangePhraseKey = "lessThan" | "under" | "moreThan" | "above";
+
+const RANGE_PHRASE_TEMPLATES: Record<string, Record<RangePhraseKey, string>> = {
+  en: {
+    lessThan: "less than {value}",
+    under: "under {value}",
+    moreThan: "more than {value}",
+    above: "above {value}",
+  },
+  tr: {
+    lessThan: "{value} değerinden az",
+    under: "{value} altı",
+    moreThan: "{value} değerinden fazla",
+    above: "{value} üstü",
+  },
+  th: {
+    lessThan: "ต่ำกว่า {value}",
+    under: "ไม่เกิน {value}",
+    moreThan: "มากกว่า {value}",
+    above: "เกิน {value}",
+  },
+  ko: {
+    lessThan: "{value} 미만",
+    under: "{value} 이하",
+    moreThan: "{value} 초과",
+    above: "{value} 이상",
+  },
+  ja: {
+    lessThan: "{value}未満",
+    under: "{value}以下",
+    moreThan: "{value}超",
+    above: "{value}以上",
+  },
+};
+
+const LOCALIZED_FACET_NAMES_FOR_QUERY: Record<string, Record<string, string>> = {
+  tr: {
+    bodyType: "gövde tipi",
+    fuelType: "yakıt tipi",
+    color: "renk",
+    stockType: "stok tipi",
+    brand: "marka",
+    price: "fiyat",
+    monthlyRate: "aylık taksit",
+    seats: "koltuk sayısı",
+    modelIdentifier: "model",
+    motorization: "varyant",
+    mileage: "kilometre",
+    enginePowerHP: "motor gücü (HP)",
+    enginePowerKW: "motor gücü (kW)",
+    modelYear: "model yılı",
+    firstRegistrationDate: "ilk tescil tarihi",
+    equipment: "donanım",
+    packages: "donanım paketi",
+    lines: "tasarım konsepti",
+    colorPolish: "boya tipi",
+    upholstery: "döşeme",
+    upholsteryPolish: "döşeme kaplaması",
+  },
+  th: {
+    bodyType: "ประเภทรถ",
+    fuelType: "ประเภทเชื้อเพลิง",
+    color: "สี",
+    stockType: "ประเภทสต็อก",
+    brand: "แบรนด์",
+    price: "ราคา",
+    monthlyRate: "ค่างวดรายเดือน",
+    seats: "จำนวนที่นั่ง",
+    modelIdentifier: "รุ่น",
+    motorization: "รุ่นย่อย",
+    mileage: "ระยะทาง",
+    enginePowerHP: "แรงม้า",
+    enginePowerKW: "กำลังเครื่องยนต์ (kW)",
+    modelYear: "ปีรุ่น",
+    firstRegistrationDate: "วันที่จดทะเบียนครั้งแรก",
+    equipment: "อุปกรณ์",
+    packages: "แพ็กเกจ",
+    lines: "ไลน์",
+    colorPolish: "ประเภทสี",
+    upholstery: "สีภายใน",
+    upholsteryPolish: "วัสดุตกแต่งภายใน",
+  },
+  ko: {
+    bodyType: "바디 타입",
+    fuelType: "연료 타입",
+    color: "색상",
+    stockType: "재고 유형",
+    brand: "브랜드",
+    price: "가격",
+    monthlyRate: "월 납입금",
+    seats: "좌석 수",
+    modelIdentifier: "모델",
+    motorization: "세부 모델",
+    mileage: "주행거리",
+    enginePowerHP: "엔진 출력(마력)",
+    enginePowerKW: "엔진 출력(킬로와트)",
+    modelYear: "연식",
+    firstRegistrationDate: "최초 등록일",
+    equipment: "옵션사양",
+    packages: "패키지",
+    lines: "라인",
+    colorPolish: "도장 마감",
+    upholstery: "내장 색상",
+    upholsteryPolish: "내장 마감",
+  },
+  ja: {
+    bodyType: "ボディタイプ",
+    fuelType: "燃料タイプ",
+    color: "色",
+    stockType: "在庫タイプ",
+    brand: "ブランド",
+    price: "価格",
+    monthlyRate: "月額支払",
+    seats: "座席数",
+    modelIdentifier: "モデル",
+    motorization: "グレード",
+    mileage: "走行距離",
+    enginePowerHP: "馬力",
+    enginePowerKW: "エンジン出力（kW）",
+    modelYear: "年式",
+    firstRegistrationDate: "初度登録日",
+    equipment: "装備",
+    packages: "パッケージ",
+    lines: "ライン",
+    colorPolish: "塗装仕上げ",
+    upholstery: "内装色",
+    upholsteryPolish: "内装仕上げ",
+  },
+};
+
+function getRangePhraseTemplates(): Record<RangePhraseKey, string> {
+  return RANGE_PHRASE_TEMPLATES[getLanguageCode()] || RANGE_PHRASE_TEMPLATES.en;
+}
+
+function formatRangePhrase(template: string, value: string): string {
+  return template.replace(/\{value\}/g, value);
+}
+
+function facetDisplayNameForQuery(facetKey: string): string {
+  const language = getLanguageCode();
+  return LOCALIZED_FACET_NAMES_FOR_QUERY[language]?.[facetKey] || facetDisplayName(facetKey);
+}
+
+function shouldUseLocalizedFallback(): boolean {
+  return getLanguageCode() !== "en";
+}
+
+function fallbackLocalizedCompleteQuery(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown
+): string {
+  const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
+  const valueLabel =
+    facetKey === "price" || facetKey === "monthlyRate"
+      ? displayValue
+      : String(formattedValue || rawValue);
+  return `${valueLabel} ${facetDisplayNameForQuery(facetKey)}`.trim();
+}
+
+function isRangeQueryValue(value: unknown): boolean {
+  const text = String(value).trim();
+  const localizedRangePhrases = Object.values(RANGE_PHRASE_TEMPLATES)
+    .flatMap((templates) => Object.values(templates))
+    .map((template) => template.replace(/\{value\}/g, "").trim())
+    .filter(Boolean);
+  return (
+    /^(less than|more than|under|above|between)\b/i.test(text) ||
+    localizedRangePhrases.some((phrase) => text.includes(phrase))
+  );
+}
+
 function fallbackCompleteQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
   const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
+  if (isRangeQueryValue(formattedValue)) {
+    return `${formattedValue} ${facetDisplayNameForQuery(facetKey)}`;
+  }
+  if (shouldUseLocalizedFallback()) {
+    return fallbackLocalizedCompleteQuery(facetKey, formattedValue, rawValue);
+  }
   if (facetKey === "modelIdentifier") {
     return `list me all ${formattedValue}`;
   }
@@ -296,7 +533,13 @@ function addCompleteQuery(
   filterValue: unknown,
   shouldFilter: ShouldFilter
 ): void {
-  const displayFilterValue = formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
+  const isNumericFilterValue =
+    typeof filterValue === "number" ||
+    (typeof filterValue === "string" && Number.isFinite(Number(filterValue)));
+  const displayFilterValue =
+    (facetKey === "price" || facetKey === "monthlyRate") && !isNumericFilterValue
+      ? String(filterValue)
+      : formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
   if (queryMap.has(query)) {
     return;
   }
@@ -339,9 +582,9 @@ function loadCompletePromptConfig(): PromptConfig {
 
 function buildCompleteFilterText(facetKey: string, formattedValue: string, rawValue: unknown): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return `'category'='${facetDisplayName(facetKey)}' 'value'='${formatLocalizedPriceValue(rawValue)}'`;
+    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
   }
-  return `'category'='${facetDisplayName(facetKey)}' 'value'='${formattedValue}'`;
+  return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue}'`;
 }
 
 function buildMotorizationModelMap(data: ApiResponse): Map<string, Array<string | number>> {
@@ -431,6 +674,7 @@ function createCompleteValueHints(
   formattedValue: string,
   rawValue: unknown
 ): string[] {
+  const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
   const acceptedLabels = buildAcceptedFacetValueLabels(
     facetKey,
@@ -441,24 +685,17 @@ function createCompleteValueHints(
   const acceptedLabelText = acceptedLabels.join(" / ");
 
   if (facetKey === "bodyType" && acceptedLabels.length > 1) {
-    return [
-      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
-      `Respond with "PASS" only if the response clearly acknowledges or applies the requested ${facetName} value and indicates matching vehicles are available. Treat equivalent localized or singular/plural wording as valid, including: ${acceptedLabelText}.`,
-      `If the response ignores or contradicts all accepted forms of the requested ${facetName} value (${acceptedLabelText}), respond with "MSG FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
-      `If the response says the requested ${facetName} value (${acceptedLabelText}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} value (${valueLabel})".`,
-      `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
-      `Respond with failure reason otherwise respond with "PASS" only.`,
-    ];
+    return renderHintTemplates(hintRules.bodyTypeHints?.completeValue, {
+      facetName,
+      acceptedLabelText,
+      valueLabel,
+    });
   }
 
-  return [
-    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} filter intent.`,
-    `Respond with "PASS" only if the response clearly acknowledges or applies the requested ${facetName} value: ${valueLabel} and indicates matching vehicles are available.`,
-    `If the response ignores or contradicts the requested ${facetName} value (${valueLabel}), respond with "MSG FAIL: missing or incorrect ${facetName} value (${valueLabel})".`,
-    `If the response says the requested ${facetName} value (${valueLabel}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} value (${valueLabel})".`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
-    `Respond with failure reason otherwise respond with "PASS" only.`,
-  ];
+  return renderHintTemplates(hintRules.genericHints?.completeValue, {
+    facetName,
+    valueLabel,
+  });
 }
 
 function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawValue: unknown): string {
@@ -471,30 +708,61 @@ function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawV
   return String(formattedValue || rawValue);
 }
 
-function createCompleteRangeHints(facetKey: string, numericValue: unknown): string[] {
+function createCompleteRangeHints(
+  facetKey: string,
+  numericValue: unknown,
+  valueLabel?: string
+): string[] {
+  const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
-  const targetValue = toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
-  return [
-    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${facetName} range intent.`,
-    `Respond with "PASS" only if the response references vehicles around ${facetName} ${targetValue} (exact number not required) and indicates matching vehicles are available.`,
-    `If the response ignores the requested ${facetName} target (${targetValue}) or provides clearly unrelated values, respond with "MSG FAIL: missing or incorrect ${facetName} target (${targetValue})".`,
-    `If the response says the requested ${facetName} target (${targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${facetName} target (${targetValue})".`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
-    `Respond with failure reason otherwise respond with "PASS" only.`,
-  ];
+  const targetValue = valueLabel || toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
+  const targetVerb = isRangeQueryValue(targetValue)
+    ? `references vehicles with ${facetName} ${targetValue}`
+    : `references vehicles around ${facetName} ${targetValue} (exact number not required)`;
+  return renderHintTemplates(hintRules.genericHints?.completeRange, {
+    facetName,
+    targetValue,
+    targetVerb,
+  });
 }
 
-function getRangePoints(facetKey: string, range: FacetRange): number[] {
-  if (facetKey === "price" || facetKey === "monthlyRate") {
-    const spread = range.max - range.min;
-    const interiorPoints = [0.25, 0.5, 0.75]
-      .map((ratio) => Math.round(range.min + spread * ratio))
-      .filter((value) => value > range.min && value < range.max);
+function getRangeValueMatrix(facetKey: string, range: FacetRange): RangeQueryCase[] {
+  const midpoint = Math.round((range.min + range.max) / 2);
+  const formattedMidpoint = formatFacetValueForQuery(facetKey, String(midpoint), midpoint);
+  const rangePhraseTemplates = getRangePhraseTemplates();
 
-    return [...new Set(interiorPoints)];
-  }
-
-  return [...new Set([range.min, Math.round((range.min + range.max) / 2), range.max])];
+  return [
+    {
+      formattedValue: formattedMidpoint,
+      rawValue: midpoint,
+      filterValue: formattedMidpoint,
+      expectedValue: midpoint,
+    },
+    {
+      formattedValue: formatRangePhrase(rangePhraseTemplates.lessThan, formattedMidpoint),
+      rawValue: midpoint,
+      filterValue: formatRangePhrase(rangePhraseTemplates.lessThan, formattedMidpoint),
+      expectedValue: midpoint,
+    },
+    {
+      formattedValue: formatRangePhrase(rangePhraseTemplates.under, formattedMidpoint),
+      rawValue: midpoint,
+      filterValue: formatRangePhrase(rangePhraseTemplates.under, formattedMidpoint),
+      expectedValue: midpoint,
+    },
+    {
+      formattedValue: formatRangePhrase(rangePhraseTemplates.moreThan, formattedMidpoint),
+      rawValue: midpoint + 1,
+      filterValue: formatRangePhrase(rangePhraseTemplates.moreThan, formattedMidpoint),
+      expectedValue: midpoint + 1,
+    },
+    {
+      formattedValue: formatRangePhrase(rangePhraseTemplates.above, formattedMidpoint),
+      rawValue: midpoint + 1,
+      filterValue: formatRangePhrase(rangePhraseTemplates.above, formattedMidpoint),
+      expectedValue: midpoint + 1,
+    },
+  ];
 }
 
 async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
@@ -551,14 +819,13 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
 
     const range = getFacetRange(facets, facetKey);
     if (range) {
-      const rangePoints = getRangePoints(facetKey, range);
-      for (const value of rangePoints) {
-        const formattedRangeValue = formatFacetValueForQuery(facetKey, String(value), value);
+      const rangeValueMatrix = getRangeValueMatrix(facetKey, range);
+      for (const rangeValue of rangeValueMatrix) {
         const query = await promptEngine.generateQueryWithVariation(
           getOpenAiClient(),
           facetKey,
-          formattedRangeValue,
-          value,
+          rangeValue.formattedValue,
+          rangeValue.rawValue,
           promptConfig.systemPrompt,
           promptConfig.userPromptTemplate,
           facetDisplayName,
@@ -574,10 +841,14 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
           queryMap,
           query,
           facetKey,
-          value,
-          { include: [{ [facetKey]: [value] }], exclude: [], strict: false }
+          rangeValue.filterValue,
+          { include: [{ [facetKey]: [rangeValue.expectedValue] }], exclude: [], strict: false }
         );
-        informativeHintsByQuery[query] = createCompleteRangeHints(facetKey, value);
+        informativeHintsByQuery[query] = createCompleteRangeHints(
+          facetKey,
+          rangeValue.rawValue,
+          rangeValue.filterValue
+        );
       }
     }
   }
@@ -743,29 +1014,27 @@ function createExclusionHints(
   excludedValue: unknown,
   allowedValues: Array<string | number>
 ): string[] {
+  const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
   const excludedText = toHintLabel(facetKey, excludedValue);
   const allowedText = allowedValues.map((v) => toHintLabel(facetKey, v)).join(", ");
-  return [
-    `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and recommends vehicles for this exclusion intent.`,
-    `Respond with \"PASS\" when the requested ${facetName} exclusion is respected: exclude ${excludedText}.`,
-    `Respond with \"PASS\" when any mentioned ${facetName} values align with the allowed inventory set: ${allowedText}.`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
-    `If the response includes the excluded ${facetName} value (${excludedText}) as part of recommendations, respond with "MSG FAIL: included excluded ${facetName} (${excludedText})".`,
-  ];
+  return renderHintTemplates(hintRules.genericHints?.exclusion, {
+    facetName,
+    excludedText,
+    allowedText,
+  });
 }
 
 function createInclusionHints(facetKey: string, a: unknown, b: unknown): string[] {
+  const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
   const aText = toHintLabel(facetKey, a);
   const bText = toHintLabel(facetKey, b);
-  return [
-    `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and gives recommendations for this multi-value intent.`,
-    `Respond with \"PASS\" if the response addresses both requested ${facetName} values: ${aText} and ${bText}.`,
-    `Respond with \"PASS\" if the response is concise but still explicitly references both requested ${facetName} values, optionally with result counts.`,
-    `If one of the requested ${facetName} values is ignored, respond with "MSG FAIL: missing ${facetName} value" and specify which value (${aText} or ${bText}) was not addressed.`,
-    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: off-topic or unsafe response".`,
-  ];
+  return renderHintTemplates(hintRules.genericHints?.inclusion, {
+    facetName,
+    aText,
+    bText,
+  });
 }
 
 function pairwise<T>(values: T[]): Array<[T, T]> {

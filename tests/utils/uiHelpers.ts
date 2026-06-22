@@ -118,6 +118,33 @@ function collectPrimitiveFacetValues(value: any): string[] {
   return [String(value)];
 }
 
+function getFacetRangeBounds(value: any): { min: number; max: number } | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return null;
+  }
+
+  const min = Number(value.min);
+  const max = Number(value.max);
+
+  if (!Number.isFinite(min) || !Number.isFinite(max)) {
+    return null;
+  }
+
+  return min <= max ? { min, max } : { min: max, max: min };
+}
+
+function isExpectedValueWithinFacetRange(
+  expected: unknown,
+  range: { min: number; max: number }
+): boolean {
+  const numericExpected = Number(expected);
+  return (
+    Number.isFinite(numericExpected) &&
+    numericExpected >= range.min &&
+    numericExpected <= range.max
+  );
+}
+
 function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
   return (
     ["upholstery", "color"].includes(facetKey) &&
@@ -331,10 +358,10 @@ function mapUiLabelToFacetKey(label: string): string | null {
     .replace(/\s+/g, "");
 
   const rawLabelMap: Record<string, string> = {
-    "바디타입": "bodyType",
+    "바디 타입": "bodyType",
     "차체타입": "bodyType",
     "ボディタイプ": "bodyType",
-    "연료타입": "fuelType",
+    "연료연료 타입타입": "fuelType",
     "연료유형": "fuelType",
     "燃料タイプ": "fuelType",
     "모델": "modelIdentifier",
@@ -972,6 +999,19 @@ export async function processAndLogUiResult({
           continue;
         }
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+          const rangeBounds = getFacetRangeBounds(resultsFacets[key]);
+          if (rangeBounds) {
+            for (const expected of expectedValues) {
+              if (!isExpectedValueWithinFacetRange(expected, rangeBounds)) {
+                facetCheckPassed = false;
+                failureReasons.push(
+                  `Expected facet value outside range: ${key}=${expected} (actual range: ${rangeBounds.min}-${rangeBounds.max})`
+                );
+              }
+            }
+            continue;
+          }
+
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
           const rawActuals = new Set(
             actualValues.map((value) => String(value).trim().toUpperCase())

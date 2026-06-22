@@ -1,17 +1,17 @@
 # SMART SEARCH Automation Test Suite - Updated Breakdown
-**Last Updated:** June 5, 2026
+**Last Updated:** June 19, 2026
 
 ## Summary Statistics
-- **Total Test Cases:** 53
+- **Total Test Cases:** 66
 - **Total Queries (estimated):** ~550+ queries
-- **Test Suites:** 6 describe blocks
-- **New Additions:** Negative test suite, Expanded facet coverage, Special scenarios
+- **Test Suites:** 10 describe blocks
+- **New Additions:** Negative facet suite, expanded facet coverage, scenario reporting groups
 
 ---
 
 ## Test Suite Breakdown
 
-### 1. AI Smart Search - Sanity Test (3 tests)
+### 1. AI Smart Search - Sanity (3 tests)
 
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
@@ -22,109 +22,170 @@
 
 ---
 
-### 2. AI Smart Search - Vehicles MB (18 tests)
+### 2. AI Smart Search - Vehicles MB (22 tests)
 
-#### Standard Facet Tests
+#### Facet Coverage
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
-| 2.1 | By Brand/Model | 2 fixed + 8 AI | 10 | Random 10 vehicle selections |
-| 2.2 | By Specs | 2 fixed + 8 AI | 10 | Specification-based queries |
-| 2.3 | By Filter Facets (modelIdentifier) | API + AI | Variable | Dynamic facet loading |
-| 2.4 | By Filter Facets (bodyType) | API + AI | Variable | Dynamic facet loading |
-| 2.5 | By Filter Facets (fuelType) | API + AI | Variable | Dynamic facet loading |
-| 2.6 | By Filter Facets (upholstery) | API + AI | Variable | Dynamic facet loading |
-| 2.7 | By Filter Facets (upholsteryPolish) | API + AI | Variable | Dynamic facet loading |
-| 2.8 | By Filter Facets (color) | API + AI | Variable | Dynamic facet loading |
-| 2.9 | By Filter Facets (lines) | API + AI | Variable | Dynamic facet loading |
-| 2.10 | By Filter Facets (packages) | API + AI | Variable | Dynamic facet loading |
-| 2.11 | By Filter Facets (equipment) | API + AI | Variable | Dynamic facet loading |
-| 2.12 | By Filter Facets (motorization) | API + AI | Variable | Dynamic facet loading |
+| 2.1 | By Filter Facets (bodyType) | API + AI | Variable | Dynamic facet loading |
+| 2.2 | By Filter Facets (modelIdentifier) | API + AI | Variable | Dynamic facet loading |
+| 2.3 | By Filter Facets (fuelType) | API + AI | Variable | Dynamic facet loading |
+| 2.4 | By Filter Facets (motorization) | API + AI | Variable | Dynamic facet loading |
+| 2.5 | By Filter Facets (price) | API + AI | Variable | Dynamic facet loading |
+| 2.6 | By Filter Facets (mileage) | API + AI | Variable | Dynamic facet loading |
+| 2.7 | By Filter Facets (enginePowerHP) | API + AI | Variable | Dynamic facet loading |
+| 2.8 | By Filter Facets (enginePowerKW) | API + AI | Variable | Dynamic facet loading |
+| 2.9 | By Filter Facets (color) | API + AI | Variable | Dynamic facet loading |
+| 2.10 | By Filter Facets (colorPolish) | API + AI | Variable | Dynamic facet loading |
+| 2.11 | By Filter Facets (upholstery) | API + AI | Variable | Dynamic facet loading |
+| 2.12 | By Filter Facets (upholsteryPolish) | API + AI | Variable | Dynamic facet loading |
+| 2.13 | By Filter Facets (packages) | API + AI | Variable | Dynamic facet loading |
+| 2.14 | By Filter Facets (lines) | API + AI | Variable | Dynamic facet loading |
+| 2.15 | By Filter Facets (equipment) | API + AI | Variable | Dynamic facet loading |
+| 2.16 | By Filter Facets (campaigns) | API + AI | Variable | Dynamic facet loading |
 
-#### Complex Facet Tests
+#### Facet Combination Behavior
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
-| 2.13 | By Filter Facets (AND/OR) | 5 fixed | 5 | Contradictory/combined filters |
-| 2.14 | By Filter Facets (matrix) | Dynamic | Variable | Facet matrix combinations |
-| 2.15 | No Brand/Model | 2 fixed + 10 AI | 12 | Generic/brand-agnostic queries |
-| 2.16 | Superlative | 2 fixed + 8 AI | 10 | Superlative queries (best, fastest, etc.) |
+| 2.17 | By Filter Facets (AND/OR) | 5 fixed | 5 | Contradictory/combined filters |
+| 2.18 | By Filter Facets (matrix) | Dynamic | Variable | Facet matrix combinations |
+
+#### Mercedes Query Intent
+| S/N | Test | Query Source | Estimated Count | Notes |
+|-----|------|--------------|-----------------|-------|
+| 2.19 | By Brand/Model | 2 fixed + 80 AI | 82 | Random 10 vehicle selections |
+| 2.20 | By Specs | 2 fixed + 8 AI | 10 | Specification-based queries |
+| 2.21 | No Brand/Model | 2 fixed + 10 AI | 12 | Generic/brand-agnostic queries |
+| 2.22 | Superlative | 2 fixed + 8 AI | 10 | Superlative queries (best, fastest, etc.) |
 
 | | **Subtotal** | | **57+ (excluding variable facets)** | |
 
 ---
 
-### 3. AI Smart Search - Vehicles MB (-ve) [Negative Tests] (6 tests)
+### 3. AI Smart Search - Vehicles MB - Range Facets (6 tests)
 
-**NEW:** Dedicated test suite for negative/missing facet value scenarios
+Dedicated test suite for numeric RANGE facet scenarios.
 
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
-| 3.1 | By Filter Facets (bodyType)(-ve) | Dynamic | Variable | Missing bodyType values |
-| 3.2 | By Filter Facets (fuelType)(-ve) | Dynamic | Variable | Missing fuelType values |
-| 3.3 | By Filter Facets (upholstery)(-ve) | Dynamic | Variable | Missing upholstery values |
-| 3.4 | By Filter Facets (color)(-ve) | Dynamic | Variable | Missing color values |
-| 3.5 | By Filter Facets (modelIdentifier)(-ve) | Dynamic | Variable | Missing modelIdentifier values |
-| 3.6 | By Filter Facets (motorization)(-ve) | Dynamic | Variable | Missing motorization values |
+| 3.1 | By Filter Facets (price) | Dynamic | Variable | RANGE value generation |
+| 3.2 | By Filter Facets (monthlyRate) | Dynamic | Variable | RANGE value generation |
+| 3.3 | By Filter Facets (mileage) | Dynamic | Variable | RANGE value generation |
+| 3.4 | By Filter Facets (enginePowerHP) | Dynamic | Variable | RANGE value generation |
+| 3.5 | By Filter Facets (enginePowerKW) | Dynamic | Variable | RANGE value generation |
+| 3.6 | By Filter Facets (modelYear) | Dynamic | Variable | RANGE value generation |
+
+| | **Subtotal** | | **Variable (3+ each)** | |
+
+---
+
+### 4. AI Smart Search - Vehicles MB - Negative Facets (6 tests)
+
+Dedicated test suite for negative/missing facet value scenarios
+
+| S/N | Test | Query Source | Estimated Count | Notes |
+|-----|------|--------------|-----------------|-------|
+| 4.1 | By Filter Facets (bodyType)(-ve) | Dynamic | Variable | Missing bodyType values |
+| 4.2 | By Filter Facets (modelIdentifier)(-ve) | Dynamic | Variable | Missing modelIdentifier values |
+| 4.3 | By Filter Facets (fuelType)(-ve) | Dynamic | Variable | Missing fuelType values |
+| 4.4 | By Filter Facets (motorization)(-ve) | Dynamic | Variable | Missing motorization values |
+| 4.5 | By Filter Facets (color)(-ve) | Dynamic | Variable | Missing color values |
+| 4.6 | By Filter Facets (upholstery)(-ve) | Dynamic | Variable | Missing upholstery values |
 
 | | **Subtotal** | | **Variable (6+ each)** | |
 
 ---
 
-### 4. AI Smart Search - Vehicles Non-MB (4 tests)
+### 5. AI Smart Search - Vehicles Non-MB (4 tests)
 
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
 | 4.1 | By Brand/Model (Sentence\|Single) | 2 fixed + 10 AI | 12 | Single brand/model sentences |
-| 4.2 | By Brand/Model (Keyword\|Mix) | 2 fixed + 8 AI | 10 | Mixed keyword combinations |
-| 4.3 | By Brand/Model (Keyword\|Single) | 2 fixed + 8 AI | 10 | Single keyword queries |
+| 4.2 | By Brand/Model (Keyword\|Single) | 2 fixed + 10 AI | 12 | Single keyword queries |
+| 4.3 | By Brand/Model (Keyword\|Mix) | 2 fixed + 10 AI | 12 | Mixed keyword combinations |
 | 4.4 | By Non-MB Features | Fixed only | 20 | Non-Mercedes brand features |
 
 | | **Subtotal** | | **52** | |
 
 ---
 
-### 5. AI Smart Search - Other Scenarios (15 tests)
+### 6. AI Smart Search - Input Robustness (5 tests)
 
-**Comprehensive coverage of edge cases and special scenarios**
+**Parsing, malformed input, language, and unit resilience**
 
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
-| 5.1 | Random Topics | 2 fixed + 8 AI | 10 | Off-topic/unrelated queries |
-| 5.2 | Edge Case Queries | Hardcoded | 17 | Special characters, SQL injection, Unicode, etc. |
-| 5.3 | Negative/Contradictory Queries | 2 fixed + 8 AI | 10 | Contradictory requirements |
+| 5.1 | Edge Case Queries | Hardcoded | 17 | Special characters, SQL injection, Unicode, etc. |
+| 5.2 | Random Numbers | Fixed only | 52 | Random numeric inputs |
+| 5.3 | Misspelled/Fuzzy Queries | 3 fixed + 7 AI | 10 | Typos and fuzzy matching |
 | 5.4 | Language/Localization | 3 fixed + 7 AI | 10 | Multi-language support |
-| 5.5 | Misspelled/Fuzzy Queries | 3 fixed + 7 AI | 10 | Typos and fuzzy matching |
-| 5.6 | Date Range/Numeric Filters | 2 fixed + 8 AI | 10 | Date and numeric value queries |
-| 5.7 | No Results Scenario | 2 fixed + 8 AI | 10 | Queries returning no results |
-| 5.8 | Response Consistency | 8 AI | 8 | Repeated queries for consistency check |
-| 5.9 | Personal Data | 6 fixed + 8 AI | 14 | Personal data handling |
-| 5.10 | NSFW | 5 fixed + 8 AI | 13 | NSFW content filtering |
-| 5.11 | Code and Scripts | 5 fixed + 8 AI | 13 | Code injection attempts |
-| 5.12 | Bias and Manipulation | 5 fixed + 8 AI | 13 | Bias detection and manipulation tests |
-| 5.13 | Conflicting Filter Facets | 5 fixed + 8 AI | 13 | Conflicting filter combinations |
-| 5.14 | Conflicting Brands | 5 fixed + 8 AI | 13 | Conflicting brand queries |
-| 5.15 | Random Numbers | Fixed only | 52 | Random numeric inputs |
+| 5.5 | Unusual Units Queries | Fixed only | 6 | Queries with unusual measurement units |
 
-| | **Subtotal** | | **213** | |
+| | **Subtotal** | | **95** | |
 
 ---
 
-### 6. AI Smart Search - Special Scenarios (9 tests)
+### 7. AI Smart Search - Constraint Handling (5 tests)
 
-**Extended scenario coverage**
+**Search constraints, contradictions, conflicts, and empty-result handling**
 
 | S/N | Test | Query Source | Estimated Count | Notes |
 |-----|------|--------------|-----------------|-------|
-| 6.1 | Multi-Intent Queries | Fixed only | 6 | Queries with multiple intents |
-| 6.2 | Clarification Queries | Fixed only | 6 | Clarification-seeking queries |
-| 6.3 | Price Negotiation Queries | Fixed only | 8 | Price-related negotiations |
-| 6.4 | Unusual Units Queries | Fixed only | 6 | Queries with unusual measurement units |
-| 6.5 | Joke/Humor Queries | Fixed only | 3 | Humorous/joke queries |
-| 6.6 | Repeat/Looping Queries | Fixed only | 3 | Repetitive query patterns |
-| 6.7 | Brand Loyalty/Switching Queries | Fixed only | 3 | Brand preference queries |
-| 6.8 | Accessibility Needs Queries | Fixed only | 3 | Accessibility-focused queries |
-| 6.9 | Environmental Concerns Queries | Fixed only | 3 | Environment-related queries |
+| 7.1 | Date Range/Numeric Filters | 2 fixed + 8 AI | 10 | Date and numeric value queries |
+| 7.2 | Negative/Contradictory Queries | 2 fixed + 8 AI | 10 | Contradictory requirements |
+| 7.3 | Conflicting Filter Facets | 5 fixed + 8 AI | 13 | Conflicting filter combinations |
+| 7.4 | Conflicting Brands | 5 fixed + 8 AI | 13 | Conflicting brand queries |
+| 7.5 | No Results Scenario | 2 fixed + 8 AI | 10 | Queries returning no results |
 
-| | **Subtotal** | | **41** | |
+| | **Subtotal** | | **56** | |
+
+---
+
+### 8. AI Smart Search - Conversational Behavior (9 tests)
+
+**Higher-level assistant behavior for user intent and preference handling**
+
+| S/N | Test | Query Source | Estimated Count | Notes |
+|-----|------|--------------|-----------------|-------|
+| 8.1 | Multi-Intent Queries | Fixed only | 6 | Queries with multiple intents |
+| 8.2 | Clarification Queries | Fixed only | 6 | Clarification-seeking queries |
+| 8.3 | Price Negotiation Queries | Fixed only | 8 | Price-related negotiations |
+| 8.4 | Sales | Fixed only | 20 | Sales, finance, warranty, and dealer handoff questions |
+| 8.5 | Joke/Humor Queries | Fixed only | 3 | Humorous/joke queries |
+| 8.6 | Repeat/Looping Queries | Fixed only | 3 | Repetitive query patterns |
+| 8.7 | Brand Loyalty/Switching Queries | Fixed only | 3 | Brand preference queries |
+| 8.8 | Accessibility Needs Queries | Fixed only | 3 | Accessibility-focused queries |
+| 8.9 | Environmental Concerns Queries | Fixed only | 3 | Environment-related queries |
+
+| | **Subtotal** | | **55** | |
+
+---
+
+### 9. AI Smart Search - Safety / Policy / Abuse (5 tests)
+
+**Off-topic, sensitive, unsafe, and manipulative input handling**
+
+| S/N | Test | Query Source | Estimated Count | Notes |
+|-----|------|--------------|-----------------|-------|
+| 9.1 | Personal Data | 6 fixed + 8 AI | 14 | Personal data handling |
+| 9.2 | NSFW | 5 fixed + 8 AI | 13 | NSFW content filtering |
+| 9.3 | Code and Scripts | 5 fixed + 8 AI | 13 | Code injection attempts |
+| 9.4 | Bias and Manipulation | 5 fixed + 8 AI | 13 | Bias detection and manipulation tests |
+| 9.5 | Random Topics | 2 fixed + 8 AI | 10 | Off-topic/unrelated queries |
+
+| | **Subtotal** | | **63** | |
+
+---
+
+### 10. AI Smart Search - Reliability (1 test)
+
+**Repeated-query stability**
+
+| S/N | Test | Query Source | Estimated Count | Notes |
+|-----|------|--------------|-----------------|-------|
+| 10.1 | Response Consistency | 14 fixed + 8 AI | 22 | Repeated queries for consistency check |
+
+| | **Subtotal** | | **22** | |
 
 ---
 
@@ -132,8 +193,8 @@
 
 | S/N | Category | Count |
 |-----|----------|-------|
-| 1 | **Total Test Cases** | 53 |
-| 2 | **Test Suites (describe blocks)** | 6 |
+| 1 | **Total Test Cases** | 66 |
+| 2 | **Reporting Groups** | 10 |
 | 3 | **Total Fixed Queries** | ~240 |
 | 4 | **Total AI-Generated Queries** | ~150 |
 | 5 | **Edge Case Queries** | 17 |
@@ -145,15 +206,15 @@
 ## Key Changes from Previous Breakdown
 
 ### Additions
-✅ **Negative Test Suite** - 6 new tests for MB vehicles (-ve) covering missing facet values  
-✅ **Expanded Facet Coverage** - 12 individual facet tests for MB vehicles (modelIdentifier, bodyType, fuelType, upholstery, upholsteryPolish, color, lines, packages, equipment, motorization)  
+✅ **Range Facet Suite** - 6 tests for MB vehicles covering numeric RANGE facets
+✅ **Negative Facet Suite** - 6 tests for MB vehicles covering missing facet values
+✅ **Expanded Facet Coverage** - 16 individual facet tests for MB vehicles
 ✅ **Matrix Facet Tests** - New facet matrix combinations test  
-✅ **Extended Special Scenarios** - 9 specialized scenario tests  
+✅ **Scenario reporting groups** - Input Robustness, Constraint Handling, Conversational Behavior, Safety / Policy / Abuse, and Reliability
 
 ### Changes
-- **Vehicles MB tests increased** from ~10 to 18 tests (due to individual facet tests)
-- **Special Scenarios expanded** with dedicated test suite (previously part of "Other Scenarios")
-- **Other Scenarios** reorganized with 15 comprehensive edge case tests
+- **Vehicles MB tests increased** from ~10 to 22 tests (due to individual facet tests)
+- **Other/Special scenario results** reorganized into five reporting groups
 - **Dynamic facet loading** enabled across most tests for real-time API-based query generation
 
 ---
