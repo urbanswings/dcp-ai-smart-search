@@ -1477,12 +1477,24 @@ export async function performUISmartSearchAndGetResults(
   submitDisabled: boolean = false
 ): Promise<UiSearchResult> {
   const env = process.env.ENVIRONMENT || "INT";
-  const searchButton = page.locator(
-    ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button"
-  );
+  const searchInputArea = page.locator(
+    ".smart-search__input, wb7-input.smart-search__input"
+  ).first();
+  const searchButton = page
+    .locator(".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button")
+    .or(page.locator("wb7-input-action button"))
+    .or(page.locator(".smart-search__input button"))
+    .or(page.locator("button[aria-label*='search' i], button[title*='search' i]"))
+    .first();
+  const input = page
+    .locator("wb7-input.smart-search__input wb7-grey-box input")
+    .or(page.locator(".smart-search__input input"))
+    .or(page.locator("input[placeholder*='search' i]"))
+    .first();
   try {
+    await searchInputArea.waitFor({ state: "visible", timeout: 15000 });
     console.debug("[DEBUG] Waiting for search button to be visible...");
-    await searchButton.waitFor({ state: "visible", timeout: 15000 });
+    await searchButton.waitFor({ state: "visible", timeout: 10000 });
     for (let j = 0; j < 10; j++) {
       const enabled = await searchButton.isEnabled();
       console.debug(
@@ -1492,19 +1504,30 @@ export async function performUISmartSearchAndGetResults(
       await page.waitForTimeout(1000);
     }
   } catch (e: any) {
-    console.debug("[DEBUG] Error waiting for search button:", e?.message || e);
+    const details = e?.message || e;
+    console.debug("[DEBUG] Error waiting for search UI:", details);
+    return {
+      query,
+      results: "[Script] FAILED: Search UI not visible",
+      responseTime: 0,
+      error: `Search UI not visible: ${details}`,
+    };
   }
 
   const actualInput = query?.value ?? query;
-  const input = page.locator(
-    "wb7-input.smart-search__input wb7-grey-box input"
-  );
   try {
     console.debug(`[DEBUG] Filling input with: '${actualInput}'`);
+    await input.waitFor({ state: "visible", timeout: 10000 });
     await input.fill(" ");
     await input.fill(actualInput);
   } catch (e: any) {
     console.debug("[DEBUG] Error filling input:", e?.message || e);
+    return {
+      query,
+      results: "[Script] FAILED: Search input not usable",
+      responseTime: 0,
+      error: `Search input not usable: ${e?.message || e}`,
+    };
   }
 
   if (submitDisabled) {
@@ -1569,7 +1592,7 @@ export async function performUISmartSearchAndGetResults(
   };
   page.on("response", responseListener);
 
-  if (await searchButton.isVisible()) await searchButton.click();
+  if (await searchButton.isVisible().catch(() => false)) await searchButton.click();
 
   let retries = 0;
   let resultText = "";
@@ -1592,7 +1615,21 @@ export async function performUISmartSearchAndGetResults(
         }/3)...`
       );
       await successBubbleLocator.waitFor({ state: "visible", timeout: 5000 }).catch(() => false);
-      if (await successBubbleLocator.isVisible()) {
+      
+      // Wrap isVisible in try-catch to handle race condition where page closes
+      let isSuccessVisible = false;
+      try {
+        isSuccessVisible = await successBubbleLocator.isVisible();
+      } catch (e: any) {
+        if (e?.message?.includes("closed") || e?.message?.includes("context")) {
+          console.warn("[DEBUG] Page closed during isVisible check");
+          pageClosed = true;
+          break;
+        }
+        isSuccessVisible = false;
+      }
+      
+      if (isSuccessVisible) {
         // Prefer message-specific descendants, then fallback to full bubble text.
         let extractedText = await successBubbleLocator
           .locator("p, .smart-search__message, .smart-search__result-message, .wbx-notification__content")
@@ -1616,9 +1653,18 @@ export async function performUISmartSearchAndGetResults(
         }
       }
 
-      const errorVisible = await errorResultLocator
-        .isVisible({ timeout: 3000 })
-        .catch(() => false);
+      let errorVisible = false;
+      try {
+        errorVisible = await errorResultLocator.isVisible({ timeout: 3000 });
+      } catch (e: any) {
+        if (e?.message?.includes("closed") || e?.message?.includes("context")) {
+          console.warn("[DEBUG] Page closed during error check");
+          pageClosed = true;
+          break;
+        }
+        errorVisible = false;
+      }
+      
       if (errorVisible) {
         resultText = await errorResultLocator.innerText();
         console.warn(`[DEBUG] UI showing internal error message: '${resultText}'`);
@@ -1632,8 +1678,17 @@ export async function performUISmartSearchAndGetResults(
           `[DEBUG] Results not visible, retrying search button click (attempt ${retries + 1}/3)...`
         );
         await page.waitForTimeout(500); // Brief delay before retry
-        if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-          await searchButton.click();
+        try {
+          const isButtonVisible = await searchButton.isVisible({ timeout: 3000 });
+          if (isButtonVisible) {
+            await searchButton.click();
+          }
+        } catch (e: any) {
+          if (e?.message?.includes("closed") || e?.message?.includes("context")) {
+            console.warn("[DEBUG] Page closed during retry button click");
+            pageClosed = true;
+            break;
+          }
         }
       }
     } catch (e: any) {

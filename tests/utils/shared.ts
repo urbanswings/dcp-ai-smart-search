@@ -682,6 +682,12 @@ export async function runTestsAndSaveResults(params: {
   if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
     const page = await setupContextAndPage(browser);
     for (let i = 0; i < queries.length; i++) {
+      // Check if page is still valid before proceeding
+      if (page.isClosed()) {
+        console.warn("[WARN] Page was closed, stopping UI test run");
+        break;
+      }
+
       const query = queries[i];
       const results = await performUISmartSearchAndGetResults(page, query);
       const entry = await processAndLogUiResult({
@@ -693,21 +699,29 @@ export async function runTestsAndSaveResults(params: {
       });      
       
       // Take screenshot after each query (viewport only)
-      const actualQuery = query?.value ?? query;
-      const screenshotPath = getScreenshotPath(resolvedTestType, i, actualQuery, runTimestamp);
-      await ensureDirectoryExists(screenshotPath);
-      await page.screenshot({ path: screenshotPath });
-      console.log(`📸 Screenshot: ${screenshotPath}`);
-
-      entry.screenshotPath = screenshotPath;
-      
-      // Annotate screenshot immediately with English translations
       try {
-        const { annotateSingleScreenshot } = require('../../annotate-screenshot.js');
-        await annotateSingleScreenshot(screenshotPath, entry);
-        console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);        
-      } catch (error) {
-        console.warn(`⚠️  Annotation skipped: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        const actualQuery = query?.value ?? query;
+        const screenshotPath = getScreenshotPath(resolvedTestType, i, actualQuery, runTimestamp);
+        await ensureDirectoryExists(screenshotPath);
+        await page.screenshot({ path: screenshotPath });
+        console.log(`📸 Screenshot: ${screenshotPath}`);
+
+        entry.screenshotPath = screenshotPath;
+        
+        // Annotate screenshot immediately with English translations
+        try {
+          const { annotateSingleScreenshot } = require('../../annotate-screenshot.js');
+          await annotateSingleScreenshot(screenshotPath, entry);
+          console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);        
+        } catch (error) {
+          console.warn(`⚠️  Annotation skipped: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      } catch (screenshotError: any) {
+        console.warn(`⚠️  Screenshot failed: ${screenshotError?.message || 'Unknown error'}`);
+        if (screenshotError?.message?.includes("closed") || screenshotError?.message?.includes("context")) {
+          console.warn("[WARN] Page closed during screenshot, stopping UI test run");
+          break;
+        }
       }
       console.log("\n");
       

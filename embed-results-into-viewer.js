@@ -3,6 +3,7 @@ const path = require("path");
 
 const workspaceRoot = __dirname;
 const viewerTemplatePath = path.join(workspaceRoot, "results", "html", "test-results-viewer.html");
+const echartsBundlePath = path.join(workspaceRoot, "node_modules", "echarts", "dist", "echarts.min.js");
 
 function normalizePath(value) {
   return String(value || "").replaceAll("\\", "/").replace(/^\/+/, "");
@@ -151,6 +152,22 @@ function injectEmbeddedPayload(templateHtml, payload) {
   return templateHtml.replace(scriptRegex, replacement);
 }
 
+function injectEmbeddedEcharts(templateHtml) {
+  const scriptRegex = /<script id="embeddedEchartsLib" type="text\/plain">[\s\S]*?<\/script>/;
+  if (!scriptRegex.test(templateHtml)) {
+    return templateHtml;
+  }
+
+  if (!fs.existsSync(echartsBundlePath)) {
+    console.warn("ECharts bundle not found at:", echartsBundlePath);
+    return templateHtml;
+  }
+
+  const echartsSource = fs.readFileSync(echartsBundlePath, "utf8");
+  const replacement = "<script id=\"embeddedEchartsLib\" type=\"text/plain\">\n" + echartsSource + "\n</script>";
+  return templateHtml.replace(scriptRegex, replacement);
+}
+
 function main() {
   const sourceArg = process.argv[2];
   const outArg = process.argv[3] || "results/html/test-results-viewer-standalone.html";
@@ -167,7 +184,8 @@ function main() {
   }
 
   const templateHtml = fs.readFileSync(viewerTemplatePath, "utf8");
-  const outputHtml = injectEmbeddedPayload(templateHtml, payload);
+  const withPayload = injectEmbeddedPayload(templateHtml, payload);
+  const outputHtml = injectEmbeddedEcharts(withPayload);
 
   const absoluteOutPath = path.isAbsolute(outArg) ? outArg : path.join(workspaceRoot, outArg);
   fs.mkdirSync(path.dirname(absoluteOutPath), { recursive: true });

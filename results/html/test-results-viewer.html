@@ -21,16 +21,16 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      font-family: "Avenir Next", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       color: var(--text);
       background: linear-gradient(180deg, #eaf0f5 0%, var(--bg) 100%);
-      display: grid;
-      place-items: center;
+      display: block;
       padding: 24px;
     }
 
     .wrap {
-      max-width: 100%;
+      width: min(1440px, 100%);
+      margin: 0 auto;
       min-width: 0;
       background: var(--card);
       border: 1px solid var(--border);
@@ -41,7 +41,9 @@
 
     h1 {
       margin: 0 0 8px;
-      font-size: 22px;
+      font-size: clamp(28px, 3vw, 42px);
+      line-height: 1.05;
+      letter-spacing: -0.02em;
     }
 
     .hint {
@@ -51,27 +53,84 @@
       line-height: 1.4;
     }
 
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 14px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .versionChip {
+      display: inline-flex;
+      align-items: center;
+      margin: 0;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #f8fafc;
+      font-size: 12px;
+    }
+
+    .introCard {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .introTitle {
+      margin: 0 0 8px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+    }
+
+    .introList {
+      margin: 0;
+      padding-left: 16px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .introList li + li {
+      margin-top: 4px;
+    }
+
     .actions {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
-      margin-bottom: 14px;
+      margin: 0;
     }
 
     button {
       border: 1px solid var(--border);
       border-radius: 10px;
-      height: 38px;
-      padding: 0 14px;
+      height: 40px;
+      padding: 0 16px;
       background: #fff;
       color: var(--text);
       cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease;
     }
 
     button.primary {
       background: var(--accent);
       border-color: var(--accent);
       color: #fff;
+    }
+
+    button:not(:disabled):hover {
+      border-color: #9fb0c4;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
     }
 
     button:disabled {
@@ -287,6 +346,91 @@
       margin-bottom: 8px;
     }
 
+    .chartSubValue {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      white-space: pre-line;
+    }
+
+    .queryKpiMain {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .queryKpiTotal {
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .queryKpiUnit {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .queryKpiGrid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+
+    .queryKpiPill {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 7px;
+      background: #ffffff;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .queryKpiPill strong {
+      display: block;
+      margin-top: 2px;
+      font-size: 14px;
+      color: #0f172a;
+    }
+
+    .queryKpiPillPass {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+
+    .queryKpiPillFail {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .queryKpiPillOther {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .queryKpiMeta {
+      display: grid;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .queryKpiMetaRow {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .queryKpiMetaRow strong {
+      color: #0f172a;
+      font-weight: 700;
+    }
+
     .barTrack {
       height: 10px;
       border-radius: 999px;
@@ -353,6 +497,12 @@
     .metricEmpty {
       font-size: 12px;
       color: var(--muted);
+    }
+
+    .echartContainer {
+      width: 100%;
+      height: 190px;
+      min-height: 190px;
     }
 
     .rowDetailPane {
@@ -761,6 +911,18 @@
     }
 
     @media (max-width: 700px) {
+      body {
+        padding: 12px;
+      }
+
+      .wrap {
+        padding: 14px;
+      }
+
+      .hero {
+        align-items: stretch;
+      }
+
       .row {
         grid-template-columns: 1fr;
       }
@@ -793,17 +955,24 @@
 </head>
 <body>
   <main class="wrap">
-    <h1>Smart Search - Test Results Viewer</h1>
-    <p class="hint" id="versionText">Build: 2026-06-09-02</p>
-    <p class="hint">
-      Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder, and this page will build dropdowns dynamically.<br>
-      Embedded mode: if <strong>embeddedResultsData</strong> contains JSON files, they load automatically on open.<br>
-      No external JS file required.
-    </p>
+    <div class="hero">
+      <div>
+        <h1>Smart Search - Test Results Viewer</h1>
+        <p class="hint versionChip" id="versionText">Build: 2026-06-09-02</p>
+      </div>
+      <div class="actions">
+        <button id="pickBtn" class="primary">Pick Root Folder</button>
+        <button id="iicImportBtn" type="button" disabled>IIC Import</button>
+      </div>
+    </div>
 
-    <div class="actions">
-      <button id="pickBtn" class="primary">Pick Root Folder</button>
-      <button id="iicImportBtn" type="button" disabled>IIC Import</button>
+    <div class="introCard">
+      <p class="introTitle">How It Works</p>
+      <ul class="introList">
+        <li>Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder and filters load automatically.</li>
+        <li>Embedded mode: if <strong>embeddedResultsData</strong> has files, results load on page open.</li>
+        <li>This viewer runs fully client-side with no external JS required.</li>
+      </ul>
     </div>
     <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
 
@@ -862,22 +1031,32 @@
     <div class="info" id="chartTitle">Quick Summary</div>
     <div class="chartGrid">
       <div class="chartCard">
-        <div class="chartTitle">Pass Rate</div>
-        <div class="chartValue" id="chartPassRateValue">-</div>
-        <div class="barTrack"><div class="barFill barFillPass" id="chartPassRateFill" style="width:0%"></div></div>
+        <div class="chartTitle">Market Pass Rate</div>
+        <div class="echartContainer" id="chartMarketPassRateChart"></div>
       </div>
       <div class="chartCard">
         <div class="chartTitle">Queries Ran</div>
-        <div class="chartValue" id="chartQueryCountValue">-</div>
-        <div class="barTrack"><div class="barFill barFillNeutral" id="chartQueryCountFill" style="width:100%"></div></div>
+        <div class="queryKpiMain">
+          <div class="queryKpiTotal" id="chartQueryCountValue">-</div>
+          <div class="queryKpiUnit">Queries</div>
+        </div>
+        <div class="queryKpiGrid">
+          <div class="queryKpiPill queryKpiPillPass">PASS<strong id="chartQueryPassCount">-</strong></div>
+          <div class="queryKpiPill queryKpiPillFail">FAIL<strong id="chartQueryFailCount">-</strong></div>
+          <div class="queryKpiPill queryKpiPillOther">OTHER<strong id="chartQueryOtherCount">-</strong></div>
+        </div>
+        <div class="queryKpiMeta">
+          <div class="queryKpiMetaRow"><span>Avg response</span><strong id="chartQueryAvgMs">-</strong></div>
+          <div class="queryKpiMetaRow"><span>Pass rate</span><strong id="chartQueryPassRate">-</strong></div>
+        </div>
       </div>
       <div class="chartCard">
         <div class="chartTitle">Evaluation Split</div>
-        <div class="metricList" id="chartEvaluationList"><div class="metricEmpty">No data</div></div>
+        <div class="echartContainer" id="chartEvaluationChart"></div>
       </div>
       <div class="chartCard">
-        <div class="chartTitle">Response Time Buckets</div>
-        <div class="metricList" id="chartLatencyList"><div class="metricEmpty">No data</div></div>
+        <div class="chartTitle">Response Time Summary</div>
+        <div class="echartContainer" id="chartLatencyChart"></div>
       </div>
     </div>
     <div class="info" id="tableTitle">Results Table</div>
@@ -936,6 +1115,8 @@
       "files": []
     }
   </script>
+  <script id="embeddedEchartsLib" type="text/plain"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 
   <script>
     const pickBtn = document.getElementById("pickBtn");
@@ -952,11 +1133,15 @@
     const titleValue = document.getElementById("titleValue");
     const passRateValue = document.getElementById("passRateValue");
     const passRateCard = document.getElementById("passRateCard");
-    const chartPassRateValue = document.getElementById("chartPassRateValue");
-    const chartPassRateFill = document.getElementById("chartPassRateFill");
+    const chartMarketPassRateChart = document.getElementById("chartMarketPassRateChart");
     const chartQueryCountValue = document.getElementById("chartQueryCountValue");
-    const chartEvaluationList = document.getElementById("chartEvaluationList");
-    const chartLatencyList = document.getElementById("chartLatencyList");
+    const chartQueryPassCount = document.getElementById("chartQueryPassCount");
+    const chartQueryFailCount = document.getElementById("chartQueryFailCount");
+    const chartQueryOtherCount = document.getElementById("chartQueryOtherCount");
+    const chartQueryAvgMs = document.getElementById("chartQueryAvgMs");
+    const chartQueryPassRate = document.getElementById("chartQueryPassRate");
+    const chartEvaluationChart = document.getElementById("chartEvaluationChart");
+    const chartLatencyChart = document.getElementById("chartLatencyChart");
     const tableTitle = document.getElementById("tableTitle");
     const resultsTbody = document.getElementById("resultsTbody");
     const previewTitle = document.getElementById("previewTitle");
@@ -974,6 +1159,7 @@
     const iicImportCopyBtn = document.getElementById("iicImportCopyBtn");
     const iicImportCloseBtn = document.getElementById("iicImportCloseBtn");
     const embeddedResultsData = document.getElementById("embeddedResultsData");
+    const embeddedEchartsLib = document.getElementById("embeddedEchartsLib");
 
     let rootLabel = "selected-root";
     let selectedFiles = [];
@@ -983,7 +1169,213 @@
     let currentScreenshotObjectUrl = "";
     let currentIicImportPayload = "[]";
     let embeddedScreenshots = new Map();
+    let marketChartRequestToken = 0;
+    let marketPassRateChartInstance = null;
+    let evaluationChartInstance = null;
+    let latencyChartInstance = null;
+    let echartsLoadAttempted = false;
+    let chartRetryTimer = null;
+    let chartRetryCount = 0;
     const fileMetadataCache = new Map();
+    const fileRowsCache = new Map();
+
+    function ensureEmbeddedEchartsLoaded() {
+      if (window.echarts || !embeddedEchartsLib) {
+        return;
+      }
+
+      if (echartsLoadAttempted) {
+        return;
+      }
+      echartsLoadAttempted = true;
+
+      const libText = String(embeddedEchartsLib.textContent || "").trim();
+      if (!libText) {
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.text = libText;
+      document.head.appendChild(script);
+    }
+
+    function requestChartRetry() {
+      if (chartRetryTimer || chartRetryCount >= 8) {
+        return;
+      }
+
+      chartRetryTimer = setTimeout(() => {
+        chartRetryTimer = null;
+        if (!window.echarts) {
+          chartRetryCount += 1;
+          requestChartRetry();
+          return;
+        }
+
+        chartRetryCount = 0;
+        updateCharts(currentRows);
+        const selectedFolder = folders[Number(folderSelect.value)];
+        if (selectedFolder) {
+          void updateMarketPassRateChart(selectedFolder, getVisibleFilesForFolder(selectedFolder));
+        }
+      }, 300);
+    }
+
+    function withChart(container, instance) {
+      ensureEmbeddedEchartsLoaded();
+      if (!window.echarts || !container) {
+        if (container) {
+          container.innerHTML = "<div class=\"metricEmpty\">ECharts not available</div>";
+        }
+        requestChartRetry();
+        return null;
+      }
+
+      if (container.textContent && container.textContent.includes("ECharts not available")) {
+        container.textContent = "";
+      }
+
+      const domInstance = window.echarts.getInstanceByDom(container);
+      const activeInstance = instance || domInstance || window.echarts.init(container);
+
+      requestAnimationFrame(() => {
+        if (!activeInstance.isDisposed()) {
+          activeInstance.resize();
+        }
+      });
+      setTimeout(() => {
+        if (!activeInstance.isDisposed()) {
+          activeInstance.resize();
+        }
+      }, 120);
+
+      setTimeout(() => {
+        if (!activeInstance.isDisposed()) {
+          activeInstance.resize();
+        }
+      }, 350);
+
+      return activeInstance;
+    }
+
+    function clearChart(container, instance, message) {
+      const chart = withChart(container, instance);
+      if (!chart) {
+        if (container) {
+          container.innerHTML = "<div class=\"metricEmpty\">" + escapeHtml(message || "No data") + "</div>";
+        }
+        return null;
+      }
+
+      chart.clear();
+      chart.setOption({
+        animation: false,
+        xAxis: { show: false, min: 0, max: 1 },
+        yAxis: { show: false, min: 0, max: 1 },
+        series: [],
+        graphic: {
+          type: "text",
+          left: "center",
+          top: "middle",
+          style: {
+            text: String(message || "No data"),
+            fill: "#64748b",
+            fontSize: 12,
+          },
+        },
+      }, true);
+      return chart;
+    }
+
+    function renderEvaluationChart(rows, totalCount) {
+      if (!rows.length || totalCount <= 0) {
+        evaluationChartInstance = clearChart(chartEvaluationChart, evaluationChartInstance, "No data");
+        return;
+      }
+
+      evaluationChartInstance = withChart(chartEvaluationChart, evaluationChartInstance);
+      if (!evaluationChartInstance) {
+        return;
+      }
+
+      const data = rows.map((row) => ({ name: row.label, value: row.count }));
+      evaluationChartInstance.setOption({
+        animation: false,
+        tooltip: { trigger: "item", formatter: "{b}: {c} ({d}%)" },
+        color: ["#16a34a", "#dc2626", "#64748b"],
+        series: [{
+          type: "pie",
+          radius: ["45%", "75%"],
+          center: ["50%", "52%"],
+          label: { formatter: "{b}\n{d}%", fontSize: 11 },
+          data,
+        }],
+      }, true);
+    }
+
+    function renderLatencyChart(rows, averageMs) {
+      if (!rows.length) {
+        latencyChartInstance = clearChart(chartLatencyChart, latencyChartInstance, "No data");
+        return;
+      }
+
+      latencyChartInstance = withChart(chartLatencyChart, latencyChartInstance);
+      if (!latencyChartInstance) {
+        return;
+      }
+
+      const labels = rows.map((row) => row.label);
+      const values = rows.map((row) => row.value);
+      latencyChartInstance.setOption({
+        animation: false,
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+          formatter: (params) => {
+            const p = params && params[0] ? params[0] : null;
+            if (!p) return "";
+            return p.axisValue + ": " + p.value + " ms";
+          },
+        },
+        grid: { top: 18, right: 8, bottom: 28, left: 34 },
+        xAxis: {
+          type: "category",
+          data: labels,
+          axisLabel: { fontSize: 10, interval: 0 },
+        },
+        yAxis: {
+          type: "value",
+          axisLabel: { formatter: "{value}ms", fontSize: 10 },
+          splitLine: { lineStyle: { color: "#e2e8f0" } },
+        },
+        series: [{
+          type: "bar",
+          data: values,
+          itemStyle: { color: "#0ea5e9", borderRadius: [4, 4, 0, 0] },
+          markLine: {
+            symbol: "none",
+            label: { formatter: "Avg: " + Math.round(averageMs || 0) + "ms", fontSize: 10 },
+            lineStyle: { color: "#64748b", type: "dashed" },
+            data: [{ yAxis: Math.round(averageMs || 0) }],
+          },
+        }],
+      }, true);
+    }
+
+    function getPercentile(sortedValues, percentile) {
+      if (!sortedValues.length) {
+        return 0;
+      }
+      const clamped = Math.max(0, Math.min(100, percentile));
+      const rank = (clamped / 100) * (sortedValues.length - 1);
+      const lower = Math.floor(rank);
+      const upper = Math.ceil(rank);
+      if (lower === upper) {
+        return sortedValues[lower];
+      }
+      const weight = rank - lower;
+      return sortedValues[lower] + (sortedValues[upper] - sortedValues[lower]) * weight;
+    }
 
     function normalizePath(pathValue) {
       return (pathValue || "").replaceAll("\\", "/").replace(/^\/+/, "");
@@ -1338,6 +1730,132 @@
       return Number.isFinite(n) ? n : null;
     }
 
+    async function getRowsForRelativePath(relativePath) {
+      const normalizedRel = normalizePath(relativePath);
+      if (!normalizedRel || !String(normalizedRel).toLowerCase().endsWith(".json")) {
+        return [];
+      }
+
+      if (fileRowsCache.has(normalizedRel)) {
+        return fileRowsCache.get(normalizedRel);
+      }
+
+      const fileObj = findSelectedFileByRelativePath(normalizedRel);
+      if (!fileObj) {
+        fileRowsCache.set(normalizedRel, []);
+        return [];
+      }
+
+      try {
+        const text = await fileObj.text();
+        const parsed = JSON.parse(text);
+        const rows = (Array.isArray(parsed) ? parsed : [parsed]).filter((row) => row && typeof row === "object");
+        fileRowsCache.set(normalizedRel, rows);
+        return rows;
+      } catch {
+        fileRowsCache.set(normalizedRel, []);
+        return [];
+      }
+    }
+
+    function renderMarketPassRateList(container, rows) {
+      if (!rows.length) {
+        marketPassRateChartInstance = clearChart(chartMarketPassRateChart, marketPassRateChartInstance, "No data");
+        return;
+      }
+
+      marketPassRateChartInstance = withChart(chartMarketPassRateChart, marketPassRateChartInstance);
+      if (!marketPassRateChartInstance) {
+        return;
+      }
+
+      const labels = rows.map((row) => row.label);
+      const values = rows.map((row) => row.percent);
+
+      marketPassRateChartInstance.setOption({
+        animation: false,
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+          formatter: (params) => {
+            const p = params && params[0] ? params[0] : null;
+            if (!p) return "";
+            const row = rows[p.dataIndex] || { pass: 0, total: 0 };
+            return p.axisValue + ": " + p.value + "% (" + row.pass + "/" + row.total + ")";
+          },
+        },
+        grid: { top: 10, right: 8, bottom: 12, left: 56 },
+        xAxis: {
+          type: "value",
+          min: 0,
+          max: 100,
+          axisLabel: { formatter: "{value}%", fontSize: 10 },
+          splitLine: { lineStyle: { color: "#e2e8f0" } },
+        },
+        yAxis: {
+          type: "category",
+          data: labels,
+          axisLabel: { fontSize: 11 },
+        },
+        series: [{
+          type: "bar",
+          data: values,
+          label: { show: true, position: "right", formatter: "{c}%", fontSize: 10 },
+          itemStyle: { color: "#14b8a6", borderRadius: [0, 4, 4, 0] },
+          barMaxWidth: 20,
+        }],
+      }, true);
+    }
+
+    async function updateMarketPassRateChart(folder, visibleFiles) {
+      const requestToken = ++marketChartRequestToken;
+
+      if (!folder || !Array.isArray(visibleFiles) || !visibleFiles.length) {
+        renderMarketPassRateList(chartMarketPassRateChart, []);
+        return;
+      }
+
+      marketPassRateChartInstance = clearChart(chartMarketPassRateChart, marketPassRateChartInstance, "Calculating...");
+      const marketStats = new Map();
+
+      for (const fileName of visibleFiles) {
+        const relativePath = getRelativePathForFolderFile(folder, fileName);
+        const country = extractCountryFromFileName(fileName) || "UNKNOWN";
+        const rows = await getRowsForRelativePath(relativePath);
+
+        if (requestToken !== marketChartRequestToken) {
+          return;
+        }
+
+        if (!marketStats.has(country)) {
+          marketStats.set(country, { pass: 0, total: 0 });
+        }
+
+        const stats = marketStats.get(country);
+        for (const row of rows) {
+          stats.total += 1;
+          const evalValue = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+          if (evalValue === "PASS") {
+            stats.pass += 1;
+          }
+        }
+      }
+
+      if (requestToken !== marketChartRequestToken) {
+        return;
+      }
+
+      const outputRows = [...marketStats.entries()]
+        .map(([label, stats]) => {
+          const percent = stats.total > 0 ? Math.round((stats.pass / stats.total) * 100) : 0;
+          return { label, percent, pass: stats.pass, total: stats.total };
+        })
+        .filter((row) => row.total > 0)
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      renderMarketPassRateList(chartMarketPassRateChart, outputRows);
+    }
+
     function renderMetricList(container, rows, totalCount) {
       if (!rows.length || totalCount <= 0) {
         container.innerHTML = "<div class=\"metricEmpty\">No data</div>";
@@ -1357,19 +1875,33 @@
     function updateCharts(rows) {
       const total = rows.length;
       if (!total) {
-        chartPassRateValue.textContent = "-";
-        chartPassRateFill.style.width = "0%";
         chartQueryCountValue.textContent = "-";
-        renderMetricList(chartEvaluationList, [], 0);
-        renderMetricList(chartLatencyList, [], 0);
+        chartQueryPassCount.textContent = "-";
+        chartQueryFailCount.textContent = "-";
+        chartQueryOtherCount.textContent = "-";
+        chartQueryAvgMs.textContent = "-";
+        chartQueryPassRate.textContent = "-";
+        renderEvaluationChart([], 0);
+        renderLatencyChart([], 0);
         return;
       }
 
-      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
-      const passPercent = Math.round((passCount / total) * 100);
-      chartPassRateValue.textContent = passPercent + "% (" + passCount + "/" + total + ")";
-      chartPassRateFill.style.width = passPercent + "%";
       chartQueryCountValue.textContent = String(total);
+      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
+      const failCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "FAIL").length;
+      const otherCount = Math.max(0, total - passCount - failCount);
+      const responseTimesForSummary = rows
+        .map((row) => toNumberOrNull(row && row.responseTime))
+        .filter((value) => value !== null);
+      const avgMs = responseTimesForSummary.length
+        ? Math.round(responseTimesForSummary.reduce((sum, value) => sum + value, 0) / responseTimesForSummary.length)
+        : null;
+      const passRatePct = Math.round((passCount / total) * 100);
+      chartQueryPassCount.textContent = String(passCount);
+      chartQueryFailCount.textContent = String(failCount);
+      chartQueryOtherCount.textContent = String(otherCount);
+      chartQueryAvgMs.textContent = avgMs === null ? "-" : (avgMs + " ms");
+      chartQueryPassRate.textContent = passRatePct + "%";
 
       const evalCounts = new Map();
       rows.forEach((row) => {
@@ -1380,40 +1912,32 @@
       const evalRows = ["PASS", "FAIL", "OTHER"]
         .filter((label) => evalCounts.has(label))
         .map((label) => ({ label, count: evalCounts.get(label) || 0 }));
-      renderMetricList(chartEvaluationList, evalRows, total);
+      renderEvaluationChart(evalRows, total);
 
-      const latencyCounts = new Map([
-        ["< 300 ms", 0],
-        ["300-699 ms", 0],
-        ["700-1199 ms", 0],
-        [">= 1200 ms", 0],
-        ["Unknown", 0],
-      ]);
-      rows.forEach((row) => {
-        const responseTime = toNumberOrNull(row && row.responseTime);
-        if (responseTime === null) {
-          latencyCounts.set("Unknown", (latencyCounts.get("Unknown") || 0) + 1);
-          return;
-        }
-        if (responseTime < 300) {
-          latencyCounts.set("< 300 ms", (latencyCounts.get("< 300 ms") || 0) + 1);
-          return;
-        }
-        if (responseTime < 700) {
-          latencyCounts.set("300-699 ms", (latencyCounts.get("300-699 ms") || 0) + 1);
-          return;
-        }
-        if (responseTime < 1200) {
-          latencyCounts.set("700-1199 ms", (latencyCounts.get("700-1199 ms") || 0) + 1);
-          return;
-        }
-        latencyCounts.set(">= 1200 ms", (latencyCounts.get(">= 1200 ms") || 0) + 1);
-      });
+      const numericTimes = rows
+        .map((row) => toNumberOrNull(row && row.responseTime))
+        .filter((value) => value !== null)
+        .sort((a, b) => a - b);
 
-      const latencyRows = [...latencyCounts.entries()]
-        .filter(([, count]) => count > 0)
-        .map(([label, count]) => ({ label, count }));
-      renderMetricList(chartLatencyList, latencyRows, total);
+      if (!numericTimes.length) {
+        renderLatencyChart([], 0);
+        return;
+      }
+
+      const averageLatency = numericTimes.reduce((sum, value) => sum + value, 0) / numericTimes.length;
+      const minLatency = numericTimes[0];
+      const medianLatency = getPercentile(numericTimes, 50);
+      const maxLatency = numericTimes[numericTimes.length - 1];
+      const spreadLatency = maxLatency - minLatency;
+
+      const latencyRows = [
+        { label: "Min", value: Math.round(minLatency) },
+        { label: "Median", value: Math.round(medianLatency) },
+        { label: "Average", value: Math.round(averageLatency) },
+        { label: "Max", value: Math.round(maxLatency) },
+        { label: "Spread", value: Math.round(spreadLatency) },
+      ];
+      renderLatencyChart(latencyRows, averageLatency);
     }
 
     function getIicImportQueryValue(queryValue) {
@@ -1832,6 +2356,7 @@
 
     function readRootFromSelectedFiles() {
       fileMetadataCache.clear();
+      fileRowsCache.clear();
       if (!selectedFiles.length) {
         infoText.textContent = "No folder selected.";
         folderSelect.innerHTML = "";
@@ -1854,6 +2379,7 @@
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
         updateIicImportAvailability();
+        renderMarketPassRateList(chartMarketPassRateChart, []);
         return;
       }
 
@@ -1883,6 +2409,7 @@
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Read error: " + reason;
         updateIicImportAvailability();
+        renderMarketPassRateList(chartMarketPassRateChart, []);
       }
     }
 
@@ -2027,6 +2554,7 @@
       fileSelect.innerHTML = "";
       const visibleFiles = getVisibleFilesForFolder(folder);
       const selectedCountry = String(countrySelect.value || "ALL").toUpperCase();
+      void updateMarketPassRateChart(folder, visibleFiles);
 
       if (!visibleFiles.length) {
         fileSelect.innerHTML = "<option>(no files)</option>";
@@ -2471,6 +2999,15 @@
 
     window.addEventListener("resize", () => {
       positionFullscreenControls();
+      if (marketPassRateChartInstance) {
+        marketPassRateChartInstance.resize();
+      }
+      if (evaluationChartInstance) {
+        evaluationChartInstance.resize();
+      }
+      if (latencyChartInstance) {
+        latencyChartInstance.resize();
+      }
     });
 
     screenshotPopover.addEventListener("click", (event) => {
