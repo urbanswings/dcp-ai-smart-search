@@ -73,6 +73,28 @@ const RANGE_FACETS = [
   "modelYear",
 ];
 
+const VEHICLES_MB_FILTER_FACETS = [
+  "bodyType",
+  "brand",
+  "campaigns",
+  "color",
+  "colorPolish",
+  "enginePowerHP",
+  "enginePowerKW",
+  "firstRegistrationDate",
+  "fuelType",
+  "lines",
+  "mileage",
+  "modelIdentifier",
+  "modelYear",
+  "motorization",
+  "packages",
+  "price",
+  "stockType",
+  "upholstery",
+  "upholsteryPolish",
+].sort();
+
 const DEFAULT_TEST_TIMEOUT_MS = 10 * 60000;
 const QUERY_TIMEOUT_BUFFER_MS = 2 * 60000;
 const QUERY_TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS || 45000);
@@ -243,7 +265,7 @@ test.describe("AI Smart Search - Sanity", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -282,7 +304,7 @@ test.describe("AI Smart Search - Sanity", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -370,8 +392,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     }
   });
 
-  test("By Filter Facets ('bodyType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "bodyType";
+  for (const targetFacet of VEHICLES_MB_FILTER_FACETS) {
+    test(`By Filter Facets ('${targetFacet}')`, { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const fallbackHints = Object.keys(aiEvaluationRules).length === 0
@@ -393,398 +415,8 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
-  );
-
-  test("By Filter Facets ('modelIdentifier')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "modelIdentifier";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('fuelType')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "fuelType";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('motorization')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "motorization";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('price')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "price";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('mileage')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "mileage";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('enginePowerHP')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "enginePowerHP";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('enginePowerKW')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "enginePowerKW";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('color')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "color";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('colorPolish')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "colorPolish";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('upholstery')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "upholstery";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('upholsteryPolish')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "upholsteryPolish";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('packages')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "packages";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('lines')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "lines";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('equipment')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "equipment";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('campaigns')", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const targetFacet = "campaigns";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    });
+  }
 
   test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
       // Fetch facets dynamically from API based on environment settings
@@ -808,7 +440,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -884,7 +516,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -924,7 +556,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -964,7 +596,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1005,7 +637,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1099,8 +731,8 @@ test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
     }
   });
 
-  test("By Filter Facets ('bodyType')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "bodyType";
+  for (const targetFacet of VEHICLES_MB_FILTER_FACETS) {
+    test(`By Filter Facets ('${targetFacet}')(-ve)`, { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const fallbackHints = Object.keys(aiEvaluationRules).length === 0
@@ -1122,138 +754,8 @@ test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
-  );
-
-  test("By Filter Facets ('modelIdentifier')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "modelIdentifier";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('fuelType')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "fuelType";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('motorization')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "motorization";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('color')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "color";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
-
-  test("By Filter Facets ('upholstery')(-ve)", { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const targetFacet = "upholstery";
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      const allQueries = mergeQueries(fixedQueries, queries);
-
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    });
+  }
 });
 
 test.describe("AI Smart Search - Vehicles Non-MB", () => {
@@ -1336,7 +838,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1369,7 +871,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1402,7 +904,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1543,7 +1045,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1582,7 +1084,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1622,7 +1124,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1654,7 +1156,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1699,7 +1201,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1760,7 +1262,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1800,7 +1302,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1840,7 +1342,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1879,7 +1381,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1915,7 +1417,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1947,7 +1449,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1979,7 +1481,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2019,7 +1521,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2050,7 +1552,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2081,7 +1583,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2113,7 +1615,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2145,7 +1647,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2177,7 +1679,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2222,7 +1724,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2261,7 +1763,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2300,7 +1802,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2339,7 +1841,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -2379,7 +1881,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -2424,7 +1926,7 @@ test.describe("AI Smart Search - Reliability", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 

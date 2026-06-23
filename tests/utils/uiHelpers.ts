@@ -839,6 +839,7 @@ export async function processAndLogUiResult({
 
   const testFacets = process.env.TEST_FACETS === "true";
   const aiEvaluationHints = query?.aiEvaluationHints;
+  const skipOpenAiEvaluation = query?.skipOpenAiEvaluation === true;
   const smartSearchMessage = results.results.resultText;
   const apiResponse = results.results.responseData;
   updateRuntimeFacetAliasesFromApiResponse(apiResponse);
@@ -862,7 +863,9 @@ export async function processAndLogUiResult({
     );
   })();
   let openaiEvaluation = "PASS";
-  if (smartSearchMessage?.trim()) {
+  if (skipOpenAiEvaluation && smartSearchMessage?.trim()) {
+    openaiEvaluation = "PASS";
+  } else if (smartSearchMessage?.trim()) {
     openaiEvaluation = (
       await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
     )?.trim();
