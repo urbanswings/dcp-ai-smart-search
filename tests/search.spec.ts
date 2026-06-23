@@ -265,7 +265,7 @@ test.describe("AI Smart Search - Sanity", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -304,7 +304,7 @@ test.describe("AI Smart Search - Sanity", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -440,7 +440,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -516,7 +516,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -556,7 +556,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -596,7 +596,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -637,7 +637,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -838,7 +838,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -871,7 +871,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -904,7 +904,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1045,7 +1045,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1084,7 +1084,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1124,7 +1124,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1156,7 +1156,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1201,7 +1201,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1262,7 +1262,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1302,7 +1302,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1342,7 +1342,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1381,7 +1381,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1417,7 +1417,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1449,7 +1449,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1481,7 +1481,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1521,7 +1521,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1552,7 +1552,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1583,7 +1583,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1615,7 +1615,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1647,7 +1647,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1679,7 +1679,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1724,7 +1724,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1763,7 +1763,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1802,7 +1802,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1841,7 +1841,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
             }
           : {
               ...query,
-              aiEvaluationHints: aiEvaluationRules,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
 
@@ -1881,7 +1881,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 
@@ -1926,7 +1926,7 @@ test.describe("AI Smart Search - Reliability", () => {
           }
         : {
             ...query,
-            aiEvaluationHints: aiEvaluationRules,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
           };
     });
 

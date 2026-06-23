@@ -909,6 +909,11 @@
         "label": "Drive type",
         "formattedValue": "Rear-wheel drive",
         "value": "RWD"
+      },
+      {
+        "label": "Drive type",
+        "formattedValue": "",
+        "value": "UNDEFINED"
       }
     ],
     "facetType": "MULTI_VALUE"

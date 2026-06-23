@@ -112,6 +112,7 @@ interface RegressionQuery {
   value: string;
   facet?: string;
   filterValue?: string;
+  skipOpenAiEvaluation?: boolean;
   shouldRecommend: boolean;
   shouldFilter: ShouldFilter;
 }
@@ -665,6 +666,26 @@ function buildAcceptedFacetValueLabels(
     }
   }
 
+  if (facetKey === "fuelType") {
+    const fuelTypeAliases: Record<string, string[]> = {
+      DIESEL: ["diesel"],
+      ELECTRIC: ["electric", "electric vehicle", "ev"],
+      PETROL: ["petrol", "gasoline"],
+      PETROL_ELECTRIC_PLUGIN_HYBRID: [
+        "plug-in hybrid",
+        "plugin hybrid",
+        "hybrid (petrol + electric)",
+        "hybrid (gasoline + electric)",
+        "petrol electric hybrid",
+        "gasoline electric hybrid",
+      ],
+    };
+
+    for (const alias of fuelTypeAliases[String(rawValue)] || []) {
+      add(alias);
+    }
+  }
+
   return Array.from(labels);
 }
 
@@ -694,7 +715,7 @@ function createCompleteValueHints(
 
   return renderHintTemplates(hintRules.genericHints?.completeValue, {
     facetName,
-    valueLabel,
+    valueLabel: acceptedLabelText,
   });
 }
 
@@ -1068,6 +1089,7 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
       const query = `all vehicles except ${toQueryLabel(facetKey, excludedValue)}`;
       regressionQueries.push({
         value: query,
+        skipOpenAiEvaluation: true,
         shouldRecommend: true,
         shouldFilter: { include: [{ [facetKey]: allowedValues }], exclude: [], strict: false },
       });
