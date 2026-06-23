@@ -967,6 +967,19 @@
     </div>
 
     <div class="introCard">
+      <p class="introTitle">Overall Summary</p>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 16px;">
+        <div style="padding: 12px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Total Prompts Executed</div>
+          <div style="font-size: 28px; font-weight: bold; color: #0c4a6e;" id="overallTotalCount">-</div>
+        </div>
+        <div style="padding: 12px; background: #f0fdf4; border-radius: 8px; border-left: 4px solid #22c55e;">
+          <div style="font-size: 12px; color: #666; margin-bottom: 4px;">Overall Pass Rate</div>
+          <div style="font-size: 28px; font-weight: bold; color: #166534;" id="overallPassPercent">-</div>
+        </div>
+      </div>
+    </div>
+    <div class="introCard">
       <p class="introTitle">How It Works</p>
       <ul class="introList">
         <li>Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder and filters load automatically.</li>
@@ -1142,6 +1155,8 @@
     const chartQueryPassRate = document.getElementById("chartQueryPassRate");
     const chartEvaluationChart = document.getElementById("chartEvaluationChart");
     const chartLatencyChart = document.getElementById("chartLatencyChart");
+    const overallTotalCount = document.getElementById("overallTotalCount");
+    const overallPassPercent = document.getElementById("overallPassPercent");
     const tableTitle = document.getElementById("tableTitle");
     const resultsTbody = document.getElementById("resultsTbody");
     const previewTitle = document.getElementById("previewTitle");
@@ -1471,6 +1486,51 @@
       };
     }
 
+    async function computeOverallMetrics() {
+      if (!selectedFiles || selectedFiles.length === 0) {
+        overallTotalCount.textContent = "-";
+        overallPassPercent.textContent = "-";
+        return;
+      }
+
+      let totalRows = 0;
+      let passRows = 0;
+
+      for (const file of selectedFiles) {
+        try {
+          if (!String(file.name || "").toLowerCase().endsWith(".json")) continue;
+          const text = await file.text();
+          let content;
+          try {
+            content = JSON.parse(text);
+          } catch {
+            continue;
+          }
+          if (Array.isArray(content)) {
+            for (const row of content) {
+              if (row && typeof row === "object") {
+                totalRows++;
+                const eval_result = String(row.openaiEvaluation || "").trim().toUpperCase();
+                if (eval_result === "PASS") {
+                  passRows++;
+                }
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("[DEBUG] Error computing overall metrics:", e);
+        }
+      }
+
+      overallTotalCount.textContent = totalRows > 0 ? String(totalRows) : "-";
+      if (totalRows > 0) {
+        const passPercent = Math.round((passRows / totalRows) * 100);
+        overallPassPercent.textContent = passPercent + "%";
+      } else {
+        overallPassPercent.textContent = "-";
+      }
+    }
+
     function loadEmbeddedResultsIfPresent() {
       const embeddedPayload = parseEmbeddedPayload();
       if (!embeddedPayload) {
@@ -1485,6 +1545,7 @@
       pickBtn.textContent = "Embedded Mode";
       const screenshotCount = embeddedScreenshots.size > 0 ? " (" + embeddedScreenshots.size + " screenshot(s))" : "";
       infoText.textContent = "Embedded results loaded: " + selectedFiles.length + " file(s)" + screenshotCount + ".";
+      void computeOverallMetrics();
       void readRootFromSelectedFiles();
       return true;
     }
@@ -2976,6 +3037,7 @@
 
       rootLabel = allShareFirstSegment ? firstSegment : "selected-root";
 
+      void computeOverallMetrics();
       void readRootFromSelectedFiles();
     });
 
