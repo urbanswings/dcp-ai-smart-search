@@ -323,6 +323,10 @@
       gap: 10px;
     }
 
+    .marketChartGrid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
     .chartCard {
       border: 1px solid var(--border);
       border-radius: 10px;
@@ -993,6 +997,13 @@
       </div>
     </div>
 
+    <div class="chartGrid marketChartGrid" id="marketChartGrid">
+      <div class="chartCard">
+        <div class="chartTitle">Market Pass Rate</div>
+        <div class="echartContainer" id="chartMarketPassRateChart"></div>
+      </div>
+    </div>
+
     <div class="row rowTwoCol">
       <div>
         <label for="describeFilterSelect">testDescribe</label>
@@ -1030,10 +1041,6 @@
     </div>
     <div class="info" id="chartTitle">Quick Summary</div>
     <div class="chartGrid">
-      <div class="chartCard">
-        <div class="chartTitle">Market Pass Rate</div>
-        <div class="echartContainer" id="chartMarketPassRateChart"></div>
-      </div>
       <div class="chartCard">
         <div class="chartTitle">Queries Ran</div>
         <div class="queryKpiMain">
