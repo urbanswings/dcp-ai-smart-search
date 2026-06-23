@@ -511,7 +511,6 @@ export function getLocale(): string {
 export function getLanguageCode(): string {
   const country = getCountryCode();
   const languageByCountry: Record<string, string> = {
-    IN: "hi",
     KR: "ko",
     TH: "th",
     TR: "tr",
