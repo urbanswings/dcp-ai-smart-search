@@ -102,6 +102,10 @@
       margin-top: 4px;
     }
 
+    .hideCountryColumn .countryColumn {
+      display: none;
+    }
+
     .actions {
       display: flex;
       gap: 10px;
@@ -147,6 +151,33 @@
     .rowTwoCol {
       margin-top: 12px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .filterRow {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+      align-items: end;
+    }
+
+    .resetFiltersBtn {
+      white-space: nowrap;
+    }
+
+    .selectNavGroup {
+      display: grid;
+      grid-template-columns: 40px minmax(0, 1fr) 40px;
+      gap: 6px;
+      align-items: end;
+    }
+
+    .selectNavGroup select {
+      min-width: 0;
+    }
+
+    .selectNavBtn {
+      width: 40px;
+      padding: 0;
+      font-size: 20px;
+      line-height: 1;
     }
 
     label {
@@ -324,7 +355,29 @@
     }
 
     .marketChartGrid {
-      grid-template-columns: minmax(0, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .chartHeader {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chartHeader .info {
+      margin: 0;
+    }
+
+    .chartToggleBtn {
+      height: 32px;
+      padding: 0 12px;
+      font-size: 12px;
+    }
+
+    .chartsPanel.isCollapsed {
+      display: none;
     }
 
     .chartCard {
@@ -931,6 +984,10 @@
         grid-template-columns: 1fr;
       }
 
+      .filterRow {
+        grid-template-columns: 1fr;
+      }
+
       .metaGrid {
         grid-template-columns: 1fr;
       }
@@ -968,7 +1025,16 @@
         <button id="pickBtn" class="primary">Pick Root Folder</button>
         <button id="iicImportBtn" type="button" disabled>IIC Import</button>
       </div>
+    </div>    
+    <div class="introCard">
+      <p class="introTitle">How It Works</p>
+      <ul class="introList">
+        <li>Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder and filters load automatically.</li>
+        <li>Embedded mode: if <strong>embeddedResultsData</strong> has files, results load on page open.</li>
+        <li>This viewer runs fully client-side with no external JS required.</li>
+      </ul>
     </div>
+    <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
 
     <div class="introCard">
       <p class="introTitle">Overall Summary</p>
@@ -983,16 +1049,6 @@
         </div>
       </div>
     </div>
-    <div class="introCard">
-      <p class="introTitle">How It Works</p>
-      <ul class="introList">
-        <li>Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder and filters load automatically.</li>
-        <li>Embedded mode: if <strong>embeddedResultsData</strong> has files, results load on page open.</li>
-        <li>This viewer runs fully client-side with no external JS required.</li>
-      </ul>
-    </div>
-    <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
-
     <div class="row">
       <div>
         <label for="folderSelect">Folder</label>
@@ -1010,26 +1066,45 @@
       </div>
     </div>
 
-    <div class="chartGrid marketChartGrid" id="marketChartGrid">
-      <div class="chartCard">
-        <div class="chartTitle">Market Pass Rate</div>
-        <div class="echartContainer" id="chartMarketPassRateChart"></div>
+    <div class="chartHeader">
+      <div class="info">Charts</div>
+      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button" aria-expanded="true" aria-controls="chartsPanel">Hide charts</button>
+    </div>
+    <div id="chartsPanel" class="chartsPanel">
+      <div class="chartGrid marketChartGrid" id="marketChartGrid">
+        <div class="chartCard">
+          <div class="chartTitle">Market Pass Rate</div>
+          <div class="echartContainer" id="chartMarketPassRateChart"></div>
+        </div>
+        <div class="chartCard">
+          <div class="chartTitle">testTitle Pass Rate</div>
+          <div class="echartContainer" id="chartTestTitlePassRateChart"></div>
+        </div>
       </div>
     </div>
 
-    <div class="row rowTwoCol">
+    <div class="row rowTwoCol filterRow">
       <div>
         <label for="describeFilterSelect">testDescribe</label>
-        <select id="describeFilterSelect">
-          <option value="ALL">All testDescribe values</option>
-        </select>
+        <div class="selectNavGroup">
+          <button class="selectNavBtn" id="describePrevBtn" type="button" aria-label="Previous testDescribe">&#8249;</button>
+          <select id="describeFilterSelect">
+            <option value="ALL">All testDescribe values</option>
+          </select>
+          <button class="selectNavBtn" id="describeNextBtn" type="button" aria-label="Next testDescribe">&#8250;</button>
+        </div>
       </div>
       <div>
         <label for="titleFilterSelect">testTitle</label>
-        <select id="titleFilterSelect">
-          <option value="ALL">All testTitle values</option>
-        </select>
+        <div class="selectNavGroup">
+          <button class="selectNavBtn" id="titlePrevBtn" type="button" aria-label="Previous testTitle">&#8249;</button>
+          <select id="titleFilterSelect">
+            <option value="ALL">All testTitle values</option>
+          </select>
+          <button class="selectNavBtn" id="titleNextBtn" type="button" aria-label="Next testTitle">&#8250;</button>
+        </div>
       </div>
+      <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset dropdowns</button>
     </div>
 
     <div class="info" id="infoText">No folder selected.</div>
@@ -1052,31 +1127,33 @@
         <div class="metaValue" id="passRateValue">-</div>
       </div>
     </div>
-    <div class="info" id="chartTitle">Quick Summary</div>
-    <div class="chartGrid">
-      <div class="chartCard">
-        <div class="chartTitle">Queries Ran</div>
-        <div class="queryKpiMain">
-          <div class="queryKpiTotal" id="chartQueryCountValue">-</div>
-          <div class="queryKpiUnit">Queries</div>
+    <div id="summaryChartsPanel" class="chartsPanel">
+      <div class="info" id="chartTitle">Quick Summary</div>
+      <div class="chartGrid">
+        <div class="chartCard">
+          <div class="chartTitle">Queries Ran</div>
+          <div class="queryKpiMain">
+            <div class="queryKpiTotal" id="chartQueryCountValue">-</div>
+            <div class="queryKpiUnit">Queries</div>
+          </div>
+          <div class="queryKpiGrid">
+            <div class="queryKpiPill queryKpiPillPass">PASS<strong id="chartQueryPassCount">-</strong></div>
+            <div class="queryKpiPill queryKpiPillFail">FAIL<strong id="chartQueryFailCount">-</strong></div>
+            <div class="queryKpiPill queryKpiPillOther">OTHER<strong id="chartQueryOtherCount">-</strong></div>
+          </div>
+          <div class="queryKpiMeta">
+            <div class="queryKpiMetaRow"><span>Avg response</span><strong id="chartQueryAvgMs">-</strong></div>
+            <div class="queryKpiMetaRow"><span>Pass rate</span><strong id="chartQueryPassRate">-</strong></div>
+          </div>
         </div>
-        <div class="queryKpiGrid">
-          <div class="queryKpiPill queryKpiPillPass">PASS<strong id="chartQueryPassCount">-</strong></div>
-          <div class="queryKpiPill queryKpiPillFail">FAIL<strong id="chartQueryFailCount">-</strong></div>
-          <div class="queryKpiPill queryKpiPillOther">OTHER<strong id="chartQueryOtherCount">-</strong></div>
+        <div class="chartCard">
+          <div class="chartTitle">Evaluation Split</div>
+          <div class="echartContainer" id="chartEvaluationChart"></div>
         </div>
-        <div class="queryKpiMeta">
-          <div class="queryKpiMetaRow"><span>Avg response</span><strong id="chartQueryAvgMs">-</strong></div>
-          <div class="queryKpiMetaRow"><span>Pass rate</span><strong id="chartQueryPassRate">-</strong></div>
+        <div class="chartCard">
+          <div class="chartTitle">Response Time Summary</div>
+          <div class="echartContainer" id="chartLatencyChart"></div>
         </div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle">Evaluation Split</div>
-        <div class="echartContainer" id="chartEvaluationChart"></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartTitle">Response Time Summary</div>
-        <div class="echartContainer" id="chartLatencyChart"></div>
       </div>
     </div>
     <div class="info" id="tableTitle">Results Table</div>
@@ -1085,10 +1162,12 @@
         <thead>
           <tr>
             <th>#</th>
+            <th>testTitle</th>
             <th>query.local</th>
             <th>query.en</th>
             <th>response.local</th>
             <th>response.en</th>
+            <th class="countryColumn">country</th>
             <th>evaluation</th>
             <th>count</th>
             <th>ms</th>
@@ -1096,7 +1175,7 @@
           </tr>
         </thead>
         <tbody id="resultsTbody">
-          <tr><td colspan="11">Select a file to load results.</td></tr>
+          <tr><td colspan="12">Select a file to load results.</td></tr>
         </tbody>
       </table>
     </div>
@@ -1144,8 +1223,17 @@
     const folderSelect = document.getElementById("folderSelect");
     const countrySelect = document.getElementById("countrySelect");
     const fileSelect = document.getElementById("fileSelect");
+    const resultsTable = document.getElementById("resultsTable");
     const describeFilterSelect = document.getElementById("describeFilterSelect");
     const titleFilterSelect = document.getElementById("titleFilterSelect");
+    const describePrevBtn = document.getElementById("describePrevBtn");
+    const describeNextBtn = document.getElementById("describeNextBtn");
+    const titlePrevBtn = document.getElementById("titlePrevBtn");
+    const titleNextBtn = document.getElementById("titleNextBtn");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const chartRowsToggleBtn = document.getElementById("chartRowsToggleBtn");
+    const chartsPanel = document.getElementById("chartsPanel");
+    const summaryChartsPanel = document.getElementById("summaryChartsPanel");
     const infoText = document.getElementById("infoText");
     const selectedPath = document.getElementById("selectedPath");
     const modeValue = document.getElementById("modeValue");
@@ -1154,6 +1242,7 @@
     const passRateValue = document.getElementById("passRateValue");
     const passRateCard = document.getElementById("passRateCard");
     const chartMarketPassRateChart = document.getElementById("chartMarketPassRateChart");
+    const chartTestTitlePassRateChart = document.getElementById("chartTestTitlePassRateChart");
     const chartQueryCountValue = document.getElementById("chartQueryCountValue");
     const chartQueryPassCount = document.getElementById("chartQueryPassCount");
     const chartQueryFailCount = document.getElementById("chartQueryFailCount");
@@ -1187,6 +1276,7 @@
     let selectedFiles = [];
     let folders = [];
     let currentRows = [];
+    let currentTableRenderOptions = {};
     let selectedRowIndex = -1;
     let currentScreenshotObjectUrl = "";
     let currentIicImportPayload = "[]";
@@ -1198,6 +1288,7 @@
     let echartsLoadAttempted = false;
     let chartRetryTimer = null;
     let chartRetryCount = 0;
+    let testTitlePassRateChartInstance = null;
     const fileMetadataCache = new Map();
     const fileRowsCache = new Map();
 
@@ -1239,6 +1330,7 @@
         const selectedFolder = folders[Number(folderSelect.value)];
         if (selectedFolder) {
           void updateMarketPassRateChart(selectedFolder, getVisibleFilesForFolder(selectedFolder));
+          void updateTestTitlePassRateChart(selectedFolder, getVisibleFilesForFolder(selectedFolder));
         }
       }, 300);
     }
@@ -1607,6 +1699,31 @@
       return match ? match[1].toUpperCase() : "";
     }
 
+    function slugifyMetadataValue(value) {
+      return String(value || "")
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/&/g, " and ")
+        .replace(/["']/g, "")
+        .replace(/[^a-zA-Z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .replace(/-{2,}/g, "-")
+        .toLowerCase();
+    }
+
+    function getFileSlugMetadata(fileName) {
+      const normalizedFileName = normalizePath(fileName).split("/").pop() || "";
+      const match = normalizedFileName.match(/^[A-Za-z]{2,3}_[^_]+_search-results_([^_]+)_([^_]+)_/);
+      if (!match) {
+        return { testDescribeSlug: "", testTitleSlug: "" };
+      }
+
+      return {
+        testDescribeSlug: match[1],
+        testTitleSlug: match[2].replace(/-(api|ui|both)$/i, ""),
+      };
+    }
+
     function getRelativePathForFolderFile(folder, fileName) {
       if (!folder || !fileName) {
         return "";
@@ -1628,8 +1745,9 @@
 
     async function getFileMetadata(folder, fileName) {
       const relativePath = getRelativePathForFolderFile(folder, fileName);
+      const slugMetadata = getFileSlugMetadata(fileName);
       if (!relativePath) {
-        return { testDescribe: "", testTitle: "" };
+        return { testDescribe: "", testTitle: "", ...slugMetadata };
       }
 
       if (fileMetadataCache.has(relativePath)) {
@@ -1638,7 +1756,7 @@
 
       const fileObj = findSelectedFileByRelativePath(relativePath);
       if (!fileObj || !String(fileName).toLowerCase().endsWith(".json")) {
-        const emptyMeta = { testDescribe: "", testTitle: "" };
+        const emptyMeta = { testDescribe: "", testTitle: "", ...slugMetadata };
         fileMetadataCache.set(relativePath, emptyMeta);
         return emptyMeta;
       }
@@ -1650,11 +1768,13 @@
         const metadata = {
           testDescribe: String(firstRow && firstRow.testDescribe || "").trim(),
           testTitle: String(firstRow && firstRow.testTitle || "").trim(),
+          testDescribeSlug: slugifyMetadataValue(firstRow && firstRow.testDescribe) || slugMetadata.testDescribeSlug,
+          testTitleSlug: slugifyMetadataValue(firstRow && firstRow.testTitle) || slugMetadata.testTitleSlug,
         };
         fileMetadataCache.set(relativePath, metadata);
         return metadata;
       } catch {
-        const emptyMeta = { testDescribe: "", testTitle: "" };
+        const emptyMeta = { testDescribe: "", testTitle: "", ...slugMetadata };
         fileMetadataCache.set(relativePath, emptyMeta);
         return emptyMeta;
       }
@@ -1670,7 +1790,7 @@
 
     function getCachedFileMetadata(folder, fileName) {
       const relativePath = getRelativePathForFolderFile(folder, fileName);
-      return fileMetadataCache.get(relativePath) || { testDescribe: "", testTitle: "" };
+      return fileMetadataCache.get(relativePath) || { testDescribe: "", testTitle: "", ...getFileSlugMetadata(fileName) };
     }
 
     function getVisibleFilesForFolder(folder) {
@@ -1689,14 +1809,41 @@
       );
     }
 
+    function isAllMetadataFiltersSelected() {
+      return String(describeFilterSelect.value || "ALL") === "ALL"
+        && String(titleFilterSelect.value || "ALL") === "ALL";
+    }
+
+    function shouldShowCountryColumn() {
+      return String(countrySelect.value || "ALL").toUpperCase() === "ALL";
+    }
+
+    function getTableColumnCount() {
+      return shouldShowCountryColumn() ? 12 : 11;
+    }
+
+    function updateCountryColumnVisibility() {
+      resultsTable.classList.toggle("hideCountryColumn", !shouldShowCountryColumn());
+    }
+
+    function getRowCountry(row, fallbackCountry = "") {
+      return String(row && (row.__viewerCountry || row.country || (row._metadata && row._metadata.country)) || fallbackCountry || "").toUpperCase();
+    }
+
     function filterFilesByDescribeAndTitle(folder, files) {
       const selectedDescribe = String(describeFilterSelect.value || "ALL");
       const selectedTitle = String(titleFilterSelect.value || "ALL");
+      const selectedDescribeSlug = slugifyMetadataValue(selectedDescribe);
+      const selectedTitleSlug = slugifyMetadataValue(selectedTitle);
 
       return files.filter((fileName) => {
         const metadata = getCachedFileMetadata(folder, fileName);
-        const describeMatches = selectedDescribe === "ALL" || metadata.testDescribe === selectedDescribe;
-        const titleMatches = selectedTitle === "ALL" || metadata.testTitle === selectedTitle;
+        const describeMatches = selectedDescribe === "ALL"
+          || metadata.testDescribe === selectedDescribe
+          || metadata.testDescribeSlug === selectedDescribeSlug;
+        const titleMatches = selectedTitle === "ALL"
+          || metadata.testTitle === selectedTitle
+          || metadata.testTitleSlug === selectedTitleSlug;
         return describeMatches && titleMatches;
       });
     }
@@ -1826,21 +1973,27 @@
       }
     }
 
-    function renderMarketPassRateList(container, rows) {
-      if (!rows.length) {
-        marketPassRateChartInstance = clearChart(chartMarketPassRateChart, marketPassRateChartInstance, "No data");
-        return;
+    async function getRowsForFolderFiles(folder, files) {
+      if (!folder || !Array.isArray(files) || !files.length) {
+        return [];
       }
 
-      marketPassRateChartInstance = withChart(chartMarketPassRateChart, marketPassRateChartInstance);
-      if (!marketPassRateChartInstance) {
-        return;
-      }
+      const rowsByFile = await Promise.all(files.map((fileName) => {
+        const relativePath = getRelativePathForFolderFile(folder, fileName);
+        const country = extractCountryFromFileName(fileName);
+        return getRowsForRelativePath(relativePath).then((rows) =>
+          rows.map((row) => Object.assign({}, row, { __viewerCountry: country }))
+        );
+      }));
 
+      return rowsByFile.flat();
+    }
+
+    function getPassRateChartOption(rows, color, left = 56) {
       const labels = rows.map((row) => row.label);
       const values = rows.map((row) => row.percent);
 
-      marketPassRateChartInstance.setOption({
+      return {
         animation: false,
         tooltip: {
           trigger: "axis",
@@ -1852,7 +2005,7 @@
             return p.axisValue + ": " + p.value + "% (" + row.pass + "/" + row.total + ")";
           },
         },
-        grid: { top: 10, right: 8, bottom: 12, left: 56 },
+        grid: { top: 10, right: 8, bottom: 12, left },
         xAxis: {
           type: "value",
           min: 0,
@@ -1863,16 +2016,44 @@
         yAxis: {
           type: "category",
           data: labels,
-          axisLabel: { fontSize: 11 },
+          axisLabel: { fontSize: 11, width: Math.max(40, left - 16), overflow: "truncate" },
         },
         series: [{
           type: "bar",
           data: values,
           label: { show: true, position: "right", formatter: "{c}%", fontSize: 10 },
-          itemStyle: { color: "#14b8a6", borderRadius: [0, 4, 4, 0] },
+          itemStyle: { color, borderRadius: [0, 4, 4, 0] },
           barMaxWidth: 20,
         }],
-      }, true);
+      };
+    }
+
+    function renderMarketPassRateList(container, rows) {
+      if (!rows.length) {
+        marketPassRateChartInstance = clearChart(chartMarketPassRateChart, marketPassRateChartInstance, "No data");
+        return;
+      }
+
+      marketPassRateChartInstance = withChart(chartMarketPassRateChart, marketPassRateChartInstance);
+      if (!marketPassRateChartInstance) {
+        return;
+      }
+
+      marketPassRateChartInstance.setOption(getPassRateChartOption(rows, "#14b8a6"), true);
+    }
+
+    function renderTestTitlePassRateList(container, rows) {
+      if (!rows.length) {
+        testTitlePassRateChartInstance = clearChart(chartTestTitlePassRateChart, testTitlePassRateChartInstance, "No data");
+        return;
+      }
+
+      testTitlePassRateChartInstance = withChart(chartTestTitlePassRateChart, testTitlePassRateChartInstance);
+      if (!testTitlePassRateChartInstance) {
+        return;
+      }
+
+      testTitlePassRateChartInstance.setOption(getPassRateChartOption(rows, "#6366f1", 156), true);
     }
 
     async function updateMarketPassRateChart(folder, visibleFiles) {
@@ -1922,6 +2103,54 @@
         .sort((a, b) => a.label.localeCompare(b.label));
 
       renderMarketPassRateList(chartMarketPassRateChart, outputRows);
+    }
+
+    async function updateTestTitlePassRateChart(folder, visibleFiles) {
+      const requestToken = marketChartRequestToken;
+
+      if (!folder || !Array.isArray(visibleFiles) || !visibleFiles.length) {
+        renderTestTitlePassRateList(chartTestTitlePassRateChart, []);
+        return;
+      }
+
+      testTitlePassRateChartInstance = clearChart(chartTestTitlePassRateChart, testTitlePassRateChartInstance, "Calculating...");
+      const titleStats = new Map();
+
+      for (const fileName of visibleFiles) {
+        const relativePath = getRelativePathForFolderFile(folder, fileName);
+        const rows = await getRowsForRelativePath(relativePath);
+
+        if (requestToken !== marketChartRequestToken) {
+          return;
+        }
+
+        for (const row of rows) {
+          const label = String(row && row.testTitle || "").trim() || getCachedFileMetadata(folder, fileName).testTitle || "Untitled";
+          if (!titleStats.has(label)) {
+            titleStats.set(label, { pass: 0, total: 0 });
+          }
+          const stats = titleStats.get(label);
+          stats.total += 1;
+          const evalValue = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+          if (evalValue === "PASS") {
+            stats.pass += 1;
+          }
+        }
+      }
+
+      if (requestToken !== marketChartRequestToken) {
+        return;
+      }
+
+      const outputRows = [...titleStats.entries()]
+        .map(([label, stats]) => {
+          const percent = stats.total > 0 ? Math.round((stats.pass / stats.total) * 100) : 0;
+          return { label, percent, pass: stats.pass, total: stats.total };
+        })
+        .filter((row) => row.total > 0)
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+      renderTestTitlePassRateList(chartTestTitlePassRateChart, outputRows);
     }
 
     function renderMetricList(container, rows, totalCount) {
@@ -2057,10 +2286,10 @@
       iicImportModal.setAttribute("aria-hidden", "true");
     }
 
-    function renderFileMeta(rows) {
-      modeValue.textContent = toStaticValue(rows.map((item) => item && item.testMode));
-      describeValue.textContent = toStaticValue(rows.map((item) => item && item.testDescribe));
-      titleValue.textContent = toStaticValue(rows.map((item) => item && item.testTitle));
+    function renderFileMeta(rows, options = {}) {
+      modeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testMode));
+      describeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testDescribe));
+      titleValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testTitle));
 
       const total = rows.length;
       if (!total) {
@@ -2364,14 +2593,21 @@
         "</div>";
     }
 
-    function renderTableRows(rows) {
+    function renderTableRows(rows, options = {}) {
       currentRows = rows.slice();
+      currentTableRenderOptions = options || {};
+      updateCountryColumnVisibility();
 
       if (!rows.length) {
         resetFileMeta();
+        if (options.forceAllMetadata) {
+          modeValue.textContent = "All";
+          describeValue.textContent = "All";
+          titleValue.textContent = "All";
+        }
         resetRowView();
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows in selected JSON.</td></tr>";
-        tableTitle.textContent = "Results Table";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">" + escapeHtml(options.emptyMessage || "No rows in selected JSON.") + "</td></tr>";
+        tableTitle.textContent = options.title || "Results Table";
         updateIicImportAvailability();
         return;
       }
@@ -2380,10 +2616,10 @@
         selectedRowIndex = 0;
       }
 
-      renderFileMeta(rows);
+      renderFileMeta(rows, options);
       updateCharts(rows);
       updateIicImportAvailability();
-      tableTitle.textContent = "Results Table: " + rows.length + " row(s)";
+      tableTitle.textContent = options.title || ("Results Table: " + rows.length + " row(s)");
       const html = rows.map((item, index) => {
         const queryLocal = getLocalizedText(item && item.query);
         const queryEn = getEnglishText(item && item.query);
@@ -2391,15 +2627,18 @@
         const responseEn = getEnglishText(item && item.response);
         const isError = item && item.hasError;
         const indexClass = isError === true ? "indexCellError" : (isError === false ? "indexCellOk" : "indexCellUnknown");
+        const country = getRowCountry(item, options.country);
 
         const selectedClass = selectedRowIndex === index ? " selectedRow" : "";
 
         return "<tr data-row-index=\"" + index + "\" class=\"" + selectedClass + "\">" +
           "<td class=\"mono " + indexClass + "\">" + (index + 1) + "</td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(item && item.testTitle ? item.testTitle : "") + "\">" + escapeHtml(item && item.testTitle ? item.testTitle : "") + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(queryLocal) + "\">" + escapeHtml(queryLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(queryEn) + "\">" + escapeHtml(queryEn) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseLocal) + "\">" + escapeHtml(responseLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseEn) + "\">" + escapeHtml(responseEn) + "</span></td>" +
+          "<td class=\"countryColumn mono\">" + escapeHtml(country) + "</td>" +
           "<td>" + escapeHtml(item && item.openaiEvaluation ? item.openaiEvaluation : "") + "</td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.resultCount !== undefined ? item.resultCount : "") + "</td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.responseTime !== undefined ? item.responseTime : "") + "</td>" +
@@ -2437,17 +2676,19 @@
         titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
         titleFilterSelect.value = "ALL";
         titleFilterSelect.disabled = false;
+        updateFilterNavButtons();
         fileSelect.innerHTML = "";
         selectedPath.textContent = "No file selected.";
         resetFileMeta();
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Select a file to load results.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">Select a file to load results.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
         updateIicImportAvailability();
         renderMarketPassRateList(chartMarketPassRateChart, []);
+        renderTestTitlePassRateList(chartTestTitlePassRateChart, []);
         return;
       }
 
@@ -2467,17 +2708,19 @@
         titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
         titleFilterSelect.value = "ALL";
         titleFilterSelect.disabled = false;
+        updateFilterNavButtons();
         fileSelect.innerHTML = "";
         selectedPath.textContent = "No file selected.";
         resetFileMeta();
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to load rows.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">Unable to load rows.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Read error: " + reason;
         updateIicImportAvailability();
         renderMarketPassRateList(chartMarketPassRateChart, []);
+        renderTestTitlePassRateList(chartTestTitlePassRateChart, []);
       }
     }
 
@@ -2499,7 +2742,7 @@
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
         updateIicImportAvailability();
@@ -2523,6 +2766,58 @@
       renderFiles(selectedFolderIndex);
     }
 
+    function updateFilterNavButtons() {
+      const describeHasPrevious = !describeFilterSelect.disabled && describeFilterSelect.selectedIndex > 0;
+      const describeHasNext = !describeFilterSelect.disabled && describeFilterSelect.selectedIndex < describeFilterSelect.options.length - 1;
+      const titleHasPrevious = !titleFilterSelect.disabled && titleFilterSelect.selectedIndex > 0;
+      const titleHasNext = !titleFilterSelect.disabled && titleFilterSelect.selectedIndex < titleFilterSelect.options.length - 1;
+
+      describePrevBtn.disabled = !describeHasPrevious;
+      describeNextBtn.disabled = !describeHasNext;
+      titlePrevBtn.disabled = !titleHasPrevious;
+      titleNextBtn.disabled = !titleHasNext;
+    }
+
+    function moveSelectOption(selectEl, direction) {
+      if (!selectEl || selectEl.disabled || selectEl.options.length <= 1) {
+        return false;
+      }
+
+      const nextIndex = Math.max(0, Math.min(selectEl.options.length - 1, selectEl.selectedIndex + direction));
+      if (nextIndex === selectEl.selectedIndex) {
+        return false;
+      }
+
+      selectEl.selectedIndex = nextIndex;
+      return true;
+    }
+
+    function resizeCharts() {
+      if (marketPassRateChartInstance) {
+        marketPassRateChartInstance.resize();
+      }
+      if (testTitlePassRateChartInstance) {
+        testTitlePassRateChartInstance.resize();
+      }
+      if (evaluationChartInstance) {
+        evaluationChartInstance.resize();
+      }
+      if (latencyChartInstance) {
+        latencyChartInstance.resize();
+      }
+    }
+
+    function setChartsCollapsed(isCollapsed) {
+      chartsPanel.classList.toggle("isCollapsed", isCollapsed);
+      summaryChartsPanel.classList.toggle("isCollapsed", isCollapsed);
+      chartRowsToggleBtn.setAttribute("aria-expanded", String(!isCollapsed));
+      chartRowsToggleBtn.textContent = isCollapsed ? "Show charts" : "Hide charts";
+
+      if (!isCollapsed) {
+        requestAnimationFrame(resizeCharts);
+      }
+    }
+
     async function renderMetadataFilterOptions(folder, preferredDescribe = "", preferredTitle = "") {
       describeFilterSelect.innerHTML = "";
       titleFilterSelect.innerHTML = "";
@@ -2542,14 +2837,16 @@
         titleFilterSelect.value = "ALL";
         describeFilterSelect.disabled = true;
         titleFilterSelect.disabled = true;
+        updateFilterNavButtons();
         return;
       }
 
       await ensureFolderMetadata(folder);
 
-      const countryScopedFiles = String(countrySelect.value || "ALL").toUpperCase() === "ALL"
+      const selectedCountry = String(countrySelect.value || "ALL").toUpperCase();
+      const countryScopedFiles = selectedCountry === "ALL"
         ? folder.files.slice()
-        : folder.files.filter((fileName) => extractCountryFromFileName(fileName) === String(countrySelect.value || "ALL").toUpperCase());
+        : folder.files.filter((fileName) => extractCountryFromFileName(fileName) === selectedCountry);
 
       const describeValues = [...new Set(countryScopedFiles
         .map((fileName) => getCachedFileMetadata(folder, fileName).testDescribe)
@@ -2568,9 +2865,13 @@
       describeFilterSelect.value = nextDescribe;
       describeFilterSelect.disabled = describeValues.length === 0;
 
-      const titleSourceFiles = countryScopedFiles.filter((fileName) => {
+      const nextDescribeSlug = slugifyMetadataValue(nextDescribe);
+      const titleCountryScopedFiles = selectedCountry === "ALL" ? folder.files.slice() : countryScopedFiles;
+      const titleSourceFiles = titleCountryScopedFiles.filter((fileName) => {
         const metadata = getCachedFileMetadata(folder, fileName);
-        return nextDescribe === "ALL" || metadata.testDescribe === nextDescribe;
+        return nextDescribe === "ALL"
+          || metadata.testDescribe === nextDescribe
+          || metadata.testDescribeSlug === nextDescribeSlug;
       });
 
       const titleValues = [...new Set(titleSourceFiles
@@ -2589,6 +2890,7 @@
         : "ALL";
       titleFilterSelect.value = nextTitle;
       titleFilterSelect.disabled = titleValues.length === 0;
+      updateFilterNavButtons();
     }
 
     function renderCountryOptions(folder, preferredCountry = "") {
@@ -2622,7 +2924,9 @@
       fileSelect.innerHTML = "";
       const visibleFiles = getVisibleFilesForFolder(folder);
       const selectedCountry = String(countrySelect.value || "ALL").toUpperCase();
+      updateCountryColumnVisibility();
       void updateMarketPassRateChart(folder, visibleFiles);
+      void updateTestTitlePassRateChart(folder, visibleFiles);
 
       if (!visibleFiles.length) {
         fileSelect.innerHTML = "<option>(no files)</option>";
@@ -2632,7 +2936,7 @@
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
         updateIicImportAvailability();
@@ -2673,6 +2977,7 @@
         titleFilterSelect.innerHTML = "<option value=\"ALL\">All testTitle values</option>";
         titleFilterSelect.value = "ALL";
         titleFilterSelect.disabled = true;
+        updateFilterNavButtons();
         fileSelect.innerHTML = "<option>(no files)</option>";
         infoText.textContent = folder ? folder.name + ": 0 files" : "No folder selected.";
         selectedPath.textContent = "No file selected.";
@@ -2680,7 +2985,7 @@
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">No rows to show.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">No rows to show.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Select a file to preview JSON.";
         updateIicImportAvailability();
@@ -2780,7 +3085,7 @@
 
       const wasFullscreenOpen = screenshotPopover.classList.contains("visible");
       selectedRowIndex = nextIndex;
-      renderTableRows(currentRows);
+      renderTableRows(currentRows, currentTableRenderOptions);
       focusSelectedTableRow();
 
       if (wasFullscreenOpen && currentScreenshotObjectUrl) {
@@ -2791,6 +3096,34 @@
     }
 
     async function renderPreview() {
+      const folder = folders[Number(folderSelect.value)];
+      if (shouldShowCountryColumn()) {
+        const visibleFiles = getVisibleFilesForFolder(folder);
+
+        if (!folder || !visibleFiles.length) {
+          resetFileMeta();
+          currentRows = [];
+          resetRowView();
+          tableTitle.textContent = "Results Table";
+          resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">No rows to show.</td></tr>";
+          previewTitle.textContent = "Preview";
+          previewPane.textContent = "No files match the current filters.";
+          updateIicImportAvailability();
+          return;
+        }
+
+        const rows = await getRowsForFolderFiles(folder, visibleFiles);
+        selectedPath.textContent = rootLabel + "/" + (folder.name === "(root)" ? "" : folder.name + "/") + "all visible files";
+        previewTitle.textContent = "Preview: all visible files";
+        previewPane.textContent = visibleFiles.join("\n");
+        renderTableRows(rows, {
+          forceAllMetadata: isAllMetadataFiltersSelected(),
+          emptyMessage: "No rows in visible files.",
+          title: "Results Table: " + rows.length + " row(s) across " + visibleFiles.length + " file(s)",
+        });
+        return;
+      }
+
       const relPath = getSelectedRelativePath();
       if (!relPath) {
         previewTitle.textContent = "Preview";
@@ -2806,7 +3139,7 @@
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Unable to locate selected file.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">Unable to locate selected file.</td></tr>";
         previewTitle.textContent = "Preview";
         previewPane.textContent = "Unable to locate selected file in current browser selection.";
         updateIicImportAvailability();
@@ -2817,15 +3150,18 @@
       const text = await fileObj.text();
       try {
         const parsed = JSON.parse(text);
-        const rows = Array.isArray(parsed) ? parsed : [parsed];
-        renderTableRows(rows.filter((row) => row && typeof row === "object"));
+        const fileCountry = extractCountryFromFileName(fileSelect.value);
+        const rows = (Array.isArray(parsed) ? parsed : [parsed])
+          .filter((row) => row && typeof row === "object")
+          .map((row) => Object.assign({}, row, { __viewerCountry: fileCountry }));
+        renderTableRows(rows);
         previewPane.textContent = JSON.stringify(parsed, null, 2);
       } catch {
         resetFileMeta();
         currentRows = [];
         resetRowView();
         tableTitle.textContent = "Results Table";
-        resultsTbody.innerHTML = "<tr><td colspan=\"11\">Selected file is not valid JSON.</td></tr>";
+        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">Selected file is not valid JSON.</td></tr>";
         previewPane.textContent = text;
         updateIicImportAvailability();
       }
@@ -2899,7 +3235,7 @@
 
       event.preventDefault();
       selectedRowIndex = nextIndex;
-      renderTableRows(currentRows);
+      renderTableRows(currentRows, currentTableRenderOptions);
       focusSelectedTableRow();
     });
 
@@ -2916,7 +3252,7 @@
       }
 
       selectedRowIndex = rowIndex;
-      renderTableRows(currentRows);
+      renderTableRows(currentRows, currentTableRenderOptions);
     });
 
     rowViewPane.addEventListener("click", async (event) => {
@@ -3012,6 +3348,65 @@
 
     titleFilterSelect.addEventListener("change", () => {
       renderFileOptions(folders[Number(folderSelect.value)], fileSelect.value);
+      updateFilterNavButtons();
+    });
+
+    describePrevBtn.addEventListener("click", () => {
+      if (!moveSelectOption(describeFilterSelect, -1)) {
+        updateFilterNavButtons();
+        return;
+      }
+
+      void renderFiles(
+        Number(folderSelect.value),
+        fileSelect.value,
+        countrySelect.value,
+        describeFilterSelect.value,
+        "ALL"
+      );
+    });
+
+    describeNextBtn.addEventListener("click", () => {
+      if (!moveSelectOption(describeFilterSelect, 1)) {
+        updateFilterNavButtons();
+        return;
+      }
+
+      void renderFiles(
+        Number(folderSelect.value),
+        fileSelect.value,
+        countrySelect.value,
+        describeFilterSelect.value,
+        "ALL"
+      );
+    });
+
+    titlePrevBtn.addEventListener("click", () => {
+      if (!moveSelectOption(titleFilterSelect, -1)) {
+        updateFilterNavButtons();
+        return;
+      }
+
+      renderFileOptions(folders[Number(folderSelect.value)], fileSelect.value);
+      updateFilterNavButtons();
+    });
+
+    titleNextBtn.addEventListener("click", () => {
+      if (!moveSelectOption(titleFilterSelect, 1)) {
+        updateFilterNavButtons();
+        return;
+      }
+
+      renderFileOptions(folders[Number(folderSelect.value)], fileSelect.value);
+      updateFilterNavButtons();
+    });
+
+    resetFiltersBtn.addEventListener("click", () => {
+      void renderFiles(Number(folderSelect.value), "", "ALL", "ALL", "ALL");
+    });
+
+    chartRowsToggleBtn.addEventListener("click", () => {
+      setChartsCollapsed(!chartsPanel.classList.contains("isCollapsed"));
     });
 
     fileSelect.addEventListener("change", () => {
@@ -3068,15 +3463,7 @@
 
     window.addEventListener("resize", () => {
       positionFullscreenControls();
-      if (marketPassRateChartInstance) {
-        marketPassRateChartInstance.resize();
-      }
-      if (evaluationChartInstance) {
-        evaluationChartInstance.resize();
-      }
-      if (latencyChartInstance) {
-        latencyChartInstance.resize();
-      }
+      resizeCharts();
     });
 
     screenshotPopover.addEventListener("click", (event) => {
