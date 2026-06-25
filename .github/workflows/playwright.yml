@@ -29,6 +29,25 @@ jobs:
        run: npx playwright install --with-deps
 
      - name: Run Playwright tests
+       env:
+         ENVIRONMENT: ${{ vars.ENVIRONMENT }}
+         COUNTRY: ${{ vars.COUNTRY }}
+         LANGUAGE: ${{ vars.LANGUAGE }}
+         PRODUCT: ${{ vars.PRODUCT }}
+         VEHICLECATEGORY: ${{ vars.VEHICLECATEGORY }}
+         PROJECT: ${{ vars.PROJECT }}
+         API_ENDPOINT_LOCAL: ${{ vars.API_ENDPOINT_LOCAL }}
+         X_API_KEY: ${{ secrets.X_API_KEY }}
+         TEST_MODE: ${{ vars.TEST_MODE }}
+         TEST_FACETS: ${{ vars.TEST_FACETS }}
+         FIXED_QUERIES_ONLY: ${{ vars.FIXED_QUERIES_ONLY }}
+         OVERRIDE_CONFIG_FILE: ${{ vars.OVERRIDE_CONFIG_FILE }}
+         AEM_USER_PREPROD: ${{ secrets.AEM_USER_PREPROD }}         
+         AEM_PASS_PREPROD: ${{ secrets.AEM_PASS_PREPROD }}
+         NEXUS_API_KEY: ${{ secrets.OVERRIDE_CONFIG_FILE }}
+         NEXUS_API_VERSION: ${{ vars.NEXUS_API_VERSION }}
+         NEXUS_API_ENDPOINT: ${{ vars.NEXUS_API_ENDPOINT }}
+         NEXUS_GPT_MODEL: ${{ vars.NEXUS_GPT_MODEL }}
        run: npx playwright test
 
      - name: Generate report
