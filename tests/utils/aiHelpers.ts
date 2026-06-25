@@ -9,15 +9,21 @@ const OPENAI_CHAT_MODEL = "gpt-4o-mini";
 const OPENAI_DEFAULT_MAX_TOKENS = 40;
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
-// Singleton AzureOpenAI client — created once, reused across all requests.
-// API key and endpoint are loaded from environment variables (secrets).
-// Model name is NOT set here; it is passed per request via OPENAI_CHAT_MODEL.
-const openai = new AzureOpenAI({
-  apiKey: process.env.NEXUS_API_KEY,
-  endpoint: process.env.NEXUS_API_ENDPOINT,
-  apiVersion: process.env.NEXUS_API_VERSION || process.env.OPENAI_API_VERSION || OPENAI_API_VERSION,
-});
+let openai: AzureOpenAI | null = null;
 
+function getOpenAIClient(): AzureOpenAI {
+  if (openai) {
+    return openai;
+  }
+
+  openai = new AzureOpenAI({
+    apiKey: process.env.NEXUS_API_KEY || process.env.AZURE_OPENAI_API_KEY,
+    endpoint: process.env.NEXUS_API_ENDPOINT || process.env.AZURE_OPENAI_ENDPOINT,
+    apiVersion: process.env.NEXUS_API_VERSION || process.env.OPENAI_API_VERSION || OPENAI_API_VERSION,
+  });
+
+  return openai;
+}
 
 export async function fetchTranslation(text: string, targetLang: string = 'en'): Promise<string> {
   if (!text?.trim()) return '';
@@ -47,7 +53,7 @@ export async function openaiChatCompletion(
   max_tokens?: number,
   temperature?: number
 ) {
-  return openai.chat.completions.create({
+  return getOpenAIClient().chat.completions.create({
     model: OPENAI_CHAT_MODEL,
     messages,
     max_tokens: max_tokens ?? OPENAI_DEFAULT_MAX_TOKENS,
