@@ -48,6 +48,8 @@ jobs:
          NEXUS_API_VERSION: ${{ vars.NEXUS_API_VERSION }}
          NEXUS_API_ENDPOINT: ${{ vars.NEXUS_API_ENDPOINT }}
          NEXUS_GPT_MODEL: ${{ vars.NEXUS_GPT_MODEL }}
+         OPENAI_API_VERSION: ${{ vars.OPENAI_API_VERSION }}
+         OPENAI_CHAT_MODEL: ${{ vars.OPENAI_CHAT_MODEL }}
        run: npx playwright test
 
      - name: Generate report
