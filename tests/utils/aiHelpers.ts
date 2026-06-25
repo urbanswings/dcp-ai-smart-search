@@ -15,7 +15,7 @@ const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 const openai = new AzureOpenAI({
   apiKey: process.env.NEXUS_API_KEY,
   endpoint: process.env.NEXUS_API_ENDPOINT,
-  apiVersion: process.env.NEXUS_API_VERSION,
+  apiVersion: process.env.NEXUS_API_VERSION || process.env.OPENAI_API_VERSION || OPENAI_API_VERSION,
 });
 
 
