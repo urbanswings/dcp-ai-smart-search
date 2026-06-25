@@ -33,6 +33,14 @@ on:
           - TH
           - KO
           - JA
+      TEST_DESCRIBE:
+        description: 'Select Test Describe'
+        type: choice
+        required: true
+        options:
+          - 'AI Smart Search - Sanity'
+          - 'AI Smart Search - Vehicles MB'
+          - 'AI Smart Search - Vehicles MB - Negative Facets'
 
 jobs:
  test:
@@ -76,7 +84,7 @@ jobs:
          NEXUS_GPT_MODEL: ${{ vars.NEXUS_GPT_MODEL }}
          OPENAI_API_VERSION: ${{ vars.OPENAI_API_VERSION }}
          OPENAI_CHAT_MODEL: ${{ vars.OPENAI_CHAT_MODEL }}
-       run: npx playwright test tests/search.spec.ts
+       run: npx playwright test tests/search.spec.ts -g ${{ inputs.TEST_DESCRIBE}}
 
      - name: Generate report
        uses: actions/upload-artifact@v4
