@@ -87,7 +87,7 @@ jobs:
        run: |
           if [ -n "${{ inputs.TEST_DESCRIBE }}" ]; then
             echo "Running '"${{ inputs.TEST_DESCRIBE }}"' tests only"
-            npx playwright test tests/search.spec.ts -g "${{ inputs.TEST_DESCRIBE }}"
+            npx playwright test tests/search.spec.ts -g '"${{ inputs.TEST_DESCRIBE }}"'"
           else
             echo "Running ALL tests"
             npx playwright test tests/search.spec.ts
