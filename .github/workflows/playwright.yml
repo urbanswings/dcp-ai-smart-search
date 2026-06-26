@@ -125,6 +125,7 @@ jobs:
         with:
           name: smart-search-results
           path: |
+            playwright-report/
             results/json/
             results/html/
           if-no-files-found: warn

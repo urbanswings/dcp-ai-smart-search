@@ -8,6 +8,7 @@ process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS = String(isHeadless);
 
 export default defineConfig({
   testDir: './tests',
+  reporter: 'html',
   workers: 2,
   fullyParallel: true,
   timeout: 10 * 60000,
