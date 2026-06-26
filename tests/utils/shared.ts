@@ -312,14 +312,15 @@ export function buildTestType(
 
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
+  const safeTimestamp = timestamp.replace(/[:.]/g, "-");
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
   const env = process.env.ENVIRONMENT || ENVIRONMENT;
   const country = process.env.COUNTRY || COUNTRY;
   const product = process.env.PRODUCT || PRODUCT;
   const mode = getTestMode();
-  let filename = `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${timestamp}.json`;
+  let filename = `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-${mode}_${safeTimestamp}.json`;
   if (mode === "both") {
-    return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-both_${timestamp}.json`;
+    return `./results/json/${dateOnly}_${env}/${country}_${product}_search-results_${testType}-both_${safeTimestamp}.json`;
   }
   console.log(`Results File: ${filename}`);
   return filename;
@@ -327,6 +328,7 @@ export function getOutputFileName(testType: string): string {
 
 export function getScreenshotPath(testType: string, queryIndex: number, query: string, runTimestamp: string): string {
   const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(runTimestamp));
+  const safeRunTimestamp = runTimestamp.replace(/[:.]/g, "-");
   const env = process.env.ENVIRONMENT || ENVIRONMENT;
   const country = process.env.COUNTRY || COUNTRY;
   const product = process.env.PRODUCT || PRODUCT;
@@ -337,7 +339,7 @@ export function getScreenshotPath(testType: string, queryIndex: number, query: s
     .substring(0, 50);
   
   // Use runTimestamp as folder - each test run gets its own folder
-  return `./results/screenshots/${dateOnly}_${env}/${runTimestamp}/${country}_${product}_${testType}_query-${queryIndex + 1}_${sanitizedQuery}.png`;
+  return `./results/screenshots/${dateOnly}_${env}/${safeRunTimestamp}/${country}_${product}_${testType}_query-${queryIndex + 1}_${sanitizedQuery}.png`;
 }
 
 export async function combineResults(
