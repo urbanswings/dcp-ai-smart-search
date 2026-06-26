@@ -2489,6 +2489,85 @@
       ].join("\n");
     }
 
+    function getFileNameFromPath(pathValue) {
+      const normalized = normalizePath(String(pathValue || ""));
+      if (!normalized) {
+        return "";
+      }
+      const parts = normalized.split("/").filter(Boolean);
+      return parts.length ? parts[parts.length - 1] : "";
+    }
+
+    function toJiraFacetLines(facets) {
+      if (!facets || typeof facets !== "object" || Object.keys(facets).length === 0) {
+        return [" **** None"];
+      }
+
+      const lines = [];
+      for (const key of Object.keys(facets)) {
+        const value = facets[key];
+        if (Array.isArray(value)) {
+          if (!value.length) {
+            lines.push(" **** " + key + ": None");
+            continue;
+          }
+          value.forEach((item) => {
+            lines.push(" **** " + key + ":" + formatFacetValue(item));
+          });
+        } else {
+          lines.push(" **** " + key + ":" + formatFacetValue(value));
+        }
+      }
+      return lines.length ? lines : [" **** None"];
+    }
+
+    function buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, actualFacets, screenshotPath, country) {
+      const responseResult = rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : "");
+      const facetsResult = rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : "");
+      const openaiEvaluation = String(rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "").trim().toUpperCase();
+      const jiraSummary = String(rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-").trim();
+      const marker = responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || rowData?.hasError ? "(x)" : "(/)";
+      const countryText = country || "-";
+      const screenshotName = getFileNameFromPath(screenshotPath);
+      const primaryQuery = String(queryLocal || queryEn || "-").trim();
+      const primaryResponse = String(responseLocal || responseEn || "-").trim();
+      const englishQuery = String(queryEn || "").trim();
+      const englishResponse = String(responseEn || "").trim();
+      const hasEnglishTranslation =
+        Boolean(englishQuery || englishResponse) &&
+        (englishQuery !== primaryQuery || englishResponse !== primaryResponse);
+      const detailLines = [
+        " * " + marker + " Q (" + countryText + "): " + primaryQuery,
+        " ** A: " + primaryResponse,
+      ];
+
+      if (hasEnglishTranslation) {
+        detailLines.push(" *** EN: " + (englishQuery || "-"));
+        detailLines.push(" **** A: " + (englishResponse || "-"));
+      }
+
+      detailLines.push(" *** Filtering:");
+      detailLines.push(...toJiraFacetLines(actualFacets));
+
+      return [
+        "{panel:title=Elaborate details|titleBGColor=#858585}",
+        jiraSummary || "-",
+        ...detailLines,
+        "{panel}",
+        "{panel:title=Steps|titleBGColor=#858585}",
+        " * Do a SmartSearch for",
+        " ** " + primaryQuery,
+        "{panel}",
+        "{panel:title=Expected behaviour|titleBGColor=#858585}",
+        " * Should return accurate response message",
+        "{panel}",
+        "{panel:title=Any attachments?|titleBGColor=#858585}",
+        " * Screenshot",
+        screenshotName ? " ** !" + screenshotName + "|thumbnail!" : " ** NA",
+        "{panel}",
+      ].join("\n");
+    }
+
     function renderSelectedRowView() {
       if (selectedRowIndex < 0 || selectedRowIndex >= currentRows.length) {
         resetRowView();
@@ -2521,6 +2600,7 @@
       const screenshotPath = screenshotResolution.screenshotPath;
       const screenshotFile = screenshotResolution.fileObj;
       const embeddedDataUri = screenshotResolution.embeddedDataUri;
+      const jiraCopyText = buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, facetGroups.actual, screenshotPath, getRowCountry(rowData, currentTableRenderOptions.country));
       const hasPreviousRow = selectedRowIndex > 0;
       const hasNextRow = selectedRowIndex < currentRows.length - 1;
       const screenshotNavHtml = currentRows.length > 1
@@ -2581,7 +2661,8 @@
               "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.responseTime !== undefined ? rowData.responseTime : "-") + "</div></div>" +
               "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.statusCode !== undefined ? rowData.statusCode : "-") + "</div></div>" +
             "</div>" +
-            "<div><button type=\"button\" data-copy-all=\"" + encodeURIComponent(combinedCopyText) + "\" title=\"Copy Query (EN), Response (EN), Actual Facets\" aria-label=\"Copy Query (EN), Response (EN), Actual Facets\">Copy All (3)</button></div>" +
+            "<div><button type=\"button\" data-copy-all=\"" + encodeURIComponent(combinedCopyText) + "\" title=\"Copy Query (EN), Response (EN), Actual Facets\" aria-label=\"Copy Query (EN), Response (EN), Actual Facets\">Copy All (3)</button> " +
+              "<button type=\"button\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira ticket description\" aria-label=\"Copy Jira ticket description\">Get JIRA</button></div>" +
           "</div>" +
           "<div class=\"selectedRowRight\">" +
             "<div class=\"detailLabel\">Screenshot" + (screenshotFile ? " <span style=\"font-weight:400;text-transform:none;font-size:11px;color:var(--muted)\">(click to view fullscreen)</span>" : "") + "</div>" +
@@ -3300,6 +3381,23 @@
           }, 900);
         } catch {
           copyAllButton.textContent = "ERR";
+        }
+        return;
+      }
+
+      const copyJiraButton = event.target.closest("button[data-copy-jira]");
+      if (copyJiraButton) {
+        const encodedValue = copyJiraButton.getAttribute("data-copy-jira") || "";
+        const textToCopy = decodeURIComponent(encodedValue);
+        try {
+          await copyToClipboard(textToCopy);
+          const original = copyJiraButton.innerHTML;
+          copyJiraButton.textContent = "OK";
+          setTimeout(() => {
+            copyJiraButton.innerHTML = original;
+          }, 900);
+        } catch {
+          copyJiraButton.textContent = "ERR";
         }
         return;
       }

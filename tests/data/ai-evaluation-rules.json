@@ -440,8 +440,8 @@
       ],
       "completeRange": [
         "Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and answers the requested {facetName} range intent.",
-        "Respond with \"PASS\" only if the response {targetVerb} and indicates matching vehicles are available.",
-        "If the response ignores the requested {facetName} target ({targetValue}) or provides clearly unrelated values, respond with \"MSG FAIL: missing or incorrect {facetName} target ({targetValue})\".",
+        "Respond with \"PASS\" if the response indicates matching vehicles are available and does not contradict the requested {facetName} target ({targetValue}); explicitly restating the exact {facetName} value or ceiling/floor is optional because backend facet validation checks the applied filter.",
+        "If the response provides clearly unrelated {facetName} values or contradicts the requested {facetName} target ({targetValue}), respond with \"MSG FAIL: incorrect {facetName} target ({targetValue})\".",
         "If the response says the requested {facetName} target ({targetValue}) has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with \"MSG FAIL: no results for requested {facetName} target ({targetValue})\".",
         "If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with \"MSG FAIL: off-topic or unsafe response\".",
         "Respond with failure reason otherwise respond with \"PASS\" only."
