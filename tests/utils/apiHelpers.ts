@@ -653,6 +653,10 @@ export async function fetchEmhApiResponse(): Promise<any> {
         : env?.toUpperCase() === "INT"
         ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
         : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+
+    console.log(
+      `[EMH API] env=${env} country=${country} product=${product} language=${language} vehicleCategory=${vehicleCategory} endpoint=${apiUrl} xApiKey=${process.env.X_API_KEY ? "set" : "missing"}`
+    );
     
     let graphqlPayload = {
       operationName: "GetSearchResults",
@@ -731,8 +735,7 @@ export async function fetchEmhApiResponse(): Promise<any> {
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
-    console.warn("Failed to fetch EMH API response:", errorMessage);
-    return null;
+    throw new Error(`Failed to fetch EMH API response: ${errorMessage}`);
   }
 }
 

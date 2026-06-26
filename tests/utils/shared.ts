@@ -152,7 +152,8 @@ export async function areAllResponsesConsistentOneShot(
 }
 
 export function getTestMode(): "ui" | "api" | "both" {
-  return (process.env.TEST_MODE as "ui" | "api" | "both") || "ui";
+  const mode = (process.env.TEST_MODE || "ui").toLowerCase();
+  return (["ui", "api", "both"].includes(mode) ? mode : "ui") as "ui" | "api" | "both";
 }
 
 export function shouldRunUiTests(): boolean {
