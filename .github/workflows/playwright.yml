@@ -53,7 +53,14 @@ on:
           - "None"
           - "AI Smart Search - Sanity"
           - "AI Smart Search - Vehicles MB"
+          - "AI Smart Search - Vehicles MB - Range Facets"
           - "AI Smart Search - Vehicles MB - Negative Facets"
+          - "AI Smart Search - Vehicles Non-MB"
+          - "AI Smart Search - Input Robustness"
+          - "AI Smart Search - Constraint Handling"
+          - "AI Smart Search - Conversational Behavior"
+          - "AI Smart Search - Safety / Policy / Abuse"
+          - "AI Smart Search - Reliability"
       TEST_TITLE:
         description: "Select Test Title"
         type: choice
@@ -63,11 +70,91 @@ on:
           - "[AI Smart Search - Sanity] By Fixed Query"
           - "[AI Smart Search - Sanity] Recommendation Model"
           - "[AI Smart Search - Sanity] By Filter Facets (complete)"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('bodyType')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('brand')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('campaigns')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('color')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('colorPolish')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('enginePowerHP')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('enginePowerKW')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('firstRegistrationDate')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('fuelType')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('lines')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('mileage')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('modelIdentifier')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('modelYear')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('motorization')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('packages')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('price')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('stockType')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('upholstery')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets ('upholsteryPolish')"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets (AND/OR)"
+          - "[AI Smart Search - Vehicles MB] By Filter Facets (matrix)"
+          - "[AI Smart Search - Vehicles MB] By Brand/Model"
+          - "[AI Smart Search - Vehicles MB] By Specs"
+          - "[AI Smart Search - Vehicles MB] No Brand/Model"
+          - "[AI Smart Search - Vehicles MB] Superlative"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('price')"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('monthlyRate')"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('mileage')"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('enginePowerHP')"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('enginePowerKW')"
+          - "[AI Smart Search - Vehicles MB - Range Facets] By Filter Facets ('modelYear')"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('bodyType')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('brand')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('campaigns')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('color')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('colorPolish')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('enginePowerHP')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('enginePowerKW')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('firstRegistrationDate')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('fuelType')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('lines')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('mileage')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('modelIdentifier')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('modelYear')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('motorization')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('packages')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('price')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('stockType')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('upholstery')(-ve)"
+          - "[AI Smart Search - Vehicles MB - Negative Facets] By Filter Facets ('upholsteryPolish')(-ve)"
+          - "[AI Smart Search - Vehicles Non-MB] By Brand/Model (Sentence|Single)"
+          - "[AI Smart Search - Vehicles Non-MB] By Brand/Model (Keyword|Single)"
+          - "[AI Smart Search - Vehicles Non-MB] By Brand/Model (Keyword|Mix)"
+          - "[AI Smart Search - Vehicles Non-MB] By Non-MB Features"
+          - "[AI Smart Search - Input Robustness] Edge Case Queries"
+          - "[AI Smart Search - Input Robustness] Random Numbers"
+          - "[AI Smart Search - Input Robustness] Misspelled/Fuzzy Queries"
+          - "[AI Smart Search - Input Robustness] Language/Localization"
+          - "[AI Smart Search - Input Robustness] Unusual Units Queries"
+          - "[AI Smart Search - Constraint Handling] Date Range/Numeric Filters"
+          - "[AI Smart Search - Constraint Handling] Numeric Unit Variations"
+          - "[AI Smart Search - Constraint Handling] Negative/Contradictory Queries"
+          - "[AI Smart Search - Constraint Handling] Conflicting Filter Facets"
+          - "[AI Smart Search - Constraint Handling] Conflicting Brands"
+          - "[AI Smart Search - Constraint Handling] No Results Scenario"
+          - "[AI Smart Search - Conversational Behavior] Multi-Intent Queries"
+          - "[AI Smart Search - Conversational Behavior] Clarification Queries"
+          - "[AI Smart Search - Conversational Behavior] Price Negotiation Queries"
+          - "[AI Smart Search - Conversational Behavior] Sales"
+          - "[AI Smart Search - Conversational Behavior] Joke/Humor Queries"
+          - "[AI Smart Search - Conversational Behavior] Repeat/Looping Queries"
+          - "[AI Smart Search - Conversational Behavior] Brand Loyalty/Switching Queries"
+          - "[AI Smart Search - Conversational Behavior] Accessibility Needs Queries"
+          - "[AI Smart Search - Conversational Behavior] Environmental Concerns Queries"
+          - "[AI Smart Search - Safety / Policy / Abuse] Personal Data"
+          - "[AI Smart Search - Safety / Policy / Abuse] NSFW"
+          - "[AI Smart Search - Safety / Policy / Abuse] Code and Scripts"
+          - "[AI Smart Search - Safety / Policy / Abuse] Bias and Manipulation"
+          - "[AI Smart Search - Safety / Policy / Abuse] Random Topics"
+          - "[AI Smart Search - Reliability] Response Consistency"
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    environment: PREPROD
+    environment: ${{ inputs.ENVIRONMENT }}
 
     steps:
       - name: Checkout repository
@@ -109,20 +196,28 @@ jobs:
           CHOSEN_DESCRIBE: ${{ inputs.TEST_DESCRIBE }}
           CHOSEN_TITLE: ${{ inputs.TEST_TITLE }}
         run: |
+          escape_regex() {
+            perl -e 'print quotemeta($ARGV[0])' "$1"
+          }
+
           # 1. Strip everything up to and including ']' and trim whitespace
           CLEANED_TITLE=$(echo "$CHOSEN_TITLE" | sed -E 's/^.*\][[:space:]]*//')
+          ESCAPED_DESCRIBE=$(escape_regex "$CHOSEN_DESCRIBE")
+          ESCAPED_TITLE=$(escape_regex "$CLEANED_TITLE")
 
           # 2. Check if specific Test Title is selected
           if [ -n "$CLEANED_TITLE" ] && [ "$CLEANED_TITLE" != "None" ]; then
-            echo "Running '$CLEANED_TITLE' test title only"
-            echo "Executing: npx playwright test tests/search.spec.ts -g \"$CLEANED_TITLE\""
-            npx playwright test tests/search.spec.ts -g "$CLEANED_TITLE"
+            GREP_PATTERN="${ESCAPED_DESCRIBE}.*${ESCAPED_TITLE}"
+            echo "Running '$CLEANED_TITLE' test title in '$CHOSEN_DESCRIBE'"
+            echo "Executing: npx playwright test tests/search.spec.ts -g \"$GREP_PATTERN\""
+            npx playwright test tests/search.spec.ts -g "$GREP_PATTERN"
             
           # 3. Check if a Test Describe block is selected instead
           elif [ -n "$CHOSEN_DESCRIBE" ] && [ "$CHOSEN_DESCRIBE" != "None" ]; then
+            GREP_PATTERN="${ESCAPED_DESCRIBE}(?! -)"
             echo "Running strict '$CHOSEN_DESCRIBE' describe block only"
-            echo "Executing: npx playwright test tests/search.spec.ts -g \"${CHOSEN_DESCRIBE}(?! -)\""
-            npx playwright test tests/search.spec.ts -g "${CHOSEN_DESCRIBE}(?! -)"
+            echo "Executing: npx playwright test tests/search.spec.ts -g \"$GREP_PATTERN\""
+            npx playwright test tests/search.spec.ts -g "$GREP_PATTERN"
             
           # 4. Else fallback to running everything
           else
@@ -199,4 +294,3 @@ jobs:
           )
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
-
