@@ -127,6 +127,7 @@ jobs:
         run: node generate-results-html.js
 
       - name: Upload test artifacts
+        id: upload-step
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
@@ -145,9 +146,11 @@ jobs:
           JOB_STATUS: ${{ job.status }}
           RUN_NUM: ${{ github.run_number }}
           RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-          ARTIFACT_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts"
+          # Dynamically builds the exact direct download ZIP link:
+          ARTIFACT_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload-step.outputs.artifact-id }}"
           MARKET: "${{ inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE || 'EN' }}"
           SCOPE: "${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}"
+          ACTOR: "${{ github.actor }}"
         run: |
           if [ "$JOB_STATUS" = "success" ]; then
             TITLE="✅ Playwright Tests Passed"
@@ -169,6 +172,7 @@ jobs:
                         { "title": "Workflow Run:", "value": "#$RUN_NUM" },
                         { "title": "Market Environment:", "value": "$MARKET" },
                         { "title": "Scope:", "value": "$SCOPE" },
+                        { "title": "Triggered By:", "value": "@$ACTOR" }
                       ]
                     }
                   ],
@@ -186,3 +190,4 @@ jobs:
           )
 
           curl -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
+
