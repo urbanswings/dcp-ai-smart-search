@@ -1,4 +1,5 @@
-
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://github.com
 
 name: Playwright Tests
 run-name: >-
@@ -137,3 +138,19 @@ jobs:
             results/html/
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Send Microsoft Teams Notification
+        if: ${{ !cancelled() }}
+        uses: jasonit/teams-message-card-action@v2
+        with:
+          url: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          title: "${{ job.status == 'success' && '✅ Playwright Tests Passed' || '❌ Playwright Tests Failed' }}"
+          description: |
+            **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            **Market Environment:** `${{ inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE || 'EN' }}`
+            **Scope:** ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}
+            **Triggered By:** @${{ github.actor }}
+            
+            📂 **Download HTML Reports & JSON Artifacts:** 
+            Go to the [GitHub Actions Run Summary Page](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts) to retrieve `smart-search-results`.
+          theme-color: "${{ job.status == 'success' && '00FF00' || 'FF0000' }}"
