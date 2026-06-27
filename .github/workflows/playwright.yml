@@ -4,7 +4,6 @@
 name: Playwright Tests
 run-name: >-
   [${{ inputs.COUNTRY != '' && inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE != '' && inputs.LANGUAGE || 'EN' }}] 
-  Playwright Tests - 
   ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}
 
 on:
