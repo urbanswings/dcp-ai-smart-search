@@ -106,15 +106,16 @@ jobs:
 
           # 2. Check if specific Test Title is selected
           if [ -n "$CLEANED_TITLE" ] && [ "$CLEANED_TITLE" != "None" ]; then
-            echo "Running '$CLEANED_TITLE' test title only"
-            echo "Executing: npx playwright test tests/search.spec.ts -g \"$CLEANED_TITLE\""
-            npx playwright test tests/search.spec.ts -g "$CLEANED_TITLE"
+            echo "Running strict '$CLEANED_TITLE' test title only"
+            echo "Executing: npx playwright test tests/search.spec.ts -g \"^${CLEANED_TITLE}$\""
+            npx playwright test tests/search.spec.ts -g "^${CLEANED_TITLE}$"
             
           # 3. Check if a Test Describe block is selected instead
           elif [ -n "$CHOSEN_DESCRIBE" ] && [ "$CHOSEN_DESCRIBE" != "None" ]; then
-            echo "Running '$CHOSEN_DESCRIBE' test describe only"
-            echo "Executing: npx playwright test tests/search.spec.ts -g \"$CHOSEN_DESCRIBE\""
-            npx playwright test tests/search.spec.ts -g "$CHOSEN_DESCRIBE"
+            echo "Running strict '$CHOSEN_DESCRIBE' describe block only"
+            # We append ' ›' to force Playwright to only match this specific describe block level
+            echo "Executing: npx playwright test tests/search.spec.ts -g \"^${CHOSEN_DESCRIBE} ›\""
+            npx playwright test tests/search.spec.ts -g "^${CHOSEN_DESCRIBE} ›"
             
           # 4. Else fallback to running everything
           else
