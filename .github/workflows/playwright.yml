@@ -1,5 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://github.com
+
 
 name: Playwright Tests
 run-name: >-
@@ -141,16 +140,55 @@ jobs:
 
       - name: Send Microsoft Teams Notification
         if: ${{ !cancelled() }}
-        uses: jasonit/teams-message-card-action@v2
-        with:
-          url: ${{ secrets.TEAMS_WEBHOOK_URL }}
-          title: "${{ job.status == 'success' && '✅ Playwright Tests Passed' || '❌ Playwright Tests Failed' }}"
-          description: |
-            **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
-            **Market Environment:** `${{ inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE || 'EN' }}`
-            **Scope:** ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}
-            **Triggered By:** @${{ github.actor }}
-            
-            📂 **Download HTML Reports & JSON Artifacts:** 
-            Go to the [GitHub Actions Run Summary Page](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}#artifacts) to retrieve `smart-search-results`.
-          theme-color: "${{ job.status == 'success' && '00FF00' || 'FF0000' }}"
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+          JOB_STATUS: ${{ job.status }}
+          RUN_NUM: ${{ github.run_number }}
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          MARKET: "${{ inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE || 'EN' }}"
+          SCOPE: "${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}"
+          ACTOR: "${{ github.actor }}"
+        run: |
+          # Determine card styling based on outcome
+          if [ "$JOB_STATUS" = "success" ]; then
+            TITLE="✅ Playwright Tests Passed"
+            THEME="good"
+          else
+            TITLE="❌ Playwright Tests Failed"
+            THEME="attention"
+          fi
+
+          # Construct the JSON payload for the modern Power Automate Webhook template
+          PAYLOAD=$(cat <<EOF
+          {
+            "type": "message",
+            "attachments": [
+              {
+                "contentType": "application/vnd.microsoft.card.adaptive",
+                "content": {
+                  "type": "AdaptiveCard",
+                  "body": [
+                    { "type": "TextBlock", "size": "Medium", "weight": "Bolder", "text": "$TITLE" },
+                    { "type": "FactSet", "facts": [
+                        { "title": "Workflow Run:", "value": "#$RUN_NUM" },
+                        { "title": "Market Environment:", "value": "$MARKET" },
+                        { "title": "Scope:", "value": "$SCOPE" },
+                        { "title": "Triggered By:", "value": "@$ACTOR" }
+                      ]
+                    },
+                    { "type": "TextBlock", "text": "📂 **Download HTML Reports & JSON Artifacts:**\nGo to the GitHub Actions Run Summary Page to retrieve your smart-search-results.", "wrap": true }
+                  ],
+                  "actions": [
+                    { "type": "Action.OpenUrl", "title": "View GitHub Run Summary", "url": "$RUN_URL" }
+                  ],
+                  "$schema": "http://adaptivecards.io",
+                  "version": "1.5"
+                }
+              }
+            ]
+          }
+          EOF
+          )
+
+          # Execute HTTP Post request securely
+          curl -H "Content-Type: application/json" -d "$PAYLOAD" "$TEAMS_WEBHOOK"
