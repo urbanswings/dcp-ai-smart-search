@@ -214,9 +214,15 @@
     }
 
     .chartToggleBtn {
-      background: #eef2ff;
-      border-color: #c7d2fe;
-      color: #3730a3;
+      background: #fff7ed;
+      border-color: #fdba74;
+      color: #9a3412;
+    }
+
+    .chartToggleBtn:not(:disabled):hover {
+      background: #ea580c;
+      border-color: #ea580c;
+      color: #ffffff;
     }
 
     .resetFiltersBtn {
@@ -254,7 +260,7 @@
     }
 
     .filterRow {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
       align-items: end;
     }
 
@@ -501,12 +507,6 @@
 
     .chartHeader .info {
       margin: 0;
-    }
-
-    .chartToggleBtn {
-      height: 32px;
-      padding: 0 12px;
-      font-size: 12px;
     }
 
     .chartsPanel.isCollapsed {
@@ -1231,7 +1231,6 @@
 
     <div class="chartHeader">
       <div class="info">Charts</div>
-      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button" aria-expanded="true" aria-controls="chartsPanel">Hide charts</button>
     </div>
     <div id="chartsPanel" class="chartsPanel">
       <div class="chartGrid marketChartGrid" id="marketChartGrid">
@@ -1268,6 +1267,7 @@
         </div>
       </div>
       <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset dropdowns</button>
+      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
     </div>
 
