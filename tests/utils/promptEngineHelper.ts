@@ -377,14 +377,14 @@ function buildVariedFallbackPhrase(
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
   const keyLabel = getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language);
   const templates = [
-    `${valueLabel} options`,
-    `${valueLabel} vehicles`,
+    `${valueLabel} ${keyLabel} options`,
+    `vehicles with ${valueLabel} ${keyLabel}`,
     `${keyLabel} ${valueLabel}`,
-    `find ${valueLabel}`,
-    `only ${valueLabel}`,
-    `${valueLabel} lineup`,
-    `show ${valueLabel}`,
-    `${valueLabel} recommendations`,
+    `find ${keyLabel} ${valueLabel}`,
+    `${keyLabel} only in ${valueLabel}`,
+    `with ${valueLabel} ${keyLabel} lineup`,
+    `show ${valueLabel} ${keyLabel}`,
+    `${valueLabel} ${keyLabel} recommendations`,
   ];
   const idx = context.templateCursor % templates.length;
   context.templateCursor += 1;

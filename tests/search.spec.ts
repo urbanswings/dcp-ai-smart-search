@@ -566,7 +566,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         for (const idx of indices) {
           const keyword = vehicleBrandsAndModels.mb[idx];
           const queryValues = await generateUniqueQueries(
-            2,
+            count,
             systemPrompt,
             userPromptTemplate.replace('{keyword}', keyword),
             maxTokens,

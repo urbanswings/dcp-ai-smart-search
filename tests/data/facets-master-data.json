@@ -148,22 +148,6 @@
         "formattedValue": "EQV",
         "value": "EQV",
         "tags": []
-      },
-      {
-        "label": "Model",
-        "formattedValue": "CLA",
-        "value": "CLA_NEW",
-        "tags": [
-          "NEW"
-        ]
-      },
-      {
-        "label": "Model",
-        "formattedValue": "GLB",
-        "value": "GLB_NEW",
-        "tags": [
-          "NEW"
-        ]
       }
     ],
     "facetType": "MULTI_VALUE"
