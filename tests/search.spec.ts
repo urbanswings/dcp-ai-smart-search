@@ -23,7 +23,7 @@ import {
 } from "./utils/apiHelpers";
 import {
   fetchAndConvertFacets,
-  generateQueriesFromFacets,
+  generateAndOrFacetMatrixFromFacets,
 } from "./utils/facetHelpers";
 import {
   shouldRunUiTests,
@@ -197,6 +197,7 @@ test.beforeAll(async () => {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     console.error("Failed to fetch and save EMH API response:", errorMessage);
+    throw error;
   }
 });
 
@@ -418,7 +419,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
     });
   }
 
-  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
@@ -427,7 +428,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         dcpApiResponse,
         project
       );
-      const queries = isFixedQueriesOnly() ? [] : await generateQueriesFromFacets(facets, aiPromptData[describeName]?.[test.info().title]);
+      const queries = isFixedQueriesOnly() ? [] : generateAndOrFacetMatrixFromFacets(facets);
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -443,6 +444,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
               aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
+      extendTimeoutForQueryCount(testInfo, allQueries.length);
 
       await runTestsAndSaveResults({
         queries: allQueries,

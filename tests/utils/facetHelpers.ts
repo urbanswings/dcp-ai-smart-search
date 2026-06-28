@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { generateOpenAIQuery } from "./aiHelpers";
+import { LANGUAGE } from "./testHelpers";
 
 export interface SimplifiedFacet {
   code: string;
@@ -9,6 +10,65 @@ export interface SimplifiedFacet {
   max?: number;
   values?: Array<{ code: string; name: string }>;
   displayName?: string;
+}
+
+const AND_OR_MATRIX_FACETS = ["bodyType", "brand", "color", "fuelType", "price"];
+const AND_OR_MATRIX_ANCHOR_FACETS = ["bodyType", "color"];
+
+const FACET_LABELS: Record<string, string> = {
+  bodyType: "body type",
+  brand: "brand",
+  color: "color",
+  fuelType: "fuel type",
+  price: "price",
+};
+
+const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
+  th: {
+    bodyType: "ประเภทรถ",
+    brand: "แบรนด์",
+    color: "สี",
+    fuelType: "ประเภทเชื้อเพลิง",
+    price: "ราคา",
+  },
+  tr: {
+    bodyType: "gövde tipi",
+    brand: "marka",
+    color: "renk",
+    fuelType: "yakıt tipi",
+    price: "fiyat",
+  },
+  ko: {
+    bodyType: "바디 타입",
+    brand: "브랜드",
+    color: "색상",
+    fuelType: "연료 타입",
+    price: "가격",
+  },
+  ja: {
+    bodyType: "ボディタイプ",
+    brand: "ブランド",
+    color: "色",
+    fuelType: "燃料タイプ",
+    price: "価格",
+  },
+};
+
+interface AndOrFacetMatrixQuery {
+  value: string;
+  facet: string;
+  operator: "AND" | "OR";
+  filterText: string;
+  filterValue: string;
+  shouldFilter: boolean | {
+    include: Array<Record<string, Array<string | number>>>;
+    exclude: [];
+    strict: false;
+  };
+  aiEvaluationHints: {
+    value: string[];
+    overwrite: true;
+  };
 }
 
 /**
@@ -240,4 +300,221 @@ export async function generateQueriesFromFacets(
     filterText: string;
     filterValue: string;
   }>;
+}
+
+function getFacetLabel(facet: SimplifiedFacet): string {
+  return FACET_LABELS[facet.code] || facet.displayName || facet.code;
+}
+
+function getLanguageCode(): string {
+  return (process.env.LANGUAGE || LANGUAGE || "en").toLowerCase().split(/[-_]/)[0];
+}
+
+function getLocalizedFacetLabel(facet: SimplifiedFacet): string {
+  const languageCode = getLanguageCode();
+  return LOCALIZED_FACET_LABELS[languageCode]?.[facet.code] || getFacetLabel(facet);
+}
+
+function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | null {
+  if (facetKey === "bodyType") {
+    const map: Record<string, string> = {
+      SUV_OFFROADER: "SUV",
+      CABRIO_ROADSTER: "Cabriolet",
+      PEOPLE_CARRIER: "MPV",
+      LIMOUSINE: "sedan"
+    };
+    return map[String(rawValue)] || null;
+  }
+  return null;
+}
+
+function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
+  queryValue: string;
+  expectedValue: string | number;
+}> {
+  if (facet.type === "range") {
+    const min = Number(facet.min);
+    const max = Number(facet.max);
+    if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) {
+      return [];
+    }
+
+    const value = Math.round(min + (max - min) * 0.5);
+    return [{
+      queryValue: value.toLocaleString("en-US"),
+      expectedValue: value,
+    }];
+  }
+
+  if (!Array.isArray(facet.values) || facet.values.length === 0) {
+    return [];
+  }
+
+  return facet.values.map((value) => ({
+    queryValue: getMappedFormattedValue(facet.code, value.code) || value.name || value.code,
+    expectedValue: value.code,
+  }));
+}
+
+function buildAndOrQueryValue(
+  operator: "AND" | "OR",
+  anchorLabel: string,
+  anchorValue: string,
+  targetLabel: string,
+  targetValue: string
+): string {
+  const languageCode = getLanguageCode();
+
+  if (languageCode === "th") {
+    const connector = operator === "AND" ? "และ" : "หรือ";
+    return `แสดงรถที่มี${anchorLabel} ${anchorValue} ${connector} ${targetLabel} ${targetValue}`;
+  }
+
+  if (languageCode === "tr") {
+    const connector = operator === "AND" ? "ve" : "veya";
+    return `${anchorLabel} ${anchorValue} ${connector} ${targetLabel} ${targetValue} olan araçları göster.`;
+  }
+
+  if (languageCode === "ko") {
+    const connector = operator === "AND" ? "그리고" : "또는";
+    return `${anchorLabel} ${anchorValue} ${connector} ${targetLabel} ${targetValue} 차량을 보여줘.`;
+  }
+
+  if (languageCode === "ja") {
+    const connector = operator === "AND" ? "かつ" : "または";
+    return `${anchorLabel}が${anchorValue}${connector}${targetLabel}が${targetValue}の車を表示してください。`;
+  }
+
+  const connector = operator === "AND" ? "and" : "or";
+  return `Show me vehicles with ${anchorLabel} ${anchorValue} ${connector} ${targetLabel} ${targetValue}.`;
+}
+
+function createAndOrFacetHints(
+  operator: "AND" | "OR",
+  firstFacetLabel: string,
+  firstValueLabel: string,
+  secondFacetLabel: string,
+  secondValueLabel: string
+): string[] {
+  const intent = operator === "AND" ? "combined AND filter intent" : "alternative OR filter intent";
+  const connector = operator === "AND" ? "and" : "or";
+
+  return [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and answers the requested ${intent}.`,
+    `Respond with "PASS" only if the response acknowledges or applies ${firstFacetLabel} ${firstValueLabel} ${connector} ${secondFacetLabel} ${secondValueLabel}.`,
+    `If the response ignores or contradicts ${firstFacetLabel} ${firstValueLabel}, respond with "MSG FAIL: missing or incorrect ${firstFacetLabel} value (${firstValueLabel})".`,
+    `If the response ignores or contradicts ${secondFacetLabel} ${secondValueLabel}, respond with "MSG FAIL: missing or incorrect ${secondFacetLabel} value (${secondValueLabel})".`,
+    `If the response says the requested ${firstFacetLabel}/${secondFacetLabel} combination has no results, is unavailable, is not in stock, or otherwise implies no matching vehicles were found, respond with "MSG FAIL: no results for requested ${firstFacetLabel}/${secondFacetLabel} values (${firstValueLabel}, ${secondValueLabel})".`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+    `Respond with failure reason otherwise respond with "PASS" only.`,
+  ];
+}
+
+export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): AndOrFacetMatrixQuery[] {
+  const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
+  const queries: AndOrFacetMatrixQuery[] = [];
+
+  for (const anchorFacetCode of AND_OR_MATRIX_ANCHOR_FACETS) {
+    const anchorFacet = facetByCode.get(anchorFacetCode);
+    if (!anchorFacet) {
+      continue;
+    }
+
+    const anchorValues = getFacetMatrixValues(anchorFacet);
+    if (anchorValues.length === 0) {
+      continue;
+    }
+
+    for (const targetFacetCode of AND_OR_MATRIX_FACETS) {
+      if (targetFacetCode === anchorFacetCode) {
+        continue;
+      }
+
+      const targetFacet = facetByCode.get(targetFacetCode);
+      if (!targetFacet) {
+        continue;
+      }
+
+      const targetValues = getFacetMatrixValues(targetFacet);
+      if (targetValues.length === 0) {
+        continue;
+      }
+
+      for (const anchorValue of anchorValues) {
+        for (const targetValue of targetValues) {
+          const anchorLabel = getFacetLabel(anchorFacet);
+          const targetLabel = getFacetLabel(targetFacet);
+          const localizedAnchorLabel = getLocalizedFacetLabel(anchorFacet);
+          const localizedTargetLabel = getLocalizedFacetLabel(targetFacet);
+          const facetPair = `${anchorFacet.code}+${targetFacet.code}`;
+          const filterText = `${anchorLabel} '${anchorValue.queryValue}' and ${targetLabel} '${targetValue.queryValue}'`;
+          const filterValue = `${anchorValue.expectedValue},${targetValue.expectedValue}`;
+          const include = [
+            { [anchorFacet.code]: [anchorValue.expectedValue] },
+            { [targetFacet.code]: [targetValue.expectedValue] },
+          ];
+
+          queries.push({
+            value: buildAndOrQueryValue(
+              "AND",
+              localizedAnchorLabel,
+              anchorValue.queryValue,
+              localizedTargetLabel,
+              targetValue.queryValue
+            ),
+            facet: facetPair,
+            operator: "AND",
+            filterText,
+            filterValue,
+            shouldFilter: {
+              include,
+              exclude: [],
+              strict: false,
+            },
+            aiEvaluationHints: {
+              value: createAndOrFacetHints(
+                "AND",
+                anchorLabel,
+                anchorValue.queryValue,
+                targetLabel,
+                targetValue.queryValue
+              ),
+              overwrite: true,
+            },
+          });
+
+          queries.push({
+            value: buildAndOrQueryValue(
+              "OR",
+              localizedAnchorLabel,
+              anchorValue.queryValue,
+              localizedTargetLabel,
+              targetValue.queryValue
+            ),
+            facet: facetPair,
+            operator: "OR",
+            filterText,
+            filterValue,
+            shouldFilter: {
+              include,
+              exclude: [],
+              strict: false,
+            },
+            aiEvaluationHints: {
+              value: createAndOrFacetHints(
+                "OR",
+                anchorLabel,
+                anchorValue.queryValue,
+                targetLabel,
+                targetValue.queryValue
+              ),
+              overwrite: true,
+            },
+          });
+        }
+      }
+    }
+  }
+
+  return queries;
 }
