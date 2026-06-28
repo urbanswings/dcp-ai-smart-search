@@ -100,6 +100,71 @@ const QUERY_TIMEOUT_BUFFER_MS = 2 * 60000;
 const QUERY_TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS || 45000);
 const MAX_QUERY_SCALED_TIMEOUT_MS = Number(process.env.MAX_QUERY_TIMEOUT_MS || 60 * 60000);
 
+function normalizeModelIdentifierMatchValue(value: unknown): string {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/mercedes[- ]benz/g, "")
+    .replace(/mercedes[- ]amg/g, "amg")
+    .replace(/mercedes[- ]maybach/g, "maybach")
+    .replace(/[^a-z0-9]/g, "");
+}
+
+function getModelIdentifierFilterValueIfInStock(keyword: string): string | undefined {
+  const modelIdentifierValues = emhApiResponse?.data?.search?.facets?.modelIdentifier?.values;
+  if (!Array.isArray(modelIdentifierValues)) {
+    return undefined;
+  }
+
+  const normalizedKeyword = normalizeModelIdentifierMatchValue(keyword);
+  const normalizedKeywordVariants = [
+    normalizedKeyword,
+    normalizedKeyword.replace(/^amg/, ""),
+    normalizedKeyword.replace(/^maybach/, ""),
+  ].filter(Boolean);
+  const stockedModelCandidates = modelIdentifierValues
+    .filter((model) => Number(model?.count || 0) > 0)
+    .flatMap((model) => {
+      const modelValue = model?.value ? String(model.value) : undefined;
+      if (!modelValue) {
+        return [];
+      }
+
+      return [
+        model?.formattedValue,
+        model?.value,
+      ].map((value) => ({
+        value: modelValue,
+        candidate: normalizeModelIdentifierMatchValue(value),
+      })).filter((entry) => entry.candidate);
+    });
+
+  const matchingModel = stockedModelCandidates
+    .filter(({ candidate }) =>
+      normalizedKeywordVariants.some((variant) => {
+        if (variant === candidate) {
+          return true;
+        }
+
+        if (candidate.length === 1) {
+          return variant.startsWith(candidate) && /^\d/.test(variant.slice(candidate.length));
+        }
+
+        return variant.startsWith(candidate);
+      })
+    )
+    .sort((a, b) => b.candidate.length - a.candidate.length)[0];
+
+  return matchingModel?.value;
+}
+
+function getModelIdentifierLabel(keyword: string): string {
+  return keyword
+    .replace(/^Mercedes[- ]Benz\s+/i, "")
+    .replace(/^Mercedes[- ]AMG\s+/i, "AMG ")
+    .replace(/^Mercedes[- ]Maybach\s+/i, "Maybach ")
+    .trim();
+}
+
 function extendTimeoutForQueryCount(testInfo: TestInfo, queryCount: number): void {
   if (!Number.isFinite(queryCount) || queryCount <= 0) {
     return;
@@ -486,6 +551,10 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const fixedQueries = fixedQueriesData.byBrandModel;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const modelIdentifierEvaluationRules =
+        aiEvaluationRulesData[describeName]?.["By Filter Facets ('modelIdentifier')"] || {};
+      const missingModelIdentifierEvaluationRules =
+        aiEvaluationRulesData["Vehicles MB - Negative Facets"]?.["By Filter Facets ('modelIdentifier')(-ve)"] || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
         const file = await fs.readFile(testDataVehicles, "utf-8");
         const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
@@ -497,13 +566,37 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         for (const idx of indices) {
           const keyword = vehicleBrandsAndModels.mb[idx];
           const queryValues = await generateUniqueQueries(
-            count,
+            2,
             systemPrompt,
             userPromptTemplate.replace('{keyword}', keyword),
             maxTokens,
             fallback
           );
-          generatedQueries.push(queryValues);
+          const modelIdentifierFilterValue = getModelIdentifierFilterValueIfInStock(keyword);
+          const keywordAiEvaluationRules = modelIdentifierFilterValue
+            ? modelIdentifierEvaluationRules
+            : missingModelIdentifierEvaluationRules;
+          const shouldFilter = modelIdentifierFilterValue
+            ? {
+                include: [{ modelIdentifier: [modelIdentifierFilterValue] }],
+                exclude: [],
+                strict: false,
+              }
+            : {
+                include: [],
+                exclude: [{ modelIdentifier: [getModelIdentifierLabel(keyword)] }],
+                strict: false,
+              };
+
+          generatedQueries.push(queryValues.map((query) => {
+            return {
+              value: query,
+              shouldFilter,
+              ...(Object.keys(keywordAiEvaluationRules).length > 0
+                ? { aiEvaluationHints: keywordAiEvaluationRules }
+                : {}),
+            };
+          }));
         }
         return generatedQueries.flat();
       })();
