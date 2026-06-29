@@ -843,13 +843,21 @@ function parseVehicleTotalCountDetectionAnswer(answer: string): number | null {
   return null;
 }
 
+function normalizeMessageForVehicleCountExtraction(message: string): string {
+  return message
+    .replace(/\b(\d+)\s*(?:dr|door)\b/giu, "$1-door")
+    .replace(/\b(\d+)\s*(?:matic|matic\+)\b/giu, "$1MATIC");
+}
+
 function extractVehicleTotalCountFromMessageByPattern(message: string): number | null {
   const normalizedMessage = message.replace(/\s+/g, " ").trim();
   if (!normalizedMessage) {
     return null;
   }
 
-  const countToken = "(\\d{1,3}(?:,\\d{3})+|\\d+|one|two|three|four|five|six|seven|eight|nine|ten)";
+  const numericCountToken = "(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?![\\p{L}\\p{M}_-])";
+  const wordCountToken = "(?:one|two|three|four|five|six|seven|eight|nine|ten)(?!-)";
+  const countToken = `(${numericCountToken}|${wordCountToken})`;
   const localizedVehicleNouns = [
     "vehicles?",
     "cars?",
@@ -961,6 +969,9 @@ function extractVehicleTotalCountFromMessageByPattern(message: string): number |
     const parsedCount = parseCountToken(match[1]);
     if (parsedCount !== null) {
       const matchedText = match[0] || "";
+      if (/\b\d+\s*(?:-?\s*door|dr|matic)/iu.test(matchedText) || /\b\d+\s+[\p{L}\p{M}]+\s+\d*MATIC\+?/iu.test(matchedText)) {
+        continue;
+      }
       if (
         parsedCount >= 1900 &&
         parsedCount <= 2100 &&
@@ -976,10 +987,31 @@ function extractVehicleTotalCountFromMessageByPattern(message: string): number |
   return null;
 }
 
+function isLikelyVehicleDescriptorNumber(message: string, count: number): boolean {
+  const escapedCount = String(count).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const compactDescriptorPattern = new RegExp(
+    `\\b${escapedCount}\\s*(?:-?\\s*door|dr|matic)\\b`,
+    "iu"
+  );
+  const trimDescriptorPattern = new RegExp(
+    `\\b${escapedCount}\\s+[\\p{L}\\p{M}]+\\s+\\d*MATIC\\+?\\b`,
+    "iu"
+  );
+
+  return compactDescriptorPattern.test(message) || trimDescriptorPattern.test(message);
+}
+
 export async function extractVehicleTotalCountFromMessage(message: string): Promise<number | null> {
-  const normalizedMessage = message.replace(/\s+/g, " ").trim();
+  const normalizedMessage = normalizeMessageForVehicleCountExtraction(message)
+    .replace(/\s+/g, " ")
+    .trim();
   if (!normalizedMessage) {
     return null;
+  }
+
+  const detectedByPattern = extractVehicleTotalCountFromMessageByPattern(normalizedMessage);
+  if (detectedByPattern !== null) {
+    return detectedByPattern;
   }
 
   const answer = await generateOpenAIQuery(
@@ -990,6 +1022,7 @@ export async function extractVehicleTotalCountFromMessage(message: string): Prom
       "Examples that should return an integer: 'We have 189 sedans available' -> 189; 'There are 971 options available' -> 971; '3 vehicles were found' -> 3; 'we have two exciting options' -> 2.",
       "Return NONE for years, model years, prices, mileage, speed, range, horsepower, model names, trim names, or dates.",
       "Important: '2020 models' means model year 2020, not a total count, unless the wording clearly says there are 2020 total vehicles/options/results.",
+      "Important: compact model/body descriptors such as '2dr', '2-door', '4MATIC', '4MATIC+', '53 4MATIC+', or similar trim text are not total result counts.",
       "Support non-English responses too.",
     ].join("\n"),
     `Response:\n${normalizedMessage}`,
@@ -1000,10 +1033,12 @@ export async function extractVehicleTotalCountFromMessage(message: string): Prom
 
   const detectedByAi = parseVehicleTotalCountDetectionAnswer(answer);
   if (detectedByAi !== null) {
+    if (isLikelyVehicleDescriptorNumber(normalizedMessage, detectedByAi)) {
+      return null;
+    }
     return detectedByAi;
   }
 
-  const detectedByPattern = extractVehicleTotalCountFromMessageByPattern(normalizedMessage);
   if (/^none$/i.test((answer || "").trim())) {
     return detectedByPattern;
   }
