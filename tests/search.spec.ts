@@ -52,6 +52,7 @@ import {
   loadFacetMatrixSuite,
   loadMissingFacetValuesSuite,
   loadNumericUnitVariationSuite,
+  saveFacetCompleteSuite,
 } from "./utils/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
@@ -163,6 +164,16 @@ function getModelIdentifierLabel(keyword: string): string {
     .replace(/^Mercedes[- ]AMG\s+/i, "AMG ")
     .replace(/^Mercedes[- ]Maybach\s+/i, "Maybach ")
     .trim();
+}
+
+async function saveGeneratedQueriesIfAny(queries: unknown[]): Promise<void> {
+  if (!Array.isArray(queries) || queries.length === 0) {
+    return;
+  }
+
+  await saveFacetCompleteSuite(
+    normalizeFixedQueries(queries as Parameters<typeof normalizeFixedQueries>[0])
+  );
 }
 
 function extendTimeoutForQueryCount(testInfo: TestInfo, queryCount: number): void {
@@ -320,6 +331,7 @@ test.describe("AI Smart Search - Sanity", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -359,6 +371,7 @@ test.describe("AI Smart Search - Sanity", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -397,6 +410,7 @@ test.describe("AI Smart Search - Sanity", () => {
       const queries = isFixedQueriesOnly()
         ? []
         : await loadFacetCompleteSuite(fallbackHints);
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries);
       extendTimeoutForQueryCount(testInfo, allQueries.length);
 
@@ -468,6 +482,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const queries = isFixedQueriesOnly()
         ? []
         : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -495,6 +510,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       );
       const queries = isFixedQueriesOnly() ? [] : generateAndOrFacetMatrixFromFacets(facets);
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -530,6 +546,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const matrixQueries = isFixedQueriesOnly()
         ? []
         : await loadFacetMatrixSuite();
+      await saveGeneratedQueriesIfAny(matrixQueries);
       const allQueries = mergeQueries(fixedQueries, matrixQueries);
       extendTimeoutForQueryCount(testInfo, allQueries.length);
 
@@ -600,6 +617,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         }
         return generatedQueries.flat();
       })();
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -640,6 +658,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -680,6 +699,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -721,6 +741,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         undefined,
         temperature
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -765,6 +786,7 @@ test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
         const queries = isFixedQueriesOnly()
           ? []
           : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+        await saveGeneratedQueriesIfAny(queries);
         const allQueries = mergeQueries(fixedQueries, queries);
 
         await runTestsAndSaveResults({
@@ -836,6 +858,7 @@ test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
       const queries = isFixedQueriesOnly()
         ? []
         : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries);
 
       await runTestsAndSaveResults({
@@ -921,6 +944,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         }
         return generatedQueries.flat();
       })();
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -955,6 +979,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       const fixedQueries = fixedQueriesData.keywordSingle;
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(20, 1, 1);
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -988,6 +1013,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
       const fixedQueries = fixedQueriesData.keywordMix;
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(10, 2, 5);
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1168,6 +1194,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1208,6 +1235,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1285,6 +1313,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1320,6 +1349,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         ? undefined
         : aiEvaluationRules;
       const allQueries = await loadNumericUnitVariationSuite(fallbackHints);
+      await saveGeneratedQueriesIfAny(allQueries);
 
       await runTestsAndSaveResults({
         queries: allQueries,
@@ -1346,6 +1376,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1386,6 +1417,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1426,6 +1458,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1465,6 +1498,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1605,6 +1639,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1808,6 +1843,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1847,6 +1883,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1886,6 +1923,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1925,6 +1963,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
         maxTokens,
         fallback
       );
+      await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1965,6 +2004,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -2010,6 +2050,7 @@ test.describe("AI Smart Search - Reliability", () => {
       maxTokens,
       fallback
     );
+    await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;

@@ -8,7 +8,8 @@ export interface SimplifiedFacet {
   type: "range" | "list";
   min?: number;
   max?: number;
-  values?: Array<{ code: string; name: string }>;
+  count?: number;
+  values?: Array<{ code: string; name: string; count?: number }>;
   displayName?: string;
 }
 
@@ -62,7 +63,7 @@ interface AndOrFacetMatrixQuery {
   filterValue: string;
   shouldFilter: boolean | {
     include: Array<Record<string, Array<string | number>>>;
-    exclude: [];
+    exclude: Array<Record<string, Array<string | number>>>;
     strict: false;
   };
   aiEvaluationHints: {
@@ -106,12 +107,14 @@ export async function fetchAndConvertFacets(
             facetData.facetDisplayType = "SLIDER";
             facetData.min = value.values.min;
             facetData.max = value.values.max;
+            facetData.count = value.values.count;
             facetData.displayName = key;
           } else if (value?.values && Array.isArray(value.values)) {
             facetData.facetDisplayType = "LIST";
             facetData.values = value.values.map((v: any) => ({
               code: v.value || v.formattedValue,
               name: v.formattedValue || v.value || v.label,
+              count: v.count,
             }));
             facetData.displayName = key;
           }
@@ -131,11 +134,11 @@ export async function fetchAndConvertFacets(
       return values
         .map((v: any) => {
           if (v.code && v.name) {
-            return { code: v.code, name: v.name };
+            return { code: v.code, name: v.name, count: v.count };
           }
           if (Array.isArray(v.values)) {
             return v.values
-              .map((inner: any) => ({ code: inner.code, name: inner.name }))
+              .map((inner: any) => ({ code: inner.code, name: inner.name, count: inner.count }))
               .filter((x: any) => x.code && x.name);
           }
           return null;
@@ -146,7 +149,7 @@ export async function fetchAndConvertFacets(
 
     facets = rawFacets
       .map((facet: any) => {
-        const { code, min, max, values, displayName, facetDisplayType } = facet;
+        const { code, min, max, count, values, displayName, facetDisplayType } = facet;
         let type;
         if (facetDisplayType === "SLIDER") {
           type = "range";
@@ -156,7 +159,7 @@ export async function fetchAndConvertFacets(
           if (isNaN(parsedMin) || isNaN(parsedMax) || parsedMin === parsedMax) {
             return null;
           }
-          return { code, type, min: parsedMin, max: parsedMax, displayName };
+          return { code, type, min: parsedMin, max: parsedMax, count, displayName };
         } else {
           type = "list";
           return {
@@ -331,6 +334,7 @@ function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | 
 function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
   queryValue: string;
   expectedValue: string | number;
+  count?: number;
 }> {
   if (facet.type === "range") {
     const min = Number(facet.min);
@@ -343,6 +347,7 @@ function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
     return [{
       queryValue: value.toLocaleString("en-US"),
       expectedValue: value,
+      count: facet.count,
     }];
   }
 
@@ -353,7 +358,12 @@ function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
   return facet.values.map((value) => ({
     queryValue: getMappedFormattedValue(facet.code, value.code) || value.name || value.code,
     expectedValue: value.code,
+    count: value.count,
   }));
+}
+
+function isFacetMatrixValueInStock(value: { count?: number }): boolean {
+  return value.count === undefined || Number(value.count) > 0;
 }
 
 function buildAndOrQueryValue(
@@ -410,6 +420,45 @@ function createAndOrFacetHints(
   ];
 }
 
+function createUnavailableAndOrFacetHints(
+  operator: "AND" | "OR",
+  firstFacetLabel: string,
+  firstValueLabel: string,
+  firstInStock: boolean,
+  secondFacetLabel: string,
+  secondValueLabel: string,
+  secondInStock: boolean
+): string[] {
+  const connector = operator === "AND" ? "and" : "or";
+  const unavailableValues = [
+    !firstInStock ? `${firstFacetLabel} ${firstValueLabel}` : "",
+    !secondInStock ? `${secondFacetLabel} ${secondValueLabel}` : "",
+  ].filter(Boolean).join(", ");
+  const availableValues = [
+    firstInStock ? `${firstFacetLabel} ${firstValueLabel}` : "",
+    secondInStock ? `${secondFacetLabel} ${secondValueLabel}` : "",
+  ].filter(Boolean).join(", ");
+
+  const hints = [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested ${operator} filter intent for ${firstFacetLabel} ${firstValueLabel} ${connector} ${secondFacetLabel} ${secondValueLabel}.`,
+    `Respond with "PASS" if the response acknowledges that the unavailable requested facet value(s) are not available or not in stock: ${unavailableValues}.`,
+    `FAIL if the response presents the unavailable requested facet value(s) as available matches: ${unavailableValues}.`,
+  ];
+
+  if (availableValues) {
+    hints.push(`Respond with "PASS" if the response still offers or applies available requested facet value(s) as alternatives or partial matches: ${availableValues}.`);
+  } else {
+    hints.push(`Respond with "PASS" if the response says no matching vehicles are available for the requested ${firstFacetLabel}/${secondFacetLabel} values and offers to adjust the search.`);
+  }
+
+  hints.push(
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+    `Respond with failure reason otherwise respond with "PASS" only.`
+  );
+
+  return hints;
+}
+
 export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): AndOrFacetMatrixQuery[] {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
   const queries: AndOrFacetMatrixQuery[] = [];
@@ -449,10 +498,17 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
           const facetPair = `${anchorFacet.code}+${targetFacet.code}`;
           const filterText = `${anchorLabel} '${anchorValue.queryValue}' and ${targetLabel} '${targetValue.queryValue}'`;
           const filterValue = `${anchorValue.expectedValue},${targetValue.expectedValue}`;
+          const anchorInStock = isFacetMatrixValueInStock(anchorValue);
+          const targetInStock = isFacetMatrixValueInStock(targetValue);
           const include = [
-            { [anchorFacet.code]: [anchorValue.expectedValue] },
-            { [targetFacet.code]: [targetValue.expectedValue] },
-          ];
+            anchorInStock ? { [anchorFacet.code]: [anchorValue.expectedValue] } : null,
+            targetInStock ? { [targetFacet.code]: [targetValue.expectedValue] } : null,
+          ].filter((entry): entry is Record<string, Array<string | number>> => entry !== null);
+          const exclude = [
+            anchorInStock ? null : { [anchorFacet.code]: [anchorValue.expectedValue] },
+            targetInStock ? null : { [targetFacet.code]: [targetValue.expectedValue] },
+          ].filter((entry): entry is Record<string, Array<string | number>> => entry !== null);
+          const allValuesInStock = anchorInStock && targetInStock;
 
           queries.push({
             value: buildAndOrQueryValue(
@@ -468,17 +524,27 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
             filterValue,
             shouldFilter: {
               include,
-              exclude: [],
+              exclude,
               strict: false,
             },
             aiEvaluationHints: {
-              value: createAndOrFacetHints(
-                "AND",
-                anchorLabel,
-                anchorValue.queryValue,
-                targetLabel,
-                targetValue.queryValue
-              ),
+              value: allValuesInStock
+                ? createAndOrFacetHints(
+                    "AND",
+                    anchorLabel,
+                    anchorValue.queryValue,
+                    targetLabel,
+                    targetValue.queryValue
+                  )
+                : createUnavailableAndOrFacetHints(
+                    "AND",
+                    anchorLabel,
+                    anchorValue.queryValue,
+                    anchorInStock,
+                    targetLabel,
+                    targetValue.queryValue,
+                    targetInStock
+                  ),
               overwrite: true,
             },
           });
@@ -497,17 +563,27 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
             filterValue,
             shouldFilter: {
               include,
-              exclude: [],
+              exclude,
               strict: false,
             },
             aiEvaluationHints: {
-              value: createAndOrFacetHints(
-                "OR",
-                anchorLabel,
-                anchorValue.queryValue,
-                targetLabel,
-                targetValue.queryValue
-              ),
+              value: allValuesInStock
+                ? createAndOrFacetHints(
+                    "OR",
+                    anchorLabel,
+                    anchorValue.queryValue,
+                    targetLabel,
+                    targetValue.queryValue
+                  )
+                : createUnavailableAndOrFacetHints(
+                    "OR",
+                    anchorLabel,
+                    anchorValue.queryValue,
+                    anchorInStock,
+                    targetLabel,
+                    targetValue.queryValue,
+                    targetInStock
+                  ),
               overwrite: true,
             },
           });
