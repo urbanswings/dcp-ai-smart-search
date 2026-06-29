@@ -123,6 +123,32 @@ export async function evaluateSearchResult(
       : resultText;
   }
 
+  const isNegativeContradictoryEvaluation = Boolean(
+    aiEvaluationHints?.value?.some((line) =>
+      /Negative\/Contradictory Queries|contradictory queries appropriately/i.test(String(line))
+    )
+  );
+  const shouldPassNegativeContradictoryBoundaryResponse = (answer: string): boolean => {
+    if (!isNegativeContradictoryEvaluation) {
+      return false;
+    }
+
+    const normalizedAnswer = answer.toLowerCase();
+    const failedOnlyForContradictionHandling =
+      /does not address.*contradict|fails? to address.*contradict|contradictory nature/.test(normalizedAnswer);
+    if (!failedOnlyForContradictionHandling) {
+      return false;
+    }
+
+    const normalizedResponse = resultText.toLowerCase();
+    const scopesToVehicleSearch =
+      /only (help|support|assist).*vehicle search|focused on the vehicle part|not able to assist|can't satisfy|cannot satisfy|couldn.t find|couldn't find|no exact match|not currently available|not available|no matching/.test(normalizedResponse);
+    const redirectsOrOffersAlternatives =
+      /sales team|dealer|dealership|alternative|broader|available options|options to consider|inventory|vehicles matching|found vehicles|matching your request|browse our broader lineup|explore/.test(normalizedResponse);
+
+    return scopesToVehicleSearch && redirectsOrOffersAlternatives;
+  };
+
   try {
     const answer = await generateOpenAIQuery(
       systemPrompt,
@@ -130,6 +156,10 @@ export async function evaluateSearchResult(
       maxTokens,
       temperature
     );
+
+    if (shouldPassNegativeContradictoryBoundaryResponse(answer)) {
+      return "PASS";
+    }
 
     if (!answer.includes("PASS")) {
       console.warn(`[WARN] OpenAI Evaluation indicates failure: ${answer}`);

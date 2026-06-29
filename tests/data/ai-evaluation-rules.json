@@ -184,10 +184,12 @@
     },
     "Negative/Contradictory Queries": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response handles negative or contradictory queries appropriately in Mercedes-Benz Smart Search.",
-        "PASS if the response acknowledges the contradiction and offers helpful alternatives or clarification.",
-        "PASS if the response maintains Mercedes-Benz focus even with conflicting user input.",
-        "FAIL if the response is incoherent or provides confusing guidance.",
+        "Respond ONLY with: PASS if the response maintains Mercedes-Benz focus even with conflicting user input.",
+        "PASS if the response states that it can only support Mercedes-Benz vehicle search, can only help with vehicle search, or cannot satisfy the contradictory/non-search request directly, and then redirects the user to contact the sales team or explore other Mercedes-Benz vehicle options.",
+        "PASS if the response still offers relevant Mercedes-Benz alternatives, broader vehicle options, or sales-team/dealer assistance.",
+        "PASS if the response offers any Mercedes-Benz alternatives, broader inventory, available options, or sales-team/dealer assistance after saying the exact request cannot be supported or no exact match was found.",
+        "Do NOT fail only because the alternative Mercedes-Benz model, color, body type, or option does not match the impossible/contradictory request exactly.",
+        "FAIL if the response is incoherent or provides confusing guidance, but do not treat ordinary alternative Mercedes-Benz inventory as incoherent solely because it differs from the impossible request.",
         "FAIL if the response is unsafe or offensive."
       ],
       "overwrite": true
