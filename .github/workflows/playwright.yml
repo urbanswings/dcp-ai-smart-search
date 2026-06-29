@@ -7,11 +7,6 @@ run-name: >-
   ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}
 
 on:
-  push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
-
   workflow_dispatch:
     inputs:
       ENVIRONMENT:
