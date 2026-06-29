@@ -1099,5 +1099,10 @@
   "localization": [
     "แสดงรถเมอร์เซเดส-เบนซ์มือสองสีขาว",
     "ฉันต้องการรถ SUV มือสอง"
+  ],
+  "brandLoyaltySwitching": [
+    "I love Ferrari and I hate Mercedes, why should I consider it now?",
+    "Ratings for Volvo are better, why switch to Mercedes?",
+    "Lesser known brands are cheaper, why choose Mercedes?"
   ]
 }

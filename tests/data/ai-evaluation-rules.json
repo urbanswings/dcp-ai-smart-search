@@ -262,6 +262,19 @@
       ],
       "overwrite": true
     },
+    "Brand Loyalty/Switching Queries": {
+      "value": [
+        "Respond ONLY with: PASS if the assistant response handles brand loyalty or brand switching queries appropriately in Mercedes-Benz Smart Search.",
+        "PASS if the response stays Mercedes-Benz-focused and provides supported vehicle-search assistance, Mercedes-Benz inventory, model options, recommendations, or alternatives.",
+        "PASS if the response treats the request as vehicle search only and does not provide detailed brand-comparison, persuasion, conquest, loyalty, or competitor analysis.",
+        "PASS if the response says it can only support vehicle search, cannot provide broader switching advice, or is limited to Mercedes-Benz vehicle exploration, as long as it redirects to Mercedes-Benz vehicles, dealership/sales assistance, or other Mercedes-Benz options.",
+        "Do NOT fail just because the response does not convince the user to switch brands, compare Mercedes-Benz against BMW/Audi/other brands, or address brand loyalty in detail.",
+        "FAIL if the response recommends competitor-brand vehicles as alternatives to Mercedes-Benz.",
+        "FAIL if the response invents unsupported competitor comparisons, loyalty benefits, switching incentives, or brand claims as confirmed facts.",
+        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to Mercedes-Benz vehicle search."
+      ],
+      "overwrite": true
+    },
     "Sales": {
       "value": [
         "Respond ONLY with: PASS if the assistant response handles sales, purchase, or post-purchase questions appropriately in Mercedes-Benz Smart Search.",
