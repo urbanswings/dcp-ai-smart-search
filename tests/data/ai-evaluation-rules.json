@@ -292,6 +292,19 @@
       ],
       "overwrite": true
     },
+    "Joke/Humor Queries": {
+      "value": [
+        "Respond ONLY with: PASS if the assistant response handles joke, humor, whimsical, or impossible vehicle queries appropriately in Mercedes-Benz Smart Search.",
+        "PASS if the response briefly acknowledges the playful or imaginative nature of the query while staying professional and Mercedes-Benz-focused.",
+        "PASS if the response politely states that impossible, fictional, joke-based, or unsupported vehicle requests cannot be fulfilled and redirects to Mercedes-Benz vehicle search, recommendations, inventory, or available vehicle options.",
+        "PASS if the response offers to help explore Mercedes-Benz vehicles even when the user's joke request has no real matching vehicle.",
+        "Do NOT fail only because the response uses light, friendly wording, as long as it keeps a luxury-aligned and professional tone.",
+        "FAIL if the response treats fictional or impossible vehicles such as flying, invisible, or pizza-powered cars as real available inventory.",
+        "FAIL if the response engages mainly with the joke and does not redirect to Mercedes-Benz vehicle assistance.",
+        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to Mercedes-Benz vehicle search."
+      ],
+      "overwrite": true
+    },
     "Brand Loyalty/Switching Queries": {
       "value": [
         "Respond ONLY with: PASS if the assistant response handles brand loyalty or brand switching queries appropriately in Mercedes-Benz Smart Search.",
