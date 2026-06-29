@@ -7,6 +7,7 @@ import {
   fetchTranslation,
   openaiChatCompletion,
 } from "./aiHelpers";
+import { extractVehicleTotalCountFromMessage } from "./apiHelpers";
 import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 import {
   buildFacetValueDisplayMap,
@@ -876,6 +877,7 @@ export async function processAndLogUiResult({
   let hasError = false;
   let responseCheckPassed = true;
   let facetsCheckPassed = true;
+  let countCheckPassed = true;
   let uiFacetComparison: {
     matches: boolean;
     missingFacetValues: string[];
@@ -932,6 +934,15 @@ export async function processAndLogUiResult({
     addFailureReason("Payload is zero");
   } else if (resultCount === 0 && actualFacets) {
     // Skip "Payload is zero" when facets are being validated
+  }
+
+  const responseVehicleTotalCount = await extractVehicleTotalCountFromMessage(smartSearchMessage);
+  if (responseVehicleTotalCount !== null && responseVehicleTotalCount !== resultCount) {
+    countCheckPassed = false;
+    responseCheckPassed = false;
+    addFailureReason(
+      `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`
+    );
   }
 
   // Facets check (test-data vs BE)  
@@ -1184,24 +1195,24 @@ export async function processAndLogUiResult({
   const normalizedEvaluation = (openaiEvaluation || "").trim();
   const evaluationPassed = normalizedEvaluation.toUpperCase() === "PASS";
   const displayHasError = hasError || !evaluationPassed;
+  const sectionMarker = (status: "PASS" | "FAIL" | "SKIP") => {
+    if (status === "PASS") return "✅";
+    if (status === "FAIL") return "❌";
+    return "➖";
+  };
+  const messageStatus = evaluationPassed ? "PASS" : "FAIL";
+  const countStatus = responseVehicleTotalCount === null
+    ? "SKIP"
+    : countCheckPassed ? "PASS" : "FAIL";
+  const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Query:         '${actualInput}'`);
-  console.log(`Response:      '${smartSearchMessage}'`);
-  if (actualFacets !== undefined) {
-    console.log(
-      `Expected Facets: '${JSON.stringify(actualFacets)}'`
-    );
-  }
-  console.log(
-    `Actual Facets:   '${JSON.stringify(resultsFacets)}'`
-  );
-  console.log(
-    `UI Facets:       '${JSON.stringify(uiSelectedFiltersKV)}'`
-  );
+  console.log(`${sectionMarker(messageStatus)} Message:`);
+  console.log(`• Query:      '${actualInput}'`);
+  console.log(`• Response:   '${smartSearchMessage}'`);
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
@@ -1211,9 +1222,22 @@ export async function processAndLogUiResult({
       "en"
     );
     console.log("\n");
-    console.log(`Query (EN):    '${queryEn}'`);
-    console.log(`Response (EN): '${smartSearchMessageEn}'`);
+    console.log(`${sectionMarker(messageStatus)} Message (EN):`);
+    console.log(`• Query:      '${queryEn}'`);
+    console.log(`• Response:   '${smartSearchMessageEn}'`);
   }
+
+  console.log("\n");
+  console.log(`${sectionMarker(countStatus)} Count:`);
+  console.log(`• Response: ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
+  console.log(`• Backend:   ${resultCount}`);
+  console.log(`• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`);
+
+  console.log("\n");
+  console.log(`${sectionMarker(filterStatus)} Filters:`);
+  console.log(`• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`);
+  console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
+  console.log(`• UI:        ${JSON.stringify(uiSelectedFiltersKV)}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log("\n");
 
@@ -1235,6 +1259,7 @@ export async function processAndLogUiResult({
     },
     resultCount,
     uiVehicleCount,
+    responseVehicleTotalCount,
     responseTime: results.responseTime,
     statusCode: null,
     hasError: displayHasError,
@@ -1244,6 +1269,10 @@ export async function processAndLogUiResult({
     results: {
       responseResult: responseCheckPassed ? "PASS" : "FAIL",
       facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
+      countResult: responseVehicleTotalCount === null ? "SKIP" : countCheckPassed ? "PASS" : "FAIL",
+      responseVehicleTotalCount,
+      backendResultCount: resultCount,
+      uiVehicleCount,
     },
     facets: {
       expected: actualFacets,
