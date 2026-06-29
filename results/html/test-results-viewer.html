@@ -3039,6 +3039,21 @@
       return true;
     }
 
+    function cycleSelectOption(selectEl, direction) {
+      if (!selectEl || selectEl.disabled || selectEl.options.length <= 1) {
+        return false;
+      }
+
+      const optionCount = selectEl.options.length;
+      const nextIndex = (selectEl.selectedIndex + direction + optionCount) % optionCount;
+      if (nextIndex === selectEl.selectedIndex) {
+        return false;
+      }
+
+      selectEl.selectedIndex = nextIndex;
+      return true;
+    }
+
     function resizeCharts() {
       if (marketPassRateChartInstance) {
         marketPassRateChartInstance.resize();
@@ -3456,10 +3471,6 @@
         }
       }
 
-      if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
-        return;
-      }
-
       const target = event.target;
       const tagName = target && target.tagName ? target.tagName.toLowerCase() : "";
       const isTypingContext =
@@ -3470,20 +3481,32 @@
         return;
       }
 
+      if (event.key === "Tab") {
+        if (cycleSelectOption(titleFilterSelect, event.shiftKey ? -1 : 1)) {
+          event.preventDefault();
+          renderFileOptions(folders[Number(folderSelect.value)], fileSelect.value);
+          updateFilterNavButtons();
+        }
+        return;
+      }
+
+      if (
+        event.key !== "ArrowUp" &&
+        event.key !== "ArrowDown" &&
+        event.key !== "ArrowLeft" &&
+        event.key !== "ArrowRight"
+      ) {
+        return;
+      }
+
       if (!currentRows.length || selectedRowIndex < 0) {
         return;
       }
 
-      const delta = event.key === "ArrowDown" ? 1 : -1;
-      const nextIndex = Math.min(Math.max(selectedRowIndex + delta, 0), currentRows.length - 1);
-      if (nextIndex === selectedRowIndex) {
-        return;
+      const delta = event.key === "ArrowDown" || event.key === "ArrowRight" ? 1 : -1;
+      if (navigateSelectedRow(delta)) {
+        event.preventDefault();
       }
-
-      event.preventDefault();
-      selectedRowIndex = nextIndex;
-      renderTableRows(currentRows, currentTableRenderOptions);
-      focusSelectedTableRow();
     });
 
     resultsTbody.addEventListener("click", (event) => {

@@ -976,7 +976,7 @@ function extractVehicleTotalCountFromMessageByPattern(message: string): number |
   return null;
 }
 
-async function extractVehicleTotalCountFromMessage(message: string): Promise<number | null> {
+export async function extractVehicleTotalCountFromMessage(message: string): Promise<number | null> {
   const normalizedMessage = message.replace(/\s+/g, " ").trim();
   if (!normalizedMessage) {
     return null;
