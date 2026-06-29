@@ -60,6 +60,36 @@
     "maxTokens": 20,
     "temperature": 0
   },
+  "Vehicles MB": {
+    "By Brand/Model": {
+      "value": [
+        "Respond ONLY with: PASS if the assistant response handles a Mercedes-Benz brand/model inventory query appropriately.",
+        "PASS if the response applies, acknowledges, or reasonably maps the requested Mercedes-Benz model/class to available inventory results.",
+        "PASS if the response indicates matching Mercedes-Benz vehicles are available, gives a result count, or lists relevant Mercedes-Benz alternatives within the requested model family.",
+        "PASS if the response says the exact requested trim or variant is not available but offers close Mercedes-Benz alternatives or broader model-family results.",
+        "FAIL if the response ignores the requested Mercedes-Benz brand/model, switches to unrelated models without acknowledging the request, or provides non-Mercedes recommendations.",
+        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to Mercedes-Benz vehicle search.",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
+      ],
+      "overwrite": true
+    },
+    "By Specs": {
+      "value": [
+        "Respond ONLY with: PASS if the assistant response handles a Mercedes-Benz specification, feature, style, or lifestyle preference query appropriately.",
+        "PASS if the response translates descriptive preferences such as powerful engine, stylish exterior, adventurous spirit, turbocharged engine, two-tone paint, leather interior, infotainment, luxury, performance, or comfort into relevant Mercedes-Benz vehicle options.",
+        "PASS if the response lists Mercedes-Benz models, model families, result counts, or available options that reasonably match at least one important requested specification or preference.",
+        "PASS if the response acknowledges multiple requested specifications in general terms without proving every detail is available as a backend facet.",
+        "PASS if the query asks for an adventurous or rugged off-road vehicle and the response offers Mercedes-Benz SUVs/off-road-capable models, even if it does not explicitly mention every requested detail such as high torque, bold colors, or interior materials.",
+        "PASS if the response covers the main vehicle intent and at least one major spec/theme such as rugged/off-road, powerful engine, performance, SUV body style, luxury interior, infotainment, exterior style, fuel type, or model family.",
+        "Do NOT fail only because broad or subjective terms such as stylish, adventurous, ultimate driving experience, luxurious, eye-catching, or advanced are not mapped to exact filters.",
+        "Do NOT fail only because secondary details such as exact exterior color, two-tone paint, torque wording, leather type, or infotainment package are omitted when relevant Mercedes-Benz vehicle options are provided.",
+        "FAIL if the response ignores the main specification/preference intent, gives unrelated vehicle options, invents unsupported exact equipment details, or recommends non-Mercedes vehicles.",
+        "FAIL if the response is incoherent, unsafe, offensive, or unrelated to Mercedes-Benz vehicle search.",
+        "Respond with failure reason otherwise respond with \"PASS\" only."
+      ],
+      "overwrite": true
+    }
+  },
   "Vehicles Non-MB": {
     "By Brand/Model (Sentence|Single)": {
       "value": [

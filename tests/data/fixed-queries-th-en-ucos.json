@@ -1104,5 +1104,15 @@
     "I love Ferrari and I hate Mercedes, why should I consider it now?",
     "Ratings for Volvo are better, why switch to Mercedes?",
     "Lesser known brands are cheaper, why choose Mercedes?"
+  ],
+  "bySpecs": [
+    "I want a car that combines luxury and performance, with advanced safety features and a comfortable interior.",
+    "I'm interested in a vehicle that offers a balance of fuel efficiency and power, with a spacious interior and advanced technology features.",
+    "I want a car that is perfect for city driving, with a compact size, easy maneuverability, and a stylish design.",
+    "I'm looking for a vehicle that is perfect for long road trips, with a comfortable interior, advanced safety features, and a powerful engine.",
+    "I want a car that is perfect for off-road adventures, with a rugged exterior, powerful engine, and advanced suspension system.",
+    "I'm interested in a vehicle that is perfect for families, with a spacious interior, advanced safety features, and a comfortable ride.",
+    "I'm looking for a car that is perfect for sports enthusiasts, with a powerful engine, sleek design, and advanced performance features.",
+    "I want a vehicle that is perfect for eco-conscious drivers, with a fuel-efficient engine, low emissions, and advanced technology features."
   ]
 }

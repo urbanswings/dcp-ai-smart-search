@@ -570,7 +570,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const modelIdentifierEvaluationRules =
-        aiEvaluationRulesData[describeName]?.["By Filter Facets ('modelIdentifier')"] || {};
+        aiEvaluationRulesData[describeName]?.["By Filter Facets ('modelIdentifier')"] || aiEvaluationRules;
       const missingModelIdentifierEvaluationRules =
         aiEvaluationRulesData["Vehicles MB - Negative Facets"]?.["By Filter Facets ('modelIdentifier')(-ve)"] || {};
       const queries = isFixedQueriesOnly() ? [] : await (async () => {
@@ -1079,6 +1079,15 @@ test.describe("AI Smart Search - Input Robustness", () => {
   registerSmartSearchSuiteHooks(describeName);
 
   test("Edge Case Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const withAiEvaluationHints = (query: string) => (
+      Object.keys(aiEvaluationRules).length === 0
+        ? query
+        : {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+    );
     const edgeQueries: Array<[string, boolean, number]> = [
       // [query, submitDisabled, expectedStatusCode]
       ["     ", true, 200], // whitespace only
@@ -1107,13 +1116,14 @@ test.describe("AI Smart Search - Input Robustness", () => {
     if (shouldRunUiTests()) {
       const page = await setupContextAndPage(browser);
       for (const [query, submitDisabled, expectedStatusCode] of edgeQueries) {
+        const queryWithHints = withAiEvaluationHints(query);
         const results = await performUISmartSearchAndGetResults(
           page,
           query,
           submitDisabled
         );
         const entry = await processAndLogUiResult({
-          query,
+          query: queryWithHints,
           results,
           testDescribe: describeName,
           testTitle: test.info().title,
@@ -1129,9 +1139,10 @@ test.describe("AI Smart Search - Input Robustness", () => {
       for (const [query, submitDisabled, expectedStatusCode] of edgeQueries) {
         if (!submitDisabled) {
           // Only test valid queries for API
+          const queryWithHints = withAiEvaluationHints(query);
           const results = await performApiSmartSearchAndGetResults(query);
           const entry = await processAndLogApiResult({
-            query,
+            query: queryWithHints,
             results,
             testDescribe: describeName,
             testTitle: test.info().title,
