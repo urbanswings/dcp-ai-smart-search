@@ -148,6 +148,14 @@
         "formattedValue": "EQV",
         "value": "EQV",
         "tags": []
+      },
+      {
+        "label": "モデル",
+        "formattedValue": "G-CLASS",
+        "value": "G_NEW",
+        "tags": [
+          "NEW"
+        ]
       }
     ],
     "facetType": "MULTI_VALUE"

@@ -1547,7 +1547,7 @@ export async function processAndLogApiResult({
 
   console.log("\n");
   console.log(`${sectionMarker(countStatus)} Count:`);
-  console.log(`• Response: ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
+  console.log(`• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
   console.log(`• Backend:   ${resultCount}`);
 
   console.log("\n");

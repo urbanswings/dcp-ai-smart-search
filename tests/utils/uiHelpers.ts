@@ -1229,7 +1229,7 @@ export async function processAndLogUiResult({
 
   console.log("\n");
   console.log(`${sectionMarker(countStatus)} Count:`);
-  console.log(`• Response: ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
+  console.log(`• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
   console.log(`• Backend:   ${resultCount}`);
   console.log(`• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`);
 

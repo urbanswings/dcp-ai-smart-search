@@ -808,6 +808,21 @@ export function mergeQueries(
       .trim();
   };
 
+  const shouldPreserveBrandTerms = (query: any): boolean => {
+    const shouldFilter = query?.shouldFilter;
+    if (!shouldFilter || typeof shouldFilter !== "object") {
+      return query?.facet === "brand";
+    }
+
+    const filterGroups = [
+      ...(Array.isArray(shouldFilter.include) ? shouldFilter.include : []),
+      ...(Array.isArray(shouldFilter.exclude) ? shouldFilter.exclude : []),
+    ];
+    return filterGroups.some((filterGroup: any) =>
+      filterGroup && typeof filterGroup === "object" && "brand" in filterGroup
+    );
+  };
+
   const sanitizeQueryEntry = (query: any): any => {
     if (typeof query === "string") {
       return sanitizeQueryText(query);
@@ -816,7 +831,9 @@ export function mergeQueries(
     if (query && typeof query === "object" && "value" in query) {
       return {
         ...query,
-        value: sanitizeQueryText(String(query.value ?? "")),
+        value: shouldPreserveBrandTerms(query)
+          ? String(query.value ?? "").trim()
+          : sanitizeQueryText(String(query.value ?? "")),
       };
     }
 
