@@ -82,7 +82,10 @@
   "environmentalConcerns": [
     "Do you have eco-friendly cars?",
     "I'm looking for low-emission cars, do you have any?",
-    "I'm looking for sustainable or hybrid Mercedes models."
+    "I'm looking for sustainable or hybrid Mercedes models.",
+    "Do you have electric vehicles with solar charging options?",
+    "Are there any Mercedes models with biodegradable interior materials?",
+    "Do you have cars with low carbon footprint?"
   ],
   "byFixedQuery": [
     {

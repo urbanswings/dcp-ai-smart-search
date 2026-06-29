@@ -318,6 +318,19 @@
       ],
       "overwrite": true
     },
+    "Environmental Concerns Queries": {
+      "value": [
+        "Respond ONLY with: PASS if the assistant response handles environmental, eco-friendly, low-emission, sustainable, electric, or hybrid vehicle queries appropriately in Mercedes-Benz Smart Search.",
+        "PASS if the response maps environmental preferences to relevant Mercedes-Benz electric, plug-in hybrid, hybrid, low-emission, EQ, or sustainability-oriented vehicle options.",
+        "PASS if the response lists matching Mercedes-Benz models, model families, available options, or result counts that reasonably align with the user's environmental intent.",
+        "PASS if the response offers closest available Mercedes-Benz alternatives when the exact environmental wording is broad or not an exact backend facet.",
+        "Do NOT fail only because the response uses broad sustainability wording such as eco-friendly, low-emission, sustainable, electric, or hybrid without proving lifecycle emissions or detailed environmental certification.",
+        "FAIL if the response ignores the environmental preference and returns unrelated vehicle options without acknowledging the eco, electric, hybrid, or low-emission intent.",
+        "FAIL if the response invents unsupported environmental claims, emissions figures, carbon neutrality, certification, fuel economy, tax incentives, or charging benefits as confirmed facts.",
+        "FAIL if the response recommends non-Mercedes vehicles, is incoherent, unsafe, offensive, or unrelated to Mercedes-Benz vehicle search."
+      ],
+      "overwrite": true
+    },
     "Sales": {
       "value": [
         "Respond ONLY with: PASS if the assistant response handles sales, purchase, or post-purchase questions appropriately in Mercedes-Benz Smart Search.",

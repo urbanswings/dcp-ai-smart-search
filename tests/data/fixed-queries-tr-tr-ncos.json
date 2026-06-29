@@ -66,7 +66,10 @@
   "environmentalConcerns": [
     "Çevre dostu arabalar var mı?",
     "Düşük emisyonlu araba bakıyorum, var mı?",
-    "Sürdürülebilir ya da hibrit Mercedes modelleri arıyorum."
+    "Sürdürülebilir ya da hibrit Mercedes modelleri arıyorum.",
+    "Güneş enerjisiyle şarj seçeneği olan elektrikli araçlarınız var mı?",
+    "Biyolojik olarak çözünebilen iç mekan malzemelerine sahip Mercedes modelleri var mı?",
+    "Düşük karbon ayak izine sahip arabalarınız var mı?"
   ],
   "byFixedQuery": [
     {
