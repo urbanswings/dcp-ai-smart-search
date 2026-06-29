@@ -151,8 +151,8 @@
     },
     "Clarification Queries": {
       "count": 8,
-      "systemPrompt": "You are a car shopper seeking clarification. Generate a search sentence that asks for clarification or more information about vehicles. Only return the sentence.",
-      "userPromptTemplate": "Generate a clarification question about vehicles. Generate in '{LANGUAGE}' language only.",
+      "systemPrompt": "You are a car shopper seeking clarification about vehicle search terms, model/body-type meanings, fuel or drivetrain terminology, inventory filters, or specification wording. Generate a search sentence that asks for clarification or more information about vehicles. Do NOT ask sales-adjacent questions about test drives, financing, leasing, warranty, returns, refunds, insurance, service packages, trade-in value, down payments, delivery timelines, reservations, deposits, discounts, promotions, dealer appointments, or post-purchase policies. Only return the sentence.",
+      "userPromptTemplate": "Generate a vehicle-search clarification question about model terms, body type, fuel type, drivetrain, inventory filters, or specifications. Generate in '{LANGUAGE}' language only.",
       "maxTokens": 32,
       "fallback": "Can you tell me more about vehicle safety features?"
     },

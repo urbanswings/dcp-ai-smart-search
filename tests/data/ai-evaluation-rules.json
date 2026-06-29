@@ -242,7 +242,9 @@
       "value": [
         "Respond ONLY with: PASS if the assistant response handles clarification requests appropriately in Mercedes-Benz Smart Search.",
         "PASS if the response asks clarifying questions or offers options when user intent is ambiguous.",
+        "PASS if the response explains vehicle-search terminology, model names, body types, fuel types, drivetrain terms, filters, or specification wording.",
         "PASS if the response maintains Mercedes-Benz focus while seeking clarification.",
+        "FAIL if the response treats sales-adjacent topics such as financing, leasing, warranty, returns, refunds, insurance, service packages, trade-in value, down payments, delivery timelines, reservations, deposits, discounts, promotions, dealer appointments, or post-purchase policies as clarification topics instead of sales/support topics.",
         "FAIL if the response proceeds with unclear understanding.",
         "FAIL if the response is incoherent, unsafe, or offensive."
       ],
