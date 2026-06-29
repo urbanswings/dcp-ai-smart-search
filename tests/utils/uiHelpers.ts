@@ -1191,11 +1191,16 @@ export async function processAndLogUiResult({
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`Query:         '${actualInput}'`);
   console.log(`Response:      '${smartSearchMessage}'`);
+  if (actualFacets !== undefined) {
+    console.log(
+      `Expected Facets: '${JSON.stringify(actualFacets)}'`
+    );
+  }
   console.log(
-    `BE Facets:     '${JSON.stringify(resultsFacets)}'`
+    `Actual Facets:   '${JSON.stringify(resultsFacets)}'`
   );
   console.log(
-    `UI Facets:    '${JSON.stringify(uiSelectedFiltersKV)}'`
+    `UI Facets:       '${JSON.stringify(uiSelectedFiltersKV)}'`
   );
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;

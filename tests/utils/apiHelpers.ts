@@ -1079,6 +1079,8 @@ export async function processAndLogApiResult({
   // Facets check (BE vs test-data)
   if (actualFacets === false) {
     // shouldFilter: false — assert no filters were applied
+    beFacetDiagnosticLines.push(`Expected Facets: ${JSON.stringify(actualFacets)}`);
+    beFacetDiagnosticLines.push(`Actual Facets:   ${JSON.stringify(resultsFacets)}`);
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
       addFailureReason(
@@ -1087,6 +1089,8 @@ export async function processAndLogApiResult({
     }
   } else if (actualFacets === true) {
     // shouldFilter: true — assert at least one filter was applied
+    beFacetDiagnosticLines.push(`Expected Facets: ${JSON.stringify(actualFacets)}`);
+    beFacetDiagnosticLines.push(`Actual Facets:   ${JSON.stringify(resultsFacets)}`);
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
       addFailureReason(`Expected at least one filter to be applied, but got none`);

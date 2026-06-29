@@ -107,8 +107,8 @@
   "Constraint Handling": {
     "Date Range/Numeric Filters": {
       "count": 8,
-      "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles that uses date ranges, mileage, price, monthly rate, or other numeric filters. Vary the filter types and values. Only return the sentence.",
-      "userPromptTemplate": "Generate a unique vehicle search sentence using date/numeric filters. Generate in '{LANGUAGE}' language only.",
+      "systemPrompt": "You are a car shopper. Generate a natural vehicle search sentence that uses the exact provided date or numeric filter. Only return the sentence.",
+      "userPromptTemplate": "Generate a vehicle search sentence using this exact filter: {filterText}. Generate in '{LANGUAGE}' language only.",
       "maxTokens": 32,
       "fallback": "Show me SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000."
     },

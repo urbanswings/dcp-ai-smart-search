@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
-import { buildComplete, buildMatrix, readJson } from "./generateFacetMatrix.js";
+import { buildComplete, buildMatrix, isIncludedFacet, readJson } from "./generateFacetMatrix.js";
 
 const DATA_DIR = path.join(__dirname, "../data");
 
@@ -45,6 +45,7 @@ export interface GeneratedFacetSuite {
 interface RangeFacetBounds {
   min: number;
   max: number;
+  count?: number;
 }
 
 export async function loadGeneratedFacetSuite(
@@ -110,7 +111,45 @@ function getRangeFacetBounds(sourceData: any, facetKey: string): RangeFacetBound
   if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) {
     return null;
   }
-  return { min, max };
+  return { min, max, count: values.count };
+}
+
+function isRangeFacetInStock(range: RangeFacetBounds): boolean {
+  return range.count === undefined || Number(range.count) > 0;
+}
+
+function createNumericUnitVariationHints(
+  facetKey: string,
+  valueText: string,
+  targetValue: number,
+  inStock: boolean
+): AiEvaluationHints {
+  if (inStock) {
+    return {
+      overwrite: true,
+      value: [
+        `Respond with "PASS" if the response correctly interprets ${valueText} as the numeric ${facetKey} constraint ${targetValue}.`,
+        `PASS if equivalent numeric expressions such as k/thousand/currency/unit forms are treated as the same constraint.`,
+        `PASS if the response applies or acknowledges the requested ${facetKey} constraint and provides relevant Mercedes-Benz vehicles.`,
+        `FAIL if the response treats the unit expression as a literal nonnumeric token, ignores the numeric constraint, or applies a clearly different value.`,
+        `FAIL if the response says the requested ${facetKey} constraint is unavailable or has no matching vehicles when the facet is in stock.`,
+        `If the response is off-topic, unsafe, offensive, or unrelated to the filter, respond with "MSG FAIL: invalid response".`,
+        `Respond with failure reason otherwise respond with "PASS" only.`,
+      ],
+    };
+  }
+
+  return {
+    overwrite: true,
+    value: [
+      `Respond with "PASS" if the response correctly interprets ${valueText} as the numeric ${facetKey} constraint ${targetValue} and acknowledges that matching vehicles are unavailable, not in stock, or no exact match was found.`,
+      `PASS is acceptable if alternatives or broader searches are offered after acknowledging the unavailable requested ${facetKey} constraint.`,
+      `FAIL if the response presents the unavailable requested ${facetKey} constraint (${valueText}) as available matching inventory.`,
+      `FAIL if the response treats the unit expression as a literal nonnumeric token, ignores the numeric constraint, or applies a clearly different value.`,
+      `If the response is off-topic, unsafe, offensive, or unrelated to the filter, respond with "MSG FAIL: invalid response".`,
+      `Respond with failure reason otherwise respond with "PASS" only.`,
+    ],
+  };
 }
 
 function pickUnitVariationTarget(range: RangeFacetBounds): number | null {
@@ -211,6 +250,10 @@ async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFac
   const regressionQueries: FixedQueryCase[] = [];
 
   for (const facetKey of targetFacets) {
+    if (!isIncludedFacet(facetKey)) {
+      continue;
+    }
+
     const range = getRangeFacetBounds(sourceData, facetKey);
     if (!range) {
       continue;
@@ -222,19 +265,20 @@ async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFac
     }
 
     const valueVariants = getNumericUnitValueVariants(facetKey, targetValue);
+    const inStock = isRangeFacetInStock(range);
 
     for (const valueText of valueVariants) {
       regressionQueries.push({
         value: numericUnitVariationQueryText(facetKey, valueText),
         facet: facetKey,
         filterValue: valueText,
-        skipOpenAiEvaluation: true,
-        shouldRecommend: true,
+        shouldRecommend: inStock,
         shouldFilter: {
-          include: [{ [facetKey]: [targetValue] }],
-          exclude: [],
+          include: inStock ? [{ [facetKey]: [targetValue] }] : [],
+          exclude: inStock ? [] : [{ [facetKey]: [targetValue] }],
           strict: false,
         },
+        aiEvaluationHints: createNumericUnitVariationHints(facetKey, valueText, targetValue, inStock),
       });
     }
   }

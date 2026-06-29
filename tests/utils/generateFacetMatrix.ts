@@ -26,7 +26,7 @@ const EXCLUDE_FACETS = [
 ];
 
 // Facets to include in query generation (allowlist — empty means all)
-const INCLUDE_FACETS = [
+export const INCLUDE_FACETS = [
   "bodyType",
   "brand",
   "campaigns",
@@ -53,6 +53,10 @@ const INCLUDE_FACETS = [
   "upholsteryPolish",
   "vehicleCategory",
 ];
+
+export function isIncludedFacet(facetKey: string): boolean {
+  return INCLUDE_FACETS.length === 0 || INCLUDE_FACETS.includes(facetKey);
+}
 
 // Types
 interface FacetValue {
@@ -801,7 +805,7 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
       continue;
     }
     // Skip facets not in the allowlist (when allowlist is non-empty)
-    if (INCLUDE_FACETS.length > 0 && !INCLUDE_FACETS.includes(facetKey)) {
+    if (!isIncludedFacet(facetKey)) {
       continue;
     }
 

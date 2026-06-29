@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { generateOpenAIQuery } from "./aiHelpers";
+import { isIncludedFacet } from "./generateFacetMatrix";
 import { LANGUAGE } from "./testHelpers";
 
 export interface SimplifiedFacet {
@@ -11,6 +12,23 @@ export interface SimplifiedFacet {
   count?: number;
   values?: Array<{ code: string; name: string; count?: number }>;
   displayName?: string;
+}
+
+interface DateNumericFacetQuery {
+  value: string;
+  facet: string;
+  filterText: string;
+  filterValue: string;
+  shouldRecommend: boolean;
+  shouldFilter: {
+    include: Array<Record<string, Array<string | number>>>;
+    exclude: Array<Record<string, Array<string | number>>>;
+    strict: false;
+  };
+  aiEvaluationHints: {
+    value: string[];
+    overwrite: true;
+  };
 }
 
 const AND_OR_MATRIX_FACETS = ["bodyType", "brand", "color", "fuelType", "price"];
@@ -303,6 +321,127 @@ export async function generateQueriesFromFacets(
     filterText: string;
     filterValue: string;
   }>;
+}
+
+function isFacetInStock(facet: { count?: number }): boolean {
+  return facet.count === undefined || Number(facet.count) > 0;
+}
+
+function createDateNumericFacetHints(
+  facetLabel: string,
+  filterValue: string,
+  inStock: boolean
+): string[] {
+  if (inStock) {
+    return [
+      `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and applies or acknowledges the requested ${facetLabel} numeric/date filter (${filterValue}).`,
+      `PASS if the response provides matching Mercedes-Benz vehicles, result counts, or a filtered inventory response for ${facetLabel} ${filterValue}.`,
+      `FAIL if the response ignores, misinterprets, or contradicts the requested ${facetLabel} numeric/date filter (${filterValue}).`,
+      `FAIL if the response says the requested ${facetLabel} filter is unavailable or has no matching vehicles when the facet is in stock.`,
+      `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+      `Respond with failure reason otherwise respond with "PASS" only.`,
+    ];
+  }
+
+  return [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested unavailable ${facetLabel} numeric/date filter (${filterValue}).`,
+    `PASS if the response says the requested ${facetLabel} filter has no matching vehicles, is unavailable, not in stock, or offers alternatives after acknowledging no exact match.`,
+    `FAIL if the response presents the unavailable requested ${facetLabel} filter (${filterValue}) as available matching inventory.`,
+    `FAIL if the response ignores the requested ${facetLabel} numeric/date filter (${filterValue}).`,
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+    `Respond with failure reason otherwise respond with "PASS" only.`,
+  ];
+}
+
+function getRangeFacetQueryValue(facet: SimplifiedFacet): {
+  filterText: string;
+  filterValue: string;
+  expectedValue: number;
+} | null {
+  const min = Number(facet.min);
+  const max = Number(facet.max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min >= max) {
+    return null;
+  }
+
+  if (facet.code === "firstRegistrationDateSlider") {
+    const minYear = Math.max(1900, Math.floor(min));
+    const maxYear = Math.min(2100, Math.floor(max));
+    if (minYear >= maxYear) {
+      return null;
+    }
+
+    const expectedValue = Math.round((minYear + maxYear) / 2);
+    const filterValue = `${minYear} to ${maxYear}`;
+    return {
+      filterText: `filter is of category '${facet.displayName || facet.code}' with value of '${filterValue}'`,
+      filterValue,
+      expectedValue,
+    };
+  }
+
+  const lower = Math.round(min + (max - min) * 0.25);
+  const upper = Math.round(min + (max - min) * 0.75);
+  const expectedValue = Math.round((lower + upper) / 2);
+  const filterValue = lower === upper ? `${expectedValue}` : `${lower} to ${upper}`;
+  return {
+    filterText: `filter is of category '${facet.displayName || facet.code}' with value of '${filterValue}'`,
+    filterValue,
+    expectedValue,
+  };
+}
+
+export async function generateDateNumericQueriesFromFacets(
+  facets: SimplifiedFacet[],
+  aiPromptData: {
+    count: number;
+    systemPrompt: string;
+    userPromptTemplate: string;
+    maxTokens: number;
+    fallback: string;
+  }
+): Promise<DateNumericFacetQuery[]> {
+  const rangeFacets = facets
+    .filter((facet) => facet.type === "range" && isIncludedFacet(facet.code))
+    .slice(0, aiPromptData.count || 8);
+
+  const queries = await Promise.all(rangeFacets.map(async (facet): Promise<DateNumericFacetQuery | null> => {
+    const rangeQueryValue = getRangeFacetQueryValue(facet);
+    if (!rangeQueryValue) {
+      return null;
+    }
+
+    const query = await generateOpenAIQuery(
+      aiPromptData.systemPrompt,
+      aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, rangeQueryValue.filterText),
+      aiPromptData.maxTokens,
+      undefined,
+      aiPromptData.fallback
+    );
+    const inStock = isFacetInStock(facet);
+    const facetLabel = facet.displayName || facet.code;
+
+    const shouldFilter: DateNumericFacetQuery["shouldFilter"] = {
+      include: inStock ? [{ [facet.code]: [rangeQueryValue.expectedValue] }] : [],
+      exclude: inStock ? [] : [{ [facet.code]: [rangeQueryValue.expectedValue] }],
+      strict: false,
+    };
+
+    return {
+      value: query,
+      facet: facet.code,
+      filterText: rangeQueryValue.filterText,
+      filterValue: rangeQueryValue.filterValue,
+      shouldRecommend: inStock,
+      shouldFilter,
+      aiEvaluationHints: {
+        value: createDateNumericFacetHints(facetLabel, rangeQueryValue.filterValue, inStock),
+        overwrite: true,
+      },
+    };
+  }));
+
+  return queries.filter((query): query is DateNumericFacetQuery => query !== null);
 }
 
 function getFacetLabel(facet: SimplifiedFacet): string {

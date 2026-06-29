@@ -23,6 +23,7 @@ import {
 } from "./utils/apiHelpers";
 import {
   fetchAndConvertFacets,
+  generateDateNumericQueriesFromFacets,
   generateAndOrFacetMatrixFromFacets,
 } from "./utils/facetHelpers";
 import {
@@ -1306,15 +1307,32 @@ test.describe("AI Smart Search - Constraint Handling", () => {
       const fixedQueries = fixedQueriesData.dateNumeric;
       const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 8,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
+      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+        ? undefined
+        : aiEvaluationRules;
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        getProject()
+      );
+      const queries = isFixedQueriesOnly() ? [] : await generateDateNumericQueriesFromFacets(
+        facets,
+        {
+          count: count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        }
       );
       await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      const allQueries = mergeQueries(
+        normalizeFixedQueries(fixedQueries, {
+          shouldFilter: true,
+          aiEvaluationHints: fallbackHints,
+        }),
+        queries
+      ).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
         }
