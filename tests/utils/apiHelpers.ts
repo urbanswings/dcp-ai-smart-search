@@ -2,7 +2,7 @@ import axios from "axios";
 import http from "http";
 import fs from "fs/promises";
 import path from "path";
-import { evaluateSearchResult, fetchTranslation, openaiChatCompletion } from "./aiHelpers";
+import { evaluateSearchResult, fetchTranslation, generateOpenAIQuery, openaiChatCompletion } from "./aiHelpers";
 import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 import {
   buildFacetValueDisplayMap,
@@ -805,6 +805,212 @@ function isExpectedValueWithinFacetRange(
   );
 }
 
+function parseCountToken(countText: string): number | null {
+  const normalized = countText.trim().toLowerCase();
+  const wordCounts: Record<string, number> = {
+    a: 1,
+    an: 1,
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+  };
+
+  if (wordCounts[normalized] !== undefined) {
+    return wordCounts[normalized];
+  }
+
+  const numericValue = Number(normalized.replace(/,/g, ""));
+  return Number.isFinite(numericValue) ? numericValue : null;
+}
+
+function parseVehicleTotalCountDetectionAnswer(answer: string): number | null {
+  const normalized = (answer || "").trim();
+  if (!normalized || /^none$/i.test(normalized)) {
+    return null;
+  }
+
+  if (/^\d+$/.test(normalized)) {
+    return Number(normalized);
+  }
+
+  return null;
+}
+
+function extractVehicleTotalCountFromMessageByPattern(message: string): number | null {
+  const normalizedMessage = message.replace(/\s+/g, " ").trim();
+  if (!normalizedMessage) {
+    return null;
+  }
+
+  const countToken = "(\\d{1,3}(?:,\\d{3})+|\\d+|one|two|three|four|five|six|seven|eight|nine|ten)";
+  const localizedVehicleNouns = [
+    "vehicles?",
+    "cars?",
+    "options?",
+    "results?",
+    "models?",
+    "matches?",
+    "sedans?",
+    "suvs?",
+    "hatchbacks?",
+    "coupes?",
+    "convertibles?",
+    "cabriolets?",
+    "roadsters?",
+    "wagons?",
+    "estates?",
+    "limousines?",
+    "vans?",
+    "minivans?",
+    "mpvs?",
+    "trucks?",
+    "pickups?",
+    "araç(?:lar)?",
+    "arac(?:lar)?",
+    "seçenek(?:ler)?",
+    "secenek(?:ler)?",
+    "sonuç(?:lar)?",
+    "sonuc(?:lar)?",
+    "モデル",
+    "車両",
+    "車",
+    "台",
+    "オプション",
+    "選択肢",
+    "結果",
+    "차량",
+    "자동차",
+    "옵션",
+    "결과",
+    "모델",
+    "대",
+    "รถ",
+    "คัน",
+    "ตัวเลือก",
+    "รายการ",
+    "ผลลัพธ์",
+    "รุ่น",
+    "वाहन",
+    "कार",
+    "विकल्प",
+    "परिणाम",
+    "मॉडल",
+    "गाड़ी",
+    "गाड़ियाँ",
+    "গাড়ি",
+    "যানবাহন",
+    "বিকল্প",
+    "ফলাফল",
+    "মডেল",
+    "વાહન",
+    "કાર",
+    "વિકલ્પ",
+    "પરિણામ",
+    "મોડેલ",
+    "ವಾಹನ",
+    "ಕಾರು",
+    "ಆಯ್ಕೆ",
+    "ಫಲಿತಾಂಶ",
+    "ಮಾದರಿ",
+    "വാഹനം",
+    "കാർ",
+    "ഓപ്ഷൻ",
+    "ഫലം",
+    "മോഡൽ",
+    "वाहन",
+    "कार",
+    "पर्याय",
+    "निकाल",
+    "मॉडेल",
+    "வாகன(?:ங்கள்)?",
+    "கார்",
+    "விருப்ப(?:ங்கள்)?",
+    "முடிவு(?:கள்)?",
+    "மாடல்(?:கள்)?",
+    "వాహన(?:ాలు)?",
+    "కారు",
+    "ఎంపిక(?:లు)?",
+    "ఫలిత(?:ాలు)?",
+    "మోడల్(?:లు)?",
+  ];
+  const noun = `(?:${localizedVehicleNouns.join("|")})`;
+  const compactLocalizedNoun = "(?:モデル|車両|車|台|オプション|選択肢|結果|차량|자동차|옵션|결과|모델|대|รถ|คัน|ตัวเลือก|รายการ|ผลลัพธ์|รุ่น|वाहन|कार|विकल्प|परिणाम|मॉडल|गाड़ी|गाड़ियाँ|গাড়ি|যানবাহন|বিকল্প|ফলাফল|মডেল|વાહન|કાર|વિકલ્પ|પરિણામ|મોડેલ|ವಾಹನ|ಕಾರು|ಆಯ್ಕೆ|ಫಲಿತಾಂಶ|ಮಾದರಿ|വാഹനം|കാർ|ഓപ്ഷൻ|ഫലം|മോഡൽ|पर्याय|निकाल|मॉडेल|வாகன(?:ங்கள்)?|கார்|விருப்ப(?:ங்கள்)?|முடிவு(?:கள்)?|மாடல்(?:கள்)?|వాహన(?:ాలు)?|కారు|ఎంపిక(?:లు)?|ఫలిత(?:ాలు)?|మోడల్(?:లు)?)";
+  const availabilityContext = "(?:available|to\\s+(?:explore|consider|review)|for\\s+(?:you\\s+)?(?:review|consideration)|matching|that\\s+match|in\\s+our\\s+current\\s+inventory|mevcut|bulunuyor|inceley|değerlendir|deg\\w*|利用|確認|検討|見つか|있|가능|고려|확인|มี|พร้อม|ให้พิจารณา|พบ|उपलब्ध|मौजूद|देख|विचार|उपलब्ध|উপলব্ধ|বিবেচনা|देख|ઉપલબ્ધ|વિચાર|ಲಭ್ಯ|ಪರಿಗಣ|ലഭ്യ|പരിഗണ|उपलब्ध|विचार|கிடைக்க|பரிசீல|అందుబాట|పరిగణ)";
+  const countedNounPhrase = `(?:available\\s+|mevcut\\s+)?(?:[\\p{L}\\p{M}\\p{N}_À-ÿ-]+\\s+){0,4}${noun}`;
+  const countPatterns = [
+    new RegExp(`\\bfound\\s+(a|an)\\s+${noun}\\s+matching\\b`, "iu"),
+    new RegExp(`\\b(?:total(?: of)?|currently(?:,)?\\s+we\\s+have|we\\s+(?:currently\\s+)?have|there\\s+(?:are|is)(?:\\s+currently)?|found|selection\\s+of)\\s+${countToken}\\s+${countedNounPhrase}\\b`, "iu"),
+    new RegExp(`\\b${countToken}\\s*${countedNounPhrase}\\s+${availabilityContext}`, "iu"),
+    new RegExp(`${countToken}\\s*${compactLocalizedNoun}`, "iu"),
+    new RegExp(`\\bfound\\s+${countToken}\\s+${noun}\\s+matching\\b`, "iu"),
+  ];
+
+  for (const pattern of countPatterns) {
+    const match = normalizedMessage.match(pattern);
+    if (!match?.[1]) {
+      continue;
+    }
+
+    const parsedCount = parseCountToken(match[1]);
+    if (parsedCount !== null) {
+      const matchedText = match[0] || "";
+      if (
+        parsedCount >= 1900 &&
+        parsedCount <= 2100 &&
+        /\bmodels?\b/i.test(matchedText) &&
+        !/\b(total|results?|matches?|options?|vehicles?|cars?)\b/i.test(matchedText)
+      ) {
+        continue;
+      }
+      return parsedCount;
+    }
+  }
+
+  return null;
+}
+
+async function extractVehicleTotalCountFromMessage(message: string): Promise<number | null> {
+  const normalizedMessage = message.replace(/\s+/g, " ").trim();
+  if (!normalizedMessage) {
+    return null;
+  }
+
+  const answer = await generateOpenAIQuery(
+    [
+      "You extract total vehicle/result counts from Mercedes-Benz smart-search assistant responses.",
+      "Return ONLY one integer or NONE.",
+      "Return an integer only when the response explicitly states a total/count of returned vehicles, cars, options, results, matches, models, or body-type results.",
+      "Examples that should return an integer: 'We have 189 sedans available' -> 189; 'There are 971 options available' -> 971; '3 vehicles were found' -> 3; 'we have two exciting options' -> 2.",
+      "Return NONE for years, model years, prices, mileage, speed, range, horsepower, model names, trim names, or dates.",
+      "Important: '2020 models' means model year 2020, not a total count, unless the wording clearly says there are 2020 total vehicles/options/results.",
+      "Support non-English responses too.",
+    ].join("\n"),
+    `Response:\n${normalizedMessage}`,
+    8,
+    0,
+    "NONE"
+  );
+
+  const detectedByAi = parseVehicleTotalCountDetectionAnswer(answer);
+  if (detectedByAi !== null) {
+    return detectedByAi;
+  }
+
+  const detectedByPattern = extractVehicleTotalCountFromMessageByPattern(normalizedMessage);
+  if (/^none$/i.test((answer || "").trim())) {
+    return detectedByPattern;
+  }
+
+  return detectedByPattern;
+}
+
 function normalizeFacetToken(value: string): string {
   return value
     .normalize("NFD")
@@ -1076,6 +1282,16 @@ export async function processAndLogApiResult({
     }
   }
 
+  const responseVehicleTotalCount = await extractVehicleTotalCountFromMessage(smartSearchMessage);
+  let countCheckPassed = true;
+  if (responseVehicleTotalCount !== null && responseVehicleTotalCount !== resultCount) {
+    countCheckPassed = false;
+    responseCheckPassed = false;
+    addFailureReason(
+      `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`
+    );
+  }
+
   // Facets check (BE vs test-data)
   if (actualFacets === false) {
     // shouldFilter: false — assert no filters were applied
@@ -1296,13 +1512,24 @@ export async function processAndLogApiResult({
   const evaluationPassed =
     isPassEvaluation(normalizedEvaluation);
   const displayHasError = hasError || !evaluationPassed;
+  const sectionMarker = (status: "PASS" | "FAIL" | "SKIP") => {
+    if (status === "PASS") return "✅";
+    if (status === "FAIL") return "❌";
+    return "➖";
+  };
+  const messageStatus = evaluationPassed ? "PASS" : "FAIL";
+  const countStatus = responseVehicleTotalCount === null
+    ? "SKIP"
+    : countCheckPassed ? "PASS" : "FAIL";
+  const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`Query:         '${actualInput}'`);
-  console.log(`Response:      '${smartSearchMessage}'`);
+  console.log(`${sectionMarker(messageStatus)} Message:`);
+  console.log(`• Query:      '${actualInput}'`);
+  console.log(`• Response:   '${smartSearchMessage}'`);
   
   let queryEn = actualInput;
   let smartSearchMessageEn = smartSearchMessage;
@@ -1313,14 +1540,20 @@ export async function processAndLogApiResult({
       "en"
     );
     console.log("\n");
-    console.log(`Query (EN):    '${queryEn}'`);
-    console.log(`Response (EN): '${smartSearchMessageEn}'`);
+    console.log(`${sectionMarker(messageStatus)} Message (EN):`);
+    console.log(`• Query:      '${queryEn}'`);
+    console.log(`• Response:   '${smartSearchMessageEn}'`);
   }
 
   console.log("\n");
-  for (const diagnosticLine of beFacetDiagnosticLines) {
-    console.log(diagnosticLine);
-  }  
+  console.log(`${sectionMarker(countStatus)} Count:`);
+  console.log(`• Response: ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
+  console.log(`• Backend:   ${resultCount}`);
+
+  console.log("\n");
+  console.log(`${sectionMarker(filterStatus)} Filters:`);
+  console.log(`• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`);
+  console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   
   return {
@@ -1340,6 +1573,7 @@ export async function processAndLogApiResult({
       "en": smartSearchMessageEn,
     },
     resultCount,
+    responseVehicleTotalCount,
     responseTime: results.responseTime,
     statusCode: results.statusCode,
     hasError: displayHasError,
@@ -1348,7 +1582,10 @@ export async function processAndLogApiResult({
     openaiEvaluation: openaiEvaluation,
     results: {
       responseResult: responseCheckPassed ? "PASS" : "FAIL",
-      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",      
+      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
+      countResult: responseVehicleTotalCount === null ? "SKIP" : countCheckPassed ? "PASS" : "FAIL",
+      responseVehicleTotalCount,
+      backendResultCount: resultCount,
     },    
     facets: {
       expected: actualFacets,
