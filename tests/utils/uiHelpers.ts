@@ -10,14 +10,14 @@ import {
   waitForCapturedSmartSearchResponse,
   waitForSmartSearchControls,
 } from "./uiSearchFlowHelpers";
-import type { UiSearchResult } from "./uiTypes";
+import type { UiSearchResult } from "./searchResultTypes";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
 export const LANGUAGE = process.env.LANGUAGE;
 export const PRODUCT = process.env.PRODUCT;
 
-export type { UiSearchResult } from "./uiTypes";
+export type { UiSearchResult } from "./searchResultTypes";
 export {
   handleCookieBanner,
   handlePostalCodePopUp,

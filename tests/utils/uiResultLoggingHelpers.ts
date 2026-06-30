@@ -18,7 +18,7 @@ import {
   compareUiSelectedFiltersWithFacetsByExpectedValue,
   updateRuntimeFacetAliasesFromApiResponse,
 } from "./uiFacetFilterHelpers";
-import type { UiSearchResult } from "./uiTypes";
+import type { UiSearchResult } from "./searchResultTypes";
 
 const LANGUAGE = process.env.LANGUAGE;
 

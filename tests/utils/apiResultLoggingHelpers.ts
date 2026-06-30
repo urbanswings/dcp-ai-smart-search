@@ -14,7 +14,7 @@ import {
   validateLanguageConsistency,
   validateResponseVehicleCount,
 } from "./resultEvaluationHelpers";
-import type { ApiSearchResult } from "./apiTypes";
+import type { ApiSearchResult } from "./searchResultTypes";
 
 const LANGUAGE = process.env.LANGUAGE;
 

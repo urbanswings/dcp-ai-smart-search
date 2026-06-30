@@ -5,3 +5,10 @@ export interface ApiSearchResult {
   statusCode: number;
   error?: string;
 }
+
+export interface UiSearchResult {
+  query: string;
+  results: any;
+  responseTime: number;
+  error?: string;
+}

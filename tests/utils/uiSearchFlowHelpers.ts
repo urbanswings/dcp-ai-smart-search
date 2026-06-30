@@ -1,5 +1,5 @@
 import { Locator, Page } from "@playwright/test";
-import type { UiSearchResult } from "./uiTypes";
+import type { UiSearchResult } from "./searchResultTypes";
 
 type SmartSearchLocators = {
   searchInputArea: Locator;
