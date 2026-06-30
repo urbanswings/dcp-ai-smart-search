@@ -156,6 +156,14 @@
         "tags": [
           "NEW"
         ]
+      },
+      {
+        "label": "Model",
+        "formattedValue": "CLA",
+        "value": "CLA_NEW",
+        "tags": [
+          "NEW"
+        ]
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -560,6 +568,15 @@
       },
       {
         "value": "S 680 4MATIC"
+      },
+      {
+        "value": "CLE 260"
+      },
+      {
+        "value": "EQE 500 4MATIC"
+      },
+      {
+        "value": "E 400 e 4MATIC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1211,6 +1228,10 @@
       {
         "formattedValue": "AMG 라인",
         "value": "3424078a"
+      },
+      {
+        "formattedValue": "일렉트릭 아트 라인",
+        "value": "354813cf"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2144,6 +2165,14 @@
       {
         "formattedValue": "22 kW AC şarj cihazı",
         "value": "82800a6b"
+      },
+      {
+        "formattedValue": "하이퍼스크린",
+        "value": "ac6c0f12"
+      },
+      {
+        "formattedValue": "Dört mevsim lastikleri",
+        "value": "acba0bc4"
       }
     ],
     "facetType": "MULTI_VALUE"

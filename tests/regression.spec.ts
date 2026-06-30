@@ -90,6 +90,7 @@ test.describe("AI Smart Search - Regression", () => {
     await refreshEmhApiResponse();
   });
 
+  // Test: Smart Regression Evaluation (SRE)
   test(
     "Smart Regression Evaluation (SRE)",
     { tag: ["@regression"] },
@@ -111,6 +112,7 @@ test.describe("AI Smart Search - Regression", () => {
     },
   );
 
+  // Test: Intermittent Issues Check (IIC)
   test(
     "Intermittent Issues Check (IIC)",
     { tag: ["@regression", "@intermittent"] },
@@ -131,39 +133,34 @@ test.describe("AI Smart Search - Regression", () => {
     },
   );
 
-  test(
-    "Multi Country Evaluation (MCE)",
-    { tag: ["@regression", "@multi-country"] },
-    async ({ browser }) => {
-      const mceTestData = await loadMCETestData();
+  // Test group: Multi Country Evaluation (MCE)
+  for (const country of supportedCountries) {
+    // Test: Multi Country Evaluation (MCE) - {country}
+    test(
+      `Multi Country Evaluation (MCE) - ${country}`,
+      { tag: ["@regression", "@multi-country"] },
+      async ({ browser }) => {
+        const mceTestData = await loadMCETestData();
 
-      if (mceTestData.length === 0) {
-        console.warn("⚠️  No MCE test data loaded, skipping test.");
-        return;
-      }
+        if (mceTestData.length === 0) {
+          console.warn("⚠️  No MCE test data loaded, skipping test.");
+          return;
+        }
 
-      if (supportedCountries.length === 0) {
-        console.warn("⚠️  No supported countries discovered, skipping test.");
-        return;
-      }
+        const originalCountry = process.env.COUNTRY;
+        const originalLanguage = process.env.LANGUAGE;
 
-      const originalCountry = process.env.COUNTRY;
-      const originalLanguage = process.env.LANGUAGE;
-
-      // Run MCE test for each supported country
-      for (const country of supportedCountries) {
         console.log(`\n${"=".repeat(60)}`);
         console.log(`🌍 Running MCE test for country: ${country}`);
         console.log(`${"=".repeat(60)}\n`);
 
-        // Temporarily update the country and language for this iteration
         setCountryAndLanguage(country);
 
         try {
           await runTestsAndSaveResults({
             queries: mceTestData,
             testDescribe: describeName,
-            testTitle: `${test.info().title} - ${country}`,
+            testTitle: test.info().title,
             testType: "multi-country-evaluation",
             browser,
             setupContextAndPage,
@@ -173,37 +170,25 @@ test.describe("AI Smart Search - Regression", () => {
             processAndLogApiResult,
             postRunAnalysis: summarizeRegressionRunWithAI,
           });
-        } catch (error) {
-          console.error(
-            `❌ Error running MCE test for country ${country}:`,
-            error,
-          );
+        } finally {
+          restoreCountryAndLanguage(originalCountry, originalLanguage);
         }
-      }
+      },
+    );
+  }
 
-      restoreCountryAndLanguage(originalCountry, originalLanguage);
+  // Test group: Multi Country Facet Evaluation (MCFE)
+  for (const country of supportedCountries) {
+    // Test: Multi Country Facet Evaluation (MCFE) - {country}
+    test(
+      `Multi Country Facet Evaluation (MCFE) - ${country}`,
+      { tag: ["@regression", "@multi-country", "@facet"] },
+      async ({ browser }) => {
+        const targetFacet = process.env.MCFE_TARGET_FACET || "motorization";
 
-      console.log(
-        `\n✅ Multi Country Evaluation (MCE) completed for all ${supportedCountries.length} countries.`,
-      );
-    },
-  );
+        const originalCountry = process.env.COUNTRY;
+        const originalLanguage = process.env.LANGUAGE;
 
-  test(
-    "Multi Country Facet Evaluation (MCFE)",
-    { tag: ["@regression", "@multi-country", "@facet"] },
-    async ({ browser }) => {
-      const targetFacet = process.env.MCFE_TARGET_FACET || "bodyType";
-
-      if (supportedCountries.length === 0) {
-        console.warn("⚠️  No supported countries discovered, skipping test.");
-        return;
-      }
-
-      const originalCountry = process.env.COUNTRY;
-      const originalLanguage = process.env.LANGUAGE;
-
-      for (const country of supportedCountries) {
         console.log(`\n${"=".repeat(60)}`);
         console.log(`🌍 Running MCFE test for country: ${country}`);
         console.log(`🎯 Target facet: ${targetFacet}`);
@@ -218,7 +203,7 @@ test.describe("AI Smart Search - Regression", () => {
             console.warn(
               `⚠️  Skipping MCFE for ${country}; unable to refresh EMH facets.`,
             );
-            continue;
+            return;
           }
 
           const queries = await loadFacetCompleteSuite(undefined, [
@@ -229,13 +214,13 @@ test.describe("AI Smart Search - Regression", () => {
             console.warn(
               `⚠️  No MCFE queries generated for ${country}/${targetFacet}, skipping country.`,
             );
-            continue;
+            return;
           }
 
           await runTestsAndSaveResults({
             queries,
             testDescribe: describeName,
-            testTitle: `${test.info().title} - ${country} - ${targetFacet}`,
+            testTitle: `${test.info().title} - ${targetFacet}`,
             testType: "multi-country-facet-evaluation",
             browser,
             setupContextAndPage,
@@ -245,19 +230,10 @@ test.describe("AI Smart Search - Regression", () => {
             processAndLogApiResult,
             postRunAnalysis: summarizeRegressionRunWithAI,
           });
-        } catch (error) {
-          console.error(
-            `❌ Error running MCFE test for country ${country}:`,
-            error,
-          );
+        } finally {
+          restoreCountryAndLanguage(originalCountry, originalLanguage);
         }
-      }
-
-      restoreCountryAndLanguage(originalCountry, originalLanguage);
-
-      console.log(
-        `\n✅ Multi Country Facet Evaluation (MCFE) completed for all ${supportedCountries.length} countries.`,
-      );
-    },
-  );
+      },
+    );
+  }
 });
