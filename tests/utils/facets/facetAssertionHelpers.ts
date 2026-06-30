@@ -8,7 +8,7 @@ import {
 
 const FACETS_MASTER_DATA_PATH = path.resolve(
   __dirname,
-  "../data/facets-master-data.json",
+  "../../data/facets-master-data.json",
 );
 
 let facetsMasterDataCache: any | null = null;

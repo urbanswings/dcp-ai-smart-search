@@ -1,9 +1,9 @@
 import fs from "fs/promises";
 import path from "path";
-import { generateOpenAIQuery } from "./aiHelpers";
+import { generateOpenAIQuery } from "../query/aiHelpers";
 import { extractMissingFacetValuesFromData } from "./facetValueHelpers";
-import { isIncludedFacet } from "./generateFacetMatrix";
-import { LANGUAGE } from "./testHelpers";
+import { isIncludedFacet } from "../generation/generateFacetMatrix";
+import { LANGUAGE } from "../core/testHelpers";
 
 export interface SimplifiedFacet {
   code: string;
@@ -41,7 +41,7 @@ const AND_OR_MATRIX_FACETS = [
 ];
 const AND_OR_MATRIX_ANCHOR_FACETS = ["bodyType", "color"];
 const UNAVAILABLE_AVAILABLE_VALUE_LIMIT = 2;
-const DATA_DIR = path.join(__dirname, "../data");
+const DATA_DIR = path.join(__dirname, "../../data");
 
 const FACET_LABELS: Record<string, string> = {
   bodyType: "body type",

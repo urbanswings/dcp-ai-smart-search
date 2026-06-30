@@ -2,7 +2,7 @@ import axios from "axios";
 import fs from "fs";
 import { AzureOpenAI } from "openai";
 import path from "path";
-import { COUNTRY, LANGUAGE } from "./testHelpers";
+import { COUNTRY, LANGUAGE } from "../core/testHelpers";
 
 const OPENAI_API_VERSION = "2024-08-01-preview";
 const OPENAI_CHAT_MODEL = "gpt-4o-mini";

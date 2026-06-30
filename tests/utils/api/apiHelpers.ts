@@ -6,7 +6,7 @@ import {
   GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES,
   getEmhGraphqlQuery,
 } from "./graphqlQueries";
-import type { ApiSearchResult } from "./searchResultTypes";
+import type { ApiSearchResult } from "../core/searchResultTypes";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
@@ -16,10 +16,10 @@ export const VEHICLE_CATEGORY = process.env.VEHICLE_CATEGORY;
 
 const FACETS_MASTER_DATA_PATH = path.resolve(
   __dirname,
-  "../data/facets-master-data.json",
+  "../../data/facets-master-data.json",
 );
 
-export type { ApiSearchResult } from "./searchResultTypes";
+export type { ApiSearchResult } from "../core/searchResultTypes";
 export { processAndLogApiResult } from "./apiResultLoggingHelpers";
 
 export interface ApiClient {

@@ -1,7 +1,7 @@
 import {
   normalizeFacetToken,
   validateExpectedFacets,
-} from "./facetAssertionHelpers";
+} from "../facets/facetAssertionHelpers";
 import {
   addFailureReason,
   evaluateSmartSearchMessage,
@@ -13,8 +13,8 @@ import {
   translateResultText,
   validateLanguageConsistency,
   validateResponseVehicleCount,
-} from "./resultEvaluationHelpers";
-import type { ApiSearchResult } from "./searchResultTypes";
+} from "../core/resultEvaluationHelpers";
+import type { ApiSearchResult } from "../core/searchResultTypes";
 
 const LANGUAGE = process.env.LANGUAGE;
 

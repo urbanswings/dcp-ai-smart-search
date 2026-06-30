@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { AzureOpenAI } from "openai";
 import path from "path";
-import * as promptEngine from "./promptEngineHelper";
+import * as promptEngine from "../query/promptEngineHelper";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 

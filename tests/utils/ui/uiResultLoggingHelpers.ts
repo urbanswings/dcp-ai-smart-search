@@ -1,5 +1,5 @@
 import { Page } from "@playwright/test";
-import { validateExpectedFacets } from "./facetAssertionHelpers";
+import { validateExpectedFacets } from "../facets/facetAssertionHelpers";
 import {
   addFailureReason,
   evaluateSmartSearchMessage,
@@ -11,14 +11,14 @@ import {
   translateResultText,
   validateLanguageConsistency,
   validateResponseVehicleCount,
-} from "./resultEvaluationHelpers";
+} from "../core/resultEvaluationHelpers";
 import {
   buildFacetCandidateTokens,
   compareUiSelectedFiltersWithFacets,
   compareUiSelectedFiltersWithFacetsByExpectedValue,
   updateRuntimeFacetAliasesFromApiResponse,
 } from "./uiFacetFilterHelpers";
-import type { UiSearchResult } from "./searchResultTypes";
+import type { UiSearchResult } from "../core/searchResultTypes";
 
 const LANGUAGE = process.env.LANGUAGE;
 

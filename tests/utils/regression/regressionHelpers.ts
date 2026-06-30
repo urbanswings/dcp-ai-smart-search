@@ -1,7 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
-import { generateOpenAIQuery } from "./aiHelpers";
-import { FixedQueryCase } from "./queryHelpers";
+import { generateOpenAIQuery } from "../query/aiHelpers";
+import { FixedQueryCase } from "../query/queryHelpers";
 
 const REGRESSION_DESCRIPTION_PATH = path.join(
   __dirname,
@@ -9,25 +9,25 @@ const REGRESSION_DESCRIPTION_PATH = path.join(
 );
 const REGRESSION_TESTDATA_PATH = path.join(
   __dirname,
-  "../data/regression.testdata.json",
+  "../../data/regression.testdata.json",
 );
 const REGRESSION_RUN_SUMMARY_PATH = path.join(
   __dirname,
-  "../data/regression.run-summary.json",
+  "../../data/regression.run-summary.json",
 );
 const EMH_API_RESPONSE_PATH = path.join(
   __dirname,
-  "../data/emh-api-response.json",
+  "../../data/emh-api-response.json",
 );
 const INTERMITTENCY_QUERIES_PATH = path.join(
   __dirname,
-  "../data/intermittency-queries.json",
+  "../../data/intermittency-queries.json",
 );
 const MCE_TESTDATA_PATH = path.join(
   __dirname,
-  "../data/regression.testdata-mce.json",
+  "../../data/regression.testdata-mce.json",
 );
-const DATA_DIR_PATH = path.join(__dirname, "../data");
+const DATA_DIR_PATH = path.join(__dirname, "../../data");
 
 const SYSTEM_PROMPT = `You are a test-case engineer for a Mercedes-Benz vehicle search AI.
 Given a plain-text description of a search bug or regression scenario, generate a JSON array of regression test scenarios with evaluation decisions.

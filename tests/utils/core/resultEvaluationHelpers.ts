@@ -2,7 +2,7 @@ import {
   evaluateSearchResult,
   fetchTranslation,
   openaiChatCompletion,
-} from "./aiHelpers";
+} from "../query/aiHelpers";
 import { isLanguageConsistencyAccepted } from "./shared";
 import { extractVehicleTotalCountFromMessage } from "./vehicleCountHelpers";
 

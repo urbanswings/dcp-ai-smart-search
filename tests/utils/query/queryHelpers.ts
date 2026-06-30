@@ -1,14 +1,14 @@
 import fs from "fs/promises";
 import path from "path";
-import { extractMissingFacetValuesFromData } from "./facetValueHelpers";
+import { extractMissingFacetValuesFromData } from "../facets/facetValueHelpers";
 import {
   buildComplete,
   buildMatrix,
   isIncludedFacet,
   readJson,
-} from "./generateFacetMatrix.js";
+} from "../generation/generateFacetMatrix.js";
 
-const DATA_DIR = path.join(__dirname, "../data");
+const DATA_DIR = path.join(__dirname, "../../data");
 
 // Generate output filename based on execution config
 export function generateOutputFileName(

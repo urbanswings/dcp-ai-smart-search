@@ -2,7 +2,7 @@ import { Page } from "@playwright/test";
 import {
   collectPrimitiveFacetValues,
   normalizeFacetToken,
-} from "./facetAssertionHelpers";
+} from "../facets/facetAssertionHelpers";
 
 function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
   return (

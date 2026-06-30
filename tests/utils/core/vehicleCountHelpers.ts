@@ -1,4 +1,4 @@
-import { generateOpenAIQuery } from "./aiHelpers";
+import { generateOpenAIQuery } from "../query/aiHelpers";
 
 function parseCountToken(countText: string): number | null {
   const normalized = countText.trim().toLowerCase();
