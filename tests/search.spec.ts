@@ -1,19 +1,16 @@
 import "dotenv/config";
-import { test, Page, TestInfo } from "@playwright/test";
+import { test, TestInfo } from "@playwright/test";
 import fs from "fs/promises";
 import path from "path";
-import {
-  generateUniqueQueries,
-} from "./utils/aiHelpers";
+import { generateUniqueQueries } from "./utils/aiHelpers";
 import {
   testDataVehicles,
   getRandomVehicleCombinationsNonMB,
-  logTestContext
+  logTestContext,
 } from "./utils/testHelpers";
 import {
   processAndLogUiResult,
   setupContextAndPage,
-  handleCookieBanner,
   performUISmartSearchAndGetResults,
 } from "./utils/uiHelpers";
 import {
@@ -37,7 +34,6 @@ import {
   ensureDirectoryExists,
   isFixedQueriesOnly,
   getProject,
-  getLanguageLocale,
   ENVIRONMENT,
   COUNTRY,
   PRODUCT,
@@ -47,7 +43,6 @@ import {
   mergeQueries,
   runTestsRepeatedAndSaveResults,
   resolveFixedQueriesFilePath,
-  cleanOldScreenshots,
 } from "./utils/shared";
 import {
   normalizeFixedQueries,
@@ -61,7 +56,10 @@ import {
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";
 const aiQueryPromptsPath = path.join(__dirname, "data/ai-query-prompts.json");
-const aiEvaluationRulesPath = path.join(__dirname, "data/ai-evaluation-rules.json");
+const aiEvaluationRulesPath = path.join(
+  __dirname,
+  "data/ai-evaluation-rules.json",
+);
 let fixedQueriesData: any = {};
 let aiPromptData: any = {};
 let aiEvaluationRulesData: any = {};
@@ -102,7 +100,9 @@ const VEHICLES_MB_FILTER_FACETS = [
 const DEFAULT_TEST_TIMEOUT_MS = 10 * 60000;
 const QUERY_TIMEOUT_BUFFER_MS = 2 * 60000;
 const QUERY_TIMEOUT_MS = Number(process.env.QUERY_TIMEOUT_MS || 45000);
-const MAX_QUERY_SCALED_TIMEOUT_MS = Number(process.env.MAX_QUERY_TIMEOUT_MS || 60 * 60000);
+const MAX_QUERY_SCALED_TIMEOUT_MS = Number(
+  process.env.MAX_QUERY_TIMEOUT_MS || 60 * 60000,
+);
 
 function normalizeModelIdentifierMatchValue(value: unknown): string {
   return String(value || "")
@@ -113,8 +113,11 @@ function normalizeModelIdentifierMatchValue(value: unknown): string {
     .replace(/[^a-z0-9]/g, "");
 }
 
-function getModelIdentifierFilterValueIfInStock(keyword: string): string | undefined {
-  const modelIdentifierValues = emhApiResponse?.data?.search?.facets?.modelIdentifier?.values;
+function getModelIdentifierFilterValueIfInStock(
+  keyword: string,
+): string | undefined {
+  const modelIdentifierValues =
+    emhApiResponse?.data?.search?.facets?.modelIdentifier?.values;
   if (!Array.isArray(modelIdentifierValues)) {
     return undefined;
   }
@@ -133,13 +136,12 @@ function getModelIdentifierFilterValueIfInStock(keyword: string): string | undef
         return [];
       }
 
-      return [
-        model?.formattedValue,
-        model?.value,
-      ].map((value) => ({
-        value: modelValue,
-        candidate: normalizeModelIdentifierMatchValue(value),
-      })).filter((entry) => entry.candidate);
+      return [model?.formattedValue, model?.value]
+        .map((value) => ({
+          value: modelValue,
+          candidate: normalizeModelIdentifierMatchValue(value),
+        }))
+        .filter((entry) => entry.candidate);
     });
 
   const matchingModel = stockedModelCandidates
@@ -150,11 +152,14 @@ function getModelIdentifierFilterValueIfInStock(keyword: string): string | undef
         }
 
         if (candidate.length === 1) {
-          return variant.startsWith(candidate) && /^\d/.test(variant.slice(candidate.length));
+          return (
+            variant.startsWith(candidate) &&
+            /^\d/.test(variant.slice(candidate.length))
+          );
         }
 
         return variant.startsWith(candidate);
-      })
+      }),
     )
     .sort((a, b) => b.candidate.length - a.candidate.length)[0];
 
@@ -175,24 +180,32 @@ async function saveGeneratedQueriesIfAny(queries: unknown[]): Promise<void> {
   }
 
   await saveFacetCompleteSuite(
-    normalizeFixedQueries(queries as Parameters<typeof normalizeFixedQueries>[0])
+    normalizeFixedQueries(
+      queries as Parameters<typeof normalizeFixedQueries>[0],
+    ),
   );
 }
 
-function extendTimeoutForQueryCount(testInfo: TestInfo, queryCount: number): void {
+function extendTimeoutForQueryCount(
+  testInfo: TestInfo,
+  queryCount: number,
+): void {
   if (!Number.isFinite(queryCount) || queryCount <= 0) {
     return;
   }
 
   const scaledTimeout = Math.min(
-    Math.max(DEFAULT_TEST_TIMEOUT_MS, QUERY_TIMEOUT_BUFFER_MS + queryCount * QUERY_TIMEOUT_MS),
-    MAX_QUERY_SCALED_TIMEOUT_MS
+    Math.max(
+      DEFAULT_TEST_TIMEOUT_MS,
+      QUERY_TIMEOUT_BUFFER_MS + queryCount * QUERY_TIMEOUT_MS,
+    ),
+    MAX_QUERY_SCALED_TIMEOUT_MS,
   );
 
   if (scaledTimeout > testInfo.timeout) {
     testInfo.setTimeout(scaledTimeout);
     console.log(
-      `[timeout] Extended "${testInfo.title}" timeout to ${Math.round(scaledTimeout / 1000)}s for ${queryCount} queries.`
+      `[timeout] Extended "${testInfo.title}" timeout to ${Math.round(scaledTimeout / 1000)}s for ${queryCount} queries.`,
     );
   }
 }
@@ -246,7 +259,7 @@ test.beforeAll(async () => {
 
   if (usedFallback) {
     console.warn(
-      `Fixed queries file not found for current country/language/product. Falling back to ${fixedQueriesFile}`
+      `Fixed queries file not found for current country/language/product. Falling back to ${fixedQueriesFile}`,
     );
   }
 
@@ -256,7 +269,10 @@ test.beforeAll(async () => {
   const aiPromptDataContent = await fs.readFile(aiQueryPromptsPath, "utf-8");
   aiPromptData = JSON.parse(aiPromptDataContent);
 
-  const aiEvaluationRulesDataContent = await fs.readFile(aiEvaluationRulesPath, "utf-8");
+  const aiEvaluationRulesDataContent = await fs.readFile(
+    aiEvaluationRulesPath,
+    "utf-8",
+  );
   aiEvaluationRulesData = JSON.parse(aiEvaluationRulesDataContent);
 
   // Clean up old screenshots (keep last 2 weeks)
@@ -269,7 +285,7 @@ test.beforeAll(async () => {
     await fs.writeFile(
       outputPath,
       JSON.stringify(emhApiResponse, null, 2),
-      "utf-8"
+      "utf-8",
     );
     console.log(`Saved EMH API response to: ${outputPath}`);
   } catch (error) {
@@ -325,15 +341,19 @@ test.describe("AI Smart Search - Sanity", () => {
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -363,17 +383,24 @@ test.describe("AI Smart Search - Sanity", () => {
     });
   });
 
-  test("Recommendation Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Recommendation Model",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -401,15 +428,20 @@ test.describe("AI Smart Search - Sanity", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Filter Facets (complete)", { tag: ["@ui", "@api", "@facet"] }, async ({ browser }, testInfo) => {
+  test(
+    "By Filter Facets (complete)",
+    { tag: ["@ui", "@api", "@facet"] },
+    async ({ browser }, testInfo) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints =
+        Object.keys(aiEvaluationRules).length === 0
+          ? undefined
+          : aiEvaluationRules;
       const queries = isFixedQueriesOnly()
         ? []
         : await loadFacetCompleteSuite(fallbackHints);
@@ -428,7 +460,7 @@ test.describe("AI Smart Search - Sanity", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 });
 
@@ -476,43 +508,55 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
 
   for (const targetFacet of VEHICLES_MB_FILTER_FACETS) {
-    test(`By Filter Facets ('${targetFacet}')`, { tag: ["@ui", "@api", "@facet"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
-      await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries);
+    test(
+      `By Filter Facets ('${targetFacet}')`,
+      { tag: ["@ui", "@api", "@facet"] },
+      async ({ browser }) => {
+        const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+        const aiEvaluationRules =
+          aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+        const fallbackHints =
+          Object.keys(aiEvaluationRules).length === 0
+            ? undefined
+            : aiEvaluationRules;
+        const queries = isFixedQueriesOnly()
+          ? []
+          : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
+        await saveGeneratedQueriesIfAny(queries);
+        const allQueries = mergeQueries(fixedQueries, queries);
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    });
+        await runTestsAndSaveResults({
+          queries: allQueries,
+          testDescribe: describeName,
+          testTitle: test.info().title,
+          browser,
+          setupContextAndPage,
+          performUISmartSearchAndGetResults,
+          processAndLogUiResult,
+          performApiSmartSearchAndGetResults,
+          processAndLogApiResult,
+        });
+      },
+    );
   }
 
-  test("By Filter Facets (AND/OR)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
+  test(
+    "By Filter Facets (AND/OR)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }, testInfo) => {
       // Fetch facets dynamically from API based on environment settings
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsAndOr;
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
-        project
+        project,
       );
-      const queries = isFixedQueriesOnly() ? [] : generateAndOrFacetMatrixFromFacets(facets);
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : generateAndOrFacetMatrixFromFacets(facets);
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -541,18 +585,23 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Filter Facets (punctuated)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
+  test(
+    "By Filter Facets (punctuated)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }, testInfo) => {
       const project = getProject();
       const fixedQueries = fixedQueriesData.byFilterFacetsPunctuated || [];
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
-        project
+        project,
       );
-      const queries = isFixedQueriesOnly() ? [] : generatePunctuatedFacetMatrixFromFacets(facets);
+      const queries = isFixedQueriesOnly()
+        ? []
+        : generatePunctuatedFacetMatrixFromFacets(facets);
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries);
       extendTimeoutForQueryCount(testInfo, allQueries.length);
@@ -568,18 +617,24 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Filter Facets (unavailable + available)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
+  test(
+    "By Filter Facets (unavailable + available)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }, testInfo) => {
       const project = getProject();
-      const fixedQueries = fixedQueriesData.byFilterFacetsUnavailableAvailable || [];
+      const fixedQueries =
+        fixedQueriesData.byFilterFacetsUnavailableAvailable || [];
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
-        project
+        project,
       );
-      const queries = isFixedQueriesOnly() ? [] : await generateUnavailableAvailableFacetMatrixFromFacets(facets);
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUnavailableAvailableFacetMatrixFromFacets(facets);
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries);
       extendTimeoutForQueryCount(testInfo, allQueries.length);
@@ -595,10 +650,13 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Filter Facets (matrix)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
+  test(
+    "By Filter Facets (matrix)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }, testInfo) => {
       const fixedQueries = fixedQueriesData.byFilterFacetsMatrix || [];
       const matrixQueries = isFixedQueriesOnly()
         ? []
@@ -618,144 +676,164 @@ test.describe("AI Smart Search - Vehicles MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
   test("By Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.byBrandModel;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const modelIdentifierEvaluationRules =
-        aiEvaluationRulesData[describeName]?.["By Filter Facets ('modelIdentifier')"] || aiEvaluationRules;
-      const missingModelIdentifierEvaluationRules =
-        aiEvaluationRulesData["Vehicles MB - Negative Facets"]?.["By Filter Facets ('modelIdentifier')(-ve)"] || {};
-      const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(testDataVehicles, "utf-8");
-        const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
-        const generatedQueries = [];
-        const total = vehicleBrandsAndModels.mb.length;
-        const indices = Array.from({ length: total }, (_, i) => i)
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 10);
-        for (const idx of indices) {
-          const keyword = vehicleBrandsAndModels.mb[idx];
-          const queryValues = await generateUniqueQueries(
-            count,
-            systemPrompt,
-            userPromptTemplate.replace('{keyword}', keyword),
-            maxTokens,
-            fallback
-          );
-          const modelIdentifierFilterValue = getModelIdentifierFilterValueIfInStock(keyword);
-          const keywordAiEvaluationRules = modelIdentifierFilterValue
-            ? modelIdentifierEvaluationRules
-            : missingModelIdentifierEvaluationRules;
-          const shouldFilter = modelIdentifierFilterValue
-            ? {
-                include: [{ modelIdentifier: [modelIdentifierFilterValue] }],
-                exclude: [],
-                strict: false,
-              }
-            : {
-                include: [],
-                exclude: [{ modelIdentifier: [getModelIdentifierLabel(keyword)] }],
-                strict: false,
-              };
+    const fixedQueries = fixedQueriesData.byBrandModel;
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const modelIdentifierEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[
+        "By Filter Facets ('modelIdentifier')"
+      ] || aiEvaluationRules;
+    const missingModelIdentifierEvaluationRules =
+      aiEvaluationRulesData["Vehicles MB - Negative Facets"]?.[
+        "By Filter Facets ('modelIdentifier')(-ve)"
+      ] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await (async () => {
+          const file = await fs.readFile(testDataVehicles, "utf-8");
+          const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } =
+            JSON.parse(file);
+          const generatedQueries = [];
+          const total = vehicleBrandsAndModels.mb.length;
+          const indices = Array.from({ length: total }, (_, i) => i)
+            .sort(() => 0.5 - Math.random())
+            .slice(0, 10);
+          for (const idx of indices) {
+            const keyword = vehicleBrandsAndModels.mb[idx];
+            const queryValues = await generateUniqueQueries(
+              count,
+              systemPrompt,
+              userPromptTemplate.replace("{keyword}", keyword),
+              maxTokens,
+              fallback,
+            );
+            const modelIdentifierFilterValue =
+              getModelIdentifierFilterValueIfInStock(keyword);
+            const keywordAiEvaluationRules = modelIdentifierFilterValue
+              ? modelIdentifierEvaluationRules
+              : missingModelIdentifierEvaluationRules;
+            const shouldFilter = modelIdentifierFilterValue
+              ? {
+                  include: [{ modelIdentifier: [modelIdentifierFilterValue] }],
+                  exclude: [],
+                  strict: false,
+                }
+              : {
+                  include: [],
+                  exclude: [
+                    { modelIdentifier: [getModelIdentifierLabel(keyword)] },
+                  ],
+                  strict: false,
+                };
 
-          generatedQueries.push(queryValues.map((query) => {
-            return {
-              value: query,
-              shouldFilter,
-              ...(Object.keys(keywordAiEvaluationRules).length > 0
-                ? { aiEvaluationHints: keywordAiEvaluationRules }
-                : {}),
-            };
-          }));
-        }
-        return generatedQueries.flat();
-      })();
-      await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
-            };
-      });
+            generatedQueries.push(
+              queryValues.map((query) => {
+                return {
+                  value: query,
+                  shouldFilter,
+                  ...(Object.keys(keywordAiEvaluationRules).length > 0
+                    ? { aiEvaluationHints: keywordAiEvaluationRules }
+                    : {}),
+                };
+              }),
+            );
+          }
+          return generatedQueries.flat();
+        })();
+    await saveGeneratedQueriesIfAny(queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
+          };
+    });
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  });
 
   test("By Specs", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.bySpecs;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
-      await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
-            };
-      });
+    const fixedQueries = fixedQueriesData.bySpecs;
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
+    await saveGeneratedQueriesIfAny(queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
+          };
+    });
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  });
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 10,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 10,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -786,47 +864,56 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
 
   test("Superlative", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.superlative;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback, temperature } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback,
-        undefined,
-        temperature
-      );
-      await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-        if (Object.keys(aiEvaluationRules).length === 0) {
-          return query;
-        }
-        return typeof query === "string"
-          ? {
-              value: query,
-              aiEvaluationHints: aiEvaluationRules,
-            }
-          : {
-              ...query,
-              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
-            };
-      });
+    const fixedQueries = fixedQueriesData.superlative;
+    const {
+      count,
+      systemPrompt,
+      userPromptTemplate,
+      maxTokens,
+      fallback,
+      temperature,
+    } = aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+          undefined,
+          temperature,
+        );
+    await saveGeneratedQueriesIfAny(queries);
+    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+      if (Object.keys(aiEvaluationRules).length === 0) {
+        return query;
+      }
+      return typeof query === "string"
+        ? {
+            value: query,
+            aiEvaluationHints: aiEvaluationRules,
+          }
+        : {
+            ...query,
+            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
+          };
+    });
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  });
 });
 
 test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
@@ -834,12 +921,17 @@ test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
   registerSmartSearchSuiteHooks(describeName);
 
   for (const targetFacet of RANGE_FACETS) {
-    test(`By Filter Facets ('${targetFacet}')`, { tag: ["@ui", "@api", "@facet", "@range"] }, async ({ browser }) => {
+    test(
+      `By Filter Facets ('${targetFacet}')`,
+      { tag: ["@ui", "@api", "@facet", "@range"] },
+      async ({ browser }) => {
         const fixedQueries = fixedQueriesData.byFilterFacetsRange || [];
-        const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-        const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-          ? undefined
-          : aiEvaluationRules;
+        const aiEvaluationRules =
+          aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+        const fallbackHints =
+          Object.keys(aiEvaluationRules).length === 0
+            ? undefined
+            : aiEvaluationRules;
         const queries = isFixedQueriesOnly()
           ? []
           : await loadFacetCompleteSuite(fallbackHints, [targetFacet]);
@@ -857,7 +949,7 @@ test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
           performApiSmartSearchAndGetResults,
           processAndLogApiResult,
         });
-      }
+      },
     );
   }
 });
@@ -906,30 +998,36 @@ test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
   });
 
   for (const targetFacet of VEHICLES_MB_FILTER_FACETS) {
-    test(`By Filter Facets ('${targetFacet}')(-ve)`, { tag: ["@ui", "@api", "@facet", "@-ve"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
-      const queries = isFixedQueriesOnly()
-        ? []
-        : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
-      await saveGeneratedQueriesIfAny(queries);
-      const allQueries = mergeQueries(fixedQueries, queries);
+    test(
+      `By Filter Facets ('${targetFacet}')(-ve)`,
+      { tag: ["@ui", "@api", "@facet", "@-ve"] },
+      async ({ browser }) => {
+        const fixedQueries = fixedQueriesData.byFilterFacetsComplete || [];
+        const aiEvaluationRules =
+          aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+        const fallbackHints =
+          Object.keys(aiEvaluationRules).length === 0
+            ? undefined
+            : aiEvaluationRules;
+        const queries = isFixedQueriesOnly()
+          ? []
+          : await loadMissingFacetValuesSuite(targetFacet, fallbackHints);
+        await saveGeneratedQueriesIfAny(queries);
+        const allQueries = mergeQueries(fixedQueries, queries);
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    });
+        await runTestsAndSaveResults({
+          queries: allQueries,
+          testDescribe: describeName,
+          testTitle: test.info().title,
+          browser,
+          setupContextAndPage,
+          performUISmartSearchAndGetResults,
+          processAndLogUiResult,
+          performApiSmartSearchAndGetResults,
+          processAndLogApiResult,
+        });
+      },
+    );
   }
 });
 
@@ -976,31 +1074,39 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
     }
   });
 
-  test("By Brand/Model (Sentence|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "By Brand/Model (Sentence|Single)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await (async () => {
-        const file = await fs.readFile(testDataVehicles, "utf-8");
-        const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } = JSON.parse(file);
-        const generatedQueries = [];
-        const total = vehicleBrandsAndModels["non-mb"].length;
-        const indices = Array.from({ length: total }, (_, i) => i)
-          .sort(() => 0.5 - Math.random())
-          .slice(0, 10);
-        for (const idx of indices) {
-          const keyword = vehicleBrandsAndModels["non-mb"][idx];
-          const queryValues = await generateUniqueQueries(
-            count,
-            systemPrompt,
-            userPromptTemplate.replace('{keyword}', keyword),
-            maxTokens,
-            fallback
-          );
-          generatedQueries.push(queryValues);
-        }
-        return generatedQueries.flat();
-      })();
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await (async () => {
+            const file = await fs.readFile(testDataVehicles, "utf-8");
+            const vehicleBrandsAndModels: { mb: string[]; "non-mb": string[] } =
+              JSON.parse(file);
+            const generatedQueries = [];
+            const total = vehicleBrandsAndModels["non-mb"].length;
+            const indices = Array.from({ length: total }, (_, i) => i)
+              .sort(() => 0.5 - Math.random())
+              .slice(0, 10);
+            for (const idx of indices) {
+              const keyword = vehicleBrandsAndModels["non-mb"][idx];
+              const queryValues = await generateUniqueQueries(
+                count,
+                systemPrompt,
+                userPromptTemplate.replace("{keyword}", keyword),
+                maxTokens,
+                fallback,
+              );
+              generatedQueries.push(queryValues);
+            }
+            return generatedQueries.flat();
+          })();
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1029,13 +1135,19 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Brand/Model (Keyword|Single)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "By Brand/Model (Keyword|Single)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordSingle;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(20, 1, 1);
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await getRandomVehicleCombinationsNonMB(20, 1, 1);
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1063,13 +1175,19 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("By Brand/Model (Keyword|Mix)", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "By Brand/Model (Keyword|Mix)",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.keywordMix;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await getRandomVehicleCombinationsNonMB(10, 2, 5);
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await getRandomVehicleCombinationsNonMB(10, 2, 5);
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1097,37 +1215,38 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
   test("By Non-MB Features", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const fixedQueries = fixedQueriesData.nonMbFeatures;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
+    const fixedQueries = fixedQueriesData.nonMbFeatures;
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const fallbackHints =
+      Object.keys(aiEvaluationRules).length === 0
         ? undefined
         : aiEvaluationRules;
-      const allQueries = mergeQueries(
-        normalizeFixedQueries(fixedQueries, {
-          shouldRecommend: false,
-          shouldFilter: {},
-          aiEvaluationHints: fallbackHints,
-        }),
-        []
-      );
+    const allQueries = mergeQueries(
+      normalizeFixedQueries(fixedQueries, {
+        shouldRecommend: false,
+        shouldFilter: {},
+        aiEvaluationHints: fallbackHints,
+      }),
+      [],
+    );
 
-      await runTestsAndSaveResults({
-        queries: allQueries,
-        testDescribe: describeName,
-        testTitle: test.info().title,
-        browser,
-        setupContextAndPage,
-        performUISmartSearchAndGetResults,
-        processAndLogUiResult,
-        performApiSmartSearchAndGetResults,
-        processAndLogApiResult,
-      });
-    }
-  );
+    await runTestsAndSaveResults({
+      queries: allQueries,
+      testDescribe: describeName,
+      testTitle: test.info().title,
+      browser,
+      setupContextAndPage,
+      performUISmartSearchAndGetResults,
+      processAndLogUiResult,
+      performApiSmartSearchAndGetResults,
+      processAndLogApiResult,
+    });
+  });
 });
 
 test.describe("AI Smart Search - Input Robustness", () => {
@@ -1135,15 +1254,15 @@ test.describe("AI Smart Search - Input Robustness", () => {
   registerSmartSearchSuiteHooks(describeName);
 
   test("Edge Case Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const withAiEvaluationHints = (query: string) => (
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const withAiEvaluationHints = (query: string) =>
       Object.keys(aiEvaluationRules).length === 0
         ? query
         : {
             value: query,
             aiEvaluationHints: aiEvaluationRules,
-          }
-    );
+          };
     const edgeQueries: Array<[string, boolean, number]> = [
       // [query, submitDisabled, expectedStatusCode]
       ["     ", true, 200], // whitespace only
@@ -1171,12 +1290,12 @@ test.describe("AI Smart Search - Input Robustness", () => {
     // Run UI tests if enabled
     if (shouldRunUiTests()) {
       const page = await setupContextAndPage(browser);
-      for (const [query, submitDisabled, expectedStatusCode] of edgeQueries) {
+      for (const [query, submitDisabled] of edgeQueries) {
         const queryWithHints = withAiEvaluationHints(query);
         const results = await performUISmartSearchAndGetResults(
           page,
           query,
-          submitDisabled
+          submitDisabled,
         );
         const entry = await processAndLogUiResult({
           query: queryWithHints,
@@ -1211,18 +1330,21 @@ test.describe("AI Smart Search - Input Robustness", () => {
 
     // Combine and save results
     const allResults = await combineResults(uiResults, apiResults);
-    const outputFileName = getOutputFileName(buildTestType(describeName, test.info().title, "edge-cases"));
+    const outputFileName = getOutputFileName(
+      buildTestType(describeName, test.info().title, "edge-cases"),
+    );
     await ensureDirectoryExists(outputFileName);
     await fs.writeFile(
       outputFileName,
       JSON.stringify(allResults, null, 2),
-      "utf-8"
+      "utf-8",
     );
   });
 
   test("Random Numbers", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomNumbers;
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const allQueries = mergeQueries(fixedQueries, []).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1251,17 +1373,24 @@ test.describe("AI Smart Search - Input Robustness", () => {
     });
   });
 
-  test("Misspelled/Fuzzy Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Misspelled/Fuzzy Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 7,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 7,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1289,20 +1418,27 @@ test.describe("AI Smart Search - Input Robustness", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Language/Localization", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Language/Localization",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 7,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 7,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1330,12 +1466,16 @@ test.describe("AI Smart Search - Input Robustness", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Unusual Units Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Unusual Units Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.unusualUnits;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1362,7 +1502,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 });
 
@@ -1370,35 +1510,40 @@ test.describe("AI Smart Search - Constraint Handling", () => {
   const describeName = "Constraint Handling";
   registerSmartSearchSuiteHooks(describeName);
 
-  test("Date Range/Numeric Filters", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Date Range/Numeric Filters",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints =
+        Object.keys(aiEvaluationRules).length === 0
+          ? undefined
+          : aiEvaluationRules;
       const facets = await fetchAndConvertFacets(
         emhApiResponse,
         dcpApiResponse,
-        getProject()
+        getProject(),
       );
-      const queries = isFixedQueriesOnly() ? [] : await generateDateNumericQueriesFromFacets(
-        facets,
-        {
-          count: count || 8,
-          systemPrompt,
-          userPromptTemplate,
-          maxTokens,
-          fallback,
-        }
-      );
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateDateNumericQueriesFromFacets(facets, {
+            count: count || 8,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          });
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(
         normalizeFixedQueries(fixedQueries, {
           shouldFilter: true,
           aiEvaluationHints: fallbackHints,
         }),
-        queries
+        queries,
       ).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1425,14 +1570,19 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Numeric Unit Variations", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const fallbackHints = Object.keys(aiEvaluationRules).length === 0
-        ? undefined
-        : aiEvaluationRules;
+  test(
+    "Numeric Unit Variations",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const fallbackHints =
+        Object.keys(aiEvaluationRules).length === 0
+          ? undefined
+          : aiEvaluationRules;
       const allQueries = await loadNumericUnitVariationSuite(fallbackHints);
       await saveGeneratedQueriesIfAny(allQueries);
 
@@ -1447,20 +1597,27 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Negative/Contradictory Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Negative/Contradictory Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 8,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 8,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1488,20 +1645,27 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Conflicting Filter Facets", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Conflicting Filter Facets",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 8,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 8,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1529,20 +1693,24 @@ test.describe("AI Smart Search - Constraint Handling", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1574,15 +1742,19 @@ test.describe("AI Smart Search - Constraint Handling", () => {
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1617,9 +1789,13 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
   const describeName = "Conversational Behavior";
   registerSmartSearchSuiteHooks(describeName);
 
-  test("Multi-Intent Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Multi-Intent Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.multiIntent;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1646,12 +1822,16 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Clarification Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Clarification Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.clarification;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1678,12 +1858,16 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Price Negotiation Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Price Negotiation Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.priceNegotiation;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1710,20 +1894,24 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
   test("Sales", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.sales;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1755,7 +1943,8 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
 
   test("Joke/Humor Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.jokeHumor;
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     const allQueries = mergeQueries(fixedQueries, []).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
         return query;
@@ -1784,9 +1973,13 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
     });
   });
 
-  test("Repeat/Looping Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Repeat/Looping Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.repeatLooping;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1813,12 +2006,16 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Brand Loyalty/Switching Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Brand Loyalty/Switching Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.brandLoyaltySwitching;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1845,12 +2042,16 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Accessibility Needs Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Accessibility Needs Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.accessibilityNeeds;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1877,12 +2078,16 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
-  test("Environmental Concerns Queries", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Environmental Concerns Queries",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.environmentalConcerns;
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
       const allQueries = mergeQueries(fixedQueries, []).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
           return query;
@@ -1909,7 +2114,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 });
 
@@ -1919,15 +2124,19 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1959,15 +2168,19 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -1999,15 +2212,19 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -2037,17 +2254,24 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
     });
   });
 
-  test("Bias and Manipulation", { tag: ["@ui", "@api"] }, async ({ browser }) => {
+  test(
+    "Bias and Manipulation",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-      const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-      const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-        count || 8,
-        systemPrompt,
-        userPromptTemplate,
-        maxTokens,
-        fallback
-      );
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 8,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
       await saveGeneratedQueriesIfAny(queries);
       const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
         if (Object.keys(aiEvaluationRules).length === 0) {
@@ -2075,20 +2299,24 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
         performApiSmartSearchAndGetResults,
         processAndLogApiResult,
       });
-    }
+    },
   );
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
+    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      aiPromptData[describeName]?.[test.info().title] || {};
+    const aiEvaluationRules =
+      aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+    const queries = isFixedQueriesOnly()
+      ? []
+      : await generateUniqueQueries(
+          count || 8,
+          systemPrompt,
+          userPromptTemplate,
+          maxTokens,
+          fallback,
+        );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
       if (Object.keys(aiEvaluationRules).length === 0) {
@@ -2123,45 +2351,52 @@ test.describe("AI Smart Search - Reliability", () => {
   const describeName = "Reliability";
   registerSmartSearchSuiteHooks(describeName);
 
-  test("Response Consistency", { tag: ["@ui", "@api"] }, async ({ browser }) => {
-    // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
-    const fixedQueries = fixedQueriesData.forRegression;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } = aiPromptData[describeName]?.[test.info().title] || {};
-    const aiEvaluationRules = aiEvaluationRulesData[describeName]?.[test.info().title] || {};
-    const queries = isFixedQueriesOnly() ? [] : await generateUniqueQueries(
-      count || 8,
-      systemPrompt,
-      userPromptTemplate,
-      maxTokens,
-      fallback
-    );
-    await saveGeneratedQueriesIfAny(queries);
-    const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
-      if (Object.keys(aiEvaluationRules).length === 0) {
-        return query;
-      }
-      return typeof query === "string"
-        ? {
-            value: query,
-            aiEvaluationHints: aiEvaluationRules,
-          }
-        : {
-            ...query,
-            aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
-          };
-    });
+  test(
+    "Response Consistency",
+    { tag: ["@ui", "@api"] },
+    async ({ browser }) => {
+      // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
+      const fixedQueries = fixedQueriesData.forRegression;
+      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+        aiPromptData[describeName]?.[test.info().title] || {};
+      const aiEvaluationRules =
+        aiEvaluationRulesData[describeName]?.[test.info().title] || {};
+      const queries = isFixedQueriesOnly()
+        ? []
+        : await generateUniqueQueries(
+            count || 8,
+            systemPrompt,
+            userPromptTemplate,
+            maxTokens,
+            fallback,
+          );
+      await saveGeneratedQueriesIfAny(queries);
+      const allQueries = mergeQueries(fixedQueries, queries).map((query) => {
+        if (Object.keys(aiEvaluationRules).length === 0) {
+          return query;
+        }
+        return typeof query === "string"
+          ? {
+              value: query,
+              aiEvaluationHints: aiEvaluationRules,
+            }
+          : {
+              ...query,
+              aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
+            };
+      });
 
-    await runTestsRepeatedAndSaveResults({
-      queries: allQueries,
-      testDescribe: describeName,
-      testTitle: test.info().title,
-      browser,
-      setupContextAndPage,
-      performUISmartSearchAndGetResults,
-      processAndLogUiResult,
-      performApiSmartSearchAndGetResults,
-      processAndLogApiResult,
-    });
-    }
+      await runTestsRepeatedAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    },
   );
 });

@@ -1,14 +1,9 @@
 import { Browser, Page } from "@playwright/test";
-import { chromium } from "playwright";
 import fs from "fs/promises";
 import path from "path";
-import {
-  evaluateSearchResult,
-  fetchTranslation,
-  openaiChatCompletion,
-} from "./aiHelpers";
+import { chromium } from "playwright";
+import { evaluateSearchResult, fetchTranslation } from "./aiHelpers";
 import { extractVehicleTotalCountFromMessage } from "./apiHelpers";
-import { deepEqual, isLanguageConsistencyAccepted } from "./shared";
 import {
   buildFacetValueDisplayMap,
   extractResponseFacets,
@@ -22,7 +17,7 @@ export const PRODUCT = process.env.PRODUCT;
 
 const FACETS_MASTER_DATA_PATH = path.resolve(
   __dirname,
-  "../data/facets-master-data.json"
+  "../data/facets-master-data.json",
 );
 let facetsMasterDataCache: any | null = null;
 
@@ -45,60 +40,62 @@ export interface UiSearchResult {
 }
 
 function normalizeFacetToken(value: string): string {
-  return value
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    // Re-compose characters so Hangul syllables (e.g. 세단) are preserved
-    // before the allow-list regex below.
-    .normalize("NFC")
-    .toLowerCase()
-    .replace(/ı/g, "i")
-    .replace(/^paint[_-]?color[_-]?/i, "")
-    .replace(/^upholstery[_-]?color[_-]?/i, "")
-    .replace(/[^a-z0-9가-힣ぁ-ゖァ-ヺー一-龯]/g, "");
+  return (
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      // Re-compose characters so Hangul syllables (e.g. 세단) are preserved
+      // before the allow-list regex below.
+      .normalize("NFC")
+      .toLowerCase()
+      .replace(/ı/g, "i")
+      .replace(/^paint[_-]?color[_-]?/i, "")
+      .replace(/^upholstery[_-]?color[_-]?/i, "")
+      .replace(/[^a-z0-9가-힣ぁ-ゖァ-ヺー一-龯]/g, "")
+  );
 }
 
 // Color name translations for multi-language support
 const colorTranslations: Record<string, string> = {
   // Korean transliterations
-  "화이트": "white",
-  "블랙": "black",
-  "그레이": "grey",
-  "레드": "red",
-  "블루": "blue",
-  "실버": "silver",
-  "베이지": "beige",
-  "브라운": "brown",
+  화이트: "white",
+  블랙: "black",
+  그레이: "grey",
+  레드: "red",
+  블루: "blue",
+  실버: "silver",
+  베이지: "beige",
+  브라운: "brown",
   // Korean native
-  "흰색": "white",
-  "하얀색": "white",
-  "검정": "black",
-  "검은색": "black",
-  "회색": "grey",
-  "은색": "silver",
-  "빨간색": "red",
-  "파란색": "blue",
+  흰색: "white",
+  하얀색: "white",
+  검정: "black",
+  검은색: "black",
+  회색: "grey",
+  은색: "silver",
+  빨간색: "red",
+  파란색: "blue",
   // Turkish
-  "beyaz": "white",
-  "siyah": "black",
-  "gri": "grey",
-  "gumus": "silver",
-  "kirmizi": "red",
-  "mavi": "blue",
-  "kahverengi": "brown",
-  "bej": "beige",
-  "gümüş": "silver",
+  beyaz: "white",
+  siyah: "black",
+  gri: "grey",
+  gumus: "silver",
+  kirmizi: "red",
+  mavi: "blue",
+  kahverengi: "brown",
+  bej: "beige",
+  gümüş: "silver",
   // Thai native color names
-  "ดำ": "black",
-  "ขาว": "white",
-  "เทา": "grey",
-  "เงิน": "silver",
-  "แดง": "red",
-  "น้ำเงิน": "blue",
-  "เขียว": "green",
-  "เหลือง": "yellow",
-  "น้ำตาล": "brown",
-  "เบจ": "beige",
+  ดำ: "black",
+  ขาว: "white",
+  เทา: "grey",
+  เงิน: "silver",
+  แดง: "red",
+  น้ำเงิน: "blue",
+  เขียว: "green",
+  เหลือง: "yellow",
+  น้ำตาล: "brown",
+  เบจ: "beige",
 };
 
 function translateColorName(value: string): string {
@@ -136,7 +133,7 @@ function getFacetRangeBounds(value: any): { min: number; max: number } | null {
 
 function isExpectedValueWithinFacetRange(
   expected: unknown,
-  range: { min: number; max: number }
+  range: { min: number; max: number },
 ): boolean {
   const numericExpected = Number(expected);
   return (
@@ -155,141 +152,145 @@ function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
 
 const facetValueAliasMap: Record<string, string[]> = {
   // Body type aliases
-  "limousine": ["sedan"],
-  "sedan": ["limousine"],
-  "suv": ["suvoffroader"],
-  "suvoffroader": ["suv"],
+  limousine: ["sedan"],
+  sedan: ["limousine"],
+  suv: ["suvoffroader"],
+  suvoffroader: ["suv"],
   // TR: "SUV & Arazi aracı" covers both SUV and SUV_OFFROADER
-  "suvaraziaraci": ["suv", "suvoffroader"],
-  "suvaraziarac": ["suv", "suvoffroader"],
-  "cabrioroadster": ["cabrioletroadster", "kabriyo", "cabriolet"],
-  "cabrioletroadster": ["cabrioroadster", "kabriyo", "cabriolet"],
+  suvaraziaraci: ["suv", "suvoffroader"],
+  suvaraziarac: ["suv", "suvoffroader"],
+  cabrioroadster: ["cabrioletroadster", "kabriyo", "cabriolet"],
+  cabrioletroadster: ["cabrioroadster", "kabriyo", "cabriolet"],
   // TR body type display names → BE codes
-  "kabriyo": ["cabrioroadster", "cabrioletroadster"],
-  "amggt": ["mercedesamggt"],
-  "mercedesamggt": ["amggt"],
+  kabriyo: ["cabrioroadster", "cabrioletroadster"],
+  amggt: ["mercedesamggt"],
+  mercedesamggt: ["amggt"],
   // TR model series: "A-Serisi" → "aserisi", "C-Serisi" → "cserisi", etc.
-  "a": ["aclass", "aserisi"],
-  "aclass": ["a", "aserisi"],
-  "aserisi": ["a", "aclass"],
-  "b": ["bclass", "bserisi"],
-  "bclass": ["b", "bserisi"],
-  "bserisi": ["b", "bclass"],
-  "c": ["cclass", "cserisi"],
-  "cclass": ["c", "cserisi"],
-  "cserisi": ["c", "cclass"],
-  "e": ["eclass", "eserisi"],
-  "eclass": ["e", "eserisi"],
-  "eserisi": ["e", "eclass"],
-  "g": ["gclass", "gserisi"],
-  "gclass": ["g", "gserisi"],
-  "gserisi": ["g", "gclass"],
-  "s": ["sclass", "sserisi"],
-  "sclass": ["s", "sserisi"],
-  "sserisi": ["s", "sclass"],
-  "hatchback": ["hatches"],
-  "hatches": ["hatchback"],
-  "peoplecarrier": ["peoplemovers", "mpvs"],
-  "peoplemovers": ["peoplecarrier", "mpvs"],
-  "mpvs": ["peoplecarrier", "peoplemovers"],
-  "station": ["estate"],
-  "estate": ["station"],
+  a: ["aclass", "aserisi"],
+  aclass: ["a", "aserisi"],
+  aserisi: ["a", "aclass"],
+  b: ["bclass", "bserisi"],
+  bclass: ["b", "bserisi"],
+  bserisi: ["b", "bclass"],
+  c: ["cclass", "cserisi"],
+  cclass: ["c", "cserisi"],
+  cserisi: ["c", "cclass"],
+  e: ["eclass", "eserisi"],
+  eclass: ["e", "eserisi"],
+  eserisi: ["e", "eclass"],
+  g: ["gclass", "gserisi"],
+  gclass: ["g", "gserisi"],
+  gserisi: ["g", "gclass"],
+  s: ["sclass", "sserisi"],
+  sclass: ["s", "sserisi"],
+  sserisi: ["s", "sclass"],
+  hatchback: ["hatches"],
+  hatches: ["hatchback"],
+  peoplecarrier: ["peoplemovers", "mpvs"],
+  peoplemovers: ["peoplecarrier", "mpvs"],
+  mpvs: ["peoplecarrier", "peoplemovers"],
+  station: ["estate"],
+  estate: ["station"],
   // Fuel type aliases
-  "pluginhybridpetrol": ["petrolelectricpluginhybrid"],
-  "petrolelectricpluginhybrid": ["pluginhybridpetrol"],
+  pluginhybridpetrol: ["petrolelectricpluginhybrid"],
+  petrolelectricpluginhybrid: ["pluginhybridpetrol"],
   // TR fuel type display names → BE codes
-  "benzin": ["petrol"],
-  "petrol": ["benzin"],
-  "dizel": ["diesel"],
-  "diesel": ["dizel", "디젤", "경유"],
-  "elektrik": ["electric"],
-  "electric": ["elektrik"],
-  "hibrit": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  benzin: ["petrol"],
+  petrol: ["benzin"],
+  dizel: ["diesel"],
+  diesel: ["dizel", "디젤", "경유"],
+  elektrik: ["electric"],
+  electric: ["elektrik"],
+  hibrit: ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
   // TR: "Benzinli Plug-in Hibrit" normalizes to "benzinlipluginhibrit"
-  "benzinlipluginhibrit": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  benzinlipluginhibrit: ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
   // Brand aliases: UI may show "Mercedes-Benz" or "Mercedes Benz"
-  "mercedesbenz": ["mercedes"],
-  "mercedes": ["mercedesbenz"],
+  mercedesbenz: ["mercedes"],
+  mercedes: ["mercedesbenz"],
   // TR color display names → BE codes (PAINT_COLOR_ prefix is stripped by normalizeFacetToken)
-  "siyah": ["black"],
-  "black": ["siyah"],
-  "beyaz": ["white"],
-  "white": ["beyaz"],
-  "gumus": ["silver", "grey", "gray"],
-  "silver": ["gumus"],
-  "gri": ["grey", "gray", "silver"],
-  "grey": ["gri", "gray"],
-  "gray": ["gri", "grey"],
-  "kirmizi": ["red"],
-  "red": ["kirmizi"],
-  "mavi": ["blue"],
-  "blue": ["mavi"],
-  "yesil": ["green"],
-  "green": ["yesil"],
+  siyah: ["black"],
+  black: ["siyah"],
+  beyaz: ["white"],
+  white: ["beyaz"],
+  gumus: ["silver", "grey", "gray"],
+  silver: ["gumus"],
+  gri: ["grey", "gray", "silver"],
+  grey: ["gri", "gray"],
+  gray: ["gri", "grey"],
+  kirmizi: ["red"],
+  red: ["kirmizi"],
+  mavi: ["blue"],
+  blue: ["mavi"],
+  yesil: ["green"],
+  green: ["yesil"],
   // TR color display names for upholstery/interior
-  "bej": ["beige"],
-  "beige": ["bej"],
-  "kahverengi": ["brown"],
-  "brown": ["kahverengi"],
+  bej: ["beige"],
+  beige: ["bej"],
+  kahverengi: ["brown"],
+  brown: ["kahverengi"],
   // KR color/body-type display names -> BE codes
-  "세단": ["limousine"],
-  "쿠페": ["coupe"],
-  "왜건": ["station", "estate"],
-  "해치백": ["hatchback", "hatches"],
+  세단: ["limousine"],
+  쿠페: ["coupe"],
+  왜건: ["station", "estate"],
+  해치백: ["hatchback", "hatches"],
   // JP body type display names -> BE codes
-  "セダン": ["limousine"],
-  "クーペ": ["coupe"],
-  "ステーションワゴン": ["station", "estate"],
+  セダン: ["limousine"],
+  クーペ: ["coupe"],
+  ステーションワゴン: ["station", "estate"],
   // KR native color names
-  "검정": ["black"],
-  "검은색": ["black"],
-  "흰색": ["white"],
-  "하얀색": ["white"],
-  "은색": ["silver", "grey", "gray"],
-  "회색": ["grey", "gray"],
-  "빨간색": ["red"],
-  "파란색": ["blue"],
+  검정: ["black"],
+  검은색: ["black"],
+  흰색: ["white"],
+  하얀색: ["white"],
+  은색: ["silver", "grey", "gray"],
+  회색: ["grey", "gray"],
+  빨간색: ["red"],
+  파란색: ["blue"],
   // KR color transliterations (from API facets)
-  "화이트": ["white"],
-  "블랙": ["black"],
-  "그레이": ["grey", "gray"],
-  "레드": ["red"],
-  "블루": ["blue"],
-  "실버": ["silver"],
-  "베이지": ["beige"],
-  "브라운": ["brown"],
-  "가솔린": ["petrol"],
-  "휘발유": ["petrol"],
-  "디젤": ["diesel"],
-  "경유": ["diesel"],
-  "전기": ["electric"],
-  "하이브리드": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  화이트: ["white"],
+  블랙: ["black"],
+  그레이: ["grey", "gray"],
+  레드: ["red"],
+  블루: ["blue"],
+  실버: ["silver"],
+  베이지: ["beige"],
+  브라운: ["brown"],
+  가솔린: ["petrol"],
+  휘발유: ["petrol"],
+  디젤: ["diesel"],
+  경유: ["diesel"],
+  전기: ["electric"],
+  하이브리드: ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
   // KR body type UI text variants
-  "카브리올레로드스터": ["cabrioroadster", "cabrioletroadster"],
-  "카브리올레": ["cabrioroadster", "cabrioletroadster"],
+  카브리올레로드스터: ["cabrioroadster", "cabrioletroadster"],
+  카브리올레: ["cabrioroadster", "cabrioletroadster"],
   // Thai fuel type translations
-  "ดีเซล": ["diesel"],
-  "เบนซิน": ["petrol"],
-  "ไฟฟ้า": ["electric"],
-  "ปลั๊กอินไฮบริด": ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
+  ดีเซล: ["diesel"],
+  เบนซิน: ["petrol"],
+  ไฟฟ้า: ["electric"],
+  ปลั๊กอินไฮบริด: ["petrolelectricpluginhybrid", "pluginhybridpetrol"],
   "ดีเซล/ไฟฟ้า": ["dieselelectricpluginhybrid"],
-  "ดีเซลปลั๊กอินไฮบริด": ["dieselelectricpluginhybrid"],
+  ดีเซลปลั๊กอินไฮบริด: ["dieselelectricpluginhybrid"],
   // Thai body type translations
-  "ลิมูซีน": ["limousine", "sedan", "saloon"],
-  "คูเป้": ["coupe"],
-  "เอสยูวี": ["suv", "suvoffroader"],
-  "คาบริโอเล": ["cabrioroadster", "cabrioletroadster"],
-  "รถตู้": ["peoplecarrier"],
-  "saloon": ["limousine", "sedan"],
+  ลิมูซีน: ["limousine", "sedan", "saloon"],
+  คูเป้: ["coupe"],
+  เอสยูวี: ["suv", "suvoffroader"],
+  คาบริโอเล: ["cabrioroadster", "cabrioletroadster"],
+  รถตู้: ["peoplecarrier"],
+  saloon: ["limousine", "sedan"],
   // Thai transmission type translations
-  "อัตโนมัติ": ["automatic"],
-  "เกียร์ธรรมดา": ["manual"],
-  "ธรรมดา": ["manual"],
+  อัตโนมัติ: ["automatic"],
+  เกียร์ธรรมดา: ["manual"],
+  ธรรมดา: ["manual"],
 };
 
 let runtimeFacetValueAliasMap: Record<string, string[]> = {};
 
-function addAlias(aliasMap: Record<string, string[]>, from: string, to: string): void {
+function addAlias(
+  aliasMap: Record<string, string[]>,
+  from: string,
+  to: string,
+): void {
   if (!from || !to || from === to) return;
   if (!aliasMap[from]) aliasMap[from] = [];
   if (!aliasMap[from].includes(to)) {
@@ -299,7 +300,10 @@ function addAlias(aliasMap: Record<string, string[]>, from: string, to: string):
 
 function updateRuntimeFacetAliasesFromApiResponse(apiResponse: any): void {
   runtimeFacetValueAliasMap = {};
-  const apiFacets = apiResponse?.data?.search?.facets || apiResponse?.data?.smartSearch?.facets || {};
+  const apiFacets =
+    apiResponse?.data?.search?.facets ||
+    apiResponse?.data?.smartSearch?.facets ||
+    {};
 
   for (const facet of Object.values(apiFacets) as any[]) {
     const values = facet?.values;
@@ -308,7 +312,8 @@ function updateRuntimeFacetAliasesFromApiResponse(apiResponse: any): void {
     for (const item of values) {
       if (!item || typeof item !== "object") continue;
       const beValue = typeof item.value === "string" ? item.value : "";
-      const formattedValue = typeof item.formattedValue === "string" ? item.formattedValue : "";
+      const formattedValue =
+        typeof item.formattedValue === "string" ? item.formattedValue : "";
 
       const normalizedBe = normalizeFacetToken(beValue);
       const normalizedFormatted = normalizeFacetToken(formattedValue);
@@ -360,41 +365,41 @@ function mapUiLabelToFacetKey(label: string): string | null {
 
   const rawLabelMap: Record<string, string> = {
     "바디 타입": "bodyType",
-    "차체타입": "bodyType",
-    "ボディタイプ": "bodyType",
+    차체타입: "bodyType",
+    ボディタイプ: "bodyType",
     "연료연료 타입타입": "fuelType",
-    "연료유형": "fuelType",
-    "燃料タイプ": "fuelType",
-    "모델": "modelIdentifier",
-    "모델클래스": "modelIdentifier",
-    "모델라인": "modelIdentifier",
-    "モデル": "modelIdentifier",
-    "브랜드": "brand",
-    "ブランド": "brand",
-    "색상": "color",
-    "色": "color",
-    "내장색상": "upholstery",
-    "内装色": "upholstery",
-    "연식": "modelYear",
-    "年式": "modelYear",
-    "가격": "price",
-    "価格": "price",
-    "차량": "brand",
-    "옵션사양": "equipment",
-    "装備": "equipment",
+    연료유형: "fuelType",
+    燃料タイプ: "fuelType",
+    모델: "modelIdentifier",
+    모델클래스: "modelIdentifier",
+    모델라인: "modelIdentifier",
+    モデル: "modelIdentifier",
+    브랜드: "brand",
+    ブランド: "brand",
+    색상: "color",
+    色: "color",
+    내장색상: "upholstery",
+    内装色: "upholstery",
+    연식: "modelYear",
+    年式: "modelYear",
+    가격: "price",
+    価格: "price",
+    차량: "brand",
+    옵션사양: "equipment",
+    装備: "equipment",
     // Thai UI label mappings
-    "ประเภทรถ": "bodyType",
-    "ประเภทเชื้อเพลิง": "fuelType",
-    "รุ่น": "modelIdentifier",
-    "แบรนด์": "brand",
-    "ยี่ห้อ": "brand",
-    "สี": "color",
-    "สีภายใน": "upholstery",
-    "ปีรุ่น": "modelYear",
-    "ราคา": "price",
-    "อุปกรณ์": "equipment",
-    "เกียร์": "gearbox",
-    "ระยะทาง": "mileage",
+    ประเภทรถ: "bodyType",
+    ประเภทเชื้อเพลิง: "fuelType",
+    รุ่น: "modelIdentifier",
+    แบรนด์: "brand",
+    ยี่ห้อ: "brand",
+    สี: "color",
+    สีภายใน: "upholstery",
+    ปีรุ่น: "modelYear",
+    ราคา: "price",
+    อุปกรณ์: "equipment",
+    เกียร์: "gearbox",
+    ระยะทาง: "mileage",
   };
 
   if (rawLabelMap[compactRawLabel]) {
@@ -403,45 +408,45 @@ function mapUiLabelToFacetKey(label: string): string | null {
 
   const normalizedLabel = normalizeFacetToken(label);
   const labelMap: Record<string, string> = {
-    "brand": "brand",
-    "brandname": "brand",
-    "body": "bodyType",
-    "bodystyle": "bodyType",
-    "bodytype": "bodyType",
-    "vehicletype": "bodyType",
-    "model": "modelIdentifier",
-    "modelvariant": "motorization",
-    "variant": "motorization",
-    "varyant": "motorization",
-    "modelidentifier": "modelIdentifier",
-    "motorization": "motorization",
-    "fueltype": "fuelType",
-    "engine": "fuelType",
-    "color": "color",
-    "colour": "color",
-    "upholstery": "upholstery",
-    "upholsterycolor": "upholstery",
-    "upholsterycolour": "upholstery",
-    "modelyear": "modelYear",
-    "price": "price",
-    "totalprice": "price",
-    "marka": "brand",
-    "modeladi": "modelIdentifier",
-    "motor": "motorization",
-    "yakittipi": "fuelType",
-    "govdetipi": "bodyType",
-    "govdeturu": "bodyType",
-    "renk": "color",
-    "renkler": "color",
-    "doseme": "upholstery",
-    "dosemerenk": "upholstery",
-    "icdoseme": "upholstery",
-    "icdosemerenk": "upholstery",
-    "modelyili": "modelYear",
-    "fiyat": "price",
+    brand: "brand",
+    brandname: "brand",
+    body: "bodyType",
+    bodystyle: "bodyType",
+    bodytype: "bodyType",
+    vehicletype: "bodyType",
+    model: "modelIdentifier",
+    modelvariant: "motorization",
+    variant: "motorization",
+    varyant: "motorization",
+    modelidentifier: "modelIdentifier",
+    motorization: "motorization",
+    fueltype: "fuelType",
+    engine: "fuelType",
+    color: "color",
+    colour: "color",
+    upholstery: "upholstery",
+    upholsterycolor: "upholstery",
+    upholsterycolour: "upholstery",
+    modelyear: "modelYear",
+    price: "price",
+    totalprice: "price",
+    marka: "brand",
+    modeladi: "modelIdentifier",
+    motor: "motorization",
+    yakittipi: "fuelType",
+    govdetipi: "bodyType",
+    govdeturu: "bodyType",
+    renk: "color",
+    renkler: "color",
+    doseme: "upholstery",
+    dosemerenk: "upholstery",
+    icdoseme: "upholstery",
+    icdosemerenk: "upholstery",
+    modelyili: "modelYear",
+    fiyat: "price",
     // TR: equipment
-    "donanim": "equipment",
-    "equipment": "equipment",
+    donanim: "equipment",
+    equipment: "equipment",
   };
 
   return labelMap[normalizedLabel] || null;
@@ -478,7 +483,10 @@ function mapUiDataTestIdToFacetKey(dataTestId: string | null): string | null {
   };
 
   const normalizedFacetKey = normalizeFacetToken(rawFacetKey);
-  return canonicalFacetKeyMap[normalizedFacetKey] || mapUiLabelToFacetKey(rawFacetKey);
+  return (
+    canonicalFacetKeyMap[normalizedFacetKey] ||
+    mapUiLabelToFacetKey(rawFacetKey)
+  );
 }
 
 type UiSelectedFilterPill = {
@@ -487,7 +495,7 @@ type UiSelectedFilterPill = {
 };
 
 function parseUiSelectedFiltersToKeyValue(
-  uiSelectedFilters: UiSelectedFilterPill[]
+  uiSelectedFilters: UiSelectedFilterPill[],
 ): Record<string, string[]> {
   const keyValueFilters: Record<string, string[]> = {};
   const seenValuesByFacetKey: Record<string, Set<string>> = {};
@@ -501,12 +509,12 @@ function parseUiSelectedFiltersToKeyValue(
 
     const label = cleanText.slice(0, colonIndex).trim();
     let value = cleanText.slice(colonIndex + 1).trim();
-    
+
     // Remove trailing "X" (close button) from the value
     value = value.replace(/\s*X\s*$/i, "").trim();
     // Strip artefact colons produced by the tree-walker joining label+separator text nodes
     value = value.replace(/^[:\s]+|[:\s]+$/g, "").trim();
-    
+
     const mappedFacetKey = mapUiLabelToFacetKey(label);
     const facetKey = filterPill.facetKeyHint || mappedFacetKey;
     if (!facetKey) {
@@ -526,7 +534,10 @@ function parseUiSelectedFiltersToKeyValue(
     }
 
     const normalizedValue = normalizeFacetToken(value);
-    if (normalizedValue && seenValuesByFacetKey[facetKey]?.has(normalizedValue)) {
+    if (
+      normalizedValue &&
+      seenValuesByFacetKey[facetKey]?.has(normalizedValue)
+    ) {
       continue;
     }
 
@@ -542,7 +553,7 @@ function parseUiSelectedFiltersToKeyValue(
 
 function compareUiSelectedFiltersWithFacets(
   facets: Record<string, any>,
-  uiSelectedFiltersKV: Record<string, string[]>
+  uiSelectedFiltersKV: Record<string, string[]>,
 ): {
   matches: boolean;
   missingFacetValues: string[];
@@ -562,20 +573,22 @@ function compareUiSelectedFiltersWithFacets(
     const rawFacetValues = collectPrimitiveFacetValues(facetValue);
     const candidateUiKeys = facetKeyUiFallbacks[facetKey] || [facetKey];
     const keySpecificUiValues = candidateUiKeys.flatMap(
-      (candidateKey) => uiSelectedFiltersKV[candidateKey] || []
+      (candidateKey) => uiSelectedFiltersKV[candidateKey] || [],
     );
     const hasSelectedFacetKey = candidateUiKeys.some((candidateKey) =>
-      uiSelectedFacetKeys.has(candidateKey)
+      uiSelectedFacetKeys.has(candidateKey),
     );
 
     // Treat facet keys whose only captured values are separator artefacts (e.g. ":") as empty
-    const realUiValues = keySpecificUiValues.filter((v) => v !== ":" && v.trim() !== "");
+    const realUiValues = keySpecificUiValues.filter(
+      (v) => v !== ":" && v.trim() !== "",
+    );
     if (hasSelectedFacetKey && realUiValues.length === 0) {
       continue;
     }
 
     const keySpecificUiTokens = new Set(
-      realUiValues.flatMap((value) => buildFacetCandidateTokens(value))
+      realUiValues.flatMap((value) => buildFacetCandidateTokens(value)),
     );
 
     for (const rawValue of rawFacetValues) {
@@ -591,8 +604,9 @@ function compareUiSelectedFiltersWithFacets(
             keySpecificUiTokens.has(candidate) ||
             // Handle truncated UI pill text (ends with "…"): UI token is a prefix of BE candidate
             Array.from(keySpecificUiTokens).some(
-              (uiToken) => uiToken.length >= 10 && candidate.startsWith(uiToken)
-            )
+              (uiToken) =>
+                uiToken.length >= 10 && candidate.startsWith(uiToken),
+            ),
         );
 
       if (!matchedByKey) {
@@ -611,7 +625,7 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
   expectedValue: string,
   facets: Record<string, any>,
   uiSelectedFiltersKV: Record<string, string[]>,
-  facetKey: string = "equipment"
+  facetKey: string = "equipment",
 ): {
   matches: boolean;
   missingFacetValues: string[];
@@ -629,10 +643,10 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
 
   const expectedCandidates = buildFacetCandidateTokens(expectedValue);
   const backendTokens = new Set(
-    backendFacetValues.flatMap((value) => buildFacetCandidateTokens(value))
+    backendFacetValues.flatMap((value) => buildFacetCandidateTokens(value)),
   );
   const uiTokens = new Set(
-    uiFacetValues.flatMap((value) => buildFacetCandidateTokens(value))
+    uiFacetValues.flatMap((value) => buildFacetCandidateTokens(value)),
   );
 
   const matchesTokenSet = (tokens: Set<string>): boolean =>
@@ -640,8 +654,8 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
       (candidate) =>
         tokens.has(candidate) ||
         Array.from(tokens).some(
-          (token) => token.length >= 10 && candidate.startsWith(token)
-        )
+          (token) => token.length >= 10 && candidate.startsWith(token),
+        ),
     );
 
   const matchesBackend = matchesTokenSet(backendTokens);
@@ -661,18 +675,26 @@ function compareUiSelectedFiltersWithFacetsByExpectedValue(
   };
 }
 
-async function extractUiSelectedFilters(page: Page): Promise<Record<string, string[]>> {
+async function extractUiSelectedFilters(
+  page: Page,
+): Promise<Record<string, string[]>> {
   try {
-    const resetButtonVisible = await page
+    await page
       .locator("#emh-selected-filters-reset-button")
       .waitFor({ state: "visible", timeout: 5000 })
       .catch(() => false);
 
-    const showMoreButton = page.locator('[data-test-id="emh-selected-filters-show-more"]');
-    const showMoreVisible = await showMoreButton.isVisible({ timeout: 5000 }).catch(() => false);
+    const showMoreButton = page.locator(
+      '[data-test-id="emh-selected-filters-show-more"]',
+    );
+    const showMoreVisible = await showMoreButton
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
     if (showMoreVisible) {
       await showMoreButton.click().catch(() => {});
-      console.debug("[DEBUG] Clicked 'Show More' to reveal additional selected filters");
+      console.debug(
+        "[DEBUG] Clicked 'Show More' to reveal additional selected filters",
+      );
     }
 
     const selectors = [
@@ -695,8 +717,11 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
     for (const selector of selectors) {
       const pills = page.locator(selector);
       const count = await pills.count().catch(() => 0);
-      
-      const firstVisible = await pills.first().isVisible({ timeout: 5000 }).catch(() => false);
+
+      const firstVisible = await pills
+        .first()
+        .isVisible({ timeout: 5000 })
+        .catch(() => false);
       if (!firstVisible) {
         continue;
       }
@@ -709,50 +734,72 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
       const parsedPills: UiSelectedFilterPill[] = [];
       for (let i = 0; i < count; i++) {
         const pill = pills.nth(i);
-        const dataTestId = await pill.getAttribute("data-test-id").catch(() => null);
+        const dataTestId = await pill
+          .getAttribute("data-test-id")
+          .catch(() => null);
         const facetKeyHint = mapUiDataTestIdToFacetKey(dataTestId);
         const innerText = await pill.innerText().catch(() => "");
         const normalizedInnerText = innerText.replace(/\s+/g, " ").trim();
-        
+
         // If the pill innerText ends with ":" (no value captured), try several
         // alternative sources to find the value: aria-label, data attributes,
         // child elements that may contain the value in a separate node.
         if (/:\s*$/.test(normalizedInnerText)) {
-          const recovered: string = await pill.evaluate((el) => {
-            // 0. Brand logo: value rendered as <img> — read alt attribute
-            const tagImg = el.querySelector(".emh-selected-filters__tag-image");
-            if (tagImg) {
-              const alt = tagImg.getAttribute("alt") || "";
-              if (alt) return alt;
-            }
-            // 1. aria-label on the pill itself
-            const ariaLabel = el.getAttribute("aria-label") || "";
-            if (ariaLabel) return ariaLabel;
-            // 2. data-value / data-label attributes
-            const dataValue = el.getAttribute("data-value") || el.getAttribute("data-label") || "";
-            if (dataValue) return dataValue;
-            // 3. Walk all descendants; innerText misses elements with certain CSS
-            //    (e.g. display:contents). Collect text from every element.
-            const all = el.querySelectorAll("*");
-            for (const child of Array.from(all)) {
-              const t = ((child as HTMLElement).innerText || (child as HTMLElement).textContent || "").trim();
-              if (t && !t.includes("\n") && t !== "×" && t !== "x" && t !== "X") {
-                // Return first non-colon-only, non-close-button text that contains more than label
-                const colon = t.indexOf(":");
-                if (colon >= 0 && t.slice(colon + 1).trim()) return t;
+          const recovered: string = await pill
+            .evaluate((el) => {
+              // 0. Brand logo: value rendered as <img> — read alt attribute
+              const tagImg = el.querySelector(
+                ".emh-selected-filters__tag-image",
+              );
+              if (tagImg) {
+                const alt = tagImg.getAttribute("alt") || "";
+                if (alt) return alt;
               }
-            }
-            // 4. Walk all text nodes including those inside shadow DOM fragments
-            const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
-            const parts: string[] = [];
-            let node = walker.nextNode();
-            while (node) {
-              const t = (node.nodeValue || "").trim();
-              if (t && t !== "×" && t !== "x" && t !== "X") parts.push(t);
-              node = walker.nextNode();
-            }
-            return parts.join(" : ");
-          }).catch(() => "");
+              // 1. aria-label on the pill itself
+              const ariaLabel = el.getAttribute("aria-label") || "";
+              if (ariaLabel) return ariaLabel;
+              // 2. data-value / data-label attributes
+              const dataValue =
+                el.getAttribute("data-value") ||
+                el.getAttribute("data-label") ||
+                "";
+              if (dataValue) return dataValue;
+              // 3. Walk all descendants; innerText misses elements with certain CSS
+              //    (e.g. display:contents). Collect text from every element.
+              const all = el.querySelectorAll("*");
+              for (const child of Array.from(all)) {
+                const t = (
+                  (child as HTMLElement).innerText ||
+                  (child as HTMLElement).textContent ||
+                  ""
+                ).trim();
+                if (
+                  t &&
+                  !t.includes("\n") &&
+                  t !== "×" &&
+                  t !== "x" &&
+                  t !== "X"
+                ) {
+                  // Return first non-colon-only, non-close-button text that contains more than label
+                  const colon = t.indexOf(":");
+                  if (colon >= 0 && t.slice(colon + 1).trim()) return t;
+                }
+              }
+              // 4. Walk all text nodes including those inside shadow DOM fragments
+              const walker = document.createTreeWalker(
+                el,
+                NodeFilter.SHOW_TEXT,
+              );
+              const parts: string[] = [];
+              let node = walker.nextNode();
+              while (node) {
+                const t = (node.nodeValue || "").trim();
+                if (t && t !== "×" && t !== "x" && t !== "X") parts.push(t);
+                node = walker.nextNode();
+              }
+              return parts.join(" : ");
+            })
+            .catch(() => "");
           const normalizedRecovered = recovered.replace(/\s+/g, " ").trim();
           parsedPills.push({
             text:
@@ -778,7 +825,7 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
 
         const parsedScore = Object.values(parsedResult).reduce(
           (sum, values) => sum + values.length,
-          0
+          0,
         );
         if (parsedScore > bestScore) {
           bestScore = parsedScore;
@@ -789,8 +836,12 @@ async function extractUiSelectedFilters(page: Page): Promise<Record<string, stri
 
     return bestParsedResult;
   } catch (e: any) {
-    if (e?.message?.includes("Target page, context or browser has been closed")) {
-      console.debug("[DEBUG] Page closed during filter extraction, returning empty filters");
+    if (
+      e?.message?.includes("Target page, context or browser has been closed")
+    ) {
+      console.debug(
+        "[DEBUG] Page closed during filter extraction, returning empty filters",
+      );
     } else {
       console.warn("[DEBUG] Error extracting UI selected filters:", e);
     }
@@ -819,7 +870,7 @@ export async function processAndLogUiResult({
   const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
-  
+
   if (results.error) {
     console.error(`UI call failed with error: ${results.error}`);
     return {
@@ -847,7 +898,8 @@ export async function processAndLogUiResult({
   const uiSelectedFiltersKV: Record<string, string[]> =
     results.results?.uiSelectedFiltersKV || {};
   const resultsFacets = (() => {
-    const params = results.results.responseData?.data?.smartSearch?.parameters || {};
+    const params =
+      results.results.responseData?.data?.smartSearch?.parameters || {};
     const excludeKeys = [
       "contextType",
       "isUcos",
@@ -857,10 +909,10 @@ export async function processAndLogUiResult({
       "profileId",
       "vehicleCategory",
       "__typename",
-      "page"
+      "page",
     ];
     return Object.fromEntries(
-      Object.entries(params).filter(([key]) => !excludeKeys.includes(key))
+      Object.entries(params).filter(([key]) => !excludeKeys.includes(key)),
     );
   })();
   let openaiEvaluation = "PASS";
@@ -868,7 +920,11 @@ export async function processAndLogUiResult({
     openaiEvaluation = "PASS";
   } else if (smartSearchMessage?.trim()) {
     openaiEvaluation = (
-      await evaluateSearchResult(smartSearchMessage, aiEvaluationHints, actualInput)
+      await evaluateSearchResult(
+        smartSearchMessage,
+        aiEvaluationHints,
+        actualInput,
+      )
     )?.trim();
   } else {
     openaiEvaluation = "Empty UI response message";
@@ -884,7 +940,10 @@ export async function processAndLogUiResult({
   } | null = null;
   const addFailureReason = (reason: string) => {
     const normalizedEvaluation = (openaiEvaluation || "").trim();
-    if (!normalizedEvaluation || normalizedEvaluation.toUpperCase() === "PASS") {
+    if (
+      !normalizedEvaluation ||
+      normalizedEvaluation.toUpperCase() === "PASS"
+    ) {
       openaiEvaluation = reason;
     } else if (!normalizedEvaluation.includes(reason)) {
       openaiEvaluation = `${normalizedEvaluation} | ${reason}`;
@@ -908,14 +967,16 @@ export async function processAndLogUiResult({
       searchResults.navigation?.totalResults ||
       searchResults.results?.length ||
       0;
-  } 
+  }
 
   // Extract UI vehicle count if page is provided
   let uiVehicleCount: number | null = null;
   try {
-    const uiCountElement = page.locator('[data-test-id="srp__header-results__result-amount__number"]');
+    const uiCountElement = page.locator(
+      '[data-test-id="srp__header-results__result-amount__number"]',
+    );
     const uiCountText = await uiCountElement.innerText();
-    uiVehicleCount = parseInt(uiCountText.replace(/[^0-9]/g, ''), 10);
+    uiVehicleCount = parseInt(uiCountText.replace(/[^0-9]/g, ""), 10);
     if (isNaN(uiVehicleCount)) {
       uiVehicleCount = null;
     }
@@ -936,29 +997,35 @@ export async function processAndLogUiResult({
     // Skip "Payload is zero" when facets are being validated
   }
 
-  const responseVehicleTotalCount = await extractVehicleTotalCountFromMessage(smartSearchMessage);
-  if (responseVehicleTotalCount !== null && responseVehicleTotalCount !== resultCount) {
+  const responseVehicleTotalCount =
+    await extractVehicleTotalCountFromMessage(smartSearchMessage);
+  if (
+    responseVehicleTotalCount !== null &&
+    responseVehicleTotalCount !== resultCount
+  ) {
     countCheckPassed = false;
     responseCheckPassed = false;
     addFailureReason(
-      `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`
+      `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`,
     );
   }
 
-  // Facets check (test-data vs BE)  
+  // Facets check (test-data vs BE)
   if (actualFacets === false) {
     // shouldFilter: false — assert no filters were applied
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
       addFailureReason(
-        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`
+        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
       );
     }
   } else if (actualFacets === true) {
     // shouldFilter: true — assert at least one filter was applied
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
-      addFailureReason(`Expected at least one filter to be applied, but got none`);
+      addFailureReason(
+        `Expected at least one filter to be applied, but got none`,
+      );
     }
   } else if (testFacets && actualFacets && typeof actualFacets === "object") {
     // New format: { include: [], exclude: [], strict: boolean }
@@ -967,7 +1034,7 @@ export async function processAndLogUiResult({
     const strict = actualFacets.strict ?? false;
     const resultsKeys = Object.keys(resultsFacets);
     const resultsKeysSet = new Set(resultsKeys);
-    
+
     // Flatten include into a set of allowed facet keys for strict mode.
     const includeKeys = new Set<string>();
     for (const filterObj of include) {
@@ -975,16 +1042,19 @@ export async function processAndLogUiResult({
         includeKeys.add(key);
       }
     }
-    
+
     let facetCheckPassed = true;
     const failureReasons: string[] = [];
-    
+
     // Build UUID-to-semantic-name mapping from API facets for color/upholstery
     const uuidToSemanticMap: Record<string, Record<string, string>> = {};
     const responseData = results.results.responseData?.data || {};
     const facetsData = extractResponseFacets(responseData);
     const masterData = await getFacetsMasterData();
-    const facetValueDisplayMap = buildFacetValueDisplayMap(facetsData, masterData || {});
+    const facetValueDisplayMap = buildFacetValueDisplayMap(
+      facetsData,
+      masterData || {},
+    );
     for (const facetKey of ["color", "upholstery"]) {
       if (facetsData[facetKey]?.values) {
         uuidToSemanticMap[facetKey] = {};
@@ -992,12 +1062,13 @@ export async function processAndLogUiResult({
           if (item.value && item.formattedValue) {
             // Map UUID to translated semantic name (e.g., "화이트" -> "white")
             const translated = translateColorName(item.formattedValue);
-            uuidToSemanticMap[facetKey][item.value.toUpperCase()] = translated.toLowerCase();
+            uuidToSemanticMap[facetKey][item.value.toUpperCase()] =
+              translated.toLowerCase();
           }
         }
       }
     }
-    
+
     // Check: all include key-value pairs must be present in resultsFacets
     for (const filterObj of include) {
       for (const [key, expectedValues] of Object.entries(filterObj)) {
@@ -1005,7 +1076,7 @@ export async function processAndLogUiResult({
           facetCheckPassed = false;
           if (Array.isArray(expectedValues) && expectedValues.length > 0) {
             failureReasons.push(
-              `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`
+              `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`,
             );
           } else {
             failureReasons.push(`Missing required facet key: ${key}`);
@@ -1019,7 +1090,7 @@ export async function processAndLogUiResult({
               if (!isExpectedValueWithinFacetRange(expected, rangeBounds)) {
                 facetCheckPassed = false;
                 failureReasons.push(
-                  `Expected facet value outside range: ${key}=${expected} (actual range: ${rangeBounds.min}-${rangeBounds.max})`
+                  `Expected facet value outside range: ${key}=${expected} (actual range: ${rangeBounds.min}-${rangeBounds.max})`,
                 );
               }
             }
@@ -1028,7 +1099,7 @@ export async function processAndLogUiResult({
 
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
           const rawActuals = new Set(
-            actualValues.map((value) => String(value).trim().toUpperCase())
+            actualValues.map((value) => String(value).trim().toUpperCase()),
           );
           // For color/upholstery, map UUID values to their formattedValue from facets
           const semanticActuals = actualValues.map((v) => {
@@ -1039,14 +1110,14 @@ export async function processAndLogUiResult({
             // If not a UUID, return as-is (translation happens in buildFacetCandidateTokens via aliases)
             return String(v);
           });
-          
+
           // Build candidate tokens for all actual values (includes aliases)
           const actualCandidates = new Set<string>();
           for (const actual of semanticActuals) {
             const candidates = buildFacetCandidateTokens(actual);
-            candidates.forEach(c => actualCandidates.add(c.toUpperCase()));
+            candidates.forEach((c) => actualCandidates.add(c.toUpperCase()));
           }
-          
+
           for (const expected of expectedValues) {
             const rawExpected = String(expected).trim().toUpperCase();
             if (rawActuals.has(rawExpected)) {
@@ -1058,14 +1129,17 @@ export async function processAndLogUiResult({
               ? translateColorName(String(expected))
               : String(expected);
             // Build candidate tokens for processed expected value (includes aliases)
-            const expectedCandidates = buildFacetCandidateTokens(processedExpected);
-            const hasMatch = expectedCandidates.some(candidate => 
-              actualCandidates.has(candidate.toUpperCase())
+            const expectedCandidates =
+              buildFacetCandidateTokens(processedExpected);
+            const hasMatch = expectedCandidates.some((candidate) =>
+              actualCandidates.has(candidate.toUpperCase()),
             );
-            
+
             if (!hasMatch) {
               facetCheckPassed = false;
-              failureReasons.push(`Missing required facet value: ${key}=${expected}`);
+              failureReasons.push(
+                `Missing required facet value: ${key}=${expected}`,
+              );
             }
           }
         }
@@ -1079,7 +1153,7 @@ export async function processAndLogUiResult({
         if (Array.isArray(excludedValues) && excludedValues.length > 0) {
           const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
           const rawActuals = new Set(
-            actualValues.map((value) => String(value).trim().toUpperCase())
+            actualValues.map((value) => String(value).trim().toUpperCase()),
           );
           // For color/upholstery, map UUID values to their formattedValue from facets
           const semanticActuals = actualValues.map((v) => {
@@ -1090,19 +1164,21 @@ export async function processAndLogUiResult({
             // If not a UUID, return as-is
             return String(v);
           });
-          
+
           // Build candidate tokens for all actual values (includes aliases)
           const actualCandidates = new Set<string>();
           for (const actual of semanticActuals) {
             const candidates = buildFacetCandidateTokens(actual);
-            candidates.forEach(c => actualCandidates.add(c.toUpperCase()));
+            candidates.forEach((c) => actualCandidates.add(c.toUpperCase()));
           }
-          
+
           for (const excluded of excludedValues) {
             const rawExcluded = String(excluded).trim().toUpperCase();
             if (rawActuals.has(rawExcluded)) {
               facetCheckPassed = false;
-              failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
+              failureReasons.push(
+                `Excluded facet value present: ${key}=${excluded}`,
+              );
               continue;
             }
 
@@ -1111,14 +1187,17 @@ export async function processAndLogUiResult({
               ? translateColorName(String(excluded))
               : String(excluded);
             // Build candidate tokens for processed excluded value (includes aliases)
-            const excludedCandidates = buildFacetCandidateTokens(processedExcluded);
-            const hasMatch = excludedCandidates.some(candidate => 
-              actualCandidates.has(candidate.toUpperCase())
+            const excludedCandidates =
+              buildFacetCandidateTokens(processedExcluded);
+            const hasMatch = excludedCandidates.some((candidate) =>
+              actualCandidates.has(candidate.toUpperCase()),
             );
 
             if (hasMatch) {
               facetCheckPassed = false;
-              failureReasons.push(`Excluded facet value present: ${key}=${excluded}`);
+              failureReasons.push(
+                `Excluded facet value present: ${key}=${excluded}`,
+              );
             }
           }
         } else {
@@ -1128,7 +1207,7 @@ export async function processAndLogUiResult({
         }
       }
     }
-    
+
     // Check: if strict mode, resultsFacets should not have any keys outside include
     if (strict) {
       for (const key of resultsKeys) {
@@ -1138,7 +1217,7 @@ export async function processAndLogUiResult({
         }
       }
     }
-    
+
     if (!facetCheckPassed) {
       facetsCheckPassed = false;
       addFailureReason(`BE Facets check failed: ${failureReasons.join("; ")}`);
@@ -1147,7 +1226,11 @@ export async function processAndLogUiResult({
 
   // Facets check (Query vs UI vs BE)
   const facetMismatches: string[] = [];
-  if (resultsFacets.equipment || resultsFacets.lines || resultsFacets.packages) {
+  if (
+    resultsFacets.equipment ||
+    resultsFacets.lines ||
+    resultsFacets.packages
+  ) {
     const mappableFacets: Array<"equipment" | "lines" | "packages"> = [
       "equipment",
       "lines",
@@ -1160,31 +1243,35 @@ export async function processAndLogUiResult({
       const apiFacetValues: Array<{ formattedValue: string; value: string }> =
         apiResponse?.data?.smartSearch?.facets?.[facetKey]?.values ?? [];
       const codeToName = new Map<string, string>(
-        apiFacetValues.map((f) => [f.value, f.formattedValue])
+        apiFacetValues.map((f) => [f.value, f.formattedValue]),
       );
 
       resultsFacets[facetKey] = (resultsFacets[facetKey] as string[]).map(
-        (code: string) => codeToName.get(code) ?? code
+        (code: string) => codeToName.get(code) ?? code,
       );
     }
   }
   uiFacetComparison = compareUiSelectedFiltersWithFacets(
     resultsFacets,
-    uiSelectedFiltersKV
+    uiSelectedFiltersKV,
   );
-  if (query?.facet === 'equipment' || query?.facet === 'lines' || query?.facet === 'packages') {
+  if (
+    query?.facet === "equipment" ||
+    query?.facet === "lines" ||
+    query?.facet === "packages"
+  ) {
     uiFacetComparison = compareUiSelectedFiltersWithFacetsByExpectedValue(
       query.filterValue,
       resultsFacets,
       uiSelectedFiltersKV,
-      query.facet
+      query.facet,
     );
   }
   if (!uiFacetComparison.matches) {
     facetMismatches.push(
       `UI Filters Mismatch: missing ${JSON.stringify(
-        uiFacetComparison.missingFacetValues
-      )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`
+        uiFacetComparison.missingFacetValues,
+      )}, uiSelectedFiltersKV ${JSON.stringify(uiSelectedFiltersKV)}, beFacets ${JSON.stringify(resultsFacets)}`,
     );
   }
   if (testFacets && facetMismatches.length > 0) {
@@ -1201,14 +1288,19 @@ export async function processAndLogUiResult({
     return "➖";
   };
   const messageStatus = evaluationPassed ? "PASS" : "FAIL";
-  const countStatus = responseVehicleTotalCount === null
-    ? "SKIP"
-    : countCheckPassed ? "PASS" : "FAIL";
+  const countStatus =
+    responseVehicleTotalCount === null
+      ? "SKIP"
+      : countCheckPassed
+        ? "PASS"
+        : "FAIL";
   const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
 
   console.log("\n");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`);
+  console.log(
+    `${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`,
+  );
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`${sectionMarker(messageStatus)} Message:`);
   console.log(`• Query:      '${actualInput}'`);
@@ -1217,10 +1309,7 @@ export async function processAndLogUiResult({
   let smartSearchMessageEn = smartSearchMessage;
   if (lang !== "en") {
     queryEn = await fetchTranslation(actualInput, "en");
-    smartSearchMessageEn = await fetchTranslation(
-      smartSearchMessage,
-      "en"
-    );
+    smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");
     console.log("\n");
     console.log(`${sectionMarker(messageStatus)} Message (EN):`);
     console.log(`• Query:      '${queryEn}'`);
@@ -1229,13 +1318,17 @@ export async function processAndLogUiResult({
 
   console.log("\n");
   console.log(`${sectionMarker(countStatus)} Count:`);
-  console.log(`• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
+  console.log(
+    `• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`,
+  );
   console.log(`• Backend:   ${resultCount}`);
   console.log(`• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`);
 
   console.log("\n");
   console.log(`${sectionMarker(filterStatus)} Filters:`);
-  console.log(`• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`);
+  console.log(
+    `• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`,
+  );
   console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
   console.log(`• UI:        ${JSON.stringify(uiSelectedFiltersKV)}`);
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -1246,16 +1339,16 @@ export async function processAndLogUiResult({
     timestampSG: new Date().toLocaleString("en-SG", {
       timeZone: "Asia/Singapore",
     }),
-    testMode: "ui",    
+    testMode: "ui",
     testDescribe,
     testTitle,
     query: {
       [`${lang}`]: actualInput,
-      "en": queryEn,
+      en: queryEn,
     },
     response: {
       [`${lang}`]: smartSearchMessage,
-      "en": smartSearchMessageEn,
+      en: smartSearchMessageEn,
     },
     resultCount,
     uiVehicleCount,
@@ -1269,7 +1362,12 @@ export async function processAndLogUiResult({
     results: {
       responseResult: responseCheckPassed ? "PASS" : "FAIL",
       facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
-      countResult: responseVehicleTotalCount === null ? "SKIP" : countCheckPassed ? "PASS" : "FAIL",
+      countResult:
+        responseVehicleTotalCount === null
+          ? "SKIP"
+          : countCheckPassed
+            ? "PASS"
+            : "FAIL",
       responseVehicleTotalCount,
       backendResultCount: resultCount,
       uiVehicleCount,
@@ -1286,9 +1384,9 @@ export async function processAndLogUiResult({
 
 export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   const country = COUNTRY || "KR";
-  const env = ENVIRONMENT || "PROD";  
+  const env = ENVIRONMENT || "PROD";
   let httpCredentials;
-  
+
   if (ENVIRONMENT === "INT") {
     if (
       process.env.PROJECT === "DCP" &&
@@ -1329,17 +1427,16 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
           });
     if (httpCredentials) {
       console.warn(
-        "httpCredentials cannot be applied when attaching to an existing persistent context. Proceeding without them."
+        "httpCredentials cannot be applied when attaching to an existing persistent context. Proceeding without them.",
       );
     }
   } else {
     if (!browser) {
       throw new Error(
-        "Browser fixture is required when PLAYWRIGHT_CDP_URL is not set."
+        "Browser fixture is required when PLAYWRIGHT_CDP_URL is not set.",
       );
     }
-    const isHeadlessMode =
-      process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS === "true";
+    const isHeadlessMode = process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS === "true";
     context = await browser.newContext({
       viewport: isHeadlessMode ? { width: 1920, height: 1080 } : null,
       deviceScaleFactor: undefined,
@@ -1349,15 +1446,15 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
   const page = await context.newPage();
 
   // Intercept and override the response payload only if OVERRIDE_CONFIG_FILE is set to 'true'
-  if (process.env.OVERRIDE_CONFIG_FILE === 'true') {
+  if (process.env.OVERRIDE_CONFIG_FILE === "true") {
     await page.route(
       (urlObj: URL) => {
         const url = urlObj.toString();
         // Use the value from the 'country' variable for the config file match
         const countryCode = country.toLowerCase();
-        const configRegex = new RegExp(`config_${countryCode}\\.json$`, 'i');
+        const configRegex = new RegExp(`config_${countryCode}\\.json$`, "i");
         return (
-          url.includes('emh-dcps-mrktplc-vehicles-configuration') &&
+          url.includes("emh-dcps-mrktplc-vehicles-configuration") &&
           configRegex.test(url)
         );
       },
@@ -1372,7 +1469,7 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
             ...originalPayload.srp,
             enableSmartSearch: true,
             availableCategories: Array.isArray(
-              originalPayload.srp.availableCategories
+              originalPayload.srp.availableCategories,
             )
               ? [
                   {
@@ -1391,7 +1488,7 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
           contentType: "application/json",
           body: JSON.stringify(modifiedPayload),
         });
-      }
+      },
     );
   }
 
@@ -1424,10 +1521,7 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
     url = url.replace(/\/new-car\//, "/used-car/");
   }
   await page.goto(url);
-  await Promise.all([
-    handleCookieBanner(page),
-    handlePostalCodePopUp(page)
-  ]);
+  await Promise.all([handleCookieBanner(page), handlePostalCodePopUp(page)]);
   return page;
 }
 
@@ -1445,10 +1539,16 @@ export async function handleCookieBanner(page: Page): Promise<void> {
 
 export async function handlePostalCodePopUp(page: Page): Promise<void> {
   try {
-    const trigger = page.locator('[data-test-id="header-integration-item-emh-region-picker"]');
-    await trigger.waitFor({ state: "visible", timeout: 5000 }).catch(() => false);
-    if (!await trigger.isVisible().catch(() => false)) {
-      console.debug("[DEBUG] Region picker trigger not visible, skipping postal code pop-up handling.");
+    const trigger = page.locator(
+      '[data-test-id="header-integration-item-emh-region-picker"]',
+    );
+    await trigger
+      .waitFor({ state: "visible", timeout: 5000 })
+      .catch(() => false);
+    if (!(await trigger.isVisible().catch(() => false))) {
+      console.debug(
+        "[DEBUG] Region picker trigger not visible, skipping postal code pop-up handling.",
+      );
       return;
     }
 
@@ -1458,14 +1558,14 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
     const country = COUNTRY || "KR";
     const addressesFile = await fs.readFile(
       "./tests/data/emh-addresses.json",
-      "utf-8"
+      "utf-8",
     );
     const addresses = JSON.parse(addressesFile);
     const postalCode = addresses[country]?.postalCode;
 
     if (!postalCode) {
       console.debug(
-        `[DEBUG] No postal code configured for country '${country}', skipping region picker submission.`
+        `[DEBUG] No postal code configured for country '${country}', skipping region picker submission.`,
       );
       return;
     }
@@ -1475,14 +1575,16 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
       .or(popup.getByRole("spinbutton"))
       .or(
         popup.locator(
-          'input[aria-invalid], input[inputmode], input[type="text"], input[type="number"]'
-        )
+          'input[aria-invalid], input[inputmode], input[type="text"], input[type="number"]',
+        ),
       )
       .first();
     const submitButton = popup.locator(".region-picker-content__submit-button");
 
     if (await trigger.isVisible({ timeout: 10000 }).catch(() => false)) {
-      const isExpanded = await trigger.getAttribute("aria-expanded").catch(() => null);
+      const isExpanded = await trigger
+        .getAttribute("aria-expanded")
+        .catch(() => null);
       if (isExpanded !== "true") {
         await trigger.click().catch((e) => {
           console.debug(`[DEBUG] Trigger click failed: ${e?.message || e}`);
@@ -1491,18 +1593,28 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
     }
 
     await popup.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
-    await regionPicker.waitFor({ state: "attached", timeout: 10000 }).catch(() => {});
-    await postalCodeInput.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+    await regionPicker
+      .waitFor({ state: "attached", timeout: 10000 })
+      .catch(() => {});
+    await postalCodeInput
+      .waitFor({ state: "visible", timeout: 10000 })
+      .catch(() => {});
     await postalCodeInput.fill("").catch(() => {});
     await postalCodeInput.fill(postalCode).catch(() => {});
-    await submitButton.waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
+    await submitButton
+      .waitFor({ state: "visible", timeout: 10000 })
+      .catch(() => {});
     await submitButton.click().catch(() => {});
   } catch (e: any) {
-    if (e?.message?.includes("Target page, context or browser has been closed")) {
-      console.debug("[DEBUG] Page closed during postal code pop-up handling, continuing...");
+    if (
+      e?.message?.includes("Target page, context or browser has been closed")
+    ) {
+      console.debug(
+        "[DEBUG] Page closed during postal code pop-up handling, continuing...",
+      );
     } else {
       console.debug(
-        `[DEBUG] Postal code pop-up handling skipped: ${e instanceof Error ? e.message : e}`
+        `[DEBUG] Postal code pop-up handling skipped: ${e instanceof Error ? e.message : e}`,
       );
     }
   }
@@ -1511,17 +1623,21 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
 export async function performUISmartSearchAndGetResults(
   page: Page,
   query: any = "",
-  submitDisabled: boolean = false
+  submitDisabled: boolean = false,
 ): Promise<UiSearchResult> {
   const env = process.env.ENVIRONMENT || "INT";
-  const searchInputArea = page.locator(
-    ".smart-search__input, wb7-input.smart-search__input"
-  ).first();
+  const searchInputArea = page
+    .locator(".smart-search__input, wb7-input.smart-search__input")
+    .first();
   const searchButton = page
-    .locator(".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button")
+    .locator(
+      ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button",
+    )
     .or(page.locator("wb7-input-action button"))
     .or(page.locator(".smart-search__input button"))
-    .or(page.locator("button[aria-label*='search' i], button[title*='search' i]"))
+    .or(
+      page.locator("button[aria-label*='search' i], button[title*='search' i]"),
+    )
     .first();
   const input = page
     .locator("wb7-input.smart-search__input wb7-grey-box input")
@@ -1535,7 +1651,7 @@ export async function performUISmartSearchAndGetResults(
     for (let j = 0; j < 10; j++) {
       const enabled = await searchButton.isEnabled();
       console.debug(
-        `[DEBUG] Search button enabled: ${enabled} (attempt ${j + 1}/10)`
+        `[DEBUG] Search button enabled: ${enabled} (attempt ${j + 1}/10)`,
       );
       if (enabled) break;
       await page.waitForTimeout(1000);
@@ -1576,7 +1692,7 @@ export async function performUISmartSearchAndGetResults(
       notClickable = true;
     }
     console.debug(
-      `[DEBUG] Submit disabled check: isDisabled=${isDisabled}, notClickable=${notClickable}`
+      `[DEBUG] Submit disabled check: isDisabled=${isDisabled}, notClickable=${notClickable}`,
     );
     if (isDisabled && notClickable) {
       console.debug("[DEBUG] PASSED: Submit Button Disabled");
@@ -1601,10 +1717,10 @@ export async function performUISmartSearchAndGetResults(
     process.env.API_ENDPOINT_LOCAL === "true"
       ? "http://localhost:8080/api/v2/search"
       : env?.toUpperCase() === "PROD"
-      ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
-      : env?.toUpperCase() === "INT"
-      ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
-      : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+        ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+        : env?.toUpperCase() === "INT"
+          ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
+          : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
 
   let apiResponsePayload: any[] = [];
   let responseCaptured = false;
@@ -1629,14 +1745,17 @@ export async function performUISmartSearchAndGetResults(
   };
   page.on("response", responseListener);
 
-  if (await searchButton.isVisible().catch(() => false)) await searchButton.click();
+  if (await searchButton.isVisible().catch(() => false))
+    await searchButton.click();
 
   let retries = 0;
   let resultText = "";
   let pageClosed = false;
   const startTime = Date.now();
   const successBubbleLocator = page.locator(".smart-search__bubble").first();
-  const errorResultLocator = page.locator(".smart-search__notification.wbx-notification--error .wbx-notification__content");
+  const errorResultLocator = page.locator(
+    ".smart-search__notification.wbx-notification--error .wbx-notification__content",
+  );
   while (retries < 3 && !pageClosed) {
     try {
       // Check if page is still valid before proceeding
@@ -1649,10 +1768,12 @@ export async function performUISmartSearchAndGetResults(
       console.debug(
         `[DEBUG] Waiting for results to be visible (attempt ${
           retries + 1
-        }/3)...`
+        }/3)...`,
       );
-      await successBubbleLocator.waitFor({ state: "visible", timeout: 5000 }).catch(() => false);
-      
+      await successBubbleLocator
+        .waitFor({ state: "visible", timeout: 5000 })
+        .catch(() => false);
+
       // Wrap isVisible in try-catch to handle race condition where page closes
       let isSuccessVisible = false;
       try {
@@ -1665,23 +1786,30 @@ export async function performUISmartSearchAndGetResults(
         }
         isSuccessVisible = false;
       }
-      
+
       if (isSuccessVisible) {
         // Prefer message-specific descendants, then fallback to full bubble text.
         let extractedText = await successBubbleLocator
-          .locator("p, .smart-search__message, .smart-search__result-message, .wbx-notification__content")
+          .locator(
+            "p, .smart-search__message, .smart-search__result-message, .wbx-notification__content",
+          )
           .first()
           .innerText()
           .catch(() => "");
 
         if (!extractedText.trim()) {
-          extractedText = await successBubbleLocator.innerText().catch(() => "");
+          extractedText = await successBubbleLocator
+            .innerText()
+            .catch(() => "");
         }
 
         resultText = extractedText.replace(/\s+/g, " ").trim();
         // Remove common CTA/footer labels if they are appended to the extracted text.
         resultText = resultText
-          .replace(/\s*(Sonuçları görüntüle|Show results|View results)\s*$/i, "")
+          .replace(
+            /\s*(Sonuçları görüntüle|Show results|View results)\s*$/i,
+            "",
+          )
           .replace(/\s*(Yapay Zekâ Bilgilendirmesi|AI Disclosure)\s*$/i, "")
           .trim();
 
@@ -1701,10 +1829,12 @@ export async function performUISmartSearchAndGetResults(
         }
         errorVisible = false;
       }
-      
+
       if (errorVisible) {
         resultText = await errorResultLocator.innerText();
-        console.warn(`[DEBUG] UI showing internal error message: '${resultText}'`);
+        console.warn(
+          `[DEBUG] UI showing internal error message: '${resultText}'`,
+        );
         break;
       }
 
@@ -1712,16 +1842,21 @@ export async function performUISmartSearchAndGetResults(
       retries++;
       if (retries < 3) {
         console.debug(
-          `[DEBUG] Results not visible, retrying search button click (attempt ${retries + 1}/3)...`
+          `[DEBUG] Results not visible, retrying search button click (attempt ${retries + 1}/3)...`,
         );
         await page.waitForTimeout(500); // Brief delay before retry
         try {
-          const isButtonVisible = await searchButton.isVisible({ timeout: 3000 });
+          const isButtonVisible = await searchButton.isVisible({
+            timeout: 3000,
+          });
           if (isButtonVisible) {
             await searchButton.click();
           }
         } catch (e: any) {
-          if (e?.message?.includes("closed") || e?.message?.includes("context")) {
+          if (
+            e?.message?.includes("closed") ||
+            e?.message?.includes("context")
+          ) {
             console.warn("[DEBUG] Page closed during retry button click");
             pageClosed = true;
             break;
@@ -1731,7 +1866,11 @@ export async function performUISmartSearchAndGetResults(
     } catch (e: any) {
       const errMsg = e?.message || String(e);
       // Check for page-closed errors
-      if (errMsg.includes("page") || errMsg.includes("closed") || errMsg.includes("context")) {
+      if (
+        errMsg.includes("page") ||
+        errMsg.includes("closed") ||
+        errMsg.includes("context")
+      ) {
         console.warn(`[DEBUG] Page appears to be closed: ${errMsg}`);
         pageClosed = true;
         break;
@@ -1740,10 +1879,12 @@ export async function performUISmartSearchAndGetResults(
       retries++;
       if (retries < 3) {
         console.debug(
-          `[DEBUG] Retrying search button click (attempt ${retries + 1}/3)...`
+          `[DEBUG] Retrying search button click (attempt ${retries + 1}/3)...`,
         );
         await page.waitForTimeout(500); // Brief delay before retry
-        if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
+        if (
+          await searchButton.isVisible({ timeout: 3000 }).catch(() => false)
+        ) {
           await searchButton.click();
         }
       }
@@ -1757,11 +1898,18 @@ export async function performUISmartSearchAndGetResults(
     try {
       await Promise.race([
         responseCapturedPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Timed out waiting for API response")), 30000)),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("Timed out waiting for API response")),
+            30000,
+          ),
+        ),
       ]);
     } catch (e) {
       page.off("response", responseListener);
-      const errMsg = pageClosed ? "Page was closed during search" : "Failed to capture API response within timeout";
+      const errMsg = pageClosed
+        ? "Page was closed during search"
+        : "Failed to capture API response within timeout";
       return {
         query: query,
         results: {
@@ -1775,14 +1923,14 @@ export async function performUISmartSearchAndGetResults(
     }
   }
   page.off("response", responseListener);
-  
+
   let errorMsg: string | undefined;
   if (pageClosed) {
     errorMsg = "Page was closed during search";
   } else if (retries === 3) {
     errorMsg = "Failed to retrieve results after 3 attempts";
   }
-  
+
   return {
     query: query,
     results: {

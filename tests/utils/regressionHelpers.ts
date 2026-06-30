@@ -3,12 +3,30 @@ import path from "path";
 import { generateOpenAIQuery } from "./aiHelpers";
 import { FixedQueryCase } from "./queryHelpers";
 
-const REGRESSION_DESCRIPTION_PATH = path.join(__dirname, "../regression.desciption.txt");
-const REGRESSION_TESTDATA_PATH = path.join(__dirname, "../data/regression.testdata.json");
-const REGRESSION_RUN_SUMMARY_PATH = path.join(__dirname, "../data/regression.run-summary.json");
-const EMH_API_RESPONSE_PATH = path.join(__dirname, "../data/emh-api-response.json");
-const INTERMITTENCY_QUERIES_PATH = path.join(__dirname, "../data/intermittency-queries.json");
-const MCE_TESTDATA_PATH = path.join(__dirname, "../data/regression.testdata-mce.json");
+const REGRESSION_DESCRIPTION_PATH = path.join(
+  __dirname,
+  "../regression.desciption.txt",
+);
+const REGRESSION_TESTDATA_PATH = path.join(
+  __dirname,
+  "../data/regression.testdata.json",
+);
+const REGRESSION_RUN_SUMMARY_PATH = path.join(
+  __dirname,
+  "../data/regression.run-summary.json",
+);
+const EMH_API_RESPONSE_PATH = path.join(
+  __dirname,
+  "../data/emh-api-response.json",
+);
+const INTERMITTENCY_QUERIES_PATH = path.join(
+  __dirname,
+  "../data/intermittency-queries.json",
+);
+const MCE_TESTDATA_PATH = path.join(
+  __dirname,
+  "../data/regression.testdata-mce.json",
+);
 const DATA_DIR_PATH = path.join(__dirname, "../data");
 
 const SYSTEM_PROMPT = `You are a test-case engineer for a Mercedes-Benz vehicle search AI.
@@ -111,7 +129,9 @@ async function loadFacetCatalogFromEmhApiResponse(): Promise<string> {
         const values = Array.isArray((facetValue as any)?.values)
           ? (facetValue as any).values
               .map((entry: any) =>
-                typeof entry === "string" ? entry : String(entry?.value ?? "").trim()
+                typeof entry === "string"
+                  ? entry
+                  : String(entry?.value ?? "").trim(),
               )
               .filter(Boolean)
           : [];
@@ -122,31 +142,43 @@ async function loadFacetCatalogFromEmhApiResponse(): Promise<string> {
 
         return accumulator;
       },
-      {}
+      {},
     );
 
     return JSON.stringify(catalog, null, 2);
   } catch (e) {
-    console.warn("[regressionHelpers] Failed to load facet catalog from emh-api-response.json:", e);
+    console.warn(
+      "[regressionHelpers] Failed to load facet catalog from emh-api-response.json:",
+      e,
+    );
     return "";
   }
 }
 
-export async function loadRegressionQueriesFromDescription(): Promise<FixedQueryCase[]> {
+export async function loadRegressionQueriesFromDescription(): Promise<
+  FixedQueryCase[]
+> {
   let description: string;
   try {
     description = await fs.readFile(REGRESSION_DESCRIPTION_PATH, "utf-8");
   } catch (e) {
-    console.warn("[regressionHelpers] Could not read regression.desciption.txt:", e);
+    console.warn(
+      "[regressionHelpers] Could not read regression.desciption.txt:",
+      e,
+    );
     return [];
   }
 
   if (!description.trim()) {
-    console.warn("[regressionHelpers] regression.desciption.txt is empty, returning no queries.");
+    console.warn(
+      "[regressionHelpers] regression.desciption.txt is empty, returning no queries.",
+    );
     return [];
   }
 
-  console.log("[regressionHelpers] Generating regression test cases from description...");
+  console.log(
+    "[regressionHelpers] Generating regression test cases from description...",
+  );
 
   const facetCatalog = await loadFacetCatalogFromEmhApiResponse();
 
@@ -158,17 +190,22 @@ export async function loadRegressionQueriesFromDescription(): Promise<FixedQuery
       description.trim(),
       /* maxTokens */ 600,
       /* temperature */ 0.3,
-      /* fallback */ ""
+      /* fallback */ "",
     );
     if (analysis.trim()) {
       const separator = "\n\n" + "─".repeat(60) + "\n";
       const timestamp = new Date().toISOString();
       const appendBlock = `${separator}[AI Analysis — ${timestamp}]\n\n${analysis.trim()}\n`;
       await fs.appendFile(REGRESSION_DESCRIPTION_PATH, appendBlock, "utf-8");
-      console.log("[regressionHelpers] Appended RCA and test approach to regression.desciption.txt");
+      console.log(
+        "[regressionHelpers] Appended RCA and test approach to regression.desciption.txt",
+      );
     }
   } catch (e) {
-    console.warn("[regressionHelpers] Failed to generate RCA/test approach:", e);
+    console.warn(
+      "[regressionHelpers] Failed to generate RCA/test approach:",
+      e,
+    );
   }
 
   // Step 2: Generate test cases using description + analysis as combined input
@@ -188,28 +225,48 @@ export async function loadRegressionQueriesFromDescription(): Promise<FixedQuery
       combinedInput,
       /* maxTokens */ 4000,
       /* temperature */ 0.2,
-      /* fallback */ "[]"
+      /* fallback */ "[]",
     );
   } catch (e) {
-    console.warn("[regressionHelpers] AI call failed, returning no queries:", e);
+    console.warn(
+      "[regressionHelpers] AI call failed, returning no queries:",
+      e,
+    );
     return [];
   }
 
   try {
     // Strip markdown fences if present
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```$/, "")
+      .trim();
     const parsed = JSON.parse(cleaned);
     if (!Array.isArray(parsed)) {
-      console.warn("[regressionHelpers] AI response was not a JSON array:", raw);
+      console.warn(
+        "[regressionHelpers] AI response was not a JSON array:",
+        raw,
+      );
       return [];
     }
-    console.log(`[regressionHelpers] Generated ${parsed.length} regression test case(s).`);
-    await fs.writeFile(REGRESSION_TESTDATA_PATH, JSON.stringify(parsed, null, 2), "utf-8");
-    console.log(`[regressionHelpers] Saved test data to: ${REGRESSION_TESTDATA_PATH}`);
+    console.log(
+      `[regressionHelpers] Generated ${parsed.length} regression test case(s).`,
+    );
+    await fs.writeFile(
+      REGRESSION_TESTDATA_PATH,
+      JSON.stringify(parsed, null, 2),
+      "utf-8",
+    );
+    console.log(
+      `[regressionHelpers] Saved test data to: ${REGRESSION_TESTDATA_PATH}`,
+    );
 
     return parsed as FixedQueryCase[];
   } catch (e) {
-    console.warn("[regressionHelpers] Failed to parse AI response as JSON:", raw);
+    console.warn(
+      "[regressionHelpers] Failed to parse AI response as JSON:",
+      raw,
+    );
     return [];
   }
 }
@@ -221,7 +278,8 @@ export async function summarizeRegressionRunWithAI(params: {
   testTitle: string;
   testType: string;
 }): Promise<void> {
-  const { allResults, outputFileName, testDescribe, testTitle, testType } = params;
+  const { allResults, outputFileName, testDescribe, testTitle, testType } =
+    params;
   if (!Array.isArray(allResults) || allResults.length === 0) {
     return;
   }
@@ -262,7 +320,7 @@ export async function summarizeRegressionRunWithAI(params: {
     userPrompt,
     /* maxTokens */ 1200,
     /* temperature */ 0.2,
-    /* fallback */ ""
+    /* fallback */ "",
   );
 
   if (!summary.trim()) {
@@ -293,13 +351,17 @@ export async function summarizeRegressionRunWithAI(params: {
         summary: summary.trim(),
       },
       null,
-      2
+      2,
     ),
-    "utf-8"
+    "utf-8",
   );
 
-  console.log("[regressionHelpers] Appended AI run summary/findings to regression.desciption.txt");
-  console.log(`[regressionHelpers] Saved AI run summary to: ${REGRESSION_RUN_SUMMARY_PATH}`);
+  console.log(
+    "[regressionHelpers] Appended AI run summary/findings to regression.desciption.txt",
+  );
+  console.log(
+    `[regressionHelpers] Saved AI run summary to: ${REGRESSION_RUN_SUMMARY_PATH}`,
+  );
 }
 
 /**
@@ -313,7 +375,10 @@ export async function loadIntermittencyQueries(): Promise<FixedQueryCase[]> {
   try {
     raw = await fs.readFile(INTERMITTENCY_QUERIES_PATH, "utf-8");
   } catch (e) {
-    console.warn("[regressionHelpers] Could not read intermittency-queries.json:", e);
+    console.warn(
+      "[regressionHelpers] Could not read intermittency-queries.json:",
+      e,
+    );
     return [];
   }
 
@@ -321,33 +386,45 @@ export async function loadIntermittencyQueries(): Promise<FixedQueryCase[]> {
   try {
     parsed = JSON.parse(raw);
   } catch (e) {
-    console.warn("[regressionHelpers] intermittency-queries.json is not valid JSON:", e);
+    console.warn(
+      "[regressionHelpers] intermittency-queries.json is not valid JSON:",
+      e,
+    );
     return [];
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    console.warn("[regressionHelpers] intermittency-queries.json is empty or not an array.");
+    console.warn(
+      "[regressionHelpers] intermittency-queries.json is empty or not an array.",
+    );
     return [];
   }
 
-  const queries: FixedQueryCase[] = parsed.map((item: unknown) => {
-    if (typeof item === "string") {
-      return { value: item } as FixedQueryCase;
-    }
-    if (typeof item === "object" && item !== null && "value" in item) {
-      return item as FixedQueryCase;
-    }
-    console.warn("[regressionHelpers] Skipping invalid entry in intermittency-queries.json:", item);
-    return null;
-  }).filter((q): q is FixedQueryCase => q !== null);
+  const queries: FixedQueryCase[] = parsed
+    .map((item: unknown) => {
+      if (typeof item === "string") {
+        return { value: item } as FixedQueryCase;
+      }
+      if (typeof item === "object" && item !== null && "value" in item) {
+        return item as FixedQueryCase;
+      }
+      console.warn(
+        "[regressionHelpers] Skipping invalid entry in intermittency-queries.json:",
+        item,
+      );
+      return null;
+    })
+    .filter((q): q is FixedQueryCase => q !== null);
 
-  console.log(`[regressionHelpers] Loaded ${queries.length} intermittency query/queries.`);
+  console.log(
+    `[regressionHelpers] Loaded ${queries.length} intermittency query/queries.`,
+  );
   if (queries.length > 0) {
     console.log(
       [
         "[regressionHelpers] Intermittency query values:",
         ...queries.map((query) => `- ${query.value}`),
-      ].join("\n")
+      ].join("\n"),
     );
   }
   return queries;
@@ -365,7 +442,10 @@ export async function loadMCETestData(): Promise<FixedQueryCase[]> {
   try {
     raw = await fs.readFile(MCE_TESTDATA_PATH, "utf-8");
   } catch (e) {
-    console.warn("[regressionHelpers] Could not read regression.testdata-mce.json:", e);
+    console.warn(
+      "[regressionHelpers] Could not read regression.testdata-mce.json:",
+      e,
+    );
     return [];
   }
 
@@ -373,12 +453,17 @@ export async function loadMCETestData(): Promise<FixedQueryCase[]> {
   try {
     parsed = JSON.parse(raw);
   } catch (e) {
-    console.warn("[regressionHelpers] regression.testdata-mce.json is not valid JSON:", e);
+    console.warn(
+      "[regressionHelpers] regression.testdata-mce.json is not valid JSON:",
+      e,
+    );
     return [];
   }
 
   if (!Array.isArray(parsed) || parsed.length === 0) {
-    console.warn("[regressionHelpers] regression.testdata-mce.json is empty or not an array.");
+    console.warn(
+      "[regressionHelpers] regression.testdata-mce.json is empty or not an array.",
+    );
     return [];
   }
 
@@ -387,7 +472,10 @@ export async function loadMCETestData(): Promise<FixedQueryCase[]> {
       if (typeof item === "object" && item !== null && "value" in item) {
         return item as FixedQueryCase;
       }
-      console.warn("[regressionHelpers] Skipping invalid entry in regression.testdata-mce.json:", item);
+      console.warn(
+        "[regressionHelpers] Skipping invalid entry in regression.testdata-mce.json:",
+        item,
+      );
       return null;
     })
     .filter((q): q is FixedQueryCase => q !== null);
@@ -398,7 +486,7 @@ export async function loadMCETestData(): Promise<FixedQueryCase[]> {
       [
         "[regressionHelpers] MCE test values:",
         ...queries.map((query) => `- ${query.value}`),
-      ].join("\n")
+      ].join("\n"),
     );
   }
   return queries;
@@ -425,10 +513,16 @@ export async function getSupportedCountries(): Promise<string[]> {
     }
 
     const countries = Array.from(supportedCountries).sort();
-    console.log(`[regressionHelpers] Discovered ${countries.length} supported country/countries:`, countries.join(", "));
+    console.log(
+      `[regressionHelpers] Discovered ${countries.length} supported country/countries:`,
+      countries.join(", "),
+    );
     return countries;
   } catch (e) {
-    console.warn("[regressionHelpers] Failed to discover supported countries:", e);
+    console.warn(
+      "[regressionHelpers] Failed to discover supported countries:",
+      e,
+    );
     return [];
   }
 }

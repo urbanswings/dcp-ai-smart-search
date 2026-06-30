@@ -7,15 +7,29 @@ const promptEngine = require("./tests/utils/promptEngineHelper");
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const rootDir = process.cwd();
-const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
-const outputPath = path.resolve(rootDir, process.env.MATRIX_OUTPUT || "tests/data/generated-facet-matrix-suite.json");
+const sourcePath = path.resolve(
+  rootDir,
+  process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json",
+);
+const outputPath = path.resolve(
+  rootDir,
+  process.env.MATRIX_OUTPUT || "tests/data/generated-facet-matrix-suite.json",
+);
 const completeOutputPath = path.resolve(
   rootDir,
-  process.env.COMPLETE_OUTPUT || "tests/data/generated-facet-complete-suite.json"
+  process.env.COMPLETE_OUTPUT ||
+    "tests/data/generated-facet-complete-suite.json",
 );
 const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
 
-const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
+const FACET_ORDER = [
+  "bodyType",
+  "fuelType",
+  "color",
+  "stockType",
+  "brand",
+  "seats",
+];
 
 function readJson(filePath) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
@@ -36,7 +50,12 @@ function getFacetValues(facets, facetKey) {
   }
   const extracted = values
     .map((entry) => entry?.value)
-    .filter((value) => value !== undefined && value !== null && String(value).toUpperCase() !== "UNDEFINED");
+    .filter(
+      (value) =>
+        value !== undefined &&
+        value !== null &&
+        String(value).toUpperCase() !== "UNDEFINED",
+    );
   return [...new Set(extracted)];
 }
 
@@ -129,7 +148,13 @@ function fallbackCompleteQuery(facetKey, formattedValue, rawValue) {
   return `show me vehicles with ${facetDisplayName(facetKey)} ${formattedValue}`;
 }
 
-function addCompleteQuery(queryMap, query, facetKey, filterValue, shouldFilter) {
+function addCompleteQuery(
+  queryMap,
+  query,
+  facetKey,
+  filterValue,
+  shouldFilter,
+) {
   if (queryMap.has(query)) {
     return;
   }
@@ -175,8 +200,6 @@ function buildCompleteFilterText(facetKey, formattedValue, rawValue) {
   }
   return `filter category '${facetDisplayName(facetKey)}' with value of '${formattedValue}'`;
 }
-
-
 
 function createCompleteValueHints(facetKey, valueLabel) {
   const facetName = facetDisplayName(facetKey);
@@ -230,24 +253,36 @@ async function buildComplete(data) {
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
           maxTokens: promptConfig.maxTokens,
-        }
+        },
       );
       addCompleteQuery(
         queryMap,
         query,
         facetKey,
         entry.formattedValue || entry.rawValue,
-        { include: [{ [facetKey]: [entry.rawValue] }], exclude: [], strict: true }
+        {
+          include: [{ [facetKey]: [entry.rawValue] }],
+          exclude: [],
+          strict: true,
+        },
       );
       informativeHintsByQuery[query] = createCompleteValueHints(
         facetKey,
-        toCompleteHintValueLabel(facetKey, entry.formattedValue, entry.rawValue)
+        toCompleteHintValueLabel(
+          facetKey,
+          entry.formattedValue,
+          entry.rawValue,
+        ),
       );
     }
 
     const range = getFacetRange(facets, facetKey);
     if (range) {
-      const points = [range.min, Math.round((range.min + range.max) / 2), range.max];
+      const points = [
+        range.min,
+        Math.round((range.min + range.max) / 2),
+        range.max,
+      ];
       const uniquePoints = [...new Set(points)];
       for (const value of uniquePoints) {
         const query = await promptEngine.generateQueryWithVariation(
@@ -264,16 +299,17 @@ async function buildComplete(data) {
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
             maxTokens: promptConfig.maxTokens,
-          }
+          },
         );
-        addCompleteQuery(
-          queryMap,
-          query,
+        addCompleteQuery(queryMap, query, facetKey, value, {
+          include: [{ [facetKey]: [value] }],
+          exclude: [],
+          strict: true,
+        });
+        informativeHintsByQuery[query] = createCompleteRangeHints(
           facetKey,
           value,
-          { include: [{ [facetKey]: [value] }], exclude: [], strict: true }
         );
-        informativeHintsByQuery[query] = createCompleteRangeHints(facetKey, value);
       }
     }
   }
@@ -299,7 +335,10 @@ function toQueryLabel(facetKey, value) {
       CABRIO_ROADSTER: "cabriolets",
       PEOPLE_CARRIER: "people carriers",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} vehicles`.toLowerCase();
+    return (
+      map[String(value)] ||
+      `${titleCaseFromToken(value)} vehicles`.toLowerCase()
+    );
   }
 
   if (facetKey === "fuelType") {
@@ -309,7 +348,9 @@ function toQueryLabel(facetKey, value) {
       PETROL: "petrol cars",
       PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase();
+    return (
+      map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase()
+    );
   }
 
   if (facetKey === "color") {
@@ -322,7 +363,10 @@ function toQueryLabel(facetKey, value) {
       AVAILABLE: "available vehicles",
       IN_PIPELINE: "in-pipeline vehicles",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} vehicles`.toLowerCase();
+    return (
+      map[String(value)] ||
+      `${titleCaseFromToken(value)} vehicles`.toLowerCase()
+    );
   }
 
   if (facetKey === "brand") {
@@ -381,7 +425,9 @@ function facetDisplayName(facetKey) {
 function createExclusionHints(facetKey, excludedValue, allowedValues) {
   const facetName = facetDisplayName(facetKey);
   const excludedText = toHintLabel(facetKey, excludedValue);
-  const allowedText = allowedValues.map((v) => toHintLabel(facetKey, v)).join(", ");
+  const allowedText = allowedValues
+    .map((v) => toHintLabel(facetKey, v))
+    .join(", ");
   return [
     `Respond with \"PASS\" if the response stays in Mercedes-Benz automotive context and recommends vehicles for this exclusion intent.`,
     `Respond with \"PASS\" when the requested ${facetName} exclusion is respected: exclude ${excludedText}.`,
@@ -435,9 +481,17 @@ function buildMatrix(data) {
       regressionQueries.push({
         value: query,
         shouldRecommend: true,
-        shouldFilter: { include: [{ [facetKey]: allowedValues }], exclude: [], strict: false },
+        shouldFilter: {
+          include: [{ [facetKey]: allowedValues }],
+          exclude: [],
+          strict: false,
+        },
       });
-      informativeHintsByQuery[query] = createExclusionHints(facetKey, excludedValue, allowedValues);
+      informativeHintsByQuery[query] = createExclusionHints(
+        facetKey,
+        excludedValue,
+        allowedValues,
+      );
     }
 
     for (const [a, b] of pairwise(values)) {
@@ -450,13 +504,21 @@ function buildMatrix(data) {
         {
           value: andQuery,
           shouldRecommend: true,
-          shouldFilter: { include: [{ [facetKey]: [a, b] }], exclude: [], strict: false },
+          shouldFilter: {
+            include: [{ [facetKey]: [a, b] }],
+            exclude: [],
+            strict: false,
+          },
         },
         {
           value: orQuery,
           shouldRecommend: true,
-          shouldFilter: { include: [{ [facetKey]: [a, b] }], exclude: [], strict: false },
-        }
+          shouldFilter: {
+            include: [{ [facetKey]: [a, b] }],
+            exclude: [],
+            strict: false,
+          },
+        },
       );
       informativeHintsByQuery[andQuery] = createInclusionHints(facetKey, a, b);
       informativeHintsByQuery[orQuery] = createInclusionHints(facetKey, a, b);
@@ -486,14 +548,28 @@ async function main() {
   const generatedComplete = await buildComplete(sourceData);
 
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
-  fs.writeFileSync(outputPath, `${JSON.stringify(generated, null, 2)}\n`, "utf8");
+  fs.writeFileSync(
+    outputPath,
+    `${JSON.stringify(generated, null, 2)}\n`,
+    "utf8",
+  );
   fs.mkdirSync(path.dirname(completeOutputPath), { recursive: true });
-  fs.writeFileSync(completeOutputPath, `${JSON.stringify(generatedComplete, null, 2)}\n`, "utf8");
+  fs.writeFileSync(
+    completeOutputPath,
+    `${JSON.stringify(generatedComplete, null, 2)}\n`,
+    "utf8",
+  );
 
-  console.log(`[matrix-generator] source: ${path.relative(rootDir, sourcePath)}`);
-  console.log(`[matrix-generator] output: ${path.relative(rootDir, outputPath)}`);
+  console.log(
+    `[matrix-generator] source: ${path.relative(rootDir, sourcePath)}`,
+  );
+  console.log(
+    `[matrix-generator] output: ${path.relative(rootDir, outputPath)}`,
+  );
   console.log(`[matrix-generator] queries: ${generated.queryCount}`);
-  console.log(`[complete-generator] output: ${path.relative(rootDir, completeOutputPath)}`);
+  console.log(
+    `[complete-generator] output: ${path.relative(rootDir, completeOutputPath)}`,
+  );
   console.log(`[complete-generator] queries: ${generatedComplete.queryCount}`);
 }
 

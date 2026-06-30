@@ -2,9 +2,15 @@ import { fetchTranslation, generateOpenAIQuery } from "./aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
-import { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE, VEHICLE_CATEGORY } from "./testHelpers";
+import {
+  COUNTRY,
+  ENVIRONMENT,
+  LANGUAGE,
+  PRODUCT,
+  VEHICLE_CATEGORY,
+} from "./testHelpers";
 
-export { ENVIRONMENT, COUNTRY, PRODUCT, LANGUAGE, VEHICLE_CATEGORY };
+export { COUNTRY, ENVIRONMENT, LANGUAGE, PRODUCT, VEHICLE_CATEGORY };
 
 const REPEAT_COUNT = 5;
 
@@ -29,9 +35,9 @@ export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
     }
     return true;
   }
-  if (typeof a === 'object' && typeof b === 'object') {
-    const aKeys = Object.keys(a).filter(k => !ignoreKeys.includes(k));
-    const bKeys = Object.keys(b).filter(k => !ignoreKeys.includes(k));
+  if (typeof a === "object" && typeof b === "object") {
+    const aKeys = Object.keys(a).filter((k) => !ignoreKeys.includes(k));
+    const bKeys = Object.keys(b).filter((k) => !ignoreKeys.includes(k));
     if (aKeys.length !== bKeys.length) return false;
     for (const key of aKeys) {
       if (!bKeys.includes(key)) return false;
@@ -42,7 +48,10 @@ export function deepEqual(a: any, b: any, ignoreKeys: string[] = []): boolean {
   return false;
 }
 
-function getConsistencyResponseText(result: any, lang: string): string | undefined {
+function getConsistencyResponseText(
+  result: any,
+  lang: string,
+): string | undefined {
   const response = result?.response;
 
   if (!response) {
@@ -65,7 +74,8 @@ function getConsistencyResponseText(result: any, lang: string): string | undefin
     }
 
     const firstAvailable = Object.values(response).find(
-      (value): value is string => typeof value === "string" && value.trim() !== ""
+      (value): value is string =>
+        typeof value === "string" && value.trim() !== "",
     );
     return firstAvailable;
   }
@@ -99,7 +109,7 @@ export function isLanguageConsistencyAccepted(result: string): boolean {
 }
 
 export async function areAllResponsesConsistentOneShot(
-  responses: string[]
+  responses: string[],
 ): Promise<{ isConsistent: boolean; reason: string }> {
   const normalizedResponses = responses
     .map((value) => String(value || "").trim())
@@ -121,7 +131,9 @@ export async function areAllResponsesConsistentOneShot(
 
   const userPrompt = [
     "Evaluate consistency for the following responses:",
-    ...normalizedResponses.map((value, index) => `Response ${index + 1}: ${value}`),
+    ...normalizedResponses.map(
+      (value, index) => `Response ${index + 1}: ${value}`,
+    ),
     "",
     "Output format:",
     "RESULT: YES or NO",
@@ -129,7 +141,13 @@ export async function areAllResponsesConsistentOneShot(
   ].join("\n");
 
   try {
-    const answer = await generateOpenAIQuery(systemPrompt, userPrompt, 80, 0.1, "NO");
+    const answer = await generateOpenAIQuery(
+      systemPrompt,
+      userPrompt,
+      80,
+      0.1,
+      "NO",
+    );
     const raw = String(answer || "").trim();
     const normalized = raw.toUpperCase();
     const isConsistent = normalized.includes("YES");
@@ -143,17 +161,23 @@ export async function areAllResponsesConsistentOneShot(
 
     return {
       isConsistent: false,
-      reason: parsedReason || "AI marked responses inconsistent but did not provide a reason.",
+      reason:
+        parsedReason ||
+        "AI marked responses inconsistent but did not provide a reason.",
     };
   } catch (error) {
     console.warn("⚠️  One-shot AI consistency check failed:", error);
-    return { isConsistent: false, reason: "One-shot AI consistency check failed." };
+    return {
+      isConsistent: false,
+      reason: "One-shot AI consistency check failed.",
+    };
   }
 }
 
 export function getTestMode(): "ui" | "api" | "both" {
   const mode = (process.env.TEST_MODE || "ui").toLowerCase();
-  return (["ui", "api", "both"].includes(mode) ? mode : "ui") as "ui" | "api" | "both";
+  return (["ui", "api", "both"].includes(mode) ? mode : "ui") as
+    "ui" | "api" | "both";
 }
 
 export function shouldRunUiTests(): boolean {
@@ -237,47 +261,53 @@ export async function ensureDirectoryExists(filePath: string): Promise<void> {
  * Clean up old screenshot folders, keeping only the most recent ones
  * @param keepCount Number of most recent date folders to keep (default: 3)
  */
-export async function cleanOldScreenshots(keepDays: number = 14): Promise<void> {
+export async function cleanOldScreenshots(
+  keepDays: number = 14,
+): Promise<void> {
   const screenshotsDir = "./results/screenshots";
-  
+
   try {
     await fs.access(screenshotsDir);
-    
+
     const entries = await fs.readdir(screenshotsDir, { withFileTypes: true });
     const dateFolders = entries
-      .filter(entry => entry.isDirectory())
-      .map(entry => ({
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => ({
         name: entry.name,
-        path: path.join(screenshotsDir, entry.name)
+        path: path.join(screenshotsDir, entry.name),
       }));
-    
+
     if (dateFolders.length === 0) {
       return;
     }
-    
+
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - keepDays);
-    
+
     const foldersWithStats = await Promise.all(
-      dateFolders.map(async folder => ({
+      dateFolders.map(async (folder) => ({
         ...folder,
-        mtime: (await fs.stat(folder.path)).mtime
-      }))
+        mtime: (await fs.stat(folder.path)).mtime,
+      })),
     );
-    
-    const foldersToRemove = foldersWithStats.filter(folder => folder.mtime < cutoffDate);
-    
+
+    const foldersToRemove = foldersWithStats.filter(
+      (folder) => folder.mtime < cutoffDate,
+    );
+
     for (const folder of foldersToRemove) {
       await fs.rm(folder.path, { recursive: true, force: true });
       console.log(`🗑️  Removed old screenshot folder: ${folder.name}`);
     }
-    
+
     if (foldersToRemove.length > 0) {
-      console.log(`✅ Cleaned up ${foldersToRemove.length} old screenshot folder(s) (older than ${keepDays} days)`);
+      console.log(
+        `✅ Cleaned up ${foldersToRemove.length} old screenshot folder(s) (older than ${keepDays} days)`,
+      );
     }
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-      console.warn('Warning: Failed to clean old screenshots:', error);
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") {
+      console.warn("Warning: Failed to clean old screenshots:", error);
     }
   }
 }
@@ -297,7 +327,7 @@ function slugifyTestTypeSegment(value: string): string {
 export function buildTestType(
   testDescribe: string,
   testTitle: string,
-  fallbackTestType: string = ""
+  fallbackTestType: string = "",
 ): string {
   const describeSlug = slugifyTestTypeSegment(testDescribe);
   const titleSlug = slugifyTestTypeSegment(testTitle);
@@ -313,7 +343,9 @@ export function buildTestType(
 export function getOutputFileName(testType: string): string {
   const timestamp = new Date().toISOString();
   const safeTimestamp = timestamp.replace(/[:.]/g, "-");
-  const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(timestamp));
+  const dateOnly = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Singapore",
+  }).format(new Date(timestamp));
   const env = process.env.ENVIRONMENT || ENVIRONMENT;
   const country = process.env.COUNTRY || COUNTRY;
   const product = process.env.PRODUCT || PRODUCT;
@@ -326,25 +358,30 @@ export function getOutputFileName(testType: string): string {
   return filename;
 }
 
-export function getScreenshotPath(testType: string, queryIndex: number, query: string, runTimestamp: string): string {
-  const dateOnly = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Singapore", }).format(new Date(runTimestamp));
+export function getScreenshotPath(
+  testType: string,
+  queryIndex: number,
+  query: string,
+  runTimestamp: string,
+): string {
+  const dateOnly = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Singapore",
+  }).format(new Date(runTimestamp));
   const safeRunTimestamp = runTimestamp.replace(/[:.]/g, "-");
   const env = process.env.ENVIRONMENT || ENVIRONMENT;
   const country = process.env.COUNTRY || COUNTRY;
   const product = process.env.PRODUCT || PRODUCT;
-  
+
   // Sanitize query for filename (remove special characters, limit length)
-  const sanitizedQuery = query
-    .replace(/[^a-zA-Z0-9]/g, '_')
-    .substring(0, 50);
-  
+  const sanitizedQuery = query.replace(/[^a-zA-Z0-9]/g, "_").substring(0, 50);
+
   // Use runTimestamp as folder - each test run gets its own folder
   return `./results/screenshots/${dateOnly}_${env}/${safeRunTimestamp}/${country}_${product}_${testType}_query-${queryIndex + 1}_${sanitizedQuery}.png`;
 }
 
 export async function combineResults(
   uiResults: any[],
-  apiResults: any[]
+  apiResults: any[],
 ): Promise<any[]> {
   const combined = [];
 
@@ -430,7 +467,9 @@ export async function runTestsRepeatedAndSaveResults(params: {
     .filter((query): query is any => query !== null);
 
   if (normalizedQueries.length === 0) {
-    console.warn("[runTestsRepeatedAndSaveResults] No valid queries found to execute.");
+    console.warn(
+      "[runTestsRepeatedAndSaveResults] No valid queries found to execute.",
+    );
     return;
   }
 
@@ -438,7 +477,12 @@ export async function runTestsRepeatedAndSaveResults(params: {
   const apiResults: any[][] = [];
 
   // Run UI tests if enabled
-  if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
+  if (
+    shouldRunUiTests() &&
+    setupContextAndPage &&
+    performUISmartSearchAndGetResults &&
+    processAndLogUiResult
+  ) {
     const page = await setupContextAndPage(browser);
     for (const query of normalizedQueries) {
       const resultsForQuery = [];
@@ -456,44 +500,71 @@ export async function runTestsRepeatedAndSaveResults(params: {
       // Consistency check for UI results (response[LANGUAGE] and facets)
       const firstString = resultsForQuery
         .map((result) => getConsistencyResponseText(result, lang))
-        .find((value): value is string => typeof value === "string" && value.trim() !== "");
+        .find(
+          (value): value is string =>
+            typeof value === "string" && value.trim() !== "",
+        );
       const firstFacets = resultsForQuery
         .map((result) => getConsistencyFacets(result))
         .find((value) => value !== undefined && value !== null);
       const responseValues = resultsForQuery
         .map((result) => getConsistencyResponseText(result, lang))
-        .filter((value): value is string => typeof value === "string" && value.trim() !== "");
-      const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
-        await areAllResponsesConsistentOneShot(responseValues);
-      const line = '────────────────────────────────────────────────────────────';
+        .filter(
+          (value): value is string =>
+            typeof value === "string" && value.trim() !== "",
+        );
+      const {
+        isConsistent: aiResponseConsistent,
+        reason: aiInconsistencyReason,
+      } = await areAllResponsesConsistentOneShot(responseValues);
+      const line =
+        "────────────────────────────────────────────────────────────";
       let matchCount = 0;
       let facetMatchCount = 0;
       const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
-        const compareString = getConsistencyResponseText(resultsForQuery[i], lang);
+        const compareString = getConsistencyResponseText(
+          resultsForQuery[i],
+          lang,
+        );
         const compareFacets = getConsistencyFacets(resultsForQuery[i]);
         const facetsMatch = deepEqual(firstFacets, compareFacets);
         const runMatched = aiResponseConsistent && facetsMatch;
         if (runMatched) matchCount++;
         if (facetsMatch) facetMatchCount++;
         if (!runMatched) {
-          failedRuns.push({ runNum: i + 1, compareString, compareFacets, facetsMatch });
+          failedRuns.push({
+            runNum: i + 1,
+            compareString,
+            compareFacets,
+            facetsMatch,
+          });
         }
       }
-      const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
-      const facetPercent = ((facetMatchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      const percent = (
+        (matchCount / (resultsForQuery.length - 1)) *
+        100
+      ).toFixed(0);
+      const facetPercent = (
+        (facetMatchCount / (resultsForQuery.length - 1)) *
+        100
+      ).toFixed(0);
       // Add consistencyRating to each result in resultsForQuery
       for (const result of resultsForQuery) {
         result.consistencyRating = Number(percent);
       }
-      const icon = percent === '100' ? '✅' : '❌';
-      const responseIcon = aiResponseConsistent ? '✅' : '❌';
-      const facetIcon = facetPercent === '100' ? '✅' : '❌';
+      const icon = percent === "100" ? "✅" : "❌";
+      const responseIcon = aiResponseConsistent ? "✅" : "❌";
+      const facetIcon = facetPercent === "100" ? "✅" : "❌";
       console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
+      console.info(
+        `🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`,
+      );
       console.info(`${line}`);
       console.info(`\nResponse Summary:\n  ${firstString}`);
-      console.info(`\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      console.info(
+        `\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`,
+      );
       if (!aiResponseConsistent && aiInconsistencyReason) {
         console.info(`\nAI Reason:\n  ${aiInconsistencyReason}`);
       }
@@ -502,30 +573,47 @@ export async function runTestsRepeatedAndSaveResults(params: {
         for (const failed of failedRuns) {
           console.info(`\n• Run #${failed.runNum}:`);
           if (!aiResponseConsistent) {
-            console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
+            console.info(
+              "  ❌ Response is NOT consistent across all runs (AI one-shot)",
+            );
             console.info(`      Response: '${failed.compareString}'`);
             if (lang !== "en" && failed.compareString) {
-              const compareStringEn = await fetchTranslation(failed.compareString, "en");
+              const compareStringEn = await fetchTranslation(
+                failed.compareString,
+                "en",
+              );
               console.info(`      Response (EN): '${compareStringEn}'`);
             }
           }
           if (!failed.facetsMatch) {
-            console.info('  ❌ Facets do NOT match');
-            console.info(`      ${JSON.stringify(failed.compareFacets, null, 2)}`);
+            console.info("  ❌ Facets do NOT match");
+            console.info(
+              `      ${JSON.stringify(failed.compareFacets, null, 2)}`,
+            );
           }
         }
       }
       console.info(`\n${line}`);
-      console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
-      console.info(`• ${responseIcon} Response: ${aiResponseConsistent ? 'Consistent' : 'NOT Consistent'}`);
-      console.info(`• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`);
+      console.info(
+        `\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`,
+      );
+      console.info(
+        `• ${responseIcon} Response: ${aiResponseConsistent ? "Consistent" : "NOT Consistent"}`,
+      );
+      console.info(
+        `• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`,
+      );
       console.info(`${line}\n`);
       uiResults.push(resultsForQuery);
     }
   }
 
   // Run API tests if enabled
-  if (shouldRunApiTests() && performApiSmartSearchAndGetResults && processAndLogApiResult) {
+  if (
+    shouldRunApiTests() &&
+    performApiSmartSearchAndGetResults &&
+    processAndLogApiResult
+  ) {
     for (const query of normalizedQueries) {
       const resultsForQuery = [];
       for (let i = 0; i < REPEAT_COUNT; i++) {
@@ -541,44 +629,71 @@ export async function runTestsRepeatedAndSaveResults(params: {
       // Consistency check for API results (response[LANGUAGE] and facets)
       const firstString = resultsForQuery
         .map((result) => getConsistencyResponseText(result, lang))
-        .find((value): value is string => typeof value === "string" && value.trim() !== "");
+        .find(
+          (value): value is string =>
+            typeof value === "string" && value.trim() !== "",
+        );
       const firstFacets = resultsForQuery
         .map((result) => getConsistencyFacets(result))
         .find((value) => value !== undefined && value !== null);
       const responseValues = resultsForQuery
         .map((result) => getConsistencyResponseText(result, lang))
-        .filter((value): value is string => typeof value === "string" && value.trim() !== "");
-      const { isConsistent: aiResponseConsistent, reason: aiInconsistencyReason } =
-        await areAllResponsesConsistentOneShot(responseValues);
-      const line = '────────────────────────────────────────────────────────────';
+        .filter(
+          (value): value is string =>
+            typeof value === "string" && value.trim() !== "",
+        );
+      const {
+        isConsistent: aiResponseConsistent,
+        reason: aiInconsistencyReason,
+      } = await areAllResponsesConsistentOneShot(responseValues);
+      const line =
+        "────────────────────────────────────────────────────────────";
       let matchCount = 0;
       let facetMatchCount = 0;
       const failedRuns = [];
       for (let i = 1; i < resultsForQuery.length; i++) {
-        const compareString = getConsistencyResponseText(resultsForQuery[i], lang);
+        const compareString = getConsistencyResponseText(
+          resultsForQuery[i],
+          lang,
+        );
         const compareFacets = getConsistencyFacets(resultsForQuery[i]);
         const facetsMatch = deepEqual(firstFacets, compareFacets);
         const runMatched = aiResponseConsistent && facetsMatch;
         if (runMatched) matchCount++;
         if (facetsMatch) facetMatchCount++;
         if (!runMatched) {
-          failedRuns.push({ runNum: i + 1, compareString, compareFacets, facetsMatch });
+          failedRuns.push({
+            runNum: i + 1,
+            compareString,
+            compareFacets,
+            facetsMatch,
+          });
         }
       }
-      const percent = ((matchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
-      const facetPercent = ((facetMatchCount / (resultsForQuery.length - 1)) * 100).toFixed(0);
+      const percent = (
+        (matchCount / (resultsForQuery.length - 1)) *
+        100
+      ).toFixed(0);
+      const facetPercent = (
+        (facetMatchCount / (resultsForQuery.length - 1)) *
+        100
+      ).toFixed(0);
       // Add consistencyRating to each result in resultsForQuery
       for (const result of resultsForQuery) {
         result.consistencyRating = Number(percent);
       }
-      const icon = percent === '100' ? '✅' : '❌';
-      const responseIcon = aiResponseConsistent ? '✅' : '❌';
-      const facetIcon = facetPercent === '100' ? '✅' : '❌';
+      const icon = percent === "100" ? "✅" : "❌";
+      const responseIcon = aiResponseConsistent ? "✅" : "❌";
+      const facetIcon = facetPercent === "100" ? "✅" : "❌";
       console.info(`\n${line}`);
-      console.info(`🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`);
+      console.info(
+        `🔎 \x1b[1mConsistency Check for Query:\x1b[0m \x1b[36m${query?.value ?? query}\x1b[0m`,
+      );
       console.info(`${line}`);
       console.info(`\nResponse Summary:\n  ${firstString}`);
-      console.info(`\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`);
+      console.info(
+        `\nFacets Summary:\n  ${JSON.stringify(firstFacets, null, 2)}`,
+      );
       if (!aiResponseConsistent && aiInconsistencyReason) {
         console.info(`\nAI Reason:\n  ${aiInconsistencyReason}`);
       }
@@ -587,23 +702,36 @@ export async function runTestsRepeatedAndSaveResults(params: {
         for (const failed of failedRuns) {
           console.info(`\n• Run #${failed.runNum}:`);
           if (!aiResponseConsistent) {
-            console.info('  ❌ Response is NOT consistent across all runs (AI one-shot)');
+            console.info(
+              "  ❌ Response is NOT consistent across all runs (AI one-shot)",
+            );
             console.info(`      Response: '${failed.compareString}'`);
             if (lang !== "en" && failed.compareString) {
-              const compareStringEn = await fetchTranslation(failed.compareString, "en");
+              const compareStringEn = await fetchTranslation(
+                failed.compareString,
+                "en",
+              );
               console.info(`      Response (EN): '${compareStringEn}'`);
             }
           }
           if (!failed.facetsMatch) {
-            console.info('  ❌ Facets do NOT match');
-            console.info(`      ${JSON.stringify(failed.compareFacets, null, 2)}`);
+            console.info("  ❌ Facets do NOT match");
+            console.info(
+              `      ${JSON.stringify(failed.compareFacets, null, 2)}`,
+            );
           }
         }
       }
       console.info(`\n${line}`);
-      console.info(`\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`);
-      console.info(`• ${responseIcon} Response: ${aiResponseConsistent ? 'Consistent' : 'NOT Consistent'}`);
-      console.info(`• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`);
+      console.info(
+        `\n• ${icon} \x1b[1mConsistency Rating:\x1b[0m ${percent}% (${matchCount} / ${resultsForQuery.length - 1} runs matched)`,
+      );
+      console.info(
+        `• ${responseIcon} Response: ${aiResponseConsistent ? "Consistent" : "NOT Consistent"}`,
+      );
+      console.info(
+        `• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`,
+      );
       console.info(`${line}\n`);
       apiResults.push(resultsForQuery);
     }
@@ -620,7 +748,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
   await fs.writeFile(
     outputFileName,
     JSON.stringify(allResults, null, 2),
-    "utf-8"
+    "utf-8",
   );
 }
 
@@ -682,7 +810,12 @@ export async function runTestsAndSaveResults(params: {
   const runTimestamp = new Date().toISOString();
 
   // Run UI tests if enabled
-  if (shouldRunUiTests() && setupContextAndPage && performUISmartSearchAndGetResults && processAndLogUiResult) {
+  if (
+    shouldRunUiTests() &&
+    setupContextAndPage &&
+    performUISmartSearchAndGetResults &&
+    processAndLogUiResult
+  ) {
     const page = await setupContextAndPage(browser);
     for (let i = 0; i < queries.length; i++) {
       // Check if page is still valid before proceeding
@@ -699,41 +832,61 @@ export async function runTestsAndSaveResults(params: {
         testDescribe,
         testTitle,
         page,
-      });      
-      
+      });
+
       // Take screenshot after each query (viewport only)
       try {
         const actualQuery = query?.value ?? query;
-        const screenshotPath = getScreenshotPath(resolvedTestType, i, actualQuery, runTimestamp);
+        const screenshotPath = getScreenshotPath(
+          resolvedTestType,
+          i,
+          actualQuery,
+          runTimestamp,
+        );
         await ensureDirectoryExists(screenshotPath);
         await page.screenshot({ path: screenshotPath });
         console.log(`📸 Screenshot: ${screenshotPath}`);
 
         entry.screenshotPath = screenshotPath;
-        
+
         // Annotate screenshot immediately with English translations
         try {
-          const { annotateSingleScreenshot } = require('../../annotate-screenshot.js');
+          const {
+            annotateSingleScreenshot,
+          } = require("../../annotate-screenshot.js");
           await annotateSingleScreenshot(screenshotPath, entry);
-          console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);        
+          console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);
         } catch (error) {
-          console.warn(`⚠️  Annotation skipped: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.warn(
+            `⚠️  Annotation skipped: ${error instanceof Error ? error.message : "Unknown error"}`,
+          );
         }
       } catch (screenshotError: any) {
-        console.warn(`⚠️  Screenshot failed: ${screenshotError?.message || 'Unknown error'}`);
-        if (screenshotError?.message?.includes("closed") || screenshotError?.message?.includes("context")) {
-          console.warn("[WARN] Page closed during screenshot, stopping UI test run");
+        console.warn(
+          `⚠️  Screenshot failed: ${screenshotError?.message || "Unknown error"}`,
+        );
+        if (
+          screenshotError?.message?.includes("closed") ||
+          screenshotError?.message?.includes("context")
+        ) {
+          console.warn(
+            "[WARN] Page closed during screenshot, stopping UI test run",
+          );
           break;
         }
       }
       console.log("\n");
-      
+
       uiResults.push(entry);
     }
   }
 
   // Run API tests if enabled
-  if (shouldRunApiTests() && performApiSmartSearchAndGetResults && processAndLogApiResult) {
+  if (
+    shouldRunApiTests() &&
+    performApiSmartSearchAndGetResults &&
+    processAndLogApiResult
+  ) {
     for (const query of queries) {
       const results = await performApiSmartSearchAndGetResults(query);
       const entry = await processAndLogApiResult({
@@ -753,7 +906,7 @@ export async function runTestsAndSaveResults(params: {
   await fs.writeFile(
     outputFileName,
     JSON.stringify(allResults, null, 2),
-    "utf-8"
+    "utf-8",
   );
 
   if (postRunAnalysis) {
@@ -767,7 +920,7 @@ export async function runTestsAndSaveResults(params: {
       });
     } catch (e) {
       console.warn(
-        `[WARN] Post-run analysis failed: ${e instanceof Error ? e.message : e}`
+        `[WARN] Post-run analysis failed: ${e instanceof Error ? e.message : e}`,
       );
     }
   }
@@ -782,7 +935,7 @@ export async function runTestsAndSaveResults(params: {
       })
       .join("\n");
     throw new Error(
-      `${failedResults.length} of ${allResults.length} test(s) failed:\n${failSummary}`
+      `${failedResults.length} of ${allResults.length} test(s) failed:\n${failSummary}`,
     );
   }
 }
@@ -795,7 +948,7 @@ export async function runTestsAndSaveResults(params: {
  */
 export function mergeQueries(
   fixedQueries: any[],
-  generatedQueries: any[] = []
+  generatedQueries: any[] = [],
 ): any[] {
   const sanitizeQueryText = (text: string): string => {
     return String(text)
@@ -818,8 +971,11 @@ export function mergeQueries(
       ...(Array.isArray(shouldFilter.include) ? shouldFilter.include : []),
       ...(Array.isArray(shouldFilter.exclude) ? shouldFilter.exclude : []),
     ];
-    return filterGroups.some((filterGroup: any) =>
-      filterGroup && typeof filterGroup === "object" && "brand" in filterGroup
+    return filterGroups.some(
+      (filterGroup: any) =>
+        filterGroup &&
+        typeof filterGroup === "object" &&
+        "brand" in filterGroup,
     );
   };
 

@@ -45,8 +45,16 @@ interface PromptContext {
 
 interface GenerationOptions {
   language?: string;
-  fallbackFn?: (facetKey: string, formattedValue: string, rawValue: unknown) => string;
-  filterTextFn?: (facetKey: string, formattedValue: string, rawValue: unknown) => string;
+  fallbackFn?: (
+    facetKey: string,
+    formattedValue: string,
+    rawValue: unknown,
+  ) => string;
+  filterTextFn?: (
+    facetKey: string,
+    formattedValue: string,
+    rawValue: unknown,
+  ) => string;
   maxTokens?: number;
 }
 
@@ -276,27 +284,27 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     mr: "गिअरबॉक्स",
   },
   packages: {
-    "kr": "패키지",
-    "tr": "donanım paketi"
+    kr: "패키지",
+    tr: "donanım paketi",
   },
   lines: {
-    "kr": "라인",
-    "tr": "tasarım konsepti"
+    kr: "라인",
+    tr: "tasarım konsepti",
   },
   colorPolish: {
-    "kr": "실내 장식품 (소재)",
-    "th": "เบาะ",
-    "tr": "döşeme"
+    kr: "실내 장식품 (소재)",
+    th: "เบาะ",
+    tr: "döşeme",
   },
   enginePowerHP: {
-    "en": "horsepower",
-    "kr": "엔진 출력(마력)",
-    "tr": "motor gücü (HP)"
+    en: "horsepower",
+    kr: "엔진 출력(마력)",
+    tr: "motor gücü (HP)",
   },
   enginePowerKW: {
-    "en": "kilowatts",
-    "kr": "엔진 출력(킬로와트)",
-    "tr": "motor gücü (kW)"
+    en: "kilowatts",
+    kr: "엔진 출력(킬로와트)",
+    tr: "motor gücü (kW)",
   },
 };
 
@@ -304,7 +312,9 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
  * Normalize whitespace in a string
  */
 function normalizeWhitespace(value: unknown): string {
-  return String(value || "").replace(/\s+/g, " ").trim();
+  return String(value || "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function normalizeLanguageCode(language: string): string {
@@ -314,11 +324,13 @@ function normalizeLanguageCode(language: string): string {
 function getLocalizedFacetLabel(
   facetKey: string,
   facetDisplayNameFn: (key: string) => string,
-  language: string
+  language: string,
 ): string {
   const normalizedLanguage = normalizeLanguageCode(language);
   const localizedLabel = LOCALIZED_FACET_LABELS[facetKey]?.[normalizedLanguage];
-  return normalizeWhitespace(localizedLabel || facetDisplayNameFn(facetKey) || facetKey);
+  return normalizeWhitespace(
+    localizedLabel || facetDisplayNameFn(facetKey) || facetKey,
+  );
 }
 
 /**
@@ -326,7 +338,10 @@ function getLocalizedFacetLabel(
  * Used for detecting repetition across recent queries
  */
 function getOpeningSignature(value: unknown): string {
-  const words = normalizeWhitespace(value).toLowerCase().split(" ").filter(Boolean);
+  const words = normalizeWhitespace(value)
+    .toLowerCase()
+    .split(" ")
+    .filter(Boolean);
   return words.slice(0, 2).join(" ");
 }
 
@@ -356,10 +371,14 @@ function buildFacetFirstQuery(
   formattedValue: string,
   rawValue: unknown,
   facetDisplayNameFn: (key: string) => string,
-  language: string
+  language: string,
 ): string {
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
-  const keyLabel = getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language);
+  const keyLabel = getLocalizedFacetLabel(
+    facetKey,
+    facetDisplayNameFn,
+    language,
+  );
   return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
 }
 
@@ -372,10 +391,14 @@ function buildVariedFallbackPhrase(
   rawValue: unknown,
   facetDisplayNameFn: (key: string) => string,
   language: string,
-  context: PromptContext
+  context: PromptContext,
 ): string {
   const valueLabel = normalizeWhitespace(formattedValue || rawValue);
-  const keyLabel = getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language);
+  const keyLabel = getLocalizedFacetLabel(
+    facetKey,
+    facetDisplayNameFn,
+    language,
+  );
   const templates = [
     `${valueLabel} ${keyLabel} options`,
     `vehicles with ${valueLabel} ${keyLabel}`,
@@ -412,23 +435,41 @@ function enforceCompleteQueryVariation(
   rawValue: unknown,
   facetDisplayNameFn: (key: string) => string,
   language: string,
-  context: PromptContext
+  context: PromptContext,
 ): string {
   const normalized = normalizeWhitespace(generated);
   if (!normalized) {
-    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
+    const fallback = buildVariedFallbackPhrase(
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context,
+    );
     recordOpening(context, getOpeningSignature(fallback));
     return fallback;
   }
 
   const lower = normalized.toLowerCase();
-  const startsRepetitive = context.recentOpenings.some((prefix) => lower.startsWith(prefix));
-  const matchesRepetitivePattern = REPETITIVE_COMPLETE_QUERY_PATTERNS.some((pattern) => pattern.test(normalized));
+  const startsRepetitive = context.recentOpenings.some((prefix) =>
+    lower.startsWith(prefix),
+  );
+  const matchesRepetitivePattern = REPETITIVE_COMPLETE_QUERY_PATTERNS.some(
+    (pattern) => pattern.test(normalized),
+  );
   const opening = getOpeningSignature(normalized);
   const seenRecently = context.recentOpenings.includes(opening);
 
   if (startsRepetitive || matchesRepetitivePattern || seenRecently) {
-    const fallback = buildVariedFallbackPhrase(facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
+    const fallback = buildVariedFallbackPhrase(
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context,
+    );
     recordOpening(context, getOpeningSignature(fallback));
     return fallback;
   }
@@ -444,7 +485,7 @@ async function generateOpenAiQuery(
   client: AzureOpenAI,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = 32
+  maxTokens: number = 32,
 ): Promise<string> {
   console.log("[prompt-engine] Generating query with AI...");
   console.log(`[prompt-engine] System prompt: ${systemPrompt}`);
@@ -485,15 +526,31 @@ async function generateQueryWithVariation(
   userPromptTemplate: string | undefined,
   facetDisplayNameFn: (key: string) => string,
   context: PromptContext,
-  options: GenerationOptions = {}
+  options: GenerationOptions = {},
 ): Promise<string> {
   const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
-  const exactQuery = buildFacetFirstQuery(facetKey, formattedValue, rawValue, facetDisplayNameFn, language);
-  const fallback = fallbackFn ? fallbackFn(facetKey, formattedValue, rawValue) : exactQuery;
-  
+  const exactQuery = buildFacetFirstQuery(
+    facetKey,
+    formattedValue,
+    rawValue,
+    facetDisplayNameFn,
+    language,
+  );
+  const fallback = fallbackFn
+    ? fallbackFn(facetKey, formattedValue, rawValue)
+    : exactQuery;
+
   if (!client || !systemPrompt || !userPromptTemplate) {
     // return normalizeWhitespace(formattedValue);
-    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
+    return enforceCompleteQueryVariation(
+      fallback,
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context,
+    );
   }
 
   try {
@@ -502,7 +559,10 @@ async function generateQueryWithVariation(
       : `${getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language)} ${formattedValue}`;
 
     const styleHint = pickNextCompleteStyle(context);
-    const resolvedSystemPrompt = String(systemPrompt).replace(/\{LANGUAGE\}/g, language);
+    const resolvedSystemPrompt = String(systemPrompt).replace(
+      /\{LANGUAGE\}/g,
+      language,
+    );
     const resolvedUserPromptBase = String(userPromptTemplate)
       .replace(/\{LANGUAGE\}/g, language)
       .replace(/\{filterText\}/g, filterText)
@@ -510,9 +570,15 @@ async function generateQueryWithVariation(
     const resolvedUserPrompt = `${resolvedUserPromptBase}\nStyle requirement: ${styleHint}.`;
 
     // If the style hint is the exact query format, skip AI generation and return the exact query to ensure we have that variation covered
-    if (styleHint.includes("'<facet name> <filter value>'")) return normalizeWhitespace(exactQuery);
-    
-    const generated = await generateOpenAiQuery(client, resolvedSystemPrompt, resolvedUserPrompt, maxTokens);
+    if (styleHint.includes("'<facet name> <filter value>'"))
+      return normalizeWhitespace(exactQuery);
+
+    const generated = await generateOpenAiQuery(
+      client,
+      resolvedSystemPrompt,
+      resolvedUserPrompt,
+      maxTokens,
+    );
     // return generated;
     const generatedVariation = enforceCompleteQueryVariation(
       generated || fallback,
@@ -521,38 +587,48 @@ async function generateQueryWithVariation(
       rawValue,
       facetDisplayNameFn,
       language,
-      context
+      context,
     );
     return generatedVariation;
   } catch (error) {
-    console.error(`[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`);
-    return enforceCompleteQueryVariation(fallback, facetKey, formattedValue, rawValue, facetDisplayNameFn, language, context);
+    console.error(
+      `[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`,
+    );
+    return enforceCompleteQueryVariation(
+      fallback,
+      facetKey,
+      formattedValue,
+      rawValue,
+      facetDisplayNameFn,
+      language,
+      context,
+    );
   }
 }
 
 export {
-  // Constants
-  COMPLETE_QUERY_STYLE_HINTS,
-  REPETITIVE_COMPLETE_QUERY_PREFIXES,
-  REPETITIVE_COMPLETE_QUERY_PATTERNS,
-  OPENING_WINDOW_SIZE,
-  // Types
-  PromptContext,
-  GenerationOptions,
-  // Utilities
-  normalizeWhitespace,
-  getOpeningSignature,
-  // Context management
-  createPromptContext,
-  // Diversification
-  pickNextCompleteStyle,
   buildFacetFirstQuery,
   buildVariedFallbackPhrase,
-  recordOpening,
+  // Constants
+  COMPLETE_QUERY_STYLE_HINTS,
+  // Context management
+  createPromptContext,
   // Enforcement
   enforceCompleteQueryVariation,
   // API
   generateOpenAiQuery,
   // Main orchestrator
   generateQueryWithVariation,
+  GenerationOptions,
+  getOpeningSignature,
+  // Utilities
+  normalizeWhitespace,
+  OPENING_WINDOW_SIZE,
+  // Diversification
+  pickNextCompleteStyle,
+  // Types
+  PromptContext,
+  recordOpening,
+  REPETITIVE_COMPLETE_QUERY_PATTERNS,
+  REPETITIVE_COMPLETE_QUERY_PREFIXES,
 };

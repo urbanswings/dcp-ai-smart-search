@@ -1,17 +1,30 @@
-import fs from "fs";
-import path from "path";
 import dotenv from "dotenv";
+import fs from "fs";
 import { AzureOpenAI } from "openai";
+import path from "path";
 import * as promptEngine from "./promptEngineHelper";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 const rootDir = process.cwd();
-const sourcePath = path.resolve(rootDir, process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json");
+const sourcePath = path.resolve(
+  rootDir,
+  process.env.MATRIX_SOURCE || "tests/data/emh-api-response.json",
+);
 const aiPromptsPath = path.resolve(rootDir, "tests/data/ai-query-prompts.json");
-const aiEvaluationRulesPath = path.resolve(rootDir, "tests/data/ai-evaluation-rules.json");
+const aiEvaluationRulesPath = path.resolve(
+  rootDir,
+  "tests/data/ai-evaluation-rules.json",
+);
 
-const FACET_ORDER = ["bodyType", "fuelType", "color", "stockType", "brand", "seats"];
+const FACET_ORDER = [
+  "bodyType",
+  "fuelType",
+  "color",
+  "stockType",
+  "brand",
+  "seats",
+];
 
 // Facets to exclude from query generation
 const EXCLUDE_FACETS = [
@@ -22,7 +35,7 @@ const EXCLUDE_FACETS = [
   "dealerFittedOptions",
   "chargeTimeDCHigh",
   "energyContent",
-  "wltpRangeTotalAllIndividual"
+  "wltpRangeTotalAllIndividual",
 ];
 
 // Facets to include in query generation (allowlist — empty means all)
@@ -137,13 +150,6 @@ interface PromptConfig {
   maxTokens?: number;
 }
 
-interface GenerationOptions {
-  language?: string;
-  fallbackFn?: (facetKey: string, formattedValue: string, rawValue: unknown) => string;
-  filterTextFn?: (facetKey: string, formattedValue: string, rawValue: unknown) => string;
-  maxTokens?: number;
-}
-
 interface FacetMatrixHintRules {
   genericHints?: Record<string, string[]>;
   rangeHints?: Record<string, string[]>;
@@ -164,7 +170,9 @@ function loadFacetMatrixHintRules(): FacetMatrixHintRules {
 
   let rules: FacetMatrixHintRules;
   try {
-    const evaluationRules = JSON.parse(fs.readFileSync(aiEvaluationRulesPath, "utf8"));
+    const evaluationRules = JSON.parse(
+      fs.readFileSync(aiEvaluationRulesPath, "utf8"),
+    );
     rules = evaluationRules?.facetMatrix || {};
   } catch {
     rules = {};
@@ -175,7 +183,7 @@ function loadFacetMatrixHintRules(): FacetMatrixHintRules {
 
 function renderHintTemplates(
   templates: string[] | undefined,
-  values: Record<string, unknown>
+  values: Record<string, unknown>,
 ): string[] {
   if (!Array.isArray(templates)) {
     return [];
@@ -184,7 +192,7 @@ function renderHintTemplates(
     template.replace(/\{([A-Za-z0-9_]+)\}/g, (match, key) => {
       const value = values[key];
       return value === undefined || value === null ? match : String(value);
-    })
+    }),
   );
 }
 
@@ -196,7 +204,10 @@ function titleCaseFromToken(value: unknown): string {
     .join(" ");
 }
 
-function getFacetValues(facets: Facets, facetKey: string): Array<string | number> {
+function getFacetValues(
+  facets: Facets,
+  facetKey: string,
+): Array<string | number> {
   const values = facets?.[facetKey]?.values;
   if (!Array.isArray(values)) {
     return [];
@@ -204,7 +215,10 @@ function getFacetValues(facets: Facets, facetKey: string): Array<string | number
   const extracted = values
     .map((entry) => entry?.value)
     .filter(
-      (value) => value !== undefined && value !== null && String(value).toUpperCase() !== "UNDEFINED"
+      (value) =>
+        value !== undefined &&
+        value !== null &&
+        String(value).toUpperCase() !== "UNDEFINED",
     );
   return [...new Set(extracted)];
 }
@@ -214,7 +228,10 @@ function isOpaqueValue(value: unknown): boolean {
   return /^[0-9a-f]{7,}$/i.test(normalized);
 }
 
-function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | null {
+function getMappedFormattedValue(
+  facetKey: string,
+  rawValue: unknown,
+): string | null {
   if (facetKey === "bodyType") {
     const map: Record<string, string> = {
       SUV_OFFROADER: "SUV",
@@ -225,7 +242,10 @@ function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | 
   return null;
 }
 
-function getFacetListEntries(facets: Facets, facetKey: string): FacetListEntry[] {
+function getFacetListEntries(
+  facets: Facets,
+  facetKey: string,
+): FacetListEntry[] {
   const values = facets?.[facetKey]?.values;
   if (!Array.isArray(values)) {
     return [];
@@ -243,8 +263,14 @@ function getFacetListEntries(facets: Facets, facetKey: string): FacetListEntry[]
     }
 
     const formattedValue =
-      entry?.formattedValue || getMappedFormattedValue(facetKey, rawValue) || String(rawValue);
-    if (!entry?.formattedValue && !getMappedFormattedValue(facetKey, rawValue) && isOpaqueValue(rawValue)) {
+      entry?.formattedValue ||
+      getMappedFormattedValue(facetKey, rawValue) ||
+      String(rawValue);
+    if (
+      !entry?.formattedValue &&
+      !getMappedFormattedValue(facetKey, rawValue) &&
+      isOpaqueValue(rawValue)
+    ) {
       continue;
     }
 
@@ -280,7 +306,9 @@ function formatLocalizedInteger(value: unknown, locale: string): string {
   if (!Number.isFinite(numericValue)) {
     return String(value);
   }
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(numericValue);
+  return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(
+    numericValue,
+  );
 }
 
 function getCountryCode(): string {
@@ -288,7 +316,9 @@ function getCountryCode(): string {
 }
 
 function getLanguageCode(): string {
-  const language = (process.env.LANGUAGE || "EN").toLowerCase().split(/[-_]/)[0];
+  const language = (process.env.LANGUAGE || "EN")
+    .toLowerCase()
+    .split(/[-_]/)[0];
   const country = getCountryCode().toLowerCase();
   if (language === "kr" || country === "kr") return "ko";
   if (language === "jp" || country === "jp") return "ja";
@@ -314,7 +344,11 @@ function formatLocalizedPriceValue(value: unknown): string {
   }
 }
 
-function formatFacetValueForQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
+function formatFacetValueForQuery(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
     return formatLocalizedPriceValue(rawValue);
   }
@@ -356,7 +390,10 @@ const RANGE_PHRASE_TEMPLATES: Record<string, Record<RangePhraseKey, string>> = {
   },
 };
 
-const LOCALIZED_FACET_NAMES_FOR_QUERY: Record<string, Record<string, string>> = {
+const LOCALIZED_FACET_NAMES_FOR_QUERY: Record<
+  string,
+  Record<string, string>
+> = {
   tr: {
     bodyType: "gövde tipi",
     fuelType: "yakıt tipi",
@@ -461,7 +498,10 @@ function formatRangePhrase(template: string, value: string): string {
 
 function facetDisplayNameForQuery(facetKey: string): string {
   const language = getLanguageCode();
-  return LOCALIZED_FACET_NAMES_FOR_QUERY[language]?.[facetKey] || facetDisplayName(facetKey);
+  return (
+    LOCALIZED_FACET_NAMES_FOR_QUERY[language]?.[facetKey] ||
+    facetDisplayName(facetKey)
+  );
 }
 
 function shouldUseLocalizedFallback(): boolean {
@@ -471,9 +511,13 @@ function shouldUseLocalizedFallback(): boolean {
 function fallbackLocalizedCompleteQuery(
   facetKey: string,
   formattedValue: string,
-  rawValue: unknown
+  rawValue: unknown,
 ): string {
-  const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
+  const displayValue = formatFacetValueForQuery(
+    facetKey,
+    formattedValue,
+    rawValue,
+  );
   const valueLabel =
     facetKey === "price" || facetKey === "monthlyRate"
       ? displayValue
@@ -493,8 +537,16 @@ function isRangeQueryValue(value: unknown): boolean {
   );
 }
 
-function fallbackCompleteQuery(facetKey: string, formattedValue: string, rawValue: unknown): string {
-  const displayValue = formatFacetValueForQuery(facetKey, formattedValue, rawValue);
+function fallbackCompleteQuery(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
+  const displayValue = formatFacetValueForQuery(
+    facetKey,
+    formattedValue,
+    rawValue,
+  );
   if (isRangeQueryValue(formattedValue)) {
     return `${formattedValue} ${facetDisplayNameForQuery(facetKey)}`;
   }
@@ -536,13 +588,14 @@ function addCompleteQuery(
   query: string,
   facetKey: string,
   filterValue: unknown,
-  shouldFilter: ShouldFilter
+  shouldFilter: ShouldFilter,
 ): void {
   const isNumericFilterValue =
     typeof filterValue === "number" ||
     (typeof filterValue === "string" && Number.isFinite(Number(filterValue)));
   const displayFilterValue =
-    (facetKey === "price" || facetKey === "monthlyRate") && !isNumericFilterValue
+    (facetKey === "price" || facetKey === "monthlyRate") &&
+    !isNumericFilterValue
       ? String(filterValue)
       : formatFacetValueForQuery(facetKey, String(filterValue), filterValue);
   if (queryMap.has(query)) {
@@ -556,7 +609,9 @@ function addCompleteQuery(
     shouldFilter,
   });
   console.log("===============================");
-  console.log(`[complete-generator] filter: ${facetKey} : ${displayFilterValue}`);
+  console.log(
+    `[complete-generator] filter: ${facetKey} : ${displayFilterValue}`,
+  );
   console.log(`[complete-generator] query: ${query}`);
   console.log("===============================");
   console.log("\n");
@@ -585,14 +640,20 @@ function loadCompletePromptConfig(): PromptConfig {
   }
 }
 
-function buildCompleteFilterText(facetKey: string, formattedValue: string, rawValue: unknown): string {
+function buildCompleteFilterText(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
     return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
   }
   return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue}'`;
 }
 
-function buildMotorizationModelMap(data: ApiResponse): Map<string, Array<string | number>> {
+function buildMotorizationModelMap(
+  data: ApiResponse,
+): Map<string, Array<string | number>> {
   const results = data?.data?.search?.results || [];
   const motorizationToModelMap = new Map<string, Set<string | number>>();
 
@@ -600,27 +661,34 @@ function buildMotorizationModelMap(data: ApiResponse): Map<string, Array<string 
     const motorization = result.vehicleModel?.motorization;
     const modelIdentifier = result.vehicleModel?.vehicleClass?.value;
 
-    if (!motorization || modelIdentifier === undefined || modelIdentifier === null) {
+    if (
+      !motorization ||
+      modelIdentifier === undefined ||
+      modelIdentifier === null
+    ) {
       continue;
     }
 
-    const existing = motorizationToModelMap.get(motorization) || new Set<string | number>();
+    const existing =
+      motorizationToModelMap.get(motorization) || new Set<string | number>();
     existing.add(modelIdentifier);
     motorizationToModelMap.set(motorization, existing);
   }
 
   return new Map(
-    Array.from(motorizationToModelMap.entries()).map(([motorization, modelIdentifiers]) => [
-      motorization,
-      Array.from(modelIdentifiers),
-    ])
+    Array.from(motorizationToModelMap.entries()).map(
+      ([motorization, modelIdentifiers]) => [
+        motorization,
+        Array.from(modelIdentifiers),
+      ],
+    ),
   );
 }
 
 function buildCompleteShouldFilter(
   facetKey: string,
   rawValue: string | number,
-  motorizationModelMap: Map<string, Array<string | number>>
+  motorizationModelMap: Map<string, Array<string | number>>,
 ): ShouldFilter {
   if (facetKey === "motorization") {
     const modelIdentifiers = motorizationModelMap.get(String(rawValue)) || [];
@@ -643,7 +711,7 @@ function buildAcceptedFacetValueLabels(
   facetKey: string,
   valueLabel: string,
   formattedValue: string,
-  rawValue: unknown
+  rawValue: unknown,
 ): string[] {
   const labels = new Set<string>();
   const add = (value: unknown) => {
@@ -697,7 +765,7 @@ function createCompleteValueHints(
   facetKey: string,
   valueLabel: string,
   formattedValue: string,
-  rawValue: unknown
+  rawValue: unknown,
 ): string[] {
   const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
@@ -705,7 +773,7 @@ function createCompleteValueHints(
     facetKey,
     valueLabel,
     formattedValue,
-    rawValue
+    rawValue,
   );
   const acceptedLabelText = acceptedLabels.join(" / ");
 
@@ -723,7 +791,11 @@ function createCompleteValueHints(
   });
 }
 
-function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawValue: unknown): string {
+function toCompleteHintValueLabel(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
   if (["bodyType", "fuelType", "color"].includes(facetKey)) {
     return toHintLabel(facetKey, rawValue);
   }
@@ -736,11 +808,13 @@ function toCompleteHintValueLabel(facetKey: string, formattedValue: string, rawV
 function createCompleteRangeHints(
   facetKey: string,
   numericValue: unknown,
-  valueLabel?: string
+  valueLabel?: string,
 ): string[] {
   const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
-  const targetValue = valueLabel || toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
+  const targetValue =
+    valueLabel ||
+    toCompleteHintValueLabel(facetKey, String(numericValue), numericValue);
   const targetVerb = isRangeQueryValue(targetValue)
     ? `references vehicles with ${facetName} ${targetValue}`
     : `references vehicles around ${facetName} ${targetValue} (exact number not required)`;
@@ -751,9 +825,16 @@ function createCompleteRangeHints(
   });
 }
 
-function getRangeValueMatrix(facetKey: string, range: FacetRange): RangeQueryCase[] {
+function getRangeValueMatrix(
+  facetKey: string,
+  range: FacetRange,
+): RangeQueryCase[] {
   const midpoint = Math.round((range.min + range.max) / 2);
-  const formattedMidpoint = formatFacetValueForQuery(facetKey, String(midpoint), midpoint);
+  const formattedMidpoint = formatFacetValueForQuery(
+    facetKey,
+    String(midpoint),
+    midpoint,
+  );
   const rangePhraseTemplates = getRangePhraseTemplates();
 
   return [
@@ -764,27 +845,51 @@ function getRangeValueMatrix(facetKey: string, range: FacetRange): RangeQueryCas
       expectedValue: midpoint,
     },
     {
-      formattedValue: formatRangePhrase(rangePhraseTemplates.lessThan, formattedMidpoint),
+      formattedValue: formatRangePhrase(
+        rangePhraseTemplates.lessThan,
+        formattedMidpoint,
+      ),
       rawValue: midpoint,
-      filterValue: formatRangePhrase(rangePhraseTemplates.lessThan, formattedMidpoint),
+      filterValue: formatRangePhrase(
+        rangePhraseTemplates.lessThan,
+        formattedMidpoint,
+      ),
       expectedValue: midpoint,
     },
     {
-      formattedValue: formatRangePhrase(rangePhraseTemplates.under, formattedMidpoint),
+      formattedValue: formatRangePhrase(
+        rangePhraseTemplates.under,
+        formattedMidpoint,
+      ),
       rawValue: midpoint,
-      filterValue: formatRangePhrase(rangePhraseTemplates.under, formattedMidpoint),
+      filterValue: formatRangePhrase(
+        rangePhraseTemplates.under,
+        formattedMidpoint,
+      ),
       expectedValue: midpoint,
     },
     {
-      formattedValue: formatRangePhrase(rangePhraseTemplates.moreThan, formattedMidpoint),
+      formattedValue: formatRangePhrase(
+        rangePhraseTemplates.moreThan,
+        formattedMidpoint,
+      ),
       rawValue: midpoint + 1,
-      filterValue: formatRangePhrase(rangePhraseTemplates.moreThan, formattedMidpoint),
+      filterValue: formatRangePhrase(
+        rangePhraseTemplates.moreThan,
+        formattedMidpoint,
+      ),
       expectedValue: midpoint + 1,
     },
     {
-      formattedValue: formatRangePhrase(rangePhraseTemplates.above, formattedMidpoint),
+      formattedValue: formatRangePhrase(
+        rangePhraseTemplates.above,
+        formattedMidpoint,
+      ),
       rawValue: midpoint + 1,
-      filterValue: formatRangePhrase(rangePhraseTemplates.above, formattedMidpoint),
+      filterValue: formatRangePhrase(
+        rangePhraseTemplates.above,
+        formattedMidpoint,
+      ),
       expectedValue: midpoint + 1,
     },
   ];
@@ -825,20 +930,28 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
           maxTokens: promptConfig.maxTokens,
-        }
+        },
       );
       addCompleteQuery(
         queryMap,
         query,
         facetKey,
         entry.formattedValue || entry.rawValue,
-        buildCompleteShouldFilter(facetKey, entry.rawValue, motorizationModelMap)
+        buildCompleteShouldFilter(
+          facetKey,
+          entry.rawValue,
+          motorizationModelMap,
+        ),
       );
       informativeHintsByQuery[query] = createCompleteValueHints(
         facetKey,
-        toCompleteHintValueLabel(facetKey, entry.formattedValue, entry.rawValue),
+        toCompleteHintValueLabel(
+          facetKey,
+          entry.formattedValue,
+          entry.rawValue,
+        ),
         entry.formattedValue,
-        entry.rawValue
+        entry.rawValue,
       );
     }
 
@@ -860,19 +973,17 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
             maxTokens: promptConfig.maxTokens,
-          }
+          },
         );
-        addCompleteQuery(
-          queryMap,
-          query,
-          facetKey,
-          rangeValue.filterValue,
-          { include: [{ [facetKey]: [rangeValue.expectedValue] }], exclude: [], strict: false }
-        );
+        addCompleteQuery(queryMap, query, facetKey, rangeValue.filterValue, {
+          include: [{ [facetKey]: [rangeValue.expectedValue] }],
+          exclude: [],
+          strict: false,
+        });
         informativeHintsByQuery[query] = createCompleteRangeHints(
           facetKey,
           rangeValue.rawValue,
-          rangeValue.filterValue
+          rangeValue.filterValue,
         );
       }
     }
@@ -899,7 +1010,10 @@ function toQueryLabel(facetKey: string, value: unknown): string {
       CABRIO_ROADSTER: "cabriolets",
       PEOPLE_CARRIER: "people carriers",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} vehicles`.toLowerCase();
+    return (
+      map[String(value)] ||
+      `${titleCaseFromToken(value)} vehicles`.toLowerCase()
+    );
   }
 
   if (facetKey === "fuelType") {
@@ -909,7 +1023,9 @@ function toQueryLabel(facetKey: string, value: unknown): string {
       PETROL: "petrol cars",
       PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase();
+    return (
+      map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase()
+    );
   }
 
   if (facetKey === "color") {
@@ -922,7 +1038,10 @@ function toQueryLabel(facetKey: string, value: unknown): string {
       AVAILABLE: "available vehicles",
       IN_PIPELINE: "in-pipeline vehicles",
     };
-    return map[String(value)] || `${titleCaseFromToken(value)} vehicles`.toLowerCase();
+    return (
+      map[String(value)] ||
+      `${titleCaseFromToken(value)} vehicles`.toLowerCase()
+    );
   }
 
   if (facetKey === "brand") {
@@ -939,14 +1058,17 @@ function toQueryLabel(facetKey: string, value: unknown): string {
 // Cache for UUID maps built from API response
 let uuidMapCache: Record<string, Record<string, string>> = {};
 
-function buildUUIDMapFromFacets(facets: Facets, facetKey: string): Record<string, string> {
+function buildUUIDMapFromFacets(
+  facets: Facets,
+  facetKey: string,
+): Record<string, string> {
   if (uuidMapCache[facetKey]) {
     return uuidMapCache[facetKey];
   }
 
   const map: Record<string, string> = {};
   const facetData = facets?.[facetKey];
-  
+
   if (facetData && Array.isArray(facetData.values)) {
     for (const entry of facetData.values) {
       if (entry && entry.value && entry.formattedValue) {
@@ -993,7 +1115,9 @@ function toHintLabel(facetKey: string, value: unknown): string {
   }
   if (facetKey === "upholsteryPolish") {
     // Map to upholstery polish/treatment names
-    return String(value).toLowerCase().replace(/^UPHOLSTERY_/, "");
+    return String(value)
+      .toLowerCase()
+      .replace(/^UPHOLSTERY_/, "");
   }
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
@@ -1037,12 +1161,14 @@ function facetDisplayName(facetKey: string): string {
 function createExclusionHints(
   facetKey: string,
   excludedValue: unknown,
-  allowedValues: Array<string | number>
+  allowedValues: Array<string | number>,
 ): string[] {
   const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
   const excludedText = toHintLabel(facetKey, excludedValue);
-  const allowedText = allowedValues.map((v) => toHintLabel(facetKey, v)).join(", ");
+  const allowedText = allowedValues
+    .map((v) => toHintLabel(facetKey, v))
+    .join(", ");
   return renderHintTemplates(hintRules.genericHints?.exclusion, {
     facetName,
     excludedText,
@@ -1050,7 +1176,11 @@ function createExclusionHints(
   });
 }
 
-function createInclusionHints(facetKey: string, a: unknown, b: unknown): string[] {
+function createInclusionHints(
+  facetKey: string,
+  a: unknown,
+  b: unknown,
+): string[] {
   const hintRules = loadFacetMatrixHintRules();
   const facetName = facetDisplayName(facetKey);
   const aText = toHintLabel(facetKey, a);
@@ -1095,9 +1225,17 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
         value: query,
         skipOpenAiEvaluation: true,
         shouldRecommend: true,
-        shouldFilter: { include: [{ [facetKey]: allowedValues }], exclude: [], strict: false },
+        shouldFilter: {
+          include: [{ [facetKey]: allowedValues }],
+          exclude: [],
+          strict: false,
+        },
       });
-      informativeHintsByQuery[query] = createExclusionHints(facetKey, excludedValue, allowedValues);
+      informativeHintsByQuery[query] = createExclusionHints(
+        facetKey,
+        excludedValue,
+        allowedValues,
+      );
     }
 
     for (const [a, b] of pairwise(values)) {
@@ -1110,13 +1248,21 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
         {
           value: andQuery,
           shouldRecommend: true,
-          shouldFilter: { include: [{ [facetKey]: [a, b] }], exclude: [], strict: false },
+          shouldFilter: {
+            include: [{ [facetKey]: [a, b] }],
+            exclude: [],
+            strict: false,
+          },
         },
         {
           value: orQuery,
           shouldRecommend: true,
-          shouldFilter: { include: [{ [facetKey]: [a, b] }], exclude: [], strict: false },
-        }
+          shouldFilter: {
+            include: [{ [facetKey]: [a, b] }],
+            exclude: [],
+            strict: false,
+          },
+        },
       );
       informativeHintsByQuery[andQuery] = createInclusionHints(facetKey, a, b);
       informativeHintsByQuery[orQuery] = createInclusionHints(facetKey, a, b);
@@ -1142,14 +1288,14 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
 
 // Export functions for programmatic use
 export {
-  readJson,
-  buildMatrix,
   buildComplete,
+  buildMatrix,
   facetDisplayName,
-  titleCaseFromToken,
-  toQueryLabel,
-  toHintLabel,
-  getFacetValues,
   getFacetListEntries,
   getFacetRange,
+  getFacetValues,
+  readJson,
+  titleCaseFromToken,
+  toHintLabel,
+  toQueryLabel,
 };

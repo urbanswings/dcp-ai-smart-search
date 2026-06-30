@@ -2,11 +2,24 @@ const fs = require("fs");
 const path = require("path");
 
 const workspaceRoot = __dirname;
-const viewerTemplatePath = path.join(workspaceRoot, "results", "html", "test-results-viewer.html");
-const echartsBundlePath = path.join(workspaceRoot, "node_modules", "echarts", "dist", "echarts.min.js");
+const viewerTemplatePath = path.join(
+  workspaceRoot,
+  "results",
+  "html",
+  "test-results-viewer.html",
+);
+const echartsBundlePath = path.join(
+  workspaceRoot,
+  "node_modules",
+  "echarts",
+  "dist",
+  "echarts.min.js",
+);
 
 function normalizePath(value) {
-  return String(value || "").replaceAll("\\", "/").replace(/^\/+/, "");
+  return String(value || "")
+    .replaceAll("\\", "/")
+    .replace(/^\/+/, "");
 }
 
 function listJsonFilesRecursively(inputPath) {
@@ -63,33 +76,50 @@ function listImageFilesRecursively(inputPath) {
 
 function findScreenshotFiles(sourcePath, dateEnv) {
   const screenshots = new Map();
-  const screenshotsDir = path.join(path.dirname(sourcePath), "..", "screenshots", dateEnv);
-  
+  const screenshotsDir = path.join(
+    path.dirname(sourcePath),
+    "..",
+    "screenshots",
+    dateEnv,
+  );
+
   if (!fs.existsSync(screenshotsDir)) {
     return screenshots;
   }
 
   const imageFiles = listImageFilesRecursively(screenshotsDir);
-  
+
   for (const filePath of imageFiles) {
     try {
       const fileContent = fs.readFileSync(filePath);
       const ext = path.extname(filePath).toLowerCase();
-      const mimeType = 
-        ext === ".png" ? "image/png" :
-        ext === ".jpg" || ext === ".jpeg" ? "image/jpeg" :
-        ext === ".gif" ? "image/gif" :
-        ext === ".webp" ? "image/webp" :
-        "image/png";
-      
+      const mimeType =
+        ext === ".png"
+          ? "image/png"
+          : ext === ".jpg" || ext === ".jpeg"
+            ? "image/jpeg"
+            : ext === ".gif"
+              ? "image/gif"
+              : ext === ".webp"
+                ? "image/webp"
+                : "image/png";
+
       const base64 = fileContent.toString("base64");
-      const normalizedRelativePath = normalizePath(path.relative(screenshotsDir, filePath));
-      screenshots.set(normalizedRelativePath, `data:${mimeType};base64,${base64}`);
+      const normalizedRelativePath = normalizePath(
+        path.relative(screenshotsDir, filePath),
+      );
+      screenshots.set(
+        normalizedRelativePath,
+        `data:${mimeType};base64,${base64}`,
+      );
     } catch (err) {
-      console.warn(`Warning: could not read screenshot ${filePath}:`, err.message);
+      console.warn(
+        `Warning: could not read screenshot ${filePath}:`,
+        err.message,
+      );
     }
   }
-  
+
   return screenshots;
 }
 
@@ -106,7 +136,9 @@ function buildEmbeddedPayload(sourcePath, dateEnv) {
   const files = [];
 
   if (stats.isDirectory()) {
-    const jsonFiles = listJsonFilesRecursively(absoluteSourcePath).sort((a, b) => a.localeCompare(b));
+    const jsonFiles = listJsonFilesRecursively(absoluteSourcePath).sort(
+      (a, b) => a.localeCompare(b),
+    );
     for (const fullPath of jsonFiles) {
       const content = loadJsonOrText(fullPath);
       files.push({
@@ -116,7 +148,10 @@ function buildEmbeddedPayload(sourcePath, dateEnv) {
     }
 
     const resolvedDateEnv = dateEnv || path.basename(absoluteSourcePath);
-    const screenshots = findScreenshotFiles(absoluteSourcePath, resolvedDateEnv);
+    const screenshots = findScreenshotFiles(
+      absoluteSourcePath,
+      resolvedDateEnv,
+    );
     return {
       rootLabel: path.basename(absoluteSourcePath),
       files,
@@ -130,30 +165,39 @@ function buildEmbeddedPayload(sourcePath, dateEnv) {
     content,
   });
 
-  const resolvedDateEnv = dateEnv || path.basename(path.dirname(absoluteSourcePath));
+  const resolvedDateEnv =
+    dateEnv || path.basename(path.dirname(absoluteSourcePath));
   const screenshots = findScreenshotFiles(absoluteSourcePath, resolvedDateEnv);
 
   return {
-    rootLabel: path.basename(path.dirname(absoluteSourcePath)) || "embedded-results",
+    rootLabel:
+      path.basename(path.dirname(absoluteSourcePath)) || "embedded-results",
     files,
     screenshots: Object.fromEntries(screenshots),
   };
 }
 
 function injectEmbeddedPayload(templateHtml, payload) {
-  const scriptRegex = /<script id="embeddedResultsData" type="application\/json">[\s\S]*?<\/script>/;
+  const scriptRegex =
+    /<script id="embeddedResultsData" type="application\/json">[\s\S]*?<\/script>/;
   const serialized = JSON.stringify(payload, null, 2);
-  const replacement = "<script id=\"embeddedResultsData\" type=\"application/json\">\n" + serialized + "\n  </script>";
+  const replacement =
+    '<script id="embeddedResultsData" type="application/json">\n' +
+    serialized +
+    "\n  </script>";
 
   if (!scriptRegex.test(templateHtml)) {
-    throw new Error("Template does not contain embeddedResultsData script tag.");
+    throw new Error(
+      "Template does not contain embeddedResultsData script tag.",
+    );
   }
 
   return templateHtml.replace(scriptRegex, replacement);
 }
 
 function injectEmbeddedEcharts(templateHtml) {
-  const scriptRegex = /<script id="embeddedEchartsLib" type="text\/plain">[\s\S]*?<\/script>/;
+  const scriptRegex =
+    /<script id="embeddedEchartsLib" type="text\/plain">[\s\S]*?<\/script>/;
   if (!scriptRegex.test(templateHtml)) {
     return templateHtml;
   }
@@ -164,16 +208,22 @@ function injectEmbeddedEcharts(templateHtml) {
   }
 
   const echartsSource = fs.readFileSync(echartsBundlePath, "utf8");
-  const replacement = "<script id=\"embeddedEchartsLib\" type=\"text/plain\">\n" + echartsSource + "\n</script>";
+  const replacement =
+    '<script id="embeddedEchartsLib" type="text/plain">\n' +
+    echartsSource +
+    "\n</script>";
   return templateHtml.replace(scriptRegex, replacement);
 }
 
 function main() {
   const sourceArg = process.argv[2];
-  const outArg = process.argv[3] || "results/html/test-results-viewer-standalone.html";
+  const outArg =
+    process.argv[3] || "results/html/test-results-viewer-standalone.html";
 
   if (!sourceArg) {
-    console.error("Usage: node embed-results-into-viewer.js <results-json-file-or-folder> [output-html]");
+    console.error(
+      "Usage: node embed-results-into-viewer.js <results-json-file-or-folder> [output-html]",
+    );
     process.exit(1);
   }
 
@@ -187,7 +237,9 @@ function main() {
   const withPayload = injectEmbeddedPayload(templateHtml, payload);
   const outputHtml = injectEmbeddedEcharts(withPayload);
 
-  const absoluteOutPath = path.isAbsolute(outArg) ? outArg : path.join(workspaceRoot, outArg);
+  const absoluteOutPath = path.isAbsolute(outArg)
+    ? outArg
+    : path.join(workspaceRoot, outArg);
   fs.mkdirSync(path.dirname(absoluteOutPath), { recursive: true });
   fs.writeFileSync(absoluteOutPath, outputHtml, "utf8");
 

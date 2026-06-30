@@ -1,5 +1,4 @@
-import { defineConfig, devices } from '@playwright/test';
-import { chromium } from 'playwright';
+import { defineConfig, devices } from "@playwright/test";
 
 const cdpUrl = process.env.PLAYWRIGHT_CDP_URL || process.env.CDP_URL;
 const isHeadless = cdpUrl ? false : true;
@@ -7,8 +6,8 @@ const fixedViewport = { width: 1920, height: 1080 };
 process.env.PLAYWRIGHT_EFFECTIVE_HEADLESS = String(isHeadless);
 
 export default defineConfig({
-  testDir: './tests',
-  reporter: 'html',
+  testDir: "./tests",
+  reporter: "html",
   workers: 2,
   fullyParallel: true,
   timeout: 10 * 60000,
@@ -17,20 +16,22 @@ export default defineConfig({
     headless: isHeadless,
     viewport: isHeadless ? fixedViewport : null,
     launchOptions: {
-      args: isHeadless ? ['--window-size=1920,1080'] : ['--start-maximized'],
+      args: isHeadless ? ["--window-size=1920,1080"] : ["--start-maximized"],
     },
     ignoreHTTPSErrors: true,
-    screenshot: 'off',
-    video: 'off'
+    screenshot: "off",
+    video: "off",
   },
   projects: [
     {
-      name: 'chromium',
+      name: "chromium",
       use: {
-        ...devices['Desktop Chrome'],
+        ...devices["Desktop Chrome"],
         viewport: isHeadless ? fixedViewport : null,
         launchOptions: {
-          args: isHeadless ? ['--window-size=1920,1080'] : ['--start-maximized'],
+          args: isHeadless
+            ? ["--window-size=1920,1080"]
+            : ["--start-maximized"],
         },
       },
     },

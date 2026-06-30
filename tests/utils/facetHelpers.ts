@@ -1,6 +1,7 @@
 import fs from "fs/promises";
 import path from "path";
 import { generateOpenAIQuery } from "./aiHelpers";
+import { extractMissingFacetValuesFromData } from "./facetValueHelpers";
 import { isIncludedFacet } from "./generateFacetMatrix";
 import { LANGUAGE } from "./testHelpers";
 
@@ -31,7 +32,13 @@ interface DateNumericFacetQuery {
   };
 }
 
-const AND_OR_MATRIX_FACETS = ["bodyType", "brand", "color", "fuelType", "price"];
+const AND_OR_MATRIX_FACETS = [
+  "bodyType",
+  "brand",
+  "color",
+  "fuelType",
+  "price",
+];
 const AND_OR_MATRIX_ANCHOR_FACETS = ["bodyType", "color"];
 const UNAVAILABLE_AVAILABLE_VALUE_LIMIT = 2;
 const DATA_DIR = path.join(__dirname, "../data");
@@ -81,11 +88,13 @@ interface AndOrFacetMatrixQuery {
   operator: "AND" | "OR";
   filterText: string;
   filterValue: string;
-  shouldFilter: boolean | {
-    include: Array<Record<string, Array<string | number>>>;
-    exclude: Array<Record<string, Array<string | number>>>;
-    strict: false;
-  };
+  shouldFilter:
+    | boolean
+    | {
+        include: Array<Record<string, Array<string | number>>>;
+        exclude: Array<Record<string, Array<string | number>>>;
+        strict: false;
+      };
   aiEvaluationHints: {
     value: string[];
     overwrite: true;
@@ -118,7 +127,7 @@ interface PunctuatedFacetMatrixQuery {
 export async function fetchAndConvertFacets(
   emhApiResponse: any,
   dcpApiResponse: any,
-  project: string
+  project: string,
 ): Promise<SimplifiedFacet[]> {
   let facets: SimplifiedFacet[] = [];
 
@@ -159,7 +168,9 @@ export async function fetchAndConvertFacets(
         });
     } else {
       // DCP response structure: data.facets
-      rawFacets = (dcpApiResponse.data.facets || []).filter((facet: any) => !skipFacetCodes.includes(facet.code));
+      rawFacets = (dcpApiResponse.data.facets || []).filter(
+        (facet: any) => !skipFacetCodes.includes(facet.code),
+      );
     }
 
     console.log(`Successfully fetched ${rawFacets.length} raw facets from API`);
@@ -174,7 +185,11 @@ export async function fetchAndConvertFacets(
           }
           if (Array.isArray(v.values)) {
             return v.values
-              .map((inner: any) => ({ code: inner.code, name: inner.name, count: inner.count }))
+              .map((inner: any) => ({
+                code: inner.code,
+                name: inner.name,
+                count: inner.count,
+              }))
               .filter((x: any) => x.code && x.name);
           }
           return null;
@@ -185,7 +200,8 @@ export async function fetchAndConvertFacets(
 
     facets = rawFacets
       .map((facet: any) => {
-        const { code, min, max, count, values, displayName, facetDisplayType } = facet;
+        const { code, min, max, count, values, displayName, facetDisplayType } =
+          facet;
         let type;
         if (facetDisplayType === "SLIDER") {
           type = "range";
@@ -195,7 +211,14 @@ export async function fetchAndConvertFacets(
           if (isNaN(parsedMin) || isNaN(parsedMax) || parsedMin === parsedMax) {
             return null;
           }
-          return { code, type, min: parsedMin, max: parsedMax, count, displayName };
+          return {
+            code,
+            type,
+            min: parsedMin,
+            max: parsedMax,
+            count,
+            displayName,
+          };
         } else {
           type = "list";
           return {
@@ -232,7 +255,7 @@ export async function generateQueriesFromFacets(
     userPromptTemplate: string;
     maxTokens: number;
     fallback: string;
-  }
+  },
 ): Promise<
   Array<{
     value: string;
@@ -318,7 +341,7 @@ export async function generateQueriesFromFacets(
     const query = await generateOpenAIQuery(
       aiPromptData.systemPrompt,
       aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, filterText),
-      aiPromptData.maxTokens
+      aiPromptData.maxTokens,
     );
 
     console.log("\n");
@@ -329,7 +352,12 @@ export async function generateQueriesFromFacets(
     console.log(`filterValue: '${filterValue}'`);
     console.log(`filterText:  '${filterText}'`);
 
-    return { value: query, facet: facet.code, filterText, filterValue: filterValue.toString().toUpperCase() };
+    return {
+      value: query,
+      facet: facet.code,
+      filterText,
+      filterValue: filterValue.toString().toUpperCase(),
+    };
   });
 
   const queries = (await Promise.all(queryPromises)).filter(Boolean);
@@ -348,7 +376,7 @@ function isFacetInStock(facet: { count?: number }): boolean {
 function createDateNumericFacetHints(
   facetLabel: string,
   filterValue: string,
-  inStock: boolean
+  inStock: boolean,
 ): string[] {
   if (inStock) {
     return [
@@ -401,7 +429,8 @@ function getRangeFacetQueryValue(facet: SimplifiedFacet): {
   const lower = Math.round(min + (max - min) * 0.25);
   const upper = Math.round(min + (max - min) * 0.75);
   const expectedValue = Math.round((lower + upper) / 2);
-  const filterValue = lower === upper ? `${expectedValue}` : `${lower} to ${upper}`;
+  const filterValue =
+    lower === upper ? `${expectedValue}` : `${lower} to ${upper}`;
   return {
     filterText: `filter is of category '${facet.displayName || facet.code}' with value of '${filterValue}'`,
     filterValue,
@@ -417,49 +446,64 @@ export async function generateDateNumericQueriesFromFacets(
     userPromptTemplate: string;
     maxTokens: number;
     fallback: string;
-  }
+  },
 ): Promise<DateNumericFacetQuery[]> {
   const rangeFacets = facets
     .filter((facet) => facet.type === "range" && isIncludedFacet(facet.code))
     .slice(0, aiPromptData.count || 8);
 
-  const queries = await Promise.all(rangeFacets.map(async (facet): Promise<DateNumericFacetQuery | null> => {
-    const rangeQueryValue = getRangeFacetQueryValue(facet);
-    if (!rangeQueryValue) {
-      return null;
-    }
+  const queries = await Promise.all(
+    rangeFacets.map(async (facet): Promise<DateNumericFacetQuery | null> => {
+      const rangeQueryValue = getRangeFacetQueryValue(facet);
+      if (!rangeQueryValue) {
+        return null;
+      }
 
-    const query = await generateOpenAIQuery(
-      aiPromptData.systemPrompt,
-      aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, rangeQueryValue.filterText),
-      aiPromptData.maxTokens,
-      undefined,
-      aiPromptData.fallback
-    );
-    const inStock = isFacetInStock(facet);
-    const facetLabel = facet.displayName || facet.code;
+      const query = await generateOpenAIQuery(
+        aiPromptData.systemPrompt,
+        aiPromptData.userPromptTemplate.replace(
+          /\{filterText\}/g,
+          rangeQueryValue.filterText,
+        ),
+        aiPromptData.maxTokens,
+        undefined,
+        aiPromptData.fallback,
+      );
+      const inStock = isFacetInStock(facet);
+      const facetLabel = facet.displayName || facet.code;
 
-    const shouldFilter: DateNumericFacetQuery["shouldFilter"] = {
-      include: inStock ? [{ [facet.code]: [rangeQueryValue.expectedValue] }] : [],
-      exclude: inStock ? [] : [{ [facet.code]: [rangeQueryValue.expectedValue] }],
-      strict: false,
-    };
+      const shouldFilter: DateNumericFacetQuery["shouldFilter"] = {
+        include: inStock
+          ? [{ [facet.code]: [rangeQueryValue.expectedValue] }]
+          : [],
+        exclude: inStock
+          ? []
+          : [{ [facet.code]: [rangeQueryValue.expectedValue] }],
+        strict: false,
+      };
 
-    return {
-      value: query,
-      facet: facet.code,
-      filterText: rangeQueryValue.filterText,
-      filterValue: rangeQueryValue.filterValue,
-      shouldRecommend: inStock,
-      shouldFilter,
-      aiEvaluationHints: {
-        value: createDateNumericFacetHints(facetLabel, rangeQueryValue.filterValue, inStock),
-        overwrite: true,
-      },
-    };
-  }));
+      return {
+        value: query,
+        facet: facet.code,
+        filterText: rangeQueryValue.filterText,
+        filterValue: rangeQueryValue.filterValue,
+        shouldRecommend: inStock,
+        shouldFilter,
+        aiEvaluationHints: {
+          value: createDateNumericFacetHints(
+            facetLabel,
+            rangeQueryValue.filterValue,
+            inStock,
+          ),
+          overwrite: true,
+        },
+      };
+    }),
+  );
 
-  return queries.filter((query): query is DateNumericFacetQuery => query !== null);
+  return queries.filter(
+    (query): query is DateNumericFacetQuery => query !== null,
+  );
 }
 
 function getFacetLabel(facet: SimplifiedFacet): string {
@@ -467,21 +511,28 @@ function getFacetLabel(facet: SimplifiedFacet): string {
 }
 
 function getLanguageCode(): string {
-  return (process.env.LANGUAGE || LANGUAGE || "en").toLowerCase().split(/[-_]/)[0];
+  return (process.env.LANGUAGE || LANGUAGE || "en")
+    .toLowerCase()
+    .split(/[-_]/)[0];
 }
 
 function getLocalizedFacetLabel(facet: SimplifiedFacet): string {
   const languageCode = getLanguageCode();
-  return LOCALIZED_FACET_LABELS[languageCode]?.[facet.code] || getFacetLabel(facet);
+  return (
+    LOCALIZED_FACET_LABELS[languageCode]?.[facet.code] || getFacetLabel(facet)
+  );
 }
 
-function getMappedFormattedValue(facetKey: string, rawValue: unknown): string | null {
+function getMappedFormattedValue(
+  facetKey: string,
+  rawValue: unknown,
+): string | null {
   if (facetKey === "bodyType") {
     const map: Record<string, string> = {
       SUV_OFFROADER: "SUV",
       CABRIO_ROADSTER: "Cabriolet",
       PEOPLE_CARRIER: "MPV",
-      LIMOUSINE: "sedan"
+      LIMOUSINE: "sedan",
     };
     return map[String(rawValue)] || null;
   }
@@ -501,11 +552,13 @@ function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
     }
 
     const value = Math.round(min + (max - min) * 0.5);
-    return [{
-      queryValue: value.toLocaleString("en-US"),
-      expectedValue: value,
-      count: facet.count,
-    }];
+    return [
+      {
+        queryValue: value.toLocaleString("en-US"),
+        expectedValue: value,
+        count: facet.count,
+      },
+    ];
   }
 
   if (!Array.isArray(facet.values) || facet.values.length === 0) {
@@ -513,7 +566,10 @@ function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
   }
 
   return facet.values.map((value) => ({
-    queryValue: getMappedFormattedValue(facet.code, value.code) || value.name || value.code,
+    queryValue:
+      getMappedFormattedValue(facet.code, value.code) ||
+      value.name ||
+      value.code,
     expectedValue: value.code,
     count: value.count,
   }));
@@ -528,7 +584,7 @@ function buildAndOrQueryValue(
   anchorLabel: string,
   anchorValue: string,
   targetLabel: string,
-  targetValue: string
+  targetValue: string,
 ): string {
   const languageCode = getLanguageCode();
 
@@ -562,7 +618,7 @@ function buildPunctuatedFacetQueryValue(
   facetB: SimplifiedFacet,
   valueB: string,
   facetC: SimplifiedFacet,
-  valueC: string
+  valueC: string,
 ): string {
   const formatTerm = (facet: SimplifiedFacet, value: string): string => {
     if (facet.code === "color") {
@@ -587,7 +643,7 @@ function buildUnavailableAvailableFacetQueryValue(
   availableFacet: SimplifiedFacet,
   availableValue: string,
   unavailableFacet: SimplifiedFacet,
-  unavailableValue: string
+  unavailableValue: string,
 ): string {
   const availableLabel = getLocalizedFacetLabel(availableFacet);
   const unavailableLabel = getLocalizedFacetLabel(unavailableFacet);
@@ -599,9 +655,12 @@ function createAndOrFacetHints(
   firstFacetLabel: string,
   firstValueLabel: string,
   secondFacetLabel: string,
-  secondValueLabel: string
+  secondValueLabel: string,
 ): string[] {
-  const intent = operator === "AND" ? "combined AND filter intent" : "alternative OR filter intent";
+  const intent =
+    operator === "AND"
+      ? "combined AND filter intent"
+      : "alternative OR filter intent";
   const connector = operator === "AND" ? "and" : "or";
 
   return [
@@ -620,7 +679,7 @@ function createPunctuatedFacetHints(
     facetLabel: string;
     valueLabel: string;
     inStock: boolean;
-  }>
+  }>,
 ): string[] {
   const requestedValues = facetLabelsAndValues
     .map(({ facetLabel, valueLabel }) => `${facetLabel} ${valueLabel}`)
@@ -640,34 +699,58 @@ function createPunctuatedFacetHints(
 
   for (const { facetLabel, valueLabel, inStock } of facetLabelsAndValues) {
     if (inStock) {
-      hints.push(`If the response ignores or contradicts ${facetLabel} ${valueLabel}, respond with "MSG FAIL: missing or incorrect ${facetLabel} value (${valueLabel})".`);
+      hints.push(
+        `If the response ignores or contradicts ${facetLabel} ${valueLabel}, respond with "MSG FAIL: missing or incorrect ${facetLabel} value (${valueLabel})".`,
+      );
     } else {
-      hints.push(`Respond with "PASS" if the response acknowledges that ${facetLabel} ${valueLabel} is unavailable or not in stock.`);
-      hints.push(`FAIL if the response presents unavailable ${facetLabel} ${valueLabel} as an available match.`);
+      hints.push(
+        `Respond with "PASS" if the response acknowledges that ${facetLabel} ${valueLabel} is unavailable or not in stock.`,
+      );
+      hints.push(
+        `FAIL if the response presents unavailable ${facetLabel} ${valueLabel} as an available match.`,
+      );
     }
   }
 
   if (unavailableValues && availableValues) {
-    hints.push(`Respond with "PASS" if unavailable requested value(s) are acknowledged as unavailable (${unavailableValues}) while available requested value(s) are still offered or applied as alternatives or partial matches (${availableValues}).`);
+    hints.push(
+      `Respond with "PASS" if unavailable requested value(s) are acknowledged as unavailable (${unavailableValues}) while available requested value(s) are still offered or applied as alternatives or partial matches (${availableValues}).`,
+    );
   } else if (unavailableValues) {
-    hints.push(`Respond with "PASS" if the response says no matching vehicles are available for the requested values and offers to adjust the search.`);
+    hints.push(
+      `Respond with "PASS" if the response says no matching vehicles are available for the requested values and offers to adjust the search.`,
+    );
   }
 
   hints.push(
     `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
-    `Respond with failure reason otherwise respond with "PASS" only.`
+    `Respond with failure reason otherwise respond with "PASS" only.`,
   );
 
   return hints;
 }
 
-export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[]): PunctuatedFacetMatrixQuery[] {
+export function generatePunctuatedFacetMatrixFromFacets(
+  facets: SimplifiedFacet[],
+): PunctuatedFacetMatrixQuery[] {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
   const queries: PunctuatedFacetMatrixQuery[] = [];
 
-  for (let firstIndex = 0; firstIndex < AND_OR_MATRIX_FACETS.length - 2; firstIndex += 1) {
-    for (let secondIndex = firstIndex + 1; secondIndex < AND_OR_MATRIX_FACETS.length - 1; secondIndex += 1) {
-      for (let thirdIndex = secondIndex + 1; thirdIndex < AND_OR_MATRIX_FACETS.length; thirdIndex += 1) {
+  for (
+    let firstIndex = 0;
+    firstIndex < AND_OR_MATRIX_FACETS.length - 2;
+    firstIndex += 1
+  ) {
+    for (
+      let secondIndex = firstIndex + 1;
+      secondIndex < AND_OR_MATRIX_FACETS.length - 1;
+      secondIndex += 1
+    ) {
+      for (
+        let thirdIndex = secondIndex + 1;
+        thirdIndex < AND_OR_MATRIX_FACETS.length;
+        thirdIndex += 1
+      ) {
         const facetCodes = [
           AND_OR_MATRIX_FACETS[firstIndex],
           AND_OR_MATRIX_FACETS[secondIndex],
@@ -686,7 +769,11 @@ export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[
         const secondValues = getFacetMatrixValues(secondFacet);
         const thirdValues = getFacetMatrixValues(thirdFacet);
 
-        if (firstValues.length === 0 || secondValues.length === 0 || thirdValues.length === 0) {
+        if (
+          firstValues.length === 0 ||
+          secondValues.length === 0 ||
+          thirdValues.length === 0
+        ) {
           continue;
         }
 
@@ -700,10 +787,14 @@ export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[
               ];
               const include = values
                 .filter(({ value }) => isFacetMatrixValueInStock(value))
-                .map(({ facet, value }) => ({ [facet.code]: [value.expectedValue] }));
+                .map(({ facet, value }) => ({
+                  [facet.code]: [value.expectedValue],
+                }));
               const exclude = values
                 .filter(({ value }) => !isFacetMatrixValueInStock(value))
-                .map(({ facet, value }) => ({ [facet.code]: [value.expectedValue] }));
+                .map(({ facet, value }) => ({
+                  [facet.code]: [value.expectedValue],
+                }));
               const facetLabelsAndValues = values.map(({ facet, value }) => ({
                 facetLabel: getFacetLabel(facet),
                 valueLabel: value.queryValue,
@@ -717,13 +808,18 @@ export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[
                   secondFacet,
                   secondValue.queryValue,
                   thirdFacet,
-                  thirdValue.queryValue
+                  thirdValue.queryValue,
                 ),
                 facet: facetCodes.join("+"),
                 filterText: values
-                  .map(({ facet, value }) => `${getFacetLabel(facet)} '${value.queryValue}'`)
+                  .map(
+                    ({ facet, value }) =>
+                      `${getFacetLabel(facet)} '${value.queryValue}'`,
+                  )
                   .join(", "),
-                filterValue: values.map(({ value }) => value.expectedValue).join(","),
+                filterValue: values
+                  .map(({ value }) => value.expectedValue)
+                  .join(","),
                 shouldFilter: {
                   include,
                   exclude,
@@ -747,7 +843,7 @@ export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[
 function getFacetMatrixValuesByStock(
   facet: SimplifiedFacet,
   inStock: boolean,
-  limit = UNAVAILABLE_AVAILABLE_VALUE_LIMIT
+  limit = UNAVAILABLE_AVAILABLE_VALUE_LIMIT,
 ): Array<{
   queryValue: string;
   expectedValue: string | number;
@@ -758,75 +854,43 @@ function getFacetMatrixValuesByStock(
     .slice(0, limit);
 }
 
-function extractFacetValuesFromData(sourceData: any, facetKey: string): Array<{
-  rawValue: string;
-  formattedValue: string;
-}> {
-  const facetValues = sourceData?.data?.search?.facets?.[facetKey]?.values || sourceData?.[facetKey]?.values;
-  if (!Array.isArray(facetValues)) {
-    return [];
-  }
-
-  const seen = new Set<string>();
-  const values: Array<{ rawValue: string; formattedValue: string }> = [];
-
-  for (const entry of facetValues) {
-    const raw =
-      typeof entry === "string" || typeof entry === "number"
-        ? String(entry)
-        : String(entry?.value ?? "");
-    const rawValue = raw.trim();
-    if (!rawValue || rawValue.toUpperCase() === "UNDEFINED") {
-      continue;
-    }
-
-    if (seen.has(rawValue)) {
-      continue;
-    }
-    seen.add(rawValue);
-
-    const formattedValue =
-      typeof entry === "object" && entry !== null && entry?.formattedValue
-        ? String(entry.formattedValue).trim()
-        : rawValue;
-
-    values.push({
-      rawValue,
-      formattedValue: formattedValue || rawValue,
-    });
-  }
-
-  return values;
-}
-
-async function loadUnavailableFacetMatrixValues(facetKey: string): Promise<Array<{
-  queryValue: string;
-  expectedValue: string;
-}>> {
+async function loadUnavailableFacetMatrixValues(facetKey: string): Promise<
+  Array<{
+    queryValue: string;
+    expectedValue: string;
+  }>
+> {
   const masterDataPath = path.join(DATA_DIR, "facets-master-data.json");
   const stockDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const masterData = JSON.parse(await fs.readFile(masterDataPath, "utf-8"));
   const stockData = JSON.parse(await fs.readFile(stockDataPath, "utf-8"));
-  const stockValues = new Set(
-    extractFacetValuesFromData(stockData, facetKey)
-      .map((entry) => String(entry.rawValue).toUpperCase())
-  );
 
-  return extractFacetValuesFromData(masterData, facetKey)
-    .filter((entry) => !stockValues.has(String(entry.rawValue).toUpperCase()))
+  return extractMissingFacetValuesFromData(facetKey, masterData, stockData)
     .slice(0, UNAVAILABLE_AVAILABLE_VALUE_LIMIT)
     .map((entry) => ({
-      queryValue: getMappedFormattedValue(facetKey, entry.rawValue) || entry.formattedValue,
+      queryValue:
+        getMappedFormattedValue(facetKey, entry.rawValue) ||
+        entry.formattedValue,
       expectedValue: entry.rawValue,
     }));
 }
 
-export async function generateUnavailableAvailableFacetMatrixFromFacets(facets: SimplifiedFacet[]): Promise<PunctuatedFacetMatrixQuery[]> {
+export async function generateUnavailableAvailableFacetMatrixFromFacets(
+  facets: SimplifiedFacet[],
+): Promise<PunctuatedFacetMatrixQuery[]> {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
   const queries: PunctuatedFacetMatrixQuery[] = [];
 
-  for (let firstIndex = 0; firstIndex < AND_OR_MATRIX_FACETS.length - 1; firstIndex += 1) {
-    for (let secondIndex = firstIndex + 1; secondIndex < AND_OR_MATRIX_FACETS.length; secondIndex += 1) {
+  for (
+    let firstIndex = 0;
+    firstIndex < AND_OR_MATRIX_FACETS.length - 1;
+    firstIndex += 1
+  ) {
+    for (
+      let secondIndex = firstIndex + 1;
+      secondIndex < AND_OR_MATRIX_FACETS.length;
+      secondIndex += 1
+    ) {
       const firstFacet = facetByCode.get(AND_OR_MATRIX_FACETS[firstIndex]);
       const secondFacet = facetByCode.get(AND_OR_MATRIX_FACETS[secondIndex]);
 
@@ -834,10 +898,20 @@ export async function generateUnavailableAvailableFacetMatrixFromFacets(facets: 
         continue;
       }
 
-      const firstAvailableValues = getFacetMatrixValuesByStock(firstFacet, true);
-      const firstUnavailableValues = await loadUnavailableFacetMatrixValues(firstFacet.code);
-      const secondAvailableValues = getFacetMatrixValuesByStock(secondFacet, true);
-      const secondUnavailableValues = await loadUnavailableFacetMatrixValues(secondFacet.code);
+      const firstAvailableValues = getFacetMatrixValuesByStock(
+        firstFacet,
+        true,
+      );
+      const firstUnavailableValues = await loadUnavailableFacetMatrixValues(
+        firstFacet.code,
+      );
+      const secondAvailableValues = getFacetMatrixValuesByStock(
+        secondFacet,
+        true,
+      );
+      const secondUnavailableValues = await loadUnavailableFacetMatrixValues(
+        secondFacet.code,
+      );
       const pairCases = [
         {
           availableFacet: firstFacet,
@@ -863,14 +937,26 @@ export async function generateUnavailableAvailableFacetMatrixFromFacets(facets: 
                 pairCase.availableFacet,
                 availableValue.queryValue,
                 pairCase.unavailableFacet,
-                unavailableValue.queryValue
+                unavailableValue.queryValue,
               ),
               facet: `${pairCase.availableFacet.code}+${pairCase.unavailableFacet.code}`,
               filterText: `${availableLabel} '${availableValue.queryValue}', ${unavailableLabel} '${unavailableValue.queryValue}'`,
               filterValue: `${availableValue.expectedValue},${unavailableValue.expectedValue}`,
               shouldFilter: {
-                include: [{ [pairCase.availableFacet.code]: [availableValue.expectedValue] }],
-                exclude: [{ [pairCase.unavailableFacet.code]: [unavailableValue.expectedValue] }],
+                include: [
+                  {
+                    [pairCase.availableFacet.code]: [
+                      availableValue.expectedValue,
+                    ],
+                  },
+                ],
+                exclude: [
+                  {
+                    [pairCase.unavailableFacet.code]: [
+                      unavailableValue.expectedValue,
+                    ],
+                  },
+                ],
                 strict: false,
               },
               aiEvaluationHints: {
@@ -905,17 +991,21 @@ function createUnavailableAndOrFacetHints(
   firstInStock: boolean,
   secondFacetLabel: string,
   secondValueLabel: string,
-  secondInStock: boolean
+  secondInStock: boolean,
 ): string[] {
   const connector = operator === "AND" ? "and" : "or";
   const unavailableValues = [
     !firstInStock ? `${firstFacetLabel} ${firstValueLabel}` : "",
     !secondInStock ? `${secondFacetLabel} ${secondValueLabel}` : "",
-  ].filter(Boolean).join(", ");
+  ]
+    .filter(Boolean)
+    .join(", ");
   const availableValues = [
     firstInStock ? `${firstFacetLabel} ${firstValueLabel}` : "",
     secondInStock ? `${secondFacetLabel} ${secondValueLabel}` : "",
-  ].filter(Boolean).join(", ");
+  ]
+    .filter(Boolean)
+    .join(", ");
 
   const hints = [
     `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested ${operator} filter intent for ${firstFacetLabel} ${firstValueLabel} ${connector} ${secondFacetLabel} ${secondValueLabel}.`,
@@ -924,20 +1014,26 @@ function createUnavailableAndOrFacetHints(
   ];
 
   if (availableValues) {
-    hints.push(`Respond with "PASS" if the response still offers or applies available requested facet value(s) as alternatives or partial matches: ${availableValues}.`);
+    hints.push(
+      `Respond with "PASS" if the response still offers or applies available requested facet value(s) as alternatives or partial matches: ${availableValues}.`,
+    );
   } else {
-    hints.push(`Respond with "PASS" if the response says no matching vehicles are available for the requested ${firstFacetLabel}/${secondFacetLabel} values and offers to adjust the search.`);
+    hints.push(
+      `Respond with "PASS" if the response says no matching vehicles are available for the requested ${firstFacetLabel}/${secondFacetLabel} values and offers to adjust the search.`,
+    );
   }
 
   hints.push(
     `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
-    `Respond with failure reason otherwise respond with "PASS" only.`
+    `Respond with failure reason otherwise respond with "PASS" only.`,
   );
 
   return hints;
 }
 
-export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): AndOrFacetMatrixQuery[] {
+export function generateAndOrFacetMatrixFromFacets(
+  facets: SimplifiedFacet[],
+): AndOrFacetMatrixQuery[] {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
   const queries: AndOrFacetMatrixQuery[] = [];
 
@@ -979,13 +1075,27 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
           const anchorInStock = isFacetMatrixValueInStock(anchorValue);
           const targetInStock = isFacetMatrixValueInStock(targetValue);
           const include = [
-            anchorInStock ? { [anchorFacet.code]: [anchorValue.expectedValue] } : null,
-            targetInStock ? { [targetFacet.code]: [targetValue.expectedValue] } : null,
-          ].filter((entry): entry is Record<string, Array<string | number>> => entry !== null);
+            anchorInStock
+              ? { [anchorFacet.code]: [anchorValue.expectedValue] }
+              : null,
+            targetInStock
+              ? { [targetFacet.code]: [targetValue.expectedValue] }
+              : null,
+          ].filter(
+            (entry): entry is Record<string, Array<string | number>> =>
+              entry !== null,
+          );
           const exclude = [
-            anchorInStock ? null : { [anchorFacet.code]: [anchorValue.expectedValue] },
-            targetInStock ? null : { [targetFacet.code]: [targetValue.expectedValue] },
-          ].filter((entry): entry is Record<string, Array<string | number>> => entry !== null);
+            anchorInStock
+              ? null
+              : { [anchorFacet.code]: [anchorValue.expectedValue] },
+            targetInStock
+              ? null
+              : { [targetFacet.code]: [targetValue.expectedValue] },
+          ].filter(
+            (entry): entry is Record<string, Array<string | number>> =>
+              entry !== null,
+          );
           const allValuesInStock = anchorInStock && targetInStock;
 
           queries.push({
@@ -994,7 +1104,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
               localizedAnchorLabel,
               anchorValue.queryValue,
               localizedTargetLabel,
-              targetValue.queryValue
+              targetValue.queryValue,
             ),
             facet: facetPair,
             operator: "AND",
@@ -1012,7 +1122,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
                     anchorLabel,
                     anchorValue.queryValue,
                     targetLabel,
-                    targetValue.queryValue
+                    targetValue.queryValue,
                   )
                 : createUnavailableAndOrFacetHints(
                     "AND",
@@ -1021,7 +1131,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
                     anchorInStock,
                     targetLabel,
                     targetValue.queryValue,
-                    targetInStock
+                    targetInStock,
                   ),
               overwrite: true,
             },
@@ -1033,7 +1143,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
               localizedAnchorLabel,
               anchorValue.queryValue,
               localizedTargetLabel,
-              targetValue.queryValue
+              targetValue.queryValue,
             ),
             facet: facetPair,
             operator: "OR",
@@ -1051,7 +1161,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
                     anchorLabel,
                     anchorValue.queryValue,
                     targetLabel,
-                    targetValue.queryValue
+                    targetValue.queryValue,
                   )
                 : createUnavailableAndOrFacetHints(
                     "OR",
@@ -1060,7 +1170,7 @@ export function generateAndOrFacetMatrixFromFacets(facets: SimplifiedFacet[]): A
                     anchorInStock,
                     targetLabel,
                     targetValue.queryValue,
-                    targetInStock
+                    targetInStock,
                   ),
               overwrite: true,
             },

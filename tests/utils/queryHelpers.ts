@@ -1,6 +1,12 @@
 import fs from "fs/promises";
 import path from "path";
-import { buildComplete, buildMatrix, isIncludedFacet, readJson } from "./generateFacetMatrix.js";
+import { extractMissingFacetValuesFromData } from "./facetValueHelpers";
+import {
+  buildComplete,
+  buildMatrix,
+  isIncludedFacet,
+  readJson,
+} from "./generateFacetMatrix.js";
 
 const DATA_DIR = path.join(__dirname, "../data");
 
@@ -8,7 +14,7 @@ const DATA_DIR = path.join(__dirname, "../data");
 export function generateOutputFileName(
   country: string = process.env.COUNTRY || "au",
   language: string = process.env.LANGUAGE || "en",
-  product: string = process.env.PRODUCT || "ncos"
+  product: string = process.env.PRODUCT || "ncos",
 ): string {
   return `generated-queries-${country.toLowerCase()}-${language.toLowerCase()}-${product.toLowerCase()}.json`;
 }
@@ -50,7 +56,7 @@ interface RangeFacetBounds {
 
 export async function loadGeneratedFacetSuite(
   filePath: string,
-  fallbackHints?: AiEvaluationHints
+  fallbackHints?: AiEvaluationHints,
 ): Promise<FixedQueryCase[]> {
   const raw = await fs.readFile(filePath, "utf-8");
   const suite = JSON.parse(raw) as GeneratedFacetSuite;
@@ -59,7 +65,7 @@ export async function loadGeneratedFacetSuite(
 
 function filterFacetsInApiResponse(
   sourceData: GeneratedFacetSuite | any,
-  allowedFacetKeys: string[]
+  allowedFacetKeys: string[],
 ): any {
   if (!Array.isArray(allowedFacetKeys) || allowedFacetKeys.length === 0) {
     return sourceData;
@@ -72,7 +78,7 @@ function filterFacetsInApiResponse(
   }
 
   const filteredFacets = Object.fromEntries(
-    Object.entries(allFacets).filter(([facetKey]) => allowed.has(facetKey))
+    Object.entries(allFacets).filter(([facetKey]) => allowed.has(facetKey)),
   );
 
   return {
@@ -87,10 +93,15 @@ function filterFacetsInApiResponse(
   };
 }
 
-async function generateCompleteSuiteOnTheFly(facetKeys?: string[]): Promise<GeneratedFacetSuite> {
+async function generateCompleteSuiteOnTheFly(
+  facetKeys?: string[],
+): Promise<GeneratedFacetSuite> {
   const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const sourceData = readJson(sourceDataPath);
-  const scopedSourceData = filterFacetsInApiResponse(sourceData, facetKeys || []);
+  const scopedSourceData = filterFacetsInApiResponse(
+    sourceData,
+    facetKeys || [],
+  );
   return buildComplete(scopedSourceData);
 }
 
@@ -100,7 +111,10 @@ async function generateMatrixSuiteOnTheFly(): Promise<GeneratedFacetSuite> {
   return buildMatrix(sourceData);
 }
 
-function getRangeFacetBounds(sourceData: any, facetKey: string): RangeFacetBounds | null {
+function getRangeFacetBounds(
+  sourceData: any,
+  facetKey: string,
+): RangeFacetBounds | null {
   const values = sourceData?.data?.search?.facets?.[facetKey]?.values;
   if (!values || typeof values !== "object" || Array.isArray(values)) {
     return null;
@@ -122,7 +136,7 @@ function createNumericUnitVariationHints(
   facetKey: string,
   valueText: string,
   targetValue: number,
-  inStock: boolean
+  inStock: boolean,
 ): AiEvaluationHints {
   if (inStock) {
     return {
@@ -153,19 +167,26 @@ function createNumericUnitVariationHints(
 }
 
 function pickUnitVariationTarget(range: RangeFacetBounds): number | null {
-  const roundedMidpoint = Math.round(((range.min + range.max) / 2) / 1000) * 1000;
+  const roundedMidpoint = Math.round((range.min + range.max) / 2 / 1000) * 1000;
   const roundedMin = Math.ceil(range.min / 1000) * 1000;
   const roundedMax = Math.floor(range.max / 1000) * 1000;
   const target = Math.min(Math.max(roundedMidpoint, roundedMin), roundedMax);
 
-  if (!Number.isFinite(target) || target <= 0 || target < range.min || target > range.max) {
+  if (
+    !Number.isFinite(target) ||
+    target <= 0 ||
+    target < range.min ||
+    target > range.max
+  ) {
     return null;
   }
   return target;
 }
 
 function formatWithThousandsSeparator(value: number): string {
-  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(value);
+  return new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 }).format(
+    value,
+  );
 }
 
 function formatCompactThousands(value: number): string {
@@ -181,7 +202,9 @@ function getCountryCode(): string {
 }
 
 function uniqueValues(values: string[]): string[] {
-  return Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
+  return Array.from(
+    new Set(values.map((value) => value.trim()).filter(Boolean)),
+  );
 }
 
 function getCurrencyUnitVariants(value: number): string[] {
@@ -191,23 +214,42 @@ function getCurrencyUnitVariants(value: number): string[] {
     case "TR":
       return [`₺${formattedValue}`, `${formattedValue} lira`];
     case "TH":
-      return [`THB ${formattedValue}`, `${formattedValue} baht`, `฿${formattedValue}`];
+      return [
+        `THB ${formattedValue}`,
+        `${formattedValue} baht`,
+        `฿${formattedValue}`,
+      ];
     case "KR":
       return [`${formattedValue} 원`, `KRW ${formattedValue}`];
     case "JP":
-      return [`¥${formattedValue}`, `${formattedValue} yen`, `${formattedValue}円`];
+      return [
+        `¥${formattedValue}`,
+        `${formattedValue} yen`,
+        `${formattedValue}円`,
+      ];
     case "SG":
-      return [`${formattedValue} SGD`, `SGD ${formattedValue}`, `S$${formattedValue}`];
+      return [
+        `${formattedValue} SGD`,
+        `SGD ${formattedValue}`,
+        `S$${formattedValue}`,
+      ];
     case "AU":
       return [`A$ ${formattedValue}`, `AUD ${formattedValue}`];
     case "IN":
-      return [`₹ ${formattedValue}`, `${formattedValue} rupees`, `INR ${formattedValue}`];
+      return [
+        `₹ ${formattedValue}`,
+        `${formattedValue} rupees`,
+        `INR ${formattedValue}`,
+      ];
     default:
       return [];
   }
 }
 
-function getNumericUnitValueVariants(facetKey: string, value: number): string[] {
+function getNumericUnitValueVariants(
+  facetKey: string,
+  value: number,
+): string[] {
   const baseVariants = [
     formatWithThousandsSeparator(value),
     formatCompactThousands(value),
@@ -230,7 +272,10 @@ function getNumericUnitValueVariants(facetKey: string, value: number): string[] 
   return uniqueValues(baseVariants);
 }
 
-function numericUnitVariationQueryText(facetKey: string, valueText: string): string {
+function numericUnitVariationQueryText(
+  facetKey: string,
+  valueText: string,
+): string {
   switch (facetKey) {
     case "price":
       return `Show Mercedes-Benz vehicles under ${valueText}`;
@@ -278,7 +323,12 @@ async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFac
           exclude: inStock ? [] : [{ [facetKey]: [targetValue] }],
           strict: false,
         },
-        aiEvaluationHints: createNumericUnitVariationHints(facetKey, valueText, targetValue, inStock),
+        aiEvaluationHints: createNumericUnitVariationHints(
+          facetKey,
+          valueText,
+          targetValue,
+          inStock,
+        ),
       });
     }
   }
@@ -292,45 +342,10 @@ async function generateNumericUnitVariationSuiteOnTheFly(): Promise<GeneratedFac
   };
 }
 
-function extractFacetValues(sourceData: any, facetKey: string): Array<{ rawValue: string; formattedValue: string }> {
-  const facetValues = sourceData?.data?.search?.facets?.[facetKey]?.values || sourceData?.[facetKey]?.values;
-  if (!Array.isArray(facetValues)) {
-    return [];
-  }
-
-  const seen = new Set<string>();
-  const values: Array<{ rawValue: string; formattedValue: string }> = [];
-
-  for (const entry of facetValues) {
-    const raw =
-      typeof entry === "string" || typeof entry === "number"
-        ? String(entry)
-        : String(entry?.value ?? "");
-    const rawValue = raw.trim();
-    if (!rawValue || rawValue.toUpperCase() === "UNDEFINED") {
-      continue;
-    }
-
-    if (seen.has(rawValue)) {
-      continue;
-    }
-    seen.add(rawValue);
-
-    const formattedValue =
-      typeof entry === "object" && entry !== null && entry?.formattedValue
-        ? String(entry.formattedValue).trim()
-        : rawValue;
-
-    values.push({
-      rawValue,
-      formattedValue: formattedValue || rawValue,
-    });
-  }
-
-  return values;
-}
-
-function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): AiEvaluationHints {
+function createUnavailableFacetValueHint(
+  facetKey: string,
+  valueLabel: string,
+): AiEvaluationHints {
   return {
     overwrite: true,
     value: [
@@ -344,33 +359,20 @@ function createUnavailableFacetValueHint(facetKey: string, valueLabel: string): 
   };
 }
 
-function extractMissingFacetValues(
+async function generateMissingFacetValuesSuiteOnTheFly(
   facetKey: string,
-  masterData: any,
-  stockData: any
-): Array<{ rawValue: string; formattedValue: string }> {
-  const allValues = extractFacetValues(masterData, facetKey);
-  const stockValuesArr = extractFacetValues(stockData, facetKey);
-
-  // Compare only the internal facet code (`value`). Labels/formatted values are localized per market.
-  const stockValues = new Set(
-    stockValuesArr.map((entry) => String(entry.rawValue).toUpperCase())
-  );
-
-  return allValues.filter((entry) => {
-    const normalizedValue = String(entry.rawValue).toUpperCase();
-    return !stockValues.has(normalizedValue);
-  });
-}
-
-async function generateMissingFacetValuesSuiteOnTheFly(facetKey: string): Promise<GeneratedFacetSuite> {
+): Promise<GeneratedFacetSuite> {
   const masterDataPath = path.join(DATA_DIR, "facets-master-data.json");
   const stockDataPath = path.join(DATA_DIR, "emh-api-response.json");
 
   const masterData = JSON.parse(await fs.readFile(masterDataPath, "utf-8"));
   const stockData = readJson(stockDataPath);
 
-  const missingValues = extractMissingFacetValues(facetKey, masterData, stockData);
+  const missingValues = extractMissingFacetValuesFromData(
+    facetKey,
+    masterData,
+    stockData,
+  );
 
   const regressionQueries: FixedQueryCase[] = missingValues.map((entry) => {
     const valueLabel = entry.formattedValue;
@@ -399,31 +401,41 @@ async function generateMissingFacetValuesSuiteOnTheFly(facetKey: string): Promis
 
 export async function loadFacetCompleteSuite(
   fallbackHints?: AiEvaluationHints,
-  facetKeys?: string[]
+  facetKeys?: string[],
 ): Promise<FixedQueryCase[]> {
   const suite = await generateCompleteSuiteOnTheFly(facetKeys);
-  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(
+    suite,
+    fallbackHints,
+  );
   await saveFacetCompleteSuite(normalizedSuite);
   return normalizedSuite;
 }
 
 export async function loadMissingFacetValuesSuite(
   facetKey: string,
-  fallbackHints?: AiEvaluationHints
+  fallbackHints?: AiEvaluationHints,
 ): Promise<FixedQueryCase[]> {
   const suite = await generateMissingFacetValuesSuiteOnTheFly(facetKey);
-  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
+  const normalizedSuite = normalizeGeneratedFacetCompleteSuite(
+    suite,
+    fallbackHints,
+  );
   await saveFacetCompleteSuite(normalizedSuite);
   return normalizedSuite;
 }
 
 export async function saveFacetCompleteSuite(
   normalizedSuite: FixedQueryCase[],
-  outputFileName: string = generateOutputFileName()
+  outputFileName: string = generateOutputFileName(),
 ): Promise<void> {
   const outputPath = path.join(DATA_DIR, outputFileName);
-  await fs.writeFile(outputPath, JSON.stringify(normalizedSuite, null, 2), "utf-8");
-  
+  await fs.writeFile(
+    outputPath,
+    JSON.stringify(normalizedSuite, null, 2),
+    "utf-8",
+  );
+
   console.log(`✅ Generated queries saved to: ${outputPath}`);
   console.log(`📊 Total queries generated: ${normalizedSuite.length}`);
 }
@@ -434,7 +446,7 @@ export async function loadFacetMatrixSuite(): Promise<FixedQueryCase[]> {
 }
 
 export async function loadNumericUnitVariationSuite(
-  fallbackHints?: AiEvaluationHints
+  fallbackHints?: AiEvaluationHints,
 ): Promise<FixedQueryCase[]> {
   const suite = await generateNumericUnitVariationSuiteOnTheFly();
   return normalizeGeneratedFacetCompleteSuite(suite, fallbackHints);
@@ -442,12 +454,20 @@ export async function loadNumericUnitVariationSuite(
 
 export function normalizeFixedQuery(
   query: FixedQueryInput,
-  defaults: Partial<Pick<FixedQueryCase, "shouldRecommend" | "shouldFilter" | "aiEvaluationHints">> = {}
+  defaults: Partial<
+    Pick<
+      FixedQueryCase,
+      "shouldRecommend" | "shouldFilter" | "aiEvaluationHints"
+    >
+  > = {},
 ): FixedQueryCase {
   const base: FixedQueryCase =
     typeof query === "string" ? { value: query } : { ...query };
 
-  if (base.shouldRecommend === undefined && defaults.shouldRecommend !== undefined) {
+  if (
+    base.shouldRecommend === undefined &&
+    defaults.shouldRecommend !== undefined
+  ) {
     base.shouldRecommend = defaults.shouldRecommend;
   }
 
@@ -464,14 +484,19 @@ export function normalizeFixedQuery(
 
 export function normalizeFixedQueries(
   queries: FixedQueryInput[],
-  defaults: Partial<Pick<FixedQueryCase, "shouldRecommend" | "shouldFilter" | "aiEvaluationHints">> = {}
+  defaults: Partial<
+    Pick<
+      FixedQueryCase,
+      "shouldRecommend" | "shouldFilter" | "aiEvaluationHints"
+    >
+  > = {},
 ): FixedQueryCase[] {
   return queries.map((query) => normalizeFixedQuery(query, defaults));
 }
 
 export function normalizeGeneratedFacetCompleteSuite(
   suite: GeneratedFacetSuite,
-  fallbackHints?: AiEvaluationHints
+  fallbackHints?: AiEvaluationHints,
 ): FixedQueryCase[] {
   return normalizeFixedQueries(suite.regressionQueries || []).map((query) => {
     const generatedHints = query.value

@@ -1,22 +1,26 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
 // Function to recursively find all JSON files in subdirectories
 function findJsonFiles(dir, fileList = []) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
-  
+
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
-    
+
     if (entry.isDirectory()) {
       // Recursively search subdirectories
       findJsonFiles(fullPath, fileList);
-    } else if (entry.isFile() && entry.name.includes('search-results') && entry.name.endsWith('.json')) {
+    } else if (
+      entry.isFile() &&
+      entry.name.includes("search-results") &&
+      entry.name.endsWith(".json")
+    ) {
       // Found a matching JSON file
       fileList.push(fullPath);
     }
   }
-  
+
   return fileList;
 }
 
@@ -24,11 +28,14 @@ function findJsonFiles(dir, fileList = []) {
 function findAllSubdirectories(dir) {
   const entries = fs.readdirSync(dir, { withFileTypes: true });
   const subdirs = entries
-    .filter(entry => entry.isDirectory() && /^\d{4}-\d{2}-\d{2}_\w+$/.test(entry.name))
-    .map(entry => ({
+    .filter(
+      (entry) =>
+        entry.isDirectory() && /^\d{4}-\d{2}-\d{2}_\w+$/.test(entry.name),
+    )
+    .map((entry) => ({
       name: entry.name,
       fullPath: path.join(dir, entry.name),
-      dateMatch: entry.name.match(/^(\d{4}-\d{2}-\d{2})_(\w+)$/)
+      dateMatch: entry.name.match(/^(\d{4}-\d{2}-\d{2})_(\w+)$/),
     }))
     .sort((a, b) => {
       // Sort by date descending (newest first)
@@ -36,49 +43,51 @@ function findAllSubdirectories(dir) {
       if (dateCompare !== 0) return dateCompare;
       return b.name.localeCompare(a.name);
     });
-  
+
   return subdirs;
 }
 
 // Find all search-results*.json files in ./results/json or provided path
 // Usage: node generate-results-html.js [path-to-json-dir]
 const inputPath = process.argv[2];
-const resultsJsonDir = inputPath 
-  ? (path.isAbsolute(inputPath) ? inputPath : path.join(process.cwd(), inputPath))
-  : path.join(__dirname, 'results', 'json');
+const resultsJsonDir = inputPath
+  ? path.isAbsolute(inputPath)
+    ? inputPath
+    : path.join(process.cwd(), inputPath)
+  : path.join(__dirname, "results", "json");
 
 // Find ALL subdirectories and process files from all of them
 const allSubdirs = findAllSubdirectories(resultsJsonDir);
 if (allSubdirs.length === 0) {
-  console.error('No date subdirectories found in the format YYYY-MM-DD_ENV');
+  console.error("No date subdirectories found in the format YYYY-MM-DD_ENV");
   process.exit(1);
 }
 
 console.log(`Processing ${allSubdirs.length} directories...`);
 
 let allResults = [];
-allSubdirs.forEach(subdir => {
+allSubdirs.forEach((subdir) => {
   const files = findJsonFiles(subdir.fullPath);
   console.log(`  ${subdir.name}: ${files.length} JSON files`);
-  
-  files.forEach(file => {
+
+  files.forEach((file) => {
     try {
-      const data = JSON.parse(fs.readFileSync(file, 'utf8'));
+      const data = JSON.parse(fs.readFileSync(file, "utf8"));
       const fileName = path.basename(file);
       const fileMatch = fileName.match(/^([A-Z]{2})_([A-Z]+)_/);
-      
+
       // Add metadata to each result
-      const enrichedData = data.map(result => ({
+      const enrichedData = data.map((result) => ({
         ...result,
         _metadata: {
           date: subdir.dateMatch[1],
           environment: subdir.dateMatch[2],
-          country: fileMatch ? fileMatch[1] : 'UNKNOWN',
-          product: fileMatch ? fileMatch[2] : 'UNKNOWN',
-          fileName: fileName
-        }
+          country: fileMatch ? fileMatch[1] : "UNKNOWN",
+          product: fileMatch ? fileMatch[2] : "UNKNOWN",
+          fileName: fileName,
+        },
       }));
-      
+
       allResults = allResults.concat(enrichedData);
     } catch (err) {
       console.error(`Error reading ${file}:`, err.message);
@@ -90,82 +99,102 @@ console.log(`Total results loaded: ${allResults.length}`);
 
 // Function to normalize text for matching
 function normalizeForMatch(text) {
-  if (!text) return '';
-  return text.toLowerCase()
-    .replace(/[ğĞ]/g, 'g')
-    .replace(/[ıİ]/g, 'i')
-    .replace(/[öÖ]/g, 'o')
-    .replace(/[üÜ]/g, 'u')
-    .replace(/[şŞ]/g, 's')
-    .replace(/[çÇ]/g, 'c')
-    .replace(/[^\w]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_|_$/g, '');
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİ]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[çÇ]/g, "c")
+    .replace(/[^\w]/g, "_")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
 }
 
 // Function to find screenshots for a result
 function findScreenshot(result, resultIndex) {
   const metadata = result._metadata;
   if (!metadata) return null;
-  
-  const screenshotBaseDir = path.join(__dirname, 'results', 'screenshots');
-  const screenshotDir = path.join(screenshotBaseDir, `${metadata.date}_${metadata.environment}`);
-  
+
+  const screenshotBaseDir = path.join(__dirname, "results", "screenshots");
+  const screenshotDir = path.join(
+    screenshotBaseDir,
+    `${metadata.date}_${metadata.environment}`,
+  );
+
   if (!fs.existsSync(screenshotDir)) return null;
-  
+
   try {
     // Get all timestamp directories
-    const timestampDirs = fs.readdirSync(screenshotDir, { withFileTypes: true })
-      .filter(entry => entry.isDirectory())
-      .map(entry => entry.name)
+    const timestampDirs = fs
+      .readdirSync(screenshotDir, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
       .sort()
       .reverse(); // Most recent first
-    
+
     // Look through each timestamp directory
     for (const timestampDir of timestampDirs) {
       const fullPath = path.join(screenshotDir, timestampDir);
-      const screenshots = fs.readdirSync(fullPath)
-        .filter(file => file.endsWith('.png') || file.endsWith('.jpg') || file.endsWith('.jpeg'));
-      
+      const screenshots = fs
+        .readdirSync(fullPath)
+        .filter(
+          (file) =>
+            file.endsWith(".png") ||
+            file.endsWith(".jpg") ||
+            file.endsWith(".jpeg"),
+        );
+
       // Get query text from result
-      let queryText = '';
-      if (typeof result.query === 'object') {
+      let queryText = "";
+      if (typeof result.query === "object") {
         // Get the first non-English value if available (original language)
-        queryText = result.query.tr || result.query.hi || result.query.en || Object.values(result.query)[0] || '';
+        queryText =
+          result.query.tr ||
+          result.query.hi ||
+          result.query.en ||
+          Object.values(result.query)[0] ||
+          "";
       } else {
-        queryText = result.query || '';
+        queryText = result.query || "";
       }
-      
+
       if (!queryText) continue;
-      
+
       const normalizedQuery = normalizeForMatch(queryText);
-      
+
       // Try different matching strategies
       for (const screenshot of screenshots) {
         const screenshotLower = screenshot.toLowerCase();
-        
+
         // Strategy 1: Match by query number (e.g., "query-1", "query-2")
         const queryNumMatch = screenshot.match(/query[_-](\d+)/i);
         if (queryNumMatch && parseInt(queryNumMatch[1]) === resultIndex + 1) {
           return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
         }
-        
+
         // Strategy 2: Match by normalized query text (at least 10 chars match)
         if (normalizedQuery.length >= 10) {
           const normalizedScreenshot = normalizeForMatch(screenshot);
           const matchLength = Math.min(normalizedQuery.length, 30);
           const querySubstring = normalizedQuery.substring(0, matchLength);
-          
+
           if (normalizedScreenshot.includes(querySubstring)) {
             return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
           }
         }
-        
+
         // Strategy 3: Fuzzy match - check if most words in query appear in filename
-        const queryWords = normalizedQuery.split('_').filter(w => w.length > 3);
+        const queryWords = normalizedQuery
+          .split("_")
+          .filter((w) => w.length > 3);
         if (queryWords.length > 0) {
           const normalizedScreenshot = normalizeForMatch(screenshot);
-          const matchedWords = queryWords.filter(word => normalizedScreenshot.includes(word));
+          const matchedWords = queryWords.filter((word) =>
+            normalizedScreenshot.includes(word),
+          );
           if (matchedWords.length >= Math.max(2, queryWords.length * 0.6)) {
             return `${metadata.date}_${metadata.environment}/${path.join(timestampDir, screenshot)}`;
           }
@@ -175,106 +204,115 @@ function findScreenshot(result, resultIndex) {
   } catch (err) {
     console.error(`Error finding screenshot: ${err.message}`);
   }
-  
+
   return null;
 }
 
 // Function to escape script tags in strings
 function escapeScriptTags(str) {
-  if (typeof str !== 'string') return str;
-  return str.replace(/<script>/gi, '&lt;script&gt;').replace(/<\/script>/gi, '&lt;/script&gt;');
+  if (typeof str !== "string") return str;
+  return str
+    .replace(/<script>/gi, "&lt;script&gt;")
+    .replace(/<\/script>/gi, "&lt;/script&gt;");
 }
 
 // Function to detect language of text
 function detectLanguage(text) {
-  if (!text) return 'unknown';
+  if (!text) return "unknown";
   // Check for Devanagari script (Hindi, Marathi, etc.)
-  if (/[\u0900-\u097F]/.test(text)) return 'hi';
+  if (/[\u0900-\u097F]/.test(text)) return "hi";
   // Check for Arabic/Urdu script
-  if (/[\u0600-\u06FF]/.test(text)) return 'ar';
+  if (/[\u0600-\u06FF]/.test(text)) return "ar";
   // Check for Turkish specific characters
-  if (/[ğĞıİöÖşŞüÜçÇ]/.test(text)) return 'tr';
+  if (/[ğĞıİöÖşŞüÜçÇ]/.test(text)) return "tr";
   // Check for Chinese characters
-  if (/[\u4E00-\u9FFF]/.test(text)) return 'zh';
+  if (/[\u4E00-\u9FFF]/.test(text)) return "zh";
   // Check for Korean characters
-  if (/[\uAC00-\uD7AF]/.test(text)) return 'ko';
+  if (/[\uAC00-\uD7AF]/.test(text)) return "ko";
   // Check for Japanese Hiragana/Katakana
-  if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return 'ja';
+  if (/[\u3040-\u309F\u30A0-\u30FF]/.test(text)) return "ja";
   // Default to English
-  return 'en';
+  return "en";
 }
 
 // Function to get flag emoji for language
 function getFlagEmoji(langCode) {
   const flags = {
-    'en': '🇬🇧',
-    'hi': '🇮🇳',
-    'tr': '🇹🇷',
-    'ar': '🇦🇪',
-    'zh': '🇨🇳',
-    'ko': '🇰🇷',
-    'ja': '🇯🇵',
-    'es': '🇪🇸',
-    'de': '🇩🇪',
-    'fr': '🇫🇷'
+    en: "🇬🇧",
+    hi: "🇮🇳",
+    tr: "🇹🇷",
+    ar: "🇦🇪",
+    zh: "🇨🇳",
+    ko: "🇰🇷",
+    ja: "🇯🇵",
+    es: "🇪🇸",
+    de: "🇩🇪",
+    fr: "🇫🇷",
   };
-  return flags[langCode] || '🌐';
+  return flags[langCode] || "🌐";
 }
 
 // Function to format multi-language text
 function formatMultiLanguageText(textObj) {
-  if (typeof textObj === 'string') {
+  if (typeof textObj === "string") {
     const detectedLang = detectLanguage(textObj);
     const flag = getFlagEmoji(detectedLang);
     return `${flag} ${escapeScriptTags(textObj)}`;
   }
-  if (typeof textObj === 'object' && textObj !== null) {
+  if (typeof textObj === "object" && textObj !== null) {
     const parts = [];
     // Process all language keys in the object
     for (const [key, value] of Object.entries(textObj)) {
-      if (value && typeof value === 'string') {
+      if (value && typeof value === "string") {
         const detectedLang = detectLanguage(value);
         const flag = getFlagEmoji(detectedLang);
         parts.push(`${flag} ${escapeScriptTags(value)}`);
       }
     }
-    return parts.join('\n\n');
+    return parts.join("\n\n");
   }
-  return '';
+  return "";
 }
 
 // Normalize results to handle both UI and API formats
-allResults = allResults.map(r => {
+allResults = allResults.map((r) => {
   // Check if this is an API result (has testMode: 'api')
-  if (r.testMode === 'api') {
+  if (r.testMode === "api") {
     // For API results, treat "no_results" scenarios as successful responses (not errors)
     // Also treat expected status code matches as successful
-    const isExpectedStatusCode = r.openaiEvaluation && r.openaiEvaluation.includes('Expected status code') && r.openaiEvaluation.includes('received as expected');
+    const isExpectedStatusCode =
+      r.openaiEvaluation &&
+      r.openaiEvaluation.includes("Expected status code") &&
+      r.openaiEvaluation.includes("received as expected");
     const isActualError = r.hasError && !isExpectedStatusCode;
-    const hasValidMessage = r.apiResults?.data?.smartSearch?.message || r.apiResults?.message || isExpectedStatusCode;
-    
-    const resultText = r.apiResults?.data?.smartSearch?.message || 
-                      r.apiResults?.message || 
-                      'No message available';
-    
+    const hasValidMessage =
+      r.apiResults?.data?.smartSearch?.message ||
+      r.apiResults?.message ||
+      isExpectedStatusCode;
+
+    const resultText =
+      r.apiResults?.data?.smartSearch?.message ||
+      r.apiResults?.message ||
+      "No message available";
+
     return {
       ...r,
       query: formatMultiLanguageText(r.query),
       resultText: escapeScriptTags(resultText),
       openaiEvaluation: escapeScriptTags(r.openaiEvaluation),
       passed: !isActualError && !!hasValidMessage,
-      icon: (isActualError || !hasValidMessage) ? '❌' : '✅'
+      icon: isActualError || !hasValidMessage ? "❌" : "✅",
     };
   }
   // UI result - handle multi-language query and response
   const queryText = formatMultiLanguageText(r.query);
   const responseText = formatMultiLanguageText(r.response || r.resultText);
-  
+
   return {
     ...r,
     query: queryText,
     resultText: responseText,
-    openaiEvaluation: escapeScriptTags(r.openaiEvaluation)
+    openaiEvaluation: escapeScriptTags(r.openaiEvaluation),
   };
 });
 
@@ -285,40 +323,58 @@ allResults = allResults.map((r, index) => {
   const screenshotPath = findScreenshot(r, index);
   return {
     ...r,
-    screenshot: screenshotPath
+    screenshot: screenshotPath,
   };
 });
 
 // Extract unique values for filters
-const describeSet = [...new Set(allResults.map(r => r.testDescribe))].filter(Boolean);
-const titleSet = [...new Set(allResults.map(r => r.testTitle))].filter(Boolean);
-const statusSet = [...new Set(allResults.map(r => r.passed ? '✅' : '❌'))];
-const dateSet = [...new Set(allResults.map(r => r._metadata?.date))].filter(Boolean).sort().reverse();
-const environmentSet = [...new Set(allResults.map(r => r._metadata?.environment))].filter(Boolean).sort();
-const countrySet = [...new Set(allResults.map(r => r._metadata?.country))].filter(Boolean).sort();
-const productSet = [...new Set(allResults.map(r => r._metadata?.product))].filter(Boolean).sort();
+const describeSet = [...new Set(allResults.map((r) => r.testDescribe))].filter(
+  Boolean,
+);
+const titleSet = [...new Set(allResults.map((r) => r.testTitle))].filter(
+  Boolean,
+);
+const statusSet = [...new Set(allResults.map((r) => (r.passed ? "✅" : "❌")))];
+const dateSet = [...new Set(allResults.map((r) => r._metadata?.date))]
+  .filter(Boolean)
+  .sort()
+  .reverse();
+const environmentSet = [
+  ...new Set(allResults.map((r) => r._metadata?.environment)),
+]
+  .filter(Boolean)
+  .sort();
+const countrySet = [...new Set(allResults.map((r) => r._metadata?.country))]
+  .filter(Boolean)
+  .sort();
+const productSet = [...new Set(allResults.map((r) => r._metadata?.product))]
+  .filter(Boolean)
+  .sort();
 const timestamp = new Date().toLocaleString();
 
 function escapeHtml(str) {
-  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
-const chartData = describeSet.map(describe => {
-  const filtered = allResults.filter(r => r.testDescribe === describe);
+const chartData = describeSet.map((describe) => {
+  const filtered = allResults.filter((r) => r.testDescribe === describe);
   const total = filtered.length;
-  const pass = filtered.filter(r => r.passed).length;
-  const fail = filtered.filter(r => !r.passed).length;
+  const pass = filtered.filter((r) => r.passed).length;
+  const fail = filtered.filter((r) => !r.passed).length;
   return {
     describe,
     passPercent: total ? Math.round((pass / total) * 100) : 0,
     failPercent: total ? Math.round((fail / total) * 100) : 0,
-    total
+    total,
   };
 });
-const chartDataByTitle = titleSet.map(title => {
-  const filtered = allResults.filter(r => r.testTitle === title);
-  const pass = filtered.filter(r => r.passed).length;
-  const fail = filtered.filter(r => !r.passed).length;
+const chartDataByTitle = titleSet.map((title) => {
+  const filtered = allResults.filter((r) => r.testTitle === title);
+  const pass = filtered.filter((r) => r.passed).length;
+  const fail = filtered.filter((r) => !r.passed).length;
   return { title, pass, fail };
 });
 
@@ -428,28 +484,28 @@ let html = `<!DOCTYPE html>
         <label for="dateFilter" class="form-label mb-0">Date:</label>
         <select id="dateFilter" class="form-select">
           <option value="">All</option>
-          ${dateSet.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('')}
+          ${dateSet.map((d) => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
         <label for="environmentFilter" class="form-label mb-0">Environment:</label>
         <select id="environmentFilter" class="form-select">
           <option value="">All</option>
-          ${environmentSet.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('')}
+          ${environmentSet.map((e) => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
         <label for="countryFilter" class="form-label mb-0">Market:</label>
         <select id="countryFilter" class="form-select">
           <option value="">All</option>
-          ${countrySet.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('')}
+          ${countrySet.map((c) => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
         <label for="productFilter" class="form-label mb-0">Product:</label>
         <select id="productFilter" class="form-select">
           <option value="">All</option>
-          ${productSet.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join('')}
+          ${productSet.map((p) => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
@@ -462,14 +518,14 @@ let html = `<!DOCTYPE html>
         <label for="describeFilter" class="form-label mb-0">Test Category:</label>
         <select id="describeFilter" class="form-select">
           <option value="">All</option>
-          ${describeSet.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('')}
+          ${describeSet.map((d) => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
         <label for="titleFilter" class="form-label mb-0">Test Title:</label>
         <select id="titleFilter" class="form-select">
           <option value="">All</option>
-          ${titleSet.map(t => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join('')}
+          ${titleSet.map((t) => `<option value="${escapeHtml(t)}">${escapeHtml(t)}</option>`).join("")}
         </select>
       </div>
       <div class="col-auto">
@@ -517,33 +573,36 @@ let html = `<!DOCTYPE html>
           </tr>
         </thead>
         <tbody id="resultsBody">
-          ${allResults.map(r => {
-            const mode = r.testMode === 'api' ? 'API' : 'UI';
-            const statusInfo = r.testMode === 'api' 
-              ? `${r.statusCode} (${r.responseTime}ms)` 
-              : 'UI Test';
-            const screenshotCell = r.screenshot 
-              ? `<img src="../screenshots/${r.screenshot}" class="screenshot-thumbnail" alt="Screenshot" onclick="showScreenshot(this.src)">` 
-              : '<span class="text-muted">-</span>';
-            const metadata = r._metadata || {};
-            return `
-            <tr data-date="${escapeHtml(metadata.date || '')}" data-environment="${escapeHtml(metadata.environment || '')}" data-country="${escapeHtml(metadata.country || '')}" data-product="${escapeHtml(metadata.product || '')}" data-describe="${escapeHtml(r.testDescribe || '')}" data-title="${escapeHtml(r.testTitle || '')}" data-status="${r.passed ? '✅' : '❌'}" data-mode="${mode}">
-              <td>${escapeHtml(metadata.date || '')}</td>
-              <td><span class="badge ${metadata.environment === 'PROD' ? 'bg-success' : metadata.environment === 'PREPROD' ? 'bg-warning' : 'bg-secondary'}">${escapeHtml(metadata.environment || '')}</span></td>
-              <td>${escapeHtml(metadata.country || '')}</td>
-              <td>${escapeHtml(metadata.product || '')}</td>
-              <td>${escapeHtml(r.testDescribe || '')}</td>
-              <td>${escapeHtml(r.testTitle || '')}</td>
-              <td><span class="badge ${mode === 'API' ? 'bg-info' : 'bg-secondary'}">${mode}</span></td>
-              <td class="query-text">${escapeHtml(r.query || '')}</td>
-              <td class="result-text">${escapeHtml(r.resultText || '')}</td>
-              <td>${escapeHtml(r.openaiEvaluation || '')}</td>
+          ${allResults
+            .map((r) => {
+              const mode = r.testMode === "api" ? "API" : "UI";
+              const statusInfo =
+                r.testMode === "api"
+                  ? `${r.statusCode} (${r.responseTime}ms)`
+                  : "UI Test";
+              const screenshotCell = r.screenshot
+                ? `<img src="../screenshots/${r.screenshot}" class="screenshot-thumbnail" alt="Screenshot" onclick="showScreenshot(this.src)">`
+                : '<span class="text-muted">-</span>';
+              const metadata = r._metadata || {};
+              return `
+            <tr data-date="${escapeHtml(metadata.date || "")}" data-environment="${escapeHtml(metadata.environment || "")}" data-country="${escapeHtml(metadata.country || "")}" data-product="${escapeHtml(metadata.product || "")}" data-describe="${escapeHtml(r.testDescribe || "")}" data-title="${escapeHtml(r.testTitle || "")}" data-status="${r.passed ? "✅" : "❌"}" data-mode="${mode}">
+              <td>${escapeHtml(metadata.date || "")}</td>
+              <td><span class="badge ${metadata.environment === "PROD" ? "bg-success" : metadata.environment === "PREPROD" ? "bg-warning" : "bg-secondary"}">${escapeHtml(metadata.environment || "")}</span></td>
+              <td>${escapeHtml(metadata.country || "")}</td>
+              <td>${escapeHtml(metadata.product || "")}</td>
+              <td>${escapeHtml(r.testDescribe || "")}</td>
+              <td>${escapeHtml(r.testTitle || "")}</td>
+              <td><span class="badge ${mode === "API" ? "bg-info" : "bg-secondary"}">${mode}</span></td>
+              <td class="query-text">${escapeHtml(r.query || "")}</td>
+              <td class="result-text">${escapeHtml(r.resultText || "")}</td>
+              <td>${escapeHtml(r.openaiEvaluation || "")}</td>
               <td><small class="text-muted">${statusInfo}</small></td>
-              <td><span class="badge ${r.passed ? 'badge-pass' : 'badge-fail'}">${escapeHtml(r.icon || '')}</span></td>
+              <td><span class="badge ${r.passed ? "badge-pass" : "badge-fail"}">${escapeHtml(r.icon || "")}</span></td>
               <td class="screenshot-cell">${screenshotCell}</td>
             </tr>
             `;
-          }).join('')}
+            })
+            .join("")}
         </tbody>
       </table>
     </div>
@@ -872,16 +931,22 @@ document.addEventListener('keydown', function(e) {
 
 console.log(`Generating comprehensive HTML for all results...`);
 
-const outputDir = path.join(__dirname, 'results', 'html');
+const outputDir = path.join(__dirname, "results", "html");
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
-const fileTimestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-const outputFile = path.join(outputDir, `search-results-all_${fileTimestamp}.html`);
-fs.writeFileSync(outputFile, html, 'utf8');
+const fileTimestamp = new Date()
+  .toISOString()
+  .replace(/[:.]/g, "-")
+  .split("T")[0];
+const outputFile = path.join(
+  outputDir,
+  `search-results-all_${fileTimestamp}.html`,
+);
+fs.writeFileSync(outputFile, html, "utf8");
 
 console.log(`Results written to ${outputFile}`);
 console.log(`Summary:`);
 console.log(`  Total results: ${allResults.length}`);
-console.log(`  Dates: ${dateSet.join(', ')}`);
-console.log(`  Environments: ${environmentSet.join(', ')}`);
-console.log(`  Markets: ${countrySet.join(', ')}`);
-console.log(`  Products: ${productSet.join(', ')}`);
+console.log(`  Dates: ${dateSet.join(", ")}`);
+console.log(`  Environments: ${environmentSet.join(", ")}`);
+console.log(`  Markets: ${countrySet.join(", ")}`);
+console.log(`  Products: ${productSet.join(", ")}`);
