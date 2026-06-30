@@ -90,6 +90,22 @@ interface AndOrFacetMatrixQuery {
   };
 }
 
+interface PunctuatedFacetMatrixQuery {
+  value: string;
+  facet: string;
+  filterText: string;
+  filterValue: string;
+  shouldFilter: {
+    include: Array<Record<string, Array<string | number>>>;
+    exclude: Array<Record<string, Array<string | number>>>;
+    strict: false;
+  };
+  aiEvaluationHints: {
+    value: string[];
+    overwrite: true;
+  };
+}
+
 /**
  * Converts raw facets from EMH or DCP API responses to a simplified format
  * @param emhApiResponse - EMH GraphQL API response containing facets
@@ -538,6 +554,33 @@ function buildAndOrQueryValue(
   return `Show me vehicles with ${anchorLabel} ${anchorValue} ${connector} ${targetLabel} ${targetValue}.`;
 }
 
+function buildPunctuatedFacetQueryValue(
+  facetA: SimplifiedFacet,
+  valueA: string,
+  facetB: SimplifiedFacet,
+  valueB: string,
+  facetC: SimplifiedFacet,
+  valueC: string
+): string {
+  const formatTerm = (facet: SimplifiedFacet, value: string): string => {
+    if (facet.code === "color") {
+      return `${value} color`;
+    }
+    if (facet.code === "fuelType") {
+      return `${value} engine`;
+    }
+    if (facet.code === "price") {
+      return `less than ${value}`;
+    }
+    if (facet.code === "bodyType" || facet.code === "brand") {
+      return value;
+    }
+    return `${value} ${getLocalizedFacetLabel(facet)}`;
+  };
+
+  return `get me ${formatTerm(facetA, valueA)}, ${formatTerm(facetB, valueB)} and ${formatTerm(facetC, valueC)}`;
+}
+
 function createAndOrFacetHints(
   operator: "AND" | "OR",
   firstFacetLabel: string,
@@ -557,6 +600,135 @@ function createAndOrFacetHints(
     `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
     `Respond with failure reason otherwise respond with "PASS" only.`,
   ];
+}
+
+function createPunctuatedFacetHints(
+  facetLabelsAndValues: Array<{
+    facetLabel: string;
+    valueLabel: string;
+    inStock: boolean;
+  }>
+): string[] {
+  const requestedValues = facetLabelsAndValues
+    .map(({ facetLabel, valueLabel }) => `${facetLabel} ${valueLabel}`)
+    .join(", ");
+  const unavailableValues = facetLabelsAndValues
+    .filter(({ inStock }) => !inStock)
+    .map(({ facetLabel, valueLabel }) => `${facetLabel} ${valueLabel}`)
+    .join(", ");
+  const availableValues = facetLabelsAndValues
+    .filter(({ inStock }) => inStock)
+    .map(({ facetLabel, valueLabel }) => `${facetLabel} ${valueLabel}`)
+    .join(", ");
+
+  const hints = [
+    `Respond with "PASS" if the response stays in Mercedes-Benz automotive context and handles the requested three-facet filter intent for ${requestedValues}.`,
+  ];
+
+  for (const { facetLabel, valueLabel, inStock } of facetLabelsAndValues) {
+    if (inStock) {
+      hints.push(`If the response ignores or contradicts ${facetLabel} ${valueLabel}, respond with "MSG FAIL: missing or incorrect ${facetLabel} value (${valueLabel})".`);
+    } else {
+      hints.push(`Respond with "PASS" if the response acknowledges that ${facetLabel} ${valueLabel} is unavailable or not in stock.`);
+      hints.push(`FAIL if the response presents unavailable ${facetLabel} ${valueLabel} as an available match.`);
+    }
+  }
+
+  if (unavailableValues && availableValues) {
+    hints.push(`Respond with "PASS" if unavailable requested value(s) are acknowledged as unavailable (${unavailableValues}) while available requested value(s) are still offered or applied as alternatives or partial matches (${availableValues}).`);
+  } else if (unavailableValues) {
+    hints.push(`Respond with "PASS" if the response says no matching vehicles are available for the requested values and offers to adjust the search.`);
+  }
+
+  hints.push(
+    `If the response is off-topic, unsafe, or refuses without a valid safety reason, respond with "MSG FAIL: invalid response".`,
+    `Respond with failure reason otherwise respond with "PASS" only.`
+  );
+
+  return hints;
+}
+
+export function generatePunctuatedFacetMatrixFromFacets(facets: SimplifiedFacet[]): PunctuatedFacetMatrixQuery[] {
+  const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
+  const queries: PunctuatedFacetMatrixQuery[] = [];
+
+  for (let firstIndex = 0; firstIndex < AND_OR_MATRIX_FACETS.length - 2; firstIndex += 1) {
+    for (let secondIndex = firstIndex + 1; secondIndex < AND_OR_MATRIX_FACETS.length - 1; secondIndex += 1) {
+      for (let thirdIndex = secondIndex + 1; thirdIndex < AND_OR_MATRIX_FACETS.length; thirdIndex += 1) {
+        const facetCodes = [
+          AND_OR_MATRIX_FACETS[firstIndex],
+          AND_OR_MATRIX_FACETS[secondIndex],
+          AND_OR_MATRIX_FACETS[thirdIndex],
+        ];
+        const selectedFacets = facetCodes
+          .map((facetCode) => facetByCode.get(facetCode))
+          .filter((facet): facet is SimplifiedFacet => Boolean(facet));
+
+        if (selectedFacets.length !== 3) {
+          continue;
+        }
+
+        const [firstFacet, secondFacet, thirdFacet] = selectedFacets;
+        const firstValues = getFacetMatrixValues(firstFacet);
+        const secondValues = getFacetMatrixValues(secondFacet);
+        const thirdValues = getFacetMatrixValues(thirdFacet);
+
+        if (firstValues.length === 0 || secondValues.length === 0 || thirdValues.length === 0) {
+          continue;
+        }
+
+        for (const firstValue of firstValues) {
+          for (const secondValue of secondValues) {
+            for (const thirdValue of thirdValues) {
+              const values = [
+                { facet: firstFacet, value: firstValue },
+                { facet: secondFacet, value: secondValue },
+                { facet: thirdFacet, value: thirdValue },
+              ];
+              const include = values
+                .filter(({ value }) => isFacetMatrixValueInStock(value))
+                .map(({ facet, value }) => ({ [facet.code]: [value.expectedValue] }));
+              const exclude = values
+                .filter(({ value }) => !isFacetMatrixValueInStock(value))
+                .map(({ facet, value }) => ({ [facet.code]: [value.expectedValue] }));
+              const facetLabelsAndValues = values.map(({ facet, value }) => ({
+                facetLabel: getFacetLabel(facet),
+                valueLabel: value.queryValue,
+                inStock: isFacetMatrixValueInStock(value),
+              }));
+
+              queries.push({
+                value: buildPunctuatedFacetQueryValue(
+                  firstFacet,
+                  firstValue.queryValue,
+                  secondFacet,
+                  secondValue.queryValue,
+                  thirdFacet,
+                  thirdValue.queryValue
+                ),
+                facet: facetCodes.join("+"),
+                filterText: values
+                  .map(({ facet, value }) => `${getFacetLabel(facet)} '${value.queryValue}'`)
+                  .join(", "),
+                filterValue: values.map(({ value }) => value.expectedValue).join(","),
+                shouldFilter: {
+                  include,
+                  exclude,
+                  strict: false,
+                },
+                aiEvaluationHints: {
+                  value: createPunctuatedFacetHints(facetLabelsAndValues),
+                  overwrite: true,
+                },
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return queries;
 }
 
 function createUnavailableAndOrFacetHints(

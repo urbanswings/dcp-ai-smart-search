@@ -25,6 +25,7 @@ import {
   fetchAndConvertFacets,
   generateDateNumericQueriesFromFacets,
   generateAndOrFacetMatrixFromFacets,
+  generatePunctuatedFacetMatrixFromFacets,
 } from "./utils/facetHelpers";
 import {
   shouldRunUiTests,
@@ -526,6 +527,33 @@ test.describe("AI Smart Search - Vehicles MB", () => {
               aiEvaluationHints: query.aiEvaluationHints || aiEvaluationRules,
             };
       });
+      extendTimeoutForQueryCount(testInfo, allQueries.length);
+
+      await runTestsAndSaveResults({
+        queries: allQueries,
+        testDescribe: describeName,
+        testTitle: test.info().title,
+        browser,
+        setupContextAndPage,
+        performUISmartSearchAndGetResults,
+        processAndLogUiResult,
+        performApiSmartSearchAndGetResults,
+        processAndLogApiResult,
+      });
+    }
+  );
+
+  test("By Filter Facets (punctuated)", { tag: ["@ui", "@api"] }, async ({ browser }, testInfo) => {
+      const project = getProject();
+      const fixedQueries = fixedQueriesData.byFilterFacetsPunctuated || [];
+      const facets = await fetchAndConvertFacets(
+        emhApiResponse,
+        dcpApiResponse,
+        project
+      );
+      const queries = isFixedQueriesOnly() ? [] : generatePunctuatedFacetMatrixFromFacets(facets);
+      await saveGeneratedQueriesIfAny(queries);
+      const allQueries = mergeQueries(fixedQueries, queries);
       extendTimeoutForQueryCount(testInfo, allQueries.length);
 
       await runTestsAndSaveResults({

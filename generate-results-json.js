@@ -62,6 +62,7 @@ const TEST_TYPE_MAP = {
   'vehicles-mb_by-filter-facets-equipment': { group: 'Vehicles MB', title: "By Filter Facets ('equipment')" },
   'vehicles-mb_by-filter-facets-campaigns': { group: 'Vehicles MB', title: "By Filter Facets ('campaigns')" },
   'vehicles-mb_by-filter-facets-and-or': { group: 'Vehicles MB', title: 'By Filter Facets (AND/OR)' },
+  'vehicles-mb_by-filter-facets-punctuated': { group: 'Vehicles MB', title: 'By Filter Facets (punctuated)' },
   'vehicles-mb_by-filter-facets-matrix': { group: 'Vehicles MB', title: 'By Filter Facets (matrix)' },
   'vehicles-mb_by-brand-model':  { group: 'Vehicles MB',        title: 'By Brand/Model' },
   'vehicles-mb_by-specs':        { group: 'Vehicles MB',        title: 'By Specs' },
@@ -155,6 +156,7 @@ const FILTER_TITLE_TO_TYPE = {
   'By Filter Facets (random)':   'sentence-by-filter-options',
   'By Filter Facets (complete)': 'sentence-by-filter-options',
   'By Filter Facets (AND/OR)':   'negative-contradictory',
+  'By Filter Facets (punctuated)': 'negative-contradictory',
 };
 
 // Extract testType segment from filename

@@ -409,6 +409,11 @@
       cursor: pointer;
     }
 
+    tbody tr.emptyTableRow:hover {
+      background: transparent;
+      cursor: default;
+    }
+
     tbody tr.selectedRow {
       background: var(--warning-bg);
       box-shadow: inset 3px 0 0 var(--warning-border);
@@ -904,6 +909,23 @@
       line-height: 1.5;
     }
 
+    .detailJson {
+      margin: 0;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      background: #0f172a;
+      color: #e5edf7;
+      padding: 10px;
+      max-height: 360px;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
     .chipRow {
       display: flex;
       flex-direction: column;
@@ -1339,7 +1361,11 @@
           </tr>
         </thead>
         <tbody id="resultsTbody">
-          <tr><td colspan="12">Select a file to load results.</td></tr>
+          <tr class="emptyTableRow"><td class="mono">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td class="countryColumn mono"></td><td></td><td class="mono"></td><td class="mono"></td><td class="mono"></td></tr>
+          <tr class="emptyTableRow"><td class="mono">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td class="countryColumn mono"></td><td></td><td class="mono"></td><td class="mono"></td><td class="mono"></td></tr>
+          <tr class="emptyTableRow"><td class="mono">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td class="countryColumn mono"></td><td></td><td class="mono"></td><td class="mono"></td><td class="mono"></td></tr>
+          <tr class="emptyTableRow"><td class="mono">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td class="countryColumn mono"></td><td></td><td class="mono"></td><td class="mono"></td><td class="mono"></td></tr>
+          <tr class="emptyTableRow"><td class="mono">&nbsp;</td><td></td><td></td><td></td><td></td><td></td><td class="countryColumn mono"></td><td></td><td class="mono"></td><td class="mono"></td><td class="mono"></td></tr>
         </tbody>
       </table>
     </div>
@@ -1347,6 +1373,13 @@
     <div class="rowDetailPane" id="rowViewPane">Click a table row to view that row's data.</div>
     <div class="info" id="previewTitle">Preview</div>
     <pre class="preview" id="previewPane">Select a file to preview JSON.</pre>
+    <div class="detailBlock" id="currentQueryJsonPanel">
+      <div class="detailHeader">
+        <div class="detailLabel">Current Query JSON</div>
+        <button type="button" class="copyIconBtn" data-copy-current-json="1" title="Copy Current Query JSON" aria-label="Copy Current Query JSON">&#128203;</button>
+      </div>
+      <pre class="detailJson" id="currentQueryJsonPane">Select a table row to view current query JSON.</pre>
+    </div>
   </main>
 
   <div class="screenshotPopover" id="screenshotPopover" aria-hidden="true">
@@ -1423,6 +1456,8 @@
     const resultsTbody = document.getElementById("resultsTbody");
     const previewTitle = document.getElementById("previewTitle");
     const previewPane = document.getElementById("previewPane");
+    const currentQueryJsonPanel = document.getElementById("currentQueryJsonPanel");
+    const currentQueryJsonPane = document.getElementById("currentQueryJsonPane");
     const rowViewTitle = document.getElementById("rowViewTitle");
     const rowViewPane = document.getElementById("rowViewPane");
     const screenshotPopover = document.getElementById("screenshotPopover");
@@ -1446,6 +1481,7 @@
     let selectedRowIndex = -1;
     let currentScreenshotObjectUrl = "";
     let currentIicImportPayload = "[]";
+    let currentSelectedRowJsonPayload = "{}";
     let embeddedScreenshots = new Map();
     let marketChartRequestToken = 0;
     let marketPassRateChartInstance = null;
@@ -1988,6 +2024,24 @@
       return shouldShowCountryColumn() ? 12 : 11;
     }
 
+    function renderEmptyTableRows(count = 5) {
+      return Array.from({ length: count }, () =>
+        "<tr class=\"emptyTableRow\">" +
+          "<td class=\"mono\">&nbsp;</td>" +
+          "<td></td>" +
+          "<td></td>" +
+          "<td></td>" +
+          "<td></td>" +
+          "<td></td>" +
+          "<td class=\"countryColumn mono\"></td>" +
+          "<td></td>" +
+          "<td class=\"mono\"></td>" +
+          "<td class=\"mono\"></td>" +
+          "<td class=\"mono\"></td>" +
+        "</tr>"
+      ).join("");
+    }
+
     function updateCountryColumnVisibility() {
       resultsTable.classList.toggle("hideCountryColumn", !shouldShowCountryColumn());
     }
@@ -2488,6 +2542,8 @@
       selectedRowIndex = -1;
       rowViewTitle.textContent = "Selected Row View";
       rowViewPane.innerHTML = "Click a table row to view that row's data.";
+      currentSelectedRowJsonPayload = "{}";
+      currentQueryJsonPane.textContent = "Select a table row to view current query JSON.";
     }
 
     function releaseScreenshotObjectUrl() {
@@ -2655,6 +2711,38 @@
       ].join("\n");
     }
 
+    function buildCurrentQueryJsonData(rowData) {
+      if (!rowData || typeof rowData !== "object") {
+        return {};
+      }
+
+      const preferredKeys = [
+        "timestamp",
+        "timestampSG",
+        "testMode",
+        "testDescribe",
+        "testTitle",
+        "query",
+        "response",
+        "resultCount",
+        "responseTime",
+        "statusCode",
+        "hasError",
+        "openaiEvaluation",
+        "results",
+        "facets",
+      ];
+      const jsonData = {};
+
+      for (const key of preferredKeys) {
+        if (Object.prototype.hasOwnProperty.call(rowData, key)) {
+          jsonData[key] = rowData[key];
+        }
+      }
+
+      return jsonData;
+    }
+
     function getFileNameFromPath(pathValue) {
       const normalized = normalizePath(String(pathValue || ""));
       if (!normalized) {
@@ -2761,6 +2849,8 @@
       const facetsResultLabel = formatSectionResult(facetsResult);
       const actualFacetsCopyText = formatFacetsAsBulletList(facetGroups.actual);
       const combinedCopyText = buildCombinedCopyText(queryEn, responseEn, facetGroups.actual);
+      currentSelectedRowJsonPayload = JSON.stringify(buildCurrentQueryJsonData(rowData), null, 2);
+      currentQueryJsonPane.textContent = currentSelectedRowJsonPayload;
 
       const screenshotResolution = resolveScreenshotFile(rowData);
       const screenshotPath = screenshotResolution.screenshotPath;
@@ -2853,7 +2943,7 @@
           titleValue.textContent = "All";
         }
         resetRowView();
-        resultsTbody.innerHTML = "<tr><td colspan=\"" + getTableColumnCount() + "\">" + escapeHtml(options.emptyMessage || "No rows in selected JSON.") + "</td></tr>";
+        resultsTbody.innerHTML = renderEmptyTableRows(5);
         tableTitle.textContent = options.title || "Results Table";
         updateIicImportAvailability();
         return;
@@ -2891,7 +2981,7 @@
           "<td class=\"mono\">" + escapeHtml(item && item.responseTime !== undefined ? item.responseTime : "") + "</td>" +
           "<td class=\"mono\">" + escapeHtml(item && item.statusCode !== undefined ? item.statusCode : "") + "</td>" +
         "</tr>";
-      }).join("");
+      }).join("") + (rows.length < 5 ? renderEmptyTableRows(5 - rows.length) : "");
 
       resultsTbody.innerHTML = html;
       renderSelectedRowView();
@@ -3591,6 +3681,21 @@
         return;
       }
 
+      const copyCurrentJsonButton = event.target.closest("button[data-copy-current-json]");
+      if (copyCurrentJsonButton) {
+        try {
+          await copyToClipboard(currentSelectedRowJsonPayload);
+          const original = copyCurrentJsonButton.innerHTML;
+          copyCurrentJsonButton.textContent = "OK";
+          setTimeout(() => {
+            copyCurrentJsonButton.innerHTML = original;
+          }, 900);
+        } catch {
+          copyCurrentJsonButton.textContent = "ERR";
+        }
+        return;
+      }
+
       const button = event.target.closest("button[data-copy-text]");
       if (button) {
         const textToCopy = button.getAttribute("data-copy-text") || "";
@@ -3607,6 +3712,24 @@
         return;
       }
 
+    });
+
+    currentQueryJsonPanel.addEventListener("click", async (event) => {
+      const copyCurrentJsonButton = event.target.closest("button[data-copy-current-json]");
+      if (!copyCurrentJsonButton) {
+        return;
+      }
+
+      try {
+        await copyToClipboard(currentSelectedRowJsonPayload);
+        const original = copyCurrentJsonButton.innerHTML;
+        copyCurrentJsonButton.textContent = "OK";
+        setTimeout(() => {
+          copyCurrentJsonButton.innerHTML = original;
+        }, 900);
+      } catch {
+        copyCurrentJsonButton.textContent = "ERR";
+      }
     });
 
     folderSelect.addEventListener("change", () => {
