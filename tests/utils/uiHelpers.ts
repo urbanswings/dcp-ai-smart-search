@@ -1,4 +1,4 @@
-import { Browser, Page } from "@playwright/test";
+import { Browser, Locator, Page } from "@playwright/test";
 import fs from "fs/promises";
 import { chromium } from "playwright";
 import {
@@ -1288,108 +1288,140 @@ export async function handlePostalCodePopUp(page: Page): Promise<void> {
   }
 }
 
-export async function performUISmartSearchAndGetResults(
+type SmartSearchLocators = {
+  searchInputArea: Locator;
+  searchButton: Locator;
+  input: Locator;
+};
+
+type SmartSearchResultWait = {
+  resultText: string;
+  retries: number;
+  pageClosed: boolean;
+};
+
+type SmartSearchResponseCapture = {
+  getPayload: () => any[];
+  isCaptured: () => boolean;
+  waitForCapture: () => Promise<void>;
+  dispose: () => void;
+};
+
+function getSmartSearchLocators(page: Page): SmartSearchLocators {
+  return {
+    searchInputArea: page
+      .locator(".smart-search__input, wb7-input.smart-search__input")
+      .first(),
+    searchButton: page
+      .locator(
+        ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button",
+      )
+      .or(page.locator("wb7-input-action button"))
+      .or(page.locator(".smart-search__input button"))
+      .or(
+        page.locator(
+          "button[aria-label*='search' i], button[title*='search' i]",
+        ),
+      )
+      .first(),
+    input: page
+      .locator("wb7-input.smart-search__input wb7-grey-box input")
+      .or(page.locator(".smart-search__input input"))
+      .or(page.locator("input[placeholder*='search' i]"))
+      .first(),
+  };
+}
+
+async function waitForSmartSearchControls(
   page: Page,
-  query: any = "",
-  submitDisabled: boolean = false,
-): Promise<UiSearchResult> {
-  const env = process.env.ENVIRONMENT || "INT";
-  const searchInputArea = page
-    .locator(".smart-search__input, wb7-input.smart-search__input")
-    .first();
-  const searchButton = page
-    .locator(
-      ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button",
-    )
-    .or(page.locator("wb7-input-action button"))
-    .or(page.locator(".smart-search__input button"))
-    .or(
-      page.locator("button[aria-label*='search' i], button[title*='search' i]"),
-    )
-    .first();
-  const input = page
-    .locator("wb7-input.smart-search__input wb7-grey-box input")
-    .or(page.locator(".smart-search__input input"))
-    .or(page.locator("input[placeholder*='search' i]"))
-    .first();
+  locators: SmartSearchLocators,
+): Promise<string | null> {
   try {
-    await searchInputArea.waitFor({ state: "visible", timeout: 15000 });
+    await locators.searchInputArea.waitFor({
+      state: "visible",
+      timeout: 15000,
+    });
     console.debug("[DEBUG] Waiting for search button to be visible...");
-    await searchButton.waitFor({ state: "visible", timeout: 10000 });
+    await locators.searchButton.waitFor({ state: "visible", timeout: 10000 });
     for (let j = 0; j < 10; j++) {
-      const enabled = await searchButton.isEnabled();
+      const enabled = await locators.searchButton.isEnabled();
       console.debug(
         `[DEBUG] Search button enabled: ${enabled} (attempt ${j + 1}/10)`,
       );
       if (enabled) break;
       await page.waitForTimeout(1000);
     }
+    return null;
   } catch (e: any) {
     const details = e?.message || e;
     console.debug("[DEBUG] Error waiting for search UI:", details);
-    return {
-      query,
-      results: "[Script] FAILED: Search UI not visible",
-      responseTime: 0,
-      error: `Search UI not visible: ${details}`,
-    };
+    return `Search UI not visible: ${details}`;
   }
+}
 
-  const actualInput = query?.value ?? query;
+async function fillSmartSearchInput(
+  input: Locator,
+  actualInput: any,
+): Promise<string | null> {
   try {
     console.debug(`[DEBUG] Filling input with: '${actualInput}'`);
     await input.waitFor({ state: "visible", timeout: 10000 });
     await input.fill(" ");
     await input.fill(actualInput);
+    return null;
   } catch (e: any) {
     console.debug("[DEBUG] Error filling input:", e?.message || e);
+    return `Search input not usable: ${e?.message || e}`;
+  }
+}
+
+async function assertSubmitDisabled(
+  query: any,
+  searchButton: Locator,
+): Promise<UiSearchResult> {
+  const isDisabled = !(await searchButton.isEnabled());
+  let notClickable = false;
+  try {
+    await searchButton.click({ trial: true, timeout: 1000 });
+  } catch (e) {
+    notClickable = true;
+  }
+  console.debug(
+    `[DEBUG] Submit disabled check: isDisabled=${isDisabled}, notClickable=${notClickable}`,
+  );
+  if (isDisabled && notClickable) {
+    console.debug("[DEBUG] PASSED: Submit Button Disabled");
     return {
       query,
-      results: "[Script] FAILED: Search input not usable",
+      results: "[Script] PASSED: Submit Button Disabled",
       responseTime: 0,
-      error: `Search input not usable: ${e?.message || e}`,
+      error: undefined,
     };
   }
 
-  if (submitDisabled) {
-    const isDisabled = !(await searchButton.isEnabled());
-    let notClickable = false;
-    try {
-      await searchButton.click({ trial: true, timeout: 1000 });
-    } catch (e) {
-      notClickable = true;
-    }
-    console.debug(
-      `[DEBUG] Submit disabled check: isDisabled=${isDisabled}, notClickable=${notClickable}`,
-    );
-    if (isDisabled && notClickable) {
-      console.debug("[DEBUG] PASSED: Submit Button Disabled");
-      return {
-        query: query,
-        results: "[Script] PASSED: Submit Button Disabled",
-        responseTime: 0,
-        error: undefined,
-      };
-    } else {
-      console.debug("[DEBUG] FAILED: Submit Button Enabled");
-      return {
-        query: query,
-        results: "[Script] FAILED: Submit Button Enabled",
-        responseTime: 0,
-        error: "Submit button was enabled when it should be disabled",
-      };
-    }
-  }
+  console.debug("[DEBUG] FAILED: Submit Button Enabled");
+  return {
+    query,
+    results: "[Script] FAILED: Submit Button Enabled",
+    responseTime: 0,
+    error: "Submit button was enabled when it should be disabled",
+  };
+}
 
-  const endpoint =
-    process.env.API_ENDPOINT_LOCAL === "true"
-      ? "http://localhost:8080/api/v2/search"
-      : env?.toUpperCase() === "PROD"
-        ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
-        : env?.toUpperCase() === "INT"
-          ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
-          : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+function getSmartSearchEndpoint(env: string): string {
+  return process.env.API_ENDPOINT_LOCAL === "true"
+    ? "http://localhost:8080/api/v2/search"
+    : env?.toUpperCase() === "PROD"
+      ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+      : env?.toUpperCase() === "INT"
+        ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
+        : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+}
 
+function createSmartSearchResponseCapture(
+  page: Page,
+  endpoint: string,
+): SmartSearchResponseCapture {
   let apiResponsePayload: any[] = [];
   let responseCaptured = false;
   let responseCapturedPromiseResolve: (() => void) | null = null;
@@ -1402,7 +1434,6 @@ export async function performUISmartSearchAndGetResults(
         response.url().includes(endpoint) &&
         response.request().method() === "POST"
       ) {
-        // console.info("[DEBUG] API response received from endpoint:", endpoint);
         apiResponsePayload = await response.json();
         responseCaptured = true;
         if (responseCapturedPromiseResolve) responseCapturedPromiseResolve();
@@ -1411,22 +1442,78 @@ export async function performUISmartSearchAndGetResults(
       console.warn("[DEBUG] Failed to capture API response payload:", e);
     }
   };
+
   page.on("response", responseListener);
 
-  if (await searchButton.isVisible().catch(() => false))
+  return {
+    getPayload: () => apiResponsePayload,
+    isCaptured: () => responseCaptured,
+    waitForCapture: () => responseCapturedPromise,
+    dispose: () => page.off("response", responseListener),
+  };
+}
+
+async function extractSmartSearchBubbleText(
+  successBubbleLocator: Locator,
+): Promise<string> {
+  let extractedText = await successBubbleLocator
+    .locator(
+      "p, .smart-search__message, .smart-search__result-message, .wbx-notification__content",
+    )
+    .first()
+    .innerText()
+    .catch(() => "");
+
+  if (!extractedText.trim()) {
+    extractedText = await successBubbleLocator.innerText().catch(() => "");
+  }
+
+  return extractedText
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/\s*(Sonuçları görüntüle|Show results|View results)\s*$/i, "")
+    .replace(/\s*(Yapay Zekâ Bilgilendirmesi|AI Disclosure)\s*$/i, "")
+    .trim();
+}
+
+async function retrySmartSearchClick(
+  page: Page,
+  searchButton: Locator,
+): Promise<boolean> {
+  await page.waitForTimeout(500);
+  try {
+    const isButtonVisible = await searchButton.isVisible({ timeout: 3000 });
+    if (isButtonVisible) {
+      await searchButton.click();
+    }
+    return false;
+  } catch (e: any) {
+    if (e?.message?.includes("closed") || e?.message?.includes("context")) {
+      console.warn("[DEBUG] Page closed during retry button click");
+      return true;
+    }
+    return false;
+  }
+}
+
+async function clickSearchAndWaitForResult(
+  page: Page,
+  searchButton: Locator,
+): Promise<SmartSearchResultWait> {
+  if (await searchButton.isVisible().catch(() => false)) {
     await searchButton.click();
+  }
 
   let retries = 0;
   let resultText = "";
   let pageClosed = false;
-  const startTime = Date.now();
   const successBubbleLocator = page.locator(".smart-search__bubble").first();
   const errorResultLocator = page.locator(
     ".smart-search__notification.wbx-notification--error .wbx-notification__content",
   );
+
   while (retries < 3 && !pageClosed) {
     try {
-      // Check if page is still valid before proceeding
       if (page.isClosed()) {
         console.warn("[DEBUG] Page was closed, cannot proceed with retries");
         pageClosed = true;
@@ -1442,7 +1529,6 @@ export async function performUISmartSearchAndGetResults(
         .waitFor({ state: "visible", timeout: 5000 })
         .catch(() => false);
 
-      // Wrap isVisible in try-catch to handle race condition where page closes
       let isSuccessVisible = false;
       try {
         isSuccessVisible = await successBubbleLocator.isVisible();
@@ -1456,31 +1542,7 @@ export async function performUISmartSearchAndGetResults(
       }
 
       if (isSuccessVisible) {
-        // Prefer message-specific descendants, then fallback to full bubble text.
-        let extractedText = await successBubbleLocator
-          .locator(
-            "p, .smart-search__message, .smart-search__result-message, .wbx-notification__content",
-          )
-          .first()
-          .innerText()
-          .catch(() => "");
-
-        if (!extractedText.trim()) {
-          extractedText = await successBubbleLocator
-            .innerText()
-            .catch(() => "");
-        }
-
-        resultText = extractedText.replace(/\s+/g, " ").trim();
-        // Remove common CTA/footer labels if they are appended to the extracted text.
-        resultText = resultText
-          .replace(
-            /\s*(Sonuçları görüntüle|Show results|View results)\s*$/i,
-            "",
-          )
-          .replace(/\s*(Yapay Zekâ Bilgilendirmesi|AI Disclosure)\s*$/i, "")
-          .trim();
-
+        resultText = await extractSmartSearchBubbleText(successBubbleLocator);
         if (resultText) {
           break;
         }
@@ -1506,34 +1568,15 @@ export async function performUISmartSearchAndGetResults(
         break;
       }
 
-      // Neither success nor error result visible — increment retries to avoid infinite loop
       retries++;
       if (retries < 3) {
         console.debug(
           `[DEBUG] Results not visible, retrying search button click (attempt ${retries + 1}/3)...`,
         );
-        await page.waitForTimeout(500); // Brief delay before retry
-        try {
-          const isButtonVisible = await searchButton.isVisible({
-            timeout: 3000,
-          });
-          if (isButtonVisible) {
-            await searchButton.click();
-          }
-        } catch (e: any) {
-          if (
-            e?.message?.includes("closed") ||
-            e?.message?.includes("context")
-          ) {
-            console.warn("[DEBUG] Page closed during retry button click");
-            pageClosed = true;
-            break;
-          }
-        }
+        pageClosed = await retrySmartSearchClick(page, searchButton);
       }
     } catch (e: any) {
       const errMsg = e?.message || String(e);
-      // Check for page-closed errors
       if (
         errMsg.includes("page") ||
         errMsg.includes("closed") ||
@@ -1549,39 +1592,86 @@ export async function performUISmartSearchAndGetResults(
         console.debug(
           `[DEBUG] Retrying search button click (attempt ${retries + 1}/3)...`,
         );
-        await page.waitForTimeout(500); // Brief delay before retry
-        if (
-          await searchButton.isVisible({ timeout: 3000 }).catch(() => false)
-        ) {
+        await page.waitForTimeout(500);
+        if (await searchButton.isVisible({ timeout: 3000 }).catch(() => false)) {
           await searchButton.click();
         }
       }
     }
   }
 
+  return { resultText, retries, pageClosed };
+}
+
+async function waitForCapturedSmartSearchResponse(
+  capture: SmartSearchResponseCapture,
+): Promise<void> {
+  await Promise.race([
+    capture.waitForCapture(),
+    new Promise((_, reject) =>
+      setTimeout(
+        () => reject(new Error("Timed out waiting for API response")),
+        30000,
+      ),
+    ),
+  ]);
+}
+
+export async function performUISmartSearchAndGetResults(
+  page: Page,
+  query: any = "",
+  submitDisabled: boolean = false,
+): Promise<UiSearchResult> {
+  const env = process.env.ENVIRONMENT || "INT";
+  const locators = getSmartSearchLocators(page);
+  const waitError = await waitForSmartSearchControls(page, locators);
+  if (waitError) {
+    return {
+      query,
+      results: "[Script] FAILED: Search UI not visible",
+      responseTime: 0,
+      error: waitError,
+    };
+  }
+
+  const actualInput = query?.value ?? query;
+  const inputError = await fillSmartSearchInput(locators.input, actualInput);
+  if (inputError) {
+    return {
+      query,
+      results: "[Script] FAILED: Search input not usable",
+      responseTime: 0,
+      error: inputError,
+    };
+  }
+
+  if (submitDisabled) {
+    return assertSubmitDisabled(query, locators.searchButton);
+  }
+
+  const endpoint = getSmartSearchEndpoint(env);
+  const responseCapture = createSmartSearchResponseCapture(page, endpoint);
+  const startTime = Date.now();
+  const searchResult = await clickSearchAndWaitForResult(
+    page,
+    locators.searchButton,
+  );
+
   const responseTime = Date.now() - startTime;
   const uiSelectedFiltersKV = await extractUiSelectedFilters(page);
   // Wait for responseListener to capture a response (max 30s)
-  if (!responseCaptured) {
+  if (!responseCapture.isCaptured()) {
     try {
-      await Promise.race([
-        responseCapturedPromise,
-        new Promise((_, reject) =>
-          setTimeout(
-            () => reject(new Error("Timed out waiting for API response")),
-            30000,
-          ),
-        ),
-      ]);
+      await waitForCapturedSmartSearchResponse(responseCapture);
     } catch (e) {
-      page.off("response", responseListener);
-      const errMsg = pageClosed
+      responseCapture.dispose();
+      const errMsg = searchResult.pageClosed
         ? "Page was closed during search"
         : "Failed to capture API response within timeout";
       return {
-        query: query,
+        query,
         results: {
-          resultText,
+          resultText: searchResult.resultText,
           responseData: null,
           uiSelectedFiltersKV,
         },
@@ -1590,20 +1680,20 @@ export async function performUISmartSearchAndGetResults(
       };
     }
   }
-  page.off("response", responseListener);
+  responseCapture.dispose();
 
   let errorMsg: string | undefined;
-  if (pageClosed) {
+  if (searchResult.pageClosed) {
     errorMsg = "Page was closed during search";
-  } else if (retries === 3) {
+  } else if (searchResult.retries === 3) {
     errorMsg = "Failed to retrieve results after 3 attempts";
   }
 
   return {
-    query: query,
+    query,
     results: {
-      resultText,
-      responseData: apiResponsePayload,
+      resultText: searchResult.resultText,
+      responseData: responseCapture.getPayload(),
       uiSelectedFiltersKV,
     },
     responseTime,
