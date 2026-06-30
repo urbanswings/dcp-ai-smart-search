@@ -1,146 +1,34 @@
 import { Browser, Page } from "@playwright/test";
 import fs from "fs/promises";
-import path from "path";
 import { chromium } from "playwright";
-import { evaluateSearchResult, fetchTranslation } from "./aiHelpers";
-import { extractVehicleTotalCountFromMessage } from "./apiHelpers";
 import {
-  buildFacetValueDisplayMap,
-  extractResponseFacets,
-  formatExpectedFacetValues,
-} from "./facetDisplayHelpers";
+  addFailureReason,
+  evaluateSmartSearchMessage,
+  extractSmartSearchParameters,
+  getCountStatus,
+  getSmartSearchResultCount,
+  isPassEvaluation,
+  logResultSummary,
+  translateResultText,
+  validateLanguageConsistency,
+  validateResponseVehicleCount,
+} from "./resultEvaluationHelpers";
+import {
+  collectPrimitiveFacetValues,
+  normalizeFacetToken,
+  validateExpectedFacets,
+} from "./facetAssertionHelpers";
 
 export const ENVIRONMENT = process.env.ENVIRONMENT;
 export const COUNTRY = process.env.COUNTRY;
 export const LANGUAGE = process.env.LANGUAGE;
 export const PRODUCT = process.env.PRODUCT;
 
-const FACETS_MASTER_DATA_PATH = path.resolve(
-  __dirname,
-  "../data/facets-master-data.json",
-);
-let facetsMasterDataCache: any | null = null;
-
-async function getFacetsMasterData(): Promise<any> {
-  if (facetsMasterDataCache) return facetsMasterDataCache;
-  try {
-    const content = await fs.readFile(FACETS_MASTER_DATA_PATH, "utf-8");
-    facetsMasterDataCache = JSON.parse(content);
-  } catch {
-    facetsMasterDataCache = {};
-  }
-  return facetsMasterDataCache;
-}
-
 export interface UiSearchResult {
   query: string;
   results: any;
   responseTime: number;
   error?: string;
-}
-
-function normalizeFacetToken(value: string): string {
-  return (
-    value
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      // Re-compose characters so Hangul syllables (e.g. 세단) are preserved
-      // before the allow-list regex below.
-      .normalize("NFC")
-      .toLowerCase()
-      .replace(/ı/g, "i")
-      .replace(/^paint[_-]?color[_-]?/i, "")
-      .replace(/^upholstery[_-]?color[_-]?/i, "")
-      .replace(/[^a-z0-9가-힣ぁ-ゖァ-ヺー一-龯]/g, "")
-  );
-}
-
-// Color name translations for multi-language support
-const colorTranslations: Record<string, string> = {
-  // Korean transliterations
-  화이트: "white",
-  블랙: "black",
-  그레이: "grey",
-  레드: "red",
-  블루: "blue",
-  실버: "silver",
-  베이지: "beige",
-  브라운: "brown",
-  // Korean native
-  흰색: "white",
-  하얀색: "white",
-  검정: "black",
-  검은색: "black",
-  회색: "grey",
-  은색: "silver",
-  빨간색: "red",
-  파란색: "blue",
-  // Turkish
-  beyaz: "white",
-  siyah: "black",
-  gri: "grey",
-  gumus: "silver",
-  kirmizi: "red",
-  mavi: "blue",
-  kahverengi: "brown",
-  bej: "beige",
-  gümüş: "silver",
-  // Thai native color names
-  ดำ: "black",
-  ขาว: "white",
-  เทา: "grey",
-  เงิน: "silver",
-  แดง: "red",
-  น้ำเงิน: "blue",
-  เขียว: "green",
-  เหลือง: "yellow",
-  น้ำตาล: "brown",
-  เบจ: "beige",
-};
-
-function translateColorName(value: string): string {
-  const normalized = normalizeFacetToken(value);
-  return colorTranslations[normalized] || normalized;
-}
-
-function collectPrimitiveFacetValues(value: any): string[] {
-  if (value == null) return [];
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => collectPrimitiveFacetValues(item));
-  }
-  if (typeof value === "object") {
-    return Object.entries(value)
-      .filter(([key]) => !key.startsWith("__"))
-      .flatMap(([, item]) => collectPrimitiveFacetValues(item));
-  }
-  return [String(value)];
-}
-
-function getFacetRangeBounds(value: any): { min: number; max: number } | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-
-  const min = Number(value.min);
-  const max = Number(value.max);
-
-  if (!Number.isFinite(min) || !Number.isFinite(max)) {
-    return null;
-  }
-
-  return min <= max ? { min, max } : { min: max, max: min };
-}
-
-function isExpectedValueWithinFacetRange(
-  expected: unknown,
-  range: { min: number; max: number },
-): boolean {
-  const numericExpected = Number(expected);
-  return (
-    Number.isFinite(numericExpected) &&
-    numericExpected >= range.min &&
-    numericExpected <= range.max
-  );
 }
 
 function isOpaqueFacetValue(facetKey: string, rawValue: string): boolean {
@@ -897,39 +785,17 @@ export async function processAndLogUiResult({
   updateRuntimeFacetAliasesFromApiResponse(apiResponse);
   const uiSelectedFiltersKV: Record<string, string[]> =
     results.results?.uiSelectedFiltersKV || {};
-  const resultsFacets = (() => {
-    const params =
-      results.results.responseData?.data?.smartSearch?.parameters || {};
-    const excludeKeys = [
-      "contextType",
-      "isUcos",
-      "limit",
-      "sortingType",
-      "language",
-      "profileId",
-      "vehicleCategory",
-      "__typename",
-      "page",
-    ];
-    return Object.fromEntries(
-      Object.entries(params).filter(([key]) => !excludeKeys.includes(key)),
-    );
-  })();
-  let openaiEvaluation = "PASS";
-  if (skipOpenAiEvaluation && smartSearchMessage?.trim()) {
-    openaiEvaluation = "PASS";
-  } else if (smartSearchMessage?.trim()) {
-    openaiEvaluation = (
-      await evaluateSearchResult(
-        smartSearchMessage,
-        aiEvaluationHints,
-        actualInput,
-      )
-    )?.trim();
-  } else {
-    openaiEvaluation = "Empty UI response message";
-  }
-  let resultCount = 0;
+  const resultsFacets = extractSmartSearchParameters(
+    results.results.responseData,
+  );
+  let openaiEvaluation = await evaluateSmartSearchMessage({
+    smartSearchMessage,
+    aiEvaluationHints,
+    actualInput,
+    skipOpenAiEvaluation,
+    emptyMessageEvaluation: "Empty UI response message",
+  });
+  let resultCount = getSmartSearchResultCount(apiResponse);
   let hasError = false;
   let responseCheckPassed = true;
   let facetsCheckPassed = true;
@@ -938,35 +804,31 @@ export async function processAndLogUiResult({
     matches: boolean;
     missingFacetValues: string[];
   } | null = null;
-  const addFailureReason = (reason: string) => {
-    const normalizedEvaluation = (openaiEvaluation || "").trim();
-    if (
-      !normalizedEvaluation ||
-      normalizedEvaluation.toUpperCase() === "PASS"
-    ) {
-      openaiEvaluation = reason;
-    } else if (!normalizedEvaluation.includes(reason)) {
-      openaiEvaluation = `${normalizedEvaluation} | ${reason}`;
-    }
-    hasError = true;
+  const failureState = {
+    get openaiEvaluation() {
+      return openaiEvaluation;
+    },
+    set openaiEvaluation(value: string) {
+      openaiEvaluation = value;
+    },
+    get hasError() {
+      return hasError;
+    },
+    set hasError(value: boolean) {
+      hasError = value;
+    },
+  };
+  const addUiFailureReason = (reason: string) => {
+    addFailureReason(failureState, reason);
   };
 
   if (!smartSearchMessage?.trim()) {
     responseCheckPassed = false;
-    addFailureReason("UI response bubble text is empty");
+    addUiFailureReason("UI response bubble text is empty");
   }
 
   if (!isPassEvaluation(openaiEvaluation)) {
     responseCheckPassed = false;
-  }
-
-  // Handle the new Smart Search + Actual Search response structure
-  const searchResults = apiResponse?.data?.smartSearch;
-  if (searchResults) {
-    resultCount =
-      searchResults.navigation?.totalResults ||
-      searchResults.results?.length ||
-      0;
   }
 
   // Extract UI vehicle count if page is provided
@@ -985,29 +847,27 @@ export async function processAndLogUiResult({
   }
   if (uiVehicleCount === 0 && resultCount > 0) {
     responseCheckPassed = false;
-    addFailureReason("UI is zero");
+    addUiFailureReason("UI is zero");
   }
 
   // Basic check to see if payload is empty (could be due to errors or unexpected response structure)
   // But skip this check if facets are being validated (empty results can be valid for faceted queries)
   if (resultCount === 0 && !actualFacets) {
     responseCheckPassed = false;
-    addFailureReason("Payload is zero");
+    addUiFailureReason("Payload is zero");
   } else if (resultCount === 0 && actualFacets) {
     // Skip "Payload is zero" when facets are being validated
   }
 
-  const responseVehicleTotalCount =
-    await extractVehicleTotalCountFromMessage(smartSearchMessage);
-  if (
-    responseVehicleTotalCount !== null &&
-    responseVehicleTotalCount !== resultCount
-  ) {
-    countCheckPassed = false;
+  const countValidation = await validateResponseVehicleCount(
+    smartSearchMessage,
+    resultCount,
+  );
+  const responseVehicleTotalCount = countValidation.responseVehicleTotalCount;
+  countCheckPassed = countValidation.countCheckPassed;
+  if (!countValidation.countCheckPassed) {
     responseCheckPassed = false;
-    addFailureReason(
-      `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`,
-    );
+    addUiFailureReason(countValidation.failureReason || "");
   }
 
   // Facets check (test-data vs BE)
@@ -1015,7 +875,7 @@ export async function processAndLogUiResult({
     // shouldFilter: false — assert no filters were applied
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
-      addFailureReason(
+      addUiFailureReason(
         `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
       );
     }
@@ -1023,204 +883,24 @@ export async function processAndLogUiResult({
     // shouldFilter: true — assert at least one filter was applied
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
-      addFailureReason(
+      addUiFailureReason(
         `Expected at least one filter to be applied, but got none`,
       );
     }
   } else if (testFacets && actualFacets && typeof actualFacets === "object") {
-    // New format: { include: [], exclude: [], strict: boolean }
-    const include = actualFacets.include || [];
-    const exclude = actualFacets.exclude || [];
-    const strict = actualFacets.strict ?? false;
-    const resultsKeys = Object.keys(resultsFacets);
-    const resultsKeysSet = new Set(resultsKeys);
+    const facetValidation = await validateExpectedFacets({
+      actualFacets,
+      resultsFacets,
+      responseData: results.results.responseData?.data || {},
+      buildFacetCandidateTokens,
+      matchIncludedValuesWithCandidates: true,
+    });
 
-    // Flatten include into a set of allowed facet keys for strict mode.
-    const includeKeys = new Set<string>();
-    for (const filterObj of include) {
-      for (const key of Object.keys(filterObj)) {
-        includeKeys.add(key);
-      }
-    }
-
-    let facetCheckPassed = true;
-    const failureReasons: string[] = [];
-
-    // Build UUID-to-semantic-name mapping from API facets for color/upholstery
-    const uuidToSemanticMap: Record<string, Record<string, string>> = {};
-    const responseData = results.results.responseData?.data || {};
-    const facetsData = extractResponseFacets(responseData);
-    const masterData = await getFacetsMasterData();
-    const facetValueDisplayMap = buildFacetValueDisplayMap(
-      facetsData,
-      masterData || {},
-    );
-    for (const facetKey of ["color", "upholstery"]) {
-      if (facetsData[facetKey]?.values) {
-        uuidToSemanticMap[facetKey] = {};
-        for (const item of facetsData[facetKey].values) {
-          if (item.value && item.formattedValue) {
-            // Map UUID to translated semantic name (e.g., "화이트" -> "white")
-            const translated = translateColorName(item.formattedValue);
-            uuidToSemanticMap[facetKey][item.value.toUpperCase()] =
-              translated.toLowerCase();
-          }
-        }
-      }
-    }
-
-    // Check: all include key-value pairs must be present in resultsFacets
-    for (const filterObj of include) {
-      for (const [key, expectedValues] of Object.entries(filterObj)) {
-        if (!resultsKeysSet.has(key)) {
-          facetCheckPassed = false;
-          if (Array.isArray(expectedValues) && expectedValues.length > 0) {
-            failureReasons.push(
-              `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`,
-            );
-          } else {
-            failureReasons.push(`Missing required facet key: ${key}`);
-          }
-          continue;
-        }
-        if (Array.isArray(expectedValues) && expectedValues.length > 0) {
-          const rangeBounds = getFacetRangeBounds(resultsFacets[key]);
-          if (rangeBounds) {
-            for (const expected of expectedValues) {
-              if (!isExpectedValueWithinFacetRange(expected, rangeBounds)) {
-                facetCheckPassed = false;
-                failureReasons.push(
-                  `Expected facet value outside range: ${key}=${expected} (actual range: ${rangeBounds.min}-${rangeBounds.max})`,
-                );
-              }
-            }
-            continue;
-          }
-
-          const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const rawActuals = new Set(
-            actualValues.map((value) => String(value).trim().toUpperCase()),
-          );
-          // For color/upholstery, map UUID values to their formattedValue from facets
-          const semanticActuals = actualValues.map((v) => {
-            const vStr = String(v).toUpperCase();
-            if (uuidToSemanticMap[key]?.[vStr]) {
-              return uuidToSemanticMap[key][vStr]; // already translated to lowercase
-            }
-            // If not a UUID, return as-is (translation happens in buildFacetCandidateTokens via aliases)
-            return String(v);
-          });
-
-          // Build candidate tokens for all actual values (includes aliases)
-          const actualCandidates = new Set<string>();
-          for (const actual of semanticActuals) {
-            const candidates = buildFacetCandidateTokens(actual);
-            candidates.forEach((c) => actualCandidates.add(c.toUpperCase()));
-          }
-
-          for (const expected of expectedValues) {
-            const rawExpected = String(expected).trim().toUpperCase();
-            if (rawActuals.has(rawExpected)) {
-              continue;
-            }
-
-            // For color/upholstery facets, translate expected value first
-            const processedExpected = ["color", "upholstery"].includes(key)
-              ? translateColorName(String(expected))
-              : String(expected);
-            // Build candidate tokens for processed expected value (includes aliases)
-            const expectedCandidates =
-              buildFacetCandidateTokens(processedExpected);
-            const hasMatch = expectedCandidates.some((candidate) =>
-              actualCandidates.has(candidate.toUpperCase()),
-            );
-
-            if (!hasMatch) {
-              facetCheckPassed = false;
-              failureReasons.push(
-                `Missing required facet value: ${key}=${expected}`,
-              );
-            }
-          }
-        }
-      }
-    }
-
-    // Check: no exclude key-value pairs should be present in resultsFacets
-    for (const filterObj of exclude) {
-      for (const [key, excludedValues] of Object.entries(filterObj)) {
-        if (!resultsKeysSet.has(key)) continue;
-        if (Array.isArray(excludedValues) && excludedValues.length > 0) {
-          const actualValues = collectPrimitiveFacetValues(resultsFacets[key]);
-          const rawActuals = new Set(
-            actualValues.map((value) => String(value).trim().toUpperCase()),
-          );
-          // For color/upholstery, map UUID values to their formattedValue from facets
-          const semanticActuals = actualValues.map((v) => {
-            const vStr = String(v).toUpperCase();
-            if (uuidToSemanticMap[key]?.[vStr]) {
-              return uuidToSemanticMap[key][vStr]; // already translated to lowercase
-            }
-            // If not a UUID, return as-is
-            return String(v);
-          });
-
-          // Build candidate tokens for all actual values (includes aliases)
-          const actualCandidates = new Set<string>();
-          for (const actual of semanticActuals) {
-            const candidates = buildFacetCandidateTokens(actual);
-            candidates.forEach((c) => actualCandidates.add(c.toUpperCase()));
-          }
-
-          for (const excluded of excludedValues) {
-            const rawExcluded = String(excluded).trim().toUpperCase();
-            if (rawActuals.has(rawExcluded)) {
-              facetCheckPassed = false;
-              failureReasons.push(
-                `Excluded facet value present: ${key}=${excluded}`,
-              );
-              continue;
-            }
-
-            // For color/upholstery facets, translate excluded value first
-            const processedExcluded = ["color", "upholstery"].includes(key)
-              ? translateColorName(String(excluded))
-              : String(excluded);
-            // Build candidate tokens for processed excluded value (includes aliases)
-            const excludedCandidates =
-              buildFacetCandidateTokens(processedExcluded);
-            const hasMatch = excludedCandidates.some((candidate) =>
-              actualCandidates.has(candidate.toUpperCase()),
-            );
-
-            if (hasMatch) {
-              facetCheckPassed = false;
-              failureReasons.push(
-                `Excluded facet value present: ${key}=${excluded}`,
-              );
-            }
-          }
-        } else {
-          // No specific values listed — treat as key-level exclusion
-          facetCheckPassed = false;
-          failureReasons.push(`Excluded facet key present: ${key}`);
-        }
-      }
-    }
-
-    // Check: if strict mode, resultsFacets should not have any keys outside include
-    if (strict) {
-      for (const key of resultsKeys) {
-        if (!includeKeys.has(key)) {
-          facetCheckPassed = false;
-          failureReasons.push(`Unexpected facet in strict mode: ${key}`);
-        }
-      }
-    }
-
-    if (!facetCheckPassed) {
+    if (!facetValidation.passed) {
       facetsCheckPassed = false;
-      addFailureReason(`BE Facets check failed: ${failureReasons.join("; ")}`);
+      addUiFailureReason(
+        `BE Facets check failed: ${facetValidation.failureReasons.join("; ")}`,
+      );
     }
   }
 
@@ -1276,62 +956,50 @@ export async function processAndLogUiResult({
   }
   if (testFacets && facetMismatches.length > 0) {
     facetsCheckPassed = false;
-    addFailureReason(facetMismatches.join(" | "));
+    addUiFailureReason(facetMismatches.join(" | "));
+  }
+
+  const languageFailureReason = await validateLanguageConsistency(
+    actualInput,
+    smartSearchMessage,
+  );
+  if (languageFailureReason) {
+    responseCheckPassed = false;
+    addUiFailureReason(languageFailureReason);
   }
 
   const normalizedEvaluation = (openaiEvaluation || "").trim();
-  const evaluationPassed = normalizedEvaluation.toUpperCase() === "PASS";
+  const evaluationPassed = isPassEvaluation(normalizedEvaluation);
   const displayHasError = hasError || !evaluationPassed;
-  const sectionMarker = (status: "PASS" | "FAIL" | "SKIP") => {
-    if (status === "PASS") return "✅";
-    if (status === "FAIL") return "❌";
-    return "➖";
-  };
   const messageStatus = evaluationPassed ? "PASS" : "FAIL";
-  const countStatus =
-    responseVehicleTotalCount === null
-      ? "SKIP"
-      : countCheckPassed
-        ? "PASS"
-        : "FAIL";
+  const countStatus = getCountStatus(
+    responseVehicleTotalCount,
+    countCheckPassed,
+  );
   const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
-
-  console.log("\n");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(
-    `${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`,
+  const { queryEn, smartSearchMessageEn } = await translateResultText(
+    lang,
+    actualInput,
+    smartSearchMessage,
   );
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-  console.log(`${sectionMarker(messageStatus)} Message:`);
-  console.log(`• Query:      '${actualInput}'`);
-  console.log(`• Response:   '${smartSearchMessage}'`);
-  let queryEn = actualInput;
-  let smartSearchMessageEn = smartSearchMessage;
-  if (lang !== "en") {
-    queryEn = await fetchTranslation(actualInput, "en");
-    smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");
-    console.log("\n");
-    console.log(`${sectionMarker(messageStatus)} Message (EN):`);
-    console.log(`• Query:      '${queryEn}'`);
-    console.log(`• Response:   '${smartSearchMessageEn}'`);
-  }
 
-  console.log("\n");
-  console.log(`${sectionMarker(countStatus)} Count:`);
-  console.log(
-    `• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`,
-  );
-  console.log(`• Backend:   ${resultCount}`);
-  console.log(`• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`);
-
-  console.log("\n");
-  console.log(`${sectionMarker(filterStatus)} Filters:`);
-  console.log(
-    `• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`,
-  );
-  console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
-  console.log(`• UI:        ${JSON.stringify(uiSelectedFiltersKV)}`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  logResultSummary({
+    displayHasError,
+    openaiEvaluation,
+    testTitle,
+    messageStatus,
+    countStatus,
+    filterStatus,
+    actualInput,
+    smartSearchMessage,
+    translatedText: { queryEn, smartSearchMessageEn },
+    responseVehicleTotalCount,
+    resultCount,
+    actualFacets,
+    resultsFacets,
+    uiVehicleCount,
+    uiSelectedFiltersKV,
+  });
   console.log("\n");
 
   return {
