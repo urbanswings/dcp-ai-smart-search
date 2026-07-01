@@ -357,7 +357,17 @@
       "value": "Güzel ve şık bir kompakt araç istiyorum",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings — acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",

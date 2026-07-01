@@ -313,7 +313,17 @@
       "value": "నాకు చక్కని మరియు స్టైలిష్ కాంపాక్ట్ వాహనం కావాలి",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings — acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",

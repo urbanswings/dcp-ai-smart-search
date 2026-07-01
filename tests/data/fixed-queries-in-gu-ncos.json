@@ -310,7 +310,17 @@
       "value": "મને એક સરસ અને સ્ટાઇલિશ કોમ્પેક્ટ વાહન જોઈએ છે",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings — acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",

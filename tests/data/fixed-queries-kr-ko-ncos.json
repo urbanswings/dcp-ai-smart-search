@@ -373,7 +373,17 @@
       "value": "멋진 컴팩트 차량을 원해요",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings — acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",

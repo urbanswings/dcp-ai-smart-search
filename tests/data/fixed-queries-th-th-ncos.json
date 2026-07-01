@@ -307,7 +307,17 @@
       "value": "ฉันต้องการรถคันเล็กที่ดูดีและมีสไตล์",
       "productType": "NCOS",
       "shouldRecommend": true,
-      "shouldFilter": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "modelIdentifier": [
+              "A"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response recommends stylish, compact vehicles and presents relevant listings in Thai or English - acceptable models include EQE, A-Class, CLA, C-Class, or compact SUVs; inventory may vary.",
