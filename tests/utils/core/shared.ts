@@ -137,7 +137,8 @@ export function isLanguageConsistencyAccepted(result: string): boolean {
   if (normalized === "YES") return true;
 
   const codes = normalized.match(/[A-Z]{2}/g);
-  if (!codes || codes.length < 2) return false;
+  if (!codes || codes.length === 0) return false;
+  if (codes.length === 1) return true;
 
   return codes[0] === codes[1];
 }
