@@ -245,6 +245,10 @@ export async function generateOpenAIQuery(
     );
     return completion.choices[0].message.content?.trim() ?? fallback;
   } catch (err) {
+    console.warn(
+      "OpenAI API error during query generation:",
+      err instanceof Error ? err.message : "Unknown error",
+    );
     return fallback;
   }
 }
