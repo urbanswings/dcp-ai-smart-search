@@ -240,6 +240,13 @@ function getMappedFormattedValue(
     };
     return map[String(rawValue)] || null;
   }
+  if (facetKey === "stockType") {
+    const map: Record<string, string> = {
+      AVAILABLE: "Available",
+      IN_PIPELINE: "In Pipeline",
+    };
+    return map[String(rawValue)] || null;
+  }
   return null;
 }
 
