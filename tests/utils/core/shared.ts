@@ -1,4 +1,4 @@
-import { fetchTranslation, generateOpenAIQuery } from "./aiHelpers";
+import { fetchTranslation, generateOpenAIQuery } from "../query/aiHelpers";
 // Shared utilities for both UI and API testing
 import fs from "fs/promises";
 import path from "path";
@@ -892,7 +892,7 @@ export async function runTestsAndSaveResults(params: {
           try {
             const {
               annotateSingleScreenshot,
-            } = require("../../annotate-screenshot.js");
+            } = require("../../../annotate-screenshot.js");
             await annotateSingleScreenshot(screenshotPath, entry);
             console.log(`✏️  Annotated: ${path.basename(screenshotPath)}`);
           } catch (error) {

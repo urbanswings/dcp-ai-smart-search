@@ -2,29 +2,29 @@ import "dotenv/config";
 import { test, TestInfo } from "@playwright/test";
 import fs from "fs/promises";
 import path from "path";
-import { generateUniqueQueries } from "./utils/aiHelpers";
+import { generateUniqueQueries } from "./utils/query/aiHelpers";
 import {
   testDataVehicles,
   getRandomVehicleCombinationsNonMB,
   logTestContext,
-} from "./utils/testHelpers";
+} from "./utils/core/testHelpers";
 import {
   processAndLogUiResult,
   setupContextAndPage,
   performUISmartSearchAndGetResults,
-} from "./utils/uiHelpers";
+} from "./utils/ui/uiHelpers";
 import {
   performApiSmartSearchAndGetResults,
   processAndLogApiResult,
   fetchEmhApiResponse,
-} from "./utils/apiHelpers";
+} from "./utils/api/apiHelpers";
 import {
   fetchAndConvertFacets,
   generateDateNumericQueriesFromFacets,
   generateAndOrFacetMatrixFromFacets,
   generatePunctuatedFacetMatrixFromFacets,
   generateUnavailableAvailableFacetMatrixFromFacets,
-} from "./utils/facetHelpers";
+} from "./utils/facets/facetHelpers";
 import {
   shouldRunUiTests,
   shouldRunApiTests,
@@ -43,7 +43,7 @@ import {
   mergeQueries,
   runTestsRepeatedAndSaveResults,
   resolveFixedQueriesFilePath,
-} from "./utils/shared";
+} from "./utils/core/shared";
 import {
   normalizeFixedQueries,
   loadFacetCompleteSuite,
@@ -51,7 +51,7 @@ import {
   loadMissingFacetValuesSuite,
   loadNumericUnitVariationSuite,
   saveFacetCompleteSuite,
-} from "./utils/queryHelpers";
+} from "./utils/query/queryHelpers";
 
 // Load fixed queries from JSON file based on LANGUAGE
 const language = LANGUAGE?.toLowerCase() || "en";

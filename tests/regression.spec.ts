@@ -3,24 +3,24 @@ import { test } from "@playwright/test";
 import {
   runTestsAndSaveResults,
   runTestsRepeatedAndSaveResults,
-} from "./utils/shared";
+} from "./utils/core/shared";
 import {
   performUISmartSearchAndGetResults,
   processAndLogUiResult,
   setupContextAndPage,
-} from "./utils/uiHelpers";
+} from "./utils/ui/uiHelpers";
 import {
   fetchEmhApiResponse,
   performApiSmartSearchAndGetResults,
   processAndLogApiResult,
-} from "./utils/apiHelpers";
-import { loadFacetCompleteSuite } from "./utils/queryHelpers";
+} from "./utils/api/apiHelpers";
+import { loadFacetCompleteSuite } from "./utils/query/queryHelpers";
 import {
   loadRegressionQueriesFromDescription,
   summarizeRegressionRunWithAI,
   loadIntermittencyQueries,
   loadMCETestData,
-} from "./utils/regressionHelpers";
+} from "./utils/regression/regressionHelpers";
 import path from "path";
 import fs from "fs/promises";
 

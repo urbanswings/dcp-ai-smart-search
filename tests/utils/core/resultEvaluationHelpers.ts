@@ -1,0 +1,286 @@
+import {
+  evaluateSearchResult,
+  fetchTranslation,
+  openaiChatCompletion,
+} from "../query/aiHelpers";
+import { isLanguageConsistencyAccepted } from "./shared";
+import { extractVehicleTotalCountFromMessage } from "./vehicleCountHelpers";
+
+export type ResultStatus = "PASS" | "FAIL" | "SKIP";
+
+export interface FailureState {
+  openaiEvaluation: string;
+  hasError: boolean;
+}
+
+export interface TranslatedResultText {
+  queryEn: any;
+  smartSearchMessageEn: string;
+}
+
+export function isPassEvaluation(
+  value: string,
+  options: { allowExpectedStatus?: boolean } = {},
+): boolean {
+  const normalized = (value || "").trim();
+  return (
+    normalized.toUpperCase() === "PASS" ||
+    Boolean(
+      options.allowExpectedStatus &&
+        normalized.startsWith("Expected status code "),
+    )
+  );
+}
+
+export function addFailureReason(state: FailureState, reason: string): void {
+  const normalizedEvaluation = (state.openaiEvaluation || "").trim();
+  if (
+    !normalizedEvaluation ||
+    normalizedEvaluation.toUpperCase() === "PASS"
+  ) {
+    state.openaiEvaluation = reason;
+  } else if (!normalizedEvaluation.includes(reason)) {
+    state.openaiEvaluation = `${normalizedEvaluation} | ${reason}`;
+  }
+  state.hasError = true;
+}
+
+export function getSmartSearchResultCount(apiResponse: any): number {
+  const searchResults = apiResponse?.data?.smartSearch;
+  if (!searchResults) {
+    return 0;
+  }
+
+  return (
+    searchResults.navigation?.totalResults || searchResults.results?.length || 0
+  );
+}
+
+export function extractSmartSearchParameters(
+  apiResponse: any,
+): Record<string, any> {
+  const params = apiResponse?.data?.smartSearch?.parameters || {};
+  const excludeKeys = [
+    "contextType",
+    "isUcos",
+    "limit",
+    "sortingType",
+    "language",
+    "profileId",
+    "vehicleCategory",
+    "__typename",
+    "page",
+  ];
+
+  return Object.fromEntries(
+    Object.entries(params).filter(([key]) => !excludeKeys.includes(key)),
+  );
+}
+
+export async function evaluateSmartSearchMessage({
+  smartSearchMessage,
+  aiEvaluationHints,
+  actualInput,
+  skipOpenAiEvaluation,
+  emptyMessageEvaluation,
+}: {
+  smartSearchMessage: string;
+  aiEvaluationHints: any;
+  actualInput: any;
+  skipOpenAiEvaluation: boolean;
+  emptyMessageEvaluation: string;
+}): Promise<string> {
+  if (skipOpenAiEvaluation && smartSearchMessage?.trim()) {
+    return "PASS";
+  }
+
+  if (smartSearchMessage?.trim()) {
+    return (
+      await evaluateSearchResult(
+        smartSearchMessage,
+        aiEvaluationHints,
+        actualInput,
+      )
+    )?.trim();
+  }
+
+  return emptyMessageEvaluation;
+}
+
+export async function validateResponseVehicleCount(
+  smartSearchMessage: string,
+  resultCount: number,
+): Promise<{
+  responseVehicleTotalCount: number | null;
+  countCheckPassed: boolean;
+  failureReason?: string;
+}> {
+  const responseVehicleTotalCount =
+    await extractVehicleTotalCountFromMessage(smartSearchMessage);
+
+  if (
+    responseVehicleTotalCount !== null &&
+    responseVehicleTotalCount !== resultCount
+  ) {
+    return {
+      responseVehicleTotalCount,
+      countCheckPassed: false,
+      failureReason: `Response total count mismatch: message says ${responseVehicleTotalCount}, backend resultCount is ${resultCount}`,
+    };
+  }
+
+  return {
+    responseVehicleTotalCount,
+    countCheckPassed: true,
+  };
+}
+
+export async function validateLanguageConsistency(
+  actualInput: any,
+  smartSearchMessage: string,
+): Promise<string | null> {
+  let langCheckResult = "YES";
+  try {
+    const langCompletion = await openaiChatCompletion(
+      [
+        {
+          role: "system",
+          content:
+            "You are a linguistic expert. Evaluate if the two texts are of the same language.",
+        },
+        {
+          role: "user",
+          content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.`,
+        },
+      ],
+      {
+        max_tokens: 10,
+        temperature: 0.2,
+      },
+    );
+    langCheckResult =
+      langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() ||
+      "NO";
+  } catch (error: any) {
+    console.warn(
+      `[WARN] OpenAI language validation skipped: ${error?.message || error}`,
+    );
+    langCheckResult = "YES";
+  }
+
+  if (!isLanguageConsistencyAccepted(langCheckResult)) {
+    console.debug("[DEBUG] Language consistency check: FAIL");
+    return `Language Inconsistency - '${langCheckResult}'`;
+  }
+
+  return null;
+}
+
+export function getCountStatus(
+  responseVehicleTotalCount: number | null,
+  countCheckPassed: boolean,
+): ResultStatus {
+  if (responseVehicleTotalCount === null) {
+    return "SKIP";
+  }
+  return countCheckPassed ? "PASS" : "FAIL";
+}
+
+export function sectionMarker(status: ResultStatus): string {
+  if (status === "PASS") return "✅";
+  if (status === "FAIL") return "❌";
+  return "➖";
+}
+
+export async function translateResultText(
+  lang: string,
+  actualInput: any,
+  smartSearchMessage: string,
+): Promise<TranslatedResultText> {
+  let queryEn = actualInput;
+  let smartSearchMessageEn = smartSearchMessage;
+
+  if (lang !== "en") {
+    queryEn = await fetchTranslation(actualInput, "en");
+    smartSearchMessageEn = await fetchTranslation(smartSearchMessage, "en");
+  }
+
+  return { queryEn, smartSearchMessageEn };
+}
+
+export function logResultSummary({
+  displayHasError,
+  openaiEvaluation,
+  testTitle,
+  messageStatus,
+  countStatus,
+  filterStatus,
+  actualInput,
+  smartSearchMessage,
+  translatedText,
+  responseVehicleTotalCount,
+  resultCount,
+  actualFacets,
+  resultsFacets,
+  uiVehicleCount,
+  uiSelectedFiltersKV,
+}: {
+  displayHasError: boolean;
+  openaiEvaluation: string;
+  testTitle: string;
+  messageStatus: ResultStatus;
+  countStatus: ResultStatus;
+  filterStatus: ResultStatus;
+  actualInput: any;
+  smartSearchMessage: string;
+  translatedText?: TranslatedResultText;
+  responseVehicleTotalCount: number | null;
+  resultCount: number;
+  actualFacets: any;
+  resultsFacets: Record<string, any>;
+  uiVehicleCount?: number | null;
+  uiSelectedFiltersKV?: Record<string, string[]>;
+}): void {
+  console.log("\n");
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(
+    `${displayHasError ? "❌ FAIL |" : "✅"} ${openaiEvaluation} | ${testTitle}`,
+  );
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+  console.log(`${sectionMarker(messageStatus)} Message:`);
+  console.log(`• Query:      '${actualInput}'`);
+  console.log(`• Response:   '${smartSearchMessage}'`);
+  if (
+    translatedText &&
+    (translatedText.queryEn !== actualInput ||
+      translatedText.smartSearchMessageEn !== smartSearchMessage)
+  ) {
+    console.log("\n");
+    console.log(`${sectionMarker(messageStatus)} Message (EN):`);
+    console.log(`• Query:      '${translatedText.queryEn}'`);
+    console.log(`• Response:   '${translatedText.smartSearchMessageEn}'`);
+  }
+
+  console.log("\n");
+  console.log(`${sectionMarker(countStatus)} Count:`);
+  console.log(
+    `• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`,
+  );
+  console.log(`• Backend:   ${resultCount}`);
+  if (uiVehicleCount !== undefined) {
+    console.log(
+      `• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`,
+    );
+  }
+
+  console.log("\n");
+  console.log(`${sectionMarker(filterStatus)} Filters:`);
+  console.log(
+    `• Expected:  ${actualFacets === undefined ? "-" : JSON.stringify(actualFacets)}`,
+  );
+  console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
+  if (uiSelectedFiltersKV !== undefined) {
+    console.log(`• UI:        ${JSON.stringify(uiSelectedFiltersKV)}`);
+  }
+  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+}
