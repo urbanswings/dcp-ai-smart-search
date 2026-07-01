@@ -1030,6 +1030,30 @@
       {
         "formattedValue": "블루/블랙",
         "value": "UPHOLSTERY_COLOR_BLUE_BLACK"
+      },
+      {
+        "formattedValue": "그레이",
+        "value": "3d9e08b9"
+      },
+      {
+        "formattedValue": "레드",
+        "value": "2340063d"
+      },
+      {
+        "formattedValue": "베이지",
+        "value": "3d42089d"
+      },
+      {
+        "formattedValue": "브라운",
+        "value": "3d3a08bd"
+      },
+      {
+        "formattedValue": "블랙",
+        "value": "24270669"
+      },
+      {
+        "formattedValue": "블루",
+        "value": "2454067d"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2218,6 +2242,34 @@
       {
         "formattedValue": "베이지",
         "value": "PAINT_COLOR_BEIGE"
+      },
+      {
+        "formattedValue": "그레이",
+        "value": "3d9e08b9"
+      },
+      {
+        "formattedValue": "기타 색상",
+        "value": "60720a5a"
+      },
+      {
+        "formattedValue": "레드",
+        "value": "2340063d"
+      },
+      {
+        "formattedValue": "블랙",
+        "value": "24270669"
+      },
+      {
+        "formattedValue": "블루",
+        "value": "2454067d"
+      },
+      {
+        "formattedValue": "실버",
+        "value": "2382064c"
+      },
+      {
+        "formattedValue": "화이트",
+        "value": "3c320896"
       }
     ],
     "facetType": "MULTI_VALUE"

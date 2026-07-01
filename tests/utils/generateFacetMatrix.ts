@@ -1029,6 +1029,11 @@ function toQueryLabel(facetKey: string, value: unknown): string {
   }
 
   if (facetKey === "color") {
+    const colorMap = buildUUIDMapFromFacets(globalFacets, "color");
+    const strValue = String(value).toLowerCase();
+    if (colorMap[strValue]) {
+      return `${colorMap[strValue]} cars`;
+    }
     const token = String(value).replace(/^PAINT_COLOR_/, "");
     return `${token.toLowerCase()} cars`;
   }

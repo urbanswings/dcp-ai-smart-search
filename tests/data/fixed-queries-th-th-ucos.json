@@ -187,6 +187,30 @@
       }
     },
     {
+      "value": "รถคันใหญ่",
+      "productType": "NCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "bodyType": [
+              "SUV_OFFROADER"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response understands the query as a request for a big, spacious, or larger vehicle and presents SUV/off-roader options.",
+          "Accept responses that recommend SUV models such as GLA, GLB, GLC, GLE, GLS, or equivalent SUV/off-roader inventory; exact count, model mix, trim, and fuel type may vary.",
+          "FAIL if the response does not apply the SUV_OFFROADER/body-size intent, presents only small/non-SUV vehicles, or treats the request as unsafe or off-topic."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "ช่วยหารถสปอร์ตแรงๆ ให้หน่อย",
       "productType": "NCOS",
       "shouldRecommend": true,
@@ -669,6 +693,30 @@
         "value": [
           "Respond ONLY with: 'PASS' if the response identifies and presents Mercedes-AMG or other clearly high-performance Mercedes variants.",
           "Do NOT fail solely because the exact AMG model differs from the expected inventory — pass as long as the response clearly targets performance-oriented Mercedes vehicles and applies the Mercedes-AMG brand intent. FAIL only if no AMG/performance-oriented vehicles are presented."
+        ],
+        "overwrite": true
+      }
+    },
+    {
+      "value": "รถเร็ว",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "brand": [
+              "Mercedes-AMG"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response understands the query as a request for fast, sporty, or high-performance vehicles and presents Mercedes-AMG or clearly performance-oriented Mercedes-Benz options.",
+          "Accept responses that recommend models such as Mercedes-AMG GLC 63 S E Coupe, Mercedes-AMG SL 63 4MATIC+, Mercedes-AMG GT 63 4MATIC+, or equivalent AMG/performance inventory; exact count, body type, fuel type, and model mix may vary.",
+          "FAIL if the response does not apply the Mercedes-AMG/performance intent, presents only unrelated non-performance vehicles, or treats the request as unsafe or off-topic."
         ],
         "overwrite": true
       }
