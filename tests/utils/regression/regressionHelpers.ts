@@ -189,7 +189,6 @@ export async function loadRegressionQueriesFromDescription(): Promise<
       ANALYSIS_PROMPT,
       description.trim(),
       /* maxTokens */ 600,
-      /* temperature */ 0.3,
       /* fallback */ "",
     );
     if (analysis.trim()) {
@@ -224,7 +223,6 @@ export async function loadRegressionQueriesFromDescription(): Promise<
       SYSTEM_PROMPT,
       combinedInput,
       /* maxTokens */ 4000,
-      /* temperature */ 0.2,
       /* fallback */ "[]",
     );
   } catch (e) {
@@ -319,7 +317,6 @@ export async function summarizeRegressionRunWithAI(params: {
     RESULTS_ANALYSIS_PROMPT,
     userPrompt,
     /* maxTokens */ 1200,
-    /* temperature */ 0.2,
     /* fallback */ "",
   );
 

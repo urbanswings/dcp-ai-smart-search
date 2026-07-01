@@ -1,33 +1,12 @@
 import axios from "axios";
 import fs from "fs";
-import { AzureOpenAI } from "openai";
 import path from "path";
 import { COUNTRY, LANGUAGE } from "../core/testHelpers";
+import { getOpenAIClient } from "../core/openaiClient";
 
-const OPENAI_API_VERSION = "2024-08-01-preview";
-const OPENAI_CHAT_MODEL = "gpt-4o-mini";
-const OPENAI_DEFAULT_MAX_TOKENS = 40;
+const OPENAI_CHAT_MODEL = process.env.NEXUS_GPT_MODEL || "gpt-4o-mini";
+const OPENAI_DEFAULT_MAX_TOKENS = 200; // Increased from 40 to support query generation with gpt-5-mini
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
-
-let openai: AzureOpenAI | null = null;
-
-function getOpenAIClient(): AzureOpenAI {
-  if (openai) {
-    return openai;
-  }
-
-  openai = new AzureOpenAI({
-    apiKey: process.env.NEXUS_API_KEY || process.env.AZURE_OPENAI_API_KEY,
-    endpoint:
-      process.env.NEXUS_API_ENDPOINT || process.env.AZURE_OPENAI_ENDPOINT,
-    apiVersion:
-      process.env.NEXUS_API_VERSION ||
-      process.env.OPENAI_API_VERSION ||
-      OPENAI_API_VERSION,
-  });
-
-  return openai;
-}
 
 export async function fetchTranslation(
   text: string,
@@ -67,14 +46,16 @@ export async function fetchTranslation(
 export async function openaiChatCompletion(
   messages: any[],
   options: Record<string, any> = {},
-  max_tokens?: number,
-  temperature?: number,
+  max_tokens: number = OPENAI_DEFAULT_MAX_TOKENS,
 ) {
-  return getOpenAIClient().chat.completions.create({
+  const client = getOpenAIClient();
+  if (!client) {
+    throw new Error("OpenAI client not configured. Check NEXUS_API_KEY and NEXUS_API_ENDPOINT.");
+  }
+  return client.chat.completions.create({
     model: OPENAI_CHAT_MODEL,
     messages,
-    max_tokens: max_tokens ?? OPENAI_DEFAULT_MAX_TOKENS,
-    temperature: temperature ?? OPENAI_DEFAULT_TEMPERATURE,
+    max_completion_tokens: max_tokens,
     ...options,
   });
 }
@@ -115,7 +96,6 @@ export async function isSemanticallySimilarOpenAI(
       systemPrompt,
       userPrompt,
       maxTokens,
-      temperature,
     );
     return answer.includes("YES");
   } catch (error) {
@@ -220,7 +200,6 @@ export async function evaluateSearchResult(
       systemPrompt,
       userPrompt,
       maxTokens,
-      temperature,
     );
 
     if (shouldPassNegativeContradictoryBoundaryResponse(answer)) {
@@ -246,8 +225,7 @@ export async function evaluateSearchResult(
 export async function generateOpenAIQuery(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = 40,
-  temperature: number = OPENAI_DEFAULT_TEMPERATURE,
+  maxTokens: number = OPENAI_DEFAULT_MAX_TOKENS,
   fallback: string = "",
 ): Promise<string> {
   systemPrompt = systemPrompt
@@ -262,10 +240,8 @@ export async function generateOpenAIQuery(
         { role: "system", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      {
-        temperature: temperature,
-        max_tokens: maxTokens,
-      },
+      {},
+      maxTokens,
     );
     return completion.choices[0].message.content?.trim() ?? fallback;
   } catch (err) {
@@ -273,9 +249,6 @@ export async function generateOpenAIQuery(
   }
 }
 
-/**
- * Generates multiple unique queries using OpenAI with deduplication.
- */
 export async function generateUniqueQueries(
   count: number,
   systemPrompt: string,
@@ -283,7 +256,6 @@ export async function generateUniqueQueries(
   maxTokens: number = 50,
   fallback: string = "",
   maxAttempts: number = 10,
-  temperature: number = OPENAI_DEFAULT_TEMPERATURE,
 ): Promise<string[]> {
   if (!systemPrompt || !userPromptTemplate) return [];
   const queries: string[] = [];
@@ -311,7 +283,6 @@ export async function generateUniqueQueries(
         systemPrompt,
         `${userPromptTemplate}${diversityHint}`,
         maxTokens,
-        temperature,
       );
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();

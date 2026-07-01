@@ -249,211 +249,241 @@ export class SearchApiClient {
     startTime?: number,
   ): Promise<ApiSearchResult> {
     const responseStartTime = startTime || Date.now();
+    console.debug(`[EMH] performEmhSearchWithFacets called | query="${query?.value ?? query}"`);
+
     try {
-      const env = ENVIRONMENT || "INT";
-      const country = getCountryCode();
-      const language = getLanguageCode();
-      const product = PRODUCT?.toUpperCase() || "UCOS";
-      const salesChannel = getSalesChannel();
-      const vehicleCategory =
-        VEHICLE_CATEGORY?.toUpperCase() || "PASSENGER-CARS";
+      const config = this.getEmhConfig();
+      console.debug(`[EMH] Config | env=${config.env} country=${config.country} language=${config.language} product=${config.product} localEndpoint=${config.isLocalEndpoint}`);
 
-      const endpoint =
-        process.env.API_ENDPOINT_LOCAL === "true"
-          ? "http://localhost:8080/api/v2/search"
-          : env?.toUpperCase() === "PROD"
-            ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
-            : env?.toUpperCase() === "INT"
-              ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
-              : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+      const { endpoint, requestConfig } = this.getEndpointAndConfig(config);
+      const payload = this.buildEmhPayload(query, config);
 
-      const actualInput = query?.value ?? query;
-      const payload =
-        process.env.API_ENDPOINT_LOCAL === "true"
-          ? {
-              country_code: country,
-              lang: language,
-              request_id: "cf19cf25-90b6-406b-8388-fda1757e94e5",
-              sales_channel: salesChannel,
-              user_query: actualInput,
-              vehicle_category: vehicleCategory,
-            }
-          : {
-              operationName: "GetSmartSearchResults",
-              variables: {
-                contextType: "B2C",
-                isUcos: product === "UCOS",
-                language: language,
-                limit: 12,
-                profileId: `${country}-${
-                  product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES"
-                }`,
-                query: actualInput,
-                sortingType: "price-asc",
-              },
-              query: undefined,
-            };
-
-      // Use the appropriate query from the constant based on vehicle type
-      const vehicleTypeKey =
-        product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES";
-      const queryKey = `${country.toUpperCase()}-${vehicleTypeKey}`;
-
-      if (
-        process.env.API_ENDPOINT_LOCAL !== "true" &&
-        payload &&
-        "query" in payload
-      ) {
-        (payload as any).query =
-          GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES[queryKey] ||
-          GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES["AU-NEW_VEHICLES"];
-      }
-
-      const isLocalEndpoint = process.env.API_ENDPOINT_LOCAL === "true";
-      const requestConfig = {
-        timeout: 40000,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          "User-Agent": "AI-Smart-Search-Test/1.0",
-          ...(isLocalEndpoint && {
-            Connection: "close",
-          }),
-          ...(process.env.API_ENDPOINT_LOCAL !== "true" && {
-            "X-Api-Key": process.env.X_API_KEY || "",
-          }),
-        },
-        ...(isLocalEndpoint && {
-          httpAgent: new http.Agent({ keepAlive: false }),
-        }),
-      };
-
-      let response;
-      try {
-        response = await axios.post(endpoint, payload, requestConfig);
-      } catch (error: any) {
-        if (isLocalEndpoint && error?.code === "ECONNRESET") {
-          response = await axios.post(endpoint, payload, requestConfig);
-        } else {
-          throw error;
-        }
-      }
+      console.debug(`[EMH] POST step-1 → ${endpoint}`);
+      const response = await this.performEmhPost(endpoint, payload, requestConfig, config.isLocalEndpoint);
+      console.debug(`[EMH] POST step-1 response | status=${response.status} dataType=${typeof response.data}`);
 
       const responseTime = Date.now() - responseStartTime;
-      let responseData = response.data;
-      if (typeof responseData === "string") {
-        try {
-          responseData = JSON.parse(responseData);
-        } catch (e) {
-          // If parsing fails, keep as string
-        }
-      }
+      const responseData = this.parseResponseData(response.data);
 
-      // Handle different response structures for local endpoint
-      if (process.env.API_ENDPOINT_LOCAL === "true") {
-        const endpoint = "http://localhost:8080/api/v2/search/proxy";
-        const payload = {
-          operationName: "GetSearchResults",
-          variables: responseData.search.variables || {},
-          query: responseData.search.query || query,
-        };
-        const response = await axios.post(endpoint, payload, {
-          timeout: 30000,
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            "User-Agent": "AI-Smart-Search-Test/1.0",
-            Connection: "close",
-          },
-          httpAgent: new http.Agent({ keepAlive: false }),
-        });
-        let data = response.data;
-        if (typeof data === "string") {
-          try {
-            data = JSON.parse(data);
-          } catch (e) {
-            // If parsing fails, keep as string
-          }
-        }
+      const result = config.isLocalEndpoint
+        ? await this.handleLocalFlowResponse(responseData, query, responseTime, response.status)
+        : this.handleRemoteFlowResponse(responseData, responseTime, response.status);
 
-        if (response.data?.errors) {
-          throw new Error(`API Error: ${JSON.stringify(response.data.errors)}`);
-        }
-
-        // Local endpoint returns: { request_id, messageToUser, search: { operationName, variables, query } }
-        // We need to normalize this to match the expected structure
-        const normalizedData = {
-          smartSearchResponse: {
-            message: responseData.messageToUser,
-            request_id: responseData.request_id,
-          },
-          data: {
-            smartSearch: {
-              parameters: Object.fromEntries(
-                Object.entries(responseData.search.variables || {}).filter(
-                  ([_, value]) => value !== null,
-                ),
-              ),
-              message: responseData.messageToUser,
-              facets: data.data.search.facets,
-              navigation: data.data.search.navigation,
-              results: data.data.search.results,
-            },
-          },
-        };
-
-        return {
-          query,
-          results: {
-            resultText: responseData.messageToUser,
-            responseData: normalizedData,
-          },
-          responseTime,
-          statusCode: response.status,
-        };
-      } else {
-        const normalizedData = {
-          smartSearchResponse: {
-            message: responseData.data.smartSearch.message,
-            request_id: null,
-          },
-          data: {
-            smartSearch: {
-              parameters: responseData.data.smartSearch.parameters,
-              message: responseData.data.smartSearch.message,
-              facets: responseData.data.smartSearch.facets,
-              navigation: responseData.data.smartSearch.navigation,
-              results: responseData.data.smartSearch.results,
-            },
-          },
-        };
-
-        return {
-          query,
-          results: {
-            resultText: responseData.data.smartSearch.message,
-            responseData: normalizedData,
-          },
-          responseTime,
-          statusCode: response.status,
-        };
-      }
+      return result;
     } catch (error: any) {
-      const responseTime = Date.now() - responseStartTime;
-      let errorMessage = error.message || "Unknown API error";
+      return this.handleEmhError(error, responseStartTime);
+    }
+  }
 
-      if (error.response?.data) {
-        errorMessage += ` | Response: ${JSON.stringify(error.response.data)}`;
-      }
+  private getEmhConfig() {
+    const env = ENVIRONMENT || "INT";
+    const country = getCountryCode();
+    const language = getLanguageCode();
+    const product = PRODUCT?.toUpperCase() || "UCOS";
+    const isLocalEndpoint = process.env.API_ENDPOINT_LOCAL === "true";
 
+    return { env, country, language, product, isLocalEndpoint, vehicleCategory: VEHICLE_CATEGORY?.toUpperCase() || "PASSENGER-CARS" };
+  }
+
+  private getEndpointAndConfig(config: ReturnType<SearchApiClient["getEmhConfig"]>) {
+    const endpoint = config.isLocalEndpoint
+      ? "http://localhost:8080/api/v2/search"
+      : config.env?.toUpperCase() === "PROD"
+        ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
+        : config.env?.toUpperCase() === "INT"
+          ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
+          : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
+
+    const requestConfig = {
+      timeout: 40000,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "AI-Smart-Search-Test/1.0",
+        ...(config.isLocalEndpoint && { Connection: "close" }),
+        ...(process.env.API_ENDPOINT_LOCAL !== "true" && { "X-Api-Key": process.env.X_API_KEY || "" }),
+      },
+      ...(config.isLocalEndpoint && { httpAgent: new http.Agent({ keepAlive: false }) }),
+    };
+
+    return { endpoint, requestConfig };
+  }
+
+  private buildEmhPayload(query: any, config: ReturnType<SearchApiClient["getEmhConfig"]>) {
+    const actualInput = query?.value ?? query;
+
+    if (config.isLocalEndpoint) {
       return {
-        query,
-        results: null,
-        responseTime,
-        statusCode: error.response?.status || 0,
-        error: errorMessage,
+        country_code: config.country,
+        lang: config.language,
+        request_id: "cf19cf25-90b6-406b-8388-fda1757e94e5",
+        sales_channel: getSalesChannel(),
+        user_query: actualInput,
+        vehicle_category: config.vehicleCategory,
       };
     }
+
+    const vehicleTypeKey = config.product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES";
+    const queryKey = `${config.country.toUpperCase()}-${vehicleTypeKey}`;
+
+    const payload: any = {
+      operationName: "GetSmartSearchResults",
+      variables: {
+        contextType: "B2C",
+        isUcos: config.product === "UCOS",
+        language: config.language,
+        limit: 12,
+        profileId: `${config.country}-${vehicleTypeKey}`,
+        query: actualInput,
+        sortingType: "price-asc",
+      },
+      query: undefined,
+    };
+
+    payload.query = GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES[queryKey] || GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES["AU-NEW_VEHICLES"];
+    return payload;
+  }
+
+  private async performEmhPost(endpoint: string, payload: any, requestConfig: any, isLocalEndpoint: boolean) {
+    try {
+      return await axios.post(endpoint, payload, requestConfig);
+    } catch (error: any) {
+      const statusCode = error?.response?.status || error?.code || "unknown";
+      console.error(`[EMH] POST step-1 FAILED | HTTP ${statusCode} | message=${error?.message}`);
+      if (error?.response?.data) {
+        console.error(`[EMH] POST step-1 error body:`, JSON.stringify(error.response.data).slice(0, 500));
+      }
+
+      if (isLocalEndpoint && error?.code === "ECONNRESET") {
+        console.debug(`[EMH] Retrying step-1 after ECONNRESET...`);
+        const retryResponse = await axios.post(endpoint, payload, requestConfig);
+        console.debug(`[EMH] Retry step-1 response | status=${retryResponse.status}`);
+        return retryResponse;
+      }
+
+      throw error;
+    }
+  }
+
+  private parseResponseData(data: any) {
+    if (typeof data === "string") {
+      try {
+        return JSON.parse(data);
+      } catch (e) {
+        console.warn("Failed to parse response data as JSON:", e);
+        return data;
+      }
+    }
+    return data;
+  }
+
+  private async handleLocalFlowResponse(responseData: any, query: any, responseTime: number, statusCode: number) {
+    console.debug(`[EMH] Local flow | messageToUser="${responseData?.messageToUser}" search.variables=${JSON.stringify(responseData?.search?.variables).slice(0, 200)}`);
+
+    const endpoint = "http://localhost:8080/api/v2/search/proxy";
+    const payload = {
+      operationName: "GetSearchResults",
+      variables: responseData.search.variables || {},
+      query: responseData.search.query || query,
+    };
+
+    console.debug(`[EMH] POST step-2 (proxy) → ${endpoint}`);
+    const response = await axios.post(endpoint, payload, {
+      timeout: 30000,
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "AI-Smart-Search-Test/1.0",
+        Connection: "close",
+      },
+      httpAgent: new http.Agent({ keepAlive: false }),
+    });
+
+    const data = this.parseResponseData(response.data);
+    console.debug(`[EMH] POST step-2 response | status=${response.status} hasErrors=${!!response.data?.errors}`);
+
+    if (response.data?.errors) {
+      console.error(`[EMH] POST step-2 GraphQL errors:`, JSON.stringify(response.data.errors).slice(0, 500));
+      throw new Error(`API Error: ${JSON.stringify(response.data.errors)}`);
+    }
+
+    const normalizedData = {
+      smartSearchResponse: {
+        message: responseData.messageToUser,
+        request_id: responseData.request_id,
+      },
+      data: {
+        smartSearch: {
+          parameters: Object.fromEntries(
+            Object.entries(responseData.search.variables || {}).filter(([_, value]) => value !== null),
+          ),
+          message: responseData.messageToUser,
+          facets: data.data.search.facets,
+          navigation: data.data.search.navigation,
+          results: data.data.search.results,
+        },
+      },
+    };
+
+    return {
+      query,
+      results: {
+        resultText: responseData.messageToUser,
+        responseData: normalizedData,
+      },
+      responseTime,
+      statusCode: response.status,
+    };
+  }
+
+  private handleRemoteFlowResponse(responseData: any, responseTime: number, statusCode: number) {
+    console.debug(`[EMH] Remote flow | hasSmartSearch=${!!responseData?.data?.smartSearch} parameters=${JSON.stringify(responseData?.data?.smartSearch?.parameters).slice(0, 200)}`);
+
+    const normalizedData = {
+      smartSearchResponse: {
+        message: responseData.data.smartSearch.message,
+        request_id: null,
+      },
+      data: {
+        smartSearch: {
+          parameters: responseData.data.smartSearch.parameters,
+          message: responseData.data.smartSearch.message,
+          facets: responseData.data.smartSearch.facets,
+          navigation: responseData.data.smartSearch.navigation,
+          results: responseData.data.smartSearch.results,
+        },
+      },
+    };
+
+    return {
+      query: responseData.data.smartSearch.message,
+      results: {
+        resultText: responseData.data.smartSearch.message,
+        responseData: normalizedData,
+      },
+      responseTime,
+      statusCode,
+    };
+  }
+
+  private handleEmhError(error: any, responseStartTime: number): ApiSearchResult {
+    const responseTime = Date.now() - responseStartTime;
+    const statusCode = error?.response?.status || error?.code || "unknown";
+    let errorMessage = error.message || "Unknown API error";
+
+    console.error(`[EMH] Caught error after ${responseTime}ms | HTTP ${statusCode} | message=${error?.message}`);
+    if (error.response?.data) {
+      console.error(`[EMH] Error response body:`, JSON.stringify(error.response.data).slice(0, 500));
+      errorMessage += ` | Response: ${JSON.stringify(error.response.data).slice(0, 300)}`;
+    }
+
+    return {
+      query: "",
+      results: null,
+      responseTime,
+      statusCode: error.response?.status || 0,
+      error: errorMessage,
+    };
   }
 }
 

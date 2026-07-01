@@ -1,8 +1,8 @@
 const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
-const { AzureOpenAI } = require("openai");
 const promptEngine = require("./tests/utils/promptEngineHelper");
+const { getOpenAIClient } = require("./lib/openaiClient");
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
@@ -171,20 +171,6 @@ function addCompleteQuery(
   console.log("===============================");
 }
 
-function getOpenAiClient() {
-  const apiKey = process.env.NEXUS_API_KEY;
-  const endpoint = process.env.NEXUS_API_ENDPOINT;
-  const apiVersion = process.env.NEXUS_API_VERSION || "2024-08-01-preview";
-  if (!apiKey || !endpoint) {
-    return null;
-  }
-  return new AzureOpenAI({
-    apiKey,
-    endpoint,
-    apiVersion,
-  });
-}
-
 function loadCompletePromptConfig() {
   try {
     const promptData = JSON.parse(fs.readFileSync(aiPromptsPath, "utf8"));
@@ -240,7 +226,7 @@ async function buildComplete(data) {
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
       const query = await promptEngine.generateQueryWithVariation(
-        getOpenAiClient(),
+        getOpenAIClient(),
         facetKey,
         entry.formattedValue,
         entry.rawValue,
@@ -286,7 +272,7 @@ async function buildComplete(data) {
       const uniquePoints = [...new Set(points)];
       for (const value of uniquePoints) {
         const query = await promptEngine.generateQueryWithVariation(
-          getOpenAiClient(),
+          getOpenAIClient(),
           facetKey,
           String(value),
           value,

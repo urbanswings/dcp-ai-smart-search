@@ -883,8 +883,6 @@ test.describe("AI Smart Search - Vehicles MB", () => {
           userPromptTemplate,
           maxTokens,
           fallback,
-          undefined,
-          temperature,
         );
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries).map((query) => {

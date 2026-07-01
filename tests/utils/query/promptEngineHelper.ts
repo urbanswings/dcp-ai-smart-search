@@ -1,5 +1,9 @@
 import { AzureOpenAI } from "openai";
 
+const OPENAI_CHAT_MODEL = process.env.NEXUS_GPT_MODEL || "gpt-4o-mini";
+const OPENAI_DEFAULT_MAX_TOKENS = 200; // Increased from 40 to support query generation with gpt-5-mini
+const OPENAI_DEFAULT_TEMPERATURE = 0.7;
+
 /**
  * PromptEngineHelper
  * Encapsulates query generation with diversification, style hints, fallback templates,
@@ -485,19 +489,18 @@ async function generateOpenAiQuery(
   client: AzureOpenAI,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = 32,
+  maxTokens: number = OPENAI_DEFAULT_MAX_TOKENS,
 ): Promise<string> {
   console.log("[prompt-engine] Generating query with AI...");
   console.log(`[prompt-engine] System prompt: ${systemPrompt}`);
   console.log(`[prompt-engine] User prompt: ${userPrompt}`);
   const completion = await client.chat.completions.create({
-    model: "gpt-4o-mini",
+    model: OPENAI_CHAT_MODEL,
     messages: [
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
-    ],
-    temperature: 0.7,
-    max_tokens: maxTokens,
+    ],    
+    max_completion_tokens: maxTokens,
   });
   return completion?.choices?.[0]?.message?.content?.trim() || "";
 }

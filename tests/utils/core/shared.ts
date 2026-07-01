@@ -180,7 +180,6 @@ export async function areAllResponsesConsistentOneShot(
       systemPrompt,
       userPrompt,
       80,
-      0.1,
       "NO",
     );
     const raw = String(answer || "").trim();

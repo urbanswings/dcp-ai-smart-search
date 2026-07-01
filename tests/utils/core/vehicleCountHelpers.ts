@@ -247,7 +247,6 @@ export async function extractVehicleTotalCountFromMessage(
     ].join("\n"),
     `Response:\n${normalizedMessage}`,
     8,
-    0,
     "NONE",
   );
 

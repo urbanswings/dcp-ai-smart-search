@@ -154,8 +154,7 @@ export async function validateLanguageConsistency(
         },
       ],
       {
-        max_tokens: 10,
-        temperature: 0.2,
+        max_completion_tokens: 50, // Increased from 10 for better reliability with gpt-5-mini
       },
     );
     langCheckResult =

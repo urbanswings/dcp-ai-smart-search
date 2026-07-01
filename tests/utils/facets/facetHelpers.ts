@@ -466,7 +466,6 @@ export async function generateDateNumericQueriesFromFacets(
           rangeQueryValue.filterText,
         ),
         aiPromptData.maxTokens,
-        undefined,
         aiPromptData.fallback,
       );
       const inStock = isFacetInStock(facet);

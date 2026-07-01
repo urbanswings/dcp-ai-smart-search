@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { AzureOpenAI } from "openai";
 import path from "path";
+import { getOpenAIClient } from "../core/openaiClient";
 import * as promptEngine from "../query/promptEngineHelper";
 
 dotenv.config({ path: path.resolve(process.cwd(), ".env") });
@@ -617,19 +618,7 @@ function addCompleteQuery(
   console.log("\n");
 }
 
-function getOpenAiClient(): AzureOpenAI | null {
-  const apiKey = process.env.NEXUS_API_KEY;
-  const endpoint = process.env.NEXUS_API_ENDPOINT;
-  const apiVersion = process.env.NEXUS_API_VERSION || "2024-08-01-preview";
-  if (!apiKey || !endpoint) {
-    return null;
-  }
-  return new AzureOpenAI({
-    apiKey,
-    endpoint,
-    apiVersion,
-  });
-}
+
 
 function loadCompletePromptConfig(): PromptConfig {
   try {
@@ -917,7 +906,7 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
       const query = await promptEngine.generateQueryWithVariation(
-        getOpenAiClient(),
+        getOpenAIClient(),
         facetKey,
         entry.formattedValue,
         entry.rawValue,
@@ -960,7 +949,7 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
       const rangeValueMatrix = getRangeValueMatrix(facetKey, range);
       for (const rangeValue of rangeValueMatrix) {
         const query = await promptEngine.generateQueryWithVariation(
-          getOpenAiClient(),
+          getOpenAIClient(),
           facetKey,
           rangeValue.formattedValue,
           rangeValue.rawValue,
