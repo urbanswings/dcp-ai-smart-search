@@ -599,6 +599,30 @@
       }
     },
     {
+      "value": "show me petrol/electric cars",
+      "productType": "UCOS",
+      "shouldRecommend": true,
+      "shouldFilter": {
+        "include": [
+          {
+            "fuelType": [
+              "PETROL",
+              "ELECTRIC"
+            ]
+          }
+        ],
+        "exclude": [],
+        "strict": false
+      },
+      "aiEvaluationHints": {
+        "value": [
+          "Respond ONLY with: 'PASS' if the response filters for petrol and/or electric fuel types (as separate fuel types) and presents matching vehicles.",
+          "FAIL if the response treats the request as a plug-in hybrid / 'Petrol-Electric' fuel type request instead of separately matching petrol and electric vehicles, or if it shows only diesel results. Do NOT fail solely because specific model names differ from expected — inventory may vary."
+        ],
+        "overwrite": true
+      }
+    },
+    {
       "value": "find cars with advanced safety features and low mileage",
       "productType": "UCOS",
       "shouldRecommend": false,
