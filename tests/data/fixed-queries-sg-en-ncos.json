@@ -764,8 +764,8 @@
       "shouldFilter": true,
       "aiEvaluationHints": {
         "value": [
-          "Respond ONLY with: 'PASS' if the response acknowledges that filtering by built-in navigation system is not directly supported, OR presents general vehicle listings with a note that navigation system filtering is unavailable.",
-          "Do NOT fail if no navigation-specific filter is applied — built-in navigation is not a filterable attribute in the system and falling back to a general vehicle listing is the correct behavior. FAIL only if the response claims to have successfully filtered by navigation system as a specific supported attribute."
+          "Respond ONLY with: 'PASS' if the response confirms that built-in navigation system filtering is applied and presents Mercedes-Benz vehicles equipped with navigation, OR (if filtering genuinely could not be applied) presents a general vehicle listing with a note that navigation-specific filtering is unavailable.",
+          "FAIL if the response falsely claims navigation system filtering is unsupported when it is actually supported, or presents vehicles unrelated to the navigation system request."
         ],
         "overwrite": true
       }
