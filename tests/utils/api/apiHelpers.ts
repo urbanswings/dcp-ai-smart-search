@@ -249,18 +249,14 @@ export class SearchApiClient {
     startTime?: number,
   ): Promise<ApiSearchResult> {
     const responseStartTime = startTime || Date.now();
-    console.debug(`[EMH] performEmhSearchWithFacets called | query="${query?.value ?? query}"`);
 
     try {
       const config = this.getEmhConfig();
-      console.debug(`[EMH] Config | env=${config.env} country=${config.country} language=${config.language} product=${config.product} localEndpoint=${config.isLocalEndpoint}`);
 
       const { endpoint, requestConfig } = this.getEndpointAndConfig(config);
       const payload = this.buildEmhPayload(query, config);
 
-      console.debug(`[EMH] POST step-1 → ${endpoint}`);
       const response = await this.performEmhPost(endpoint, payload, requestConfig, config.isLocalEndpoint);
-      console.debug(`[EMH] POST step-1 response | status=${response.status} dataType=${typeof response.data}`);
 
       const responseTime = Date.now() - responseStartTime;
       const responseData = this.parseResponseData(response.data);
@@ -355,9 +351,7 @@ export class SearchApiClient {
       }
 
       if (isLocalEndpoint && error?.code === "ECONNRESET") {
-        console.debug(`[EMH] Retrying step-1 after ECONNRESET...`);
         const retryResponse = await axios.post(endpoint, payload, requestConfig);
-        console.debug(`[EMH] Retry step-1 response | status=${retryResponse.status}`);
         return retryResponse;
       }
 
@@ -378,8 +372,6 @@ export class SearchApiClient {
   }
 
   private async handleLocalFlowResponse(responseData: any, query: any, responseTime: number, statusCode: number) {
-    console.debug(`[EMH] Local flow | messageToUser="${responseData?.messageToUser}" search.variables=${JSON.stringify(responseData?.search?.variables).slice(0, 200)}`);
-
     const endpoint = "http://localhost:8080/api/v2/search/proxy";
     const payload = {
       operationName: "GetSearchResults",
@@ -387,7 +379,6 @@ export class SearchApiClient {
       query: responseData.search.query || query,
     };
 
-    console.debug(`[EMH] POST step-2 (proxy) → ${endpoint}`);
     const response = await axios.post(endpoint, payload, {
       timeout: 30000,
       headers: {
@@ -400,7 +391,6 @@ export class SearchApiClient {
     });
 
     const data = this.parseResponseData(response.data);
-    console.debug(`[EMH] POST step-2 response | status=${response.status} hasErrors=${!!response.data?.errors}`);
 
     if (response.data?.errors) {
       console.error(`[EMH] POST step-2 GraphQL errors:`, JSON.stringify(response.data.errors).slice(0, 500));
@@ -437,8 +427,6 @@ export class SearchApiClient {
   }
 
   private handleRemoteFlowResponse(responseData: any, responseTime: number, statusCode: number) {
-    console.debug(`[EMH] Remote flow | hasSmartSearch=${!!responseData?.data?.smartSearch} parameters=${JSON.stringify(responseData?.data?.smartSearch?.parameters).slice(0, 200)}`);
-
     const normalizedData = {
       smartSearchResponse: {
         message: responseData.data.smartSearch.message,

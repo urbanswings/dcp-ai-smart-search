@@ -577,6 +577,9 @@
       },
       {
         "value": "E 400 e 4MATIC"
+      },
+      {
+        "value": "EQB 300 4MATIC"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -882,6 +885,22 @@
       {
         "formattedValue": "STARSTRUCK",
         "value": "29f5051f"
+      },
+      {
+        "formattedValue": "'RoF' 스페셜 에디션",
+        "value": "dcae100e"
+      },
+      {
+        "formattedValue": "E-Class 7월 구매 혜택",
+        "value": "dd6c0fd9"
+      },
+      {
+        "formattedValue": "개별소비세 인하분 잔여재고",
+        "value": "5cae1c36"
+      },
+      {
+        "formattedValue": "전기차 7월 구매 혜택",
+        "value": "4e951417"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1063,6 +1082,30 @@
       {
         "formattedValue": "화이트",
         "value": "3c320896"
+      },
+      {
+        "formattedValue": "그레이 ",
+        "value": "461a08d9"
+      },
+      {
+        "formattedValue": "레드  ",
+        "value": "2f60067d"
+      },
+      {
+        "formattedValue": "베이지 ",
+        "value": "45a208bd"
+      },
+      {
+        "formattedValue": "브라운 ",
+        "value": "45ba08dd"
+      },
+      {
+        "formattedValue": "블랙  ",
+        "value": "309f06a9"
+      },
+      {
+        "formattedValue": "화이트 ",
+        "value": "448b08b6"
       }
     ],
     "facetType": "MULTI_VALUE"

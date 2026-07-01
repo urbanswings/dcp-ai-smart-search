@@ -67,7 +67,7 @@ export async function waitForSmartSearchControls(
     return null;
   } catch (e: any) {
     const details = e?.message || e;
-    console.debug("[DEBUG] Error waiting for search UI:", details);
+
     return `Search UI not visible: ${details}`;
   }
 }
@@ -77,13 +77,13 @@ export async function fillSmartSearchInput(
   actualInput: any,
 ): Promise<string | null> {
   try {
-    console.debug(`[DEBUG] Filling input with: '${actualInput}'`);
+
     await input.waitFor({ state: "visible", timeout: 10000 });
     await input.fill(" ");
     await input.fill(actualInput);
     return null;
   } catch (e: any) {
-    console.debug("[DEBUG] Error filling input:", e?.message || e);
+
     return `Search input not usable: ${e?.message || e}`;
   }
 }
@@ -112,7 +112,7 @@ export async function assertSubmitDisabled(
     };
   }
 
-  console.debug("[DEBUG] FAILED: Submit Button Enabled");
+
   return {
     query,
     results: "[Script] FAILED: Submit Button Enabled",
@@ -152,7 +152,7 @@ export function createSmartSearchResponseCapture(
         if (responseCapturedPromiseResolve) responseCapturedPromiseResolve();
       }
     } catch (e) {
-      console.warn("[DEBUG] Failed to capture API response payload:", e);
+      console.warn("Failed to capture API response payload:", e);
     }
   };
 
@@ -202,7 +202,7 @@ async function retrySmartSearchClick(
     return false;
   } catch (e: any) {
     if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-      console.warn("[DEBUG] Page closed during retry button click");
+      console.warn("Page closed during retry button click");
       return true;
     }
     return false;
@@ -228,7 +228,7 @@ export async function clickSearchAndWaitForResult(
   while (retries < 3 && !pageClosed) {
     try {
       if (page.isClosed()) {
-        console.warn("[DEBUG] Page was closed, cannot proceed with retries");
+        console.warn("Page was closed, cannot proceed with retries");
         pageClosed = true;
         break;
       }
@@ -247,7 +247,7 @@ export async function clickSearchAndWaitForResult(
         isSuccessVisible = await successBubbleLocator.isVisible();
       } catch (e: any) {
         if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-          console.warn("[DEBUG] Page closed during isVisible check");
+          console.warn("Page closed during isVisible check");
           pageClosed = true;
           break;
         }
@@ -266,7 +266,7 @@ export async function clickSearchAndWaitForResult(
         errorVisible = await errorResultLocator.isVisible({ timeout: 3000 });
       } catch (e: any) {
         if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-          console.warn("[DEBUG] Page closed during error check");
+          console.warn("Page closed during error check");
           pageClosed = true;
           break;
         }
@@ -295,7 +295,7 @@ export async function clickSearchAndWaitForResult(
         errMsg.includes("closed") ||
         errMsg.includes("context")
       ) {
-        console.warn(`[DEBUG] Page appears to be closed: ${errMsg}`);
+        console.warn(`Page appears to be closed: ${errMsg}`);
         pageClosed = true;
         break;
       }

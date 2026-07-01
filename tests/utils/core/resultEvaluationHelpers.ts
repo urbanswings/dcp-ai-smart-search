@@ -168,7 +168,7 @@ export async function validateLanguageConsistency(
   }
 
   if (!isLanguageConsistencyAccepted(langCheckResult)) {
-    console.debug("[DEBUG] Language consistency check: FAIL");
+
     return `Language Inconsistency - '${langCheckResult}'`;
   }
 

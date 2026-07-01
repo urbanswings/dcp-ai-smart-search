@@ -127,7 +127,7 @@ export async function processAndLogUiResult({
       uiVehicleCount = null;
     }
   } catch (e) {
-    console.debug("[DEBUG] Could not extract UI vehicle count:", e);
+
   }
   if (uiVehicleCount === 0 && resultCount > 0) {
     responseCheckPassed = false;
