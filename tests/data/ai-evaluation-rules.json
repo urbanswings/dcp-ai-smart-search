@@ -493,6 +493,7 @@
         "PASS if the response names a specific Mercedes-Benz model (e.g., GLC, EQS, E-Class, GLE) and explains why it suits the described preferences — even if the reasoning is broad or aspirational.",
         "PASS if the response addresses the primary vehicle type or category from the query (e.g., sedan, SUV, coupe) and presents a relevant Mercedes-Benz selection, even if not every stated preference is explicitly mentioned in the response text — the presence of a matching selection is sufficient.",
         "PASS if the response reports a technical issue, unavailability, or lack of match and redirects the user to Mercedes-Benz resources, inventory browsing, or a sales consultant.",
+        "PASS if the response declines to give details on a non-vehicle-search preference (e.g., specific safety feature details, financing, warranty terms) and redirects that part of the request to a sales consultant or dealership, as long as it still presents a relevant Mercedes-Benz vehicle selection addressing the other stated preferences (e.g., body type, luxury tier). Do NOT fail solely because the response does not itemize or explain the declined preference in detail.",
         "FAIL if the response recommends non-Mercedes-Benz vehicles or competitor brands instead of or alongside MB options.",
         "FAIL if the response completely ignores the user's stated preferences and presents unrelated vehicles with no connection to what was requested.",
         "FAIL if the response is incoherent, off-topic, unsafe, or offensive.",
