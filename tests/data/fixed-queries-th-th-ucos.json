@@ -424,11 +424,7 @@
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
-        "include": [
-          {
-            "campaigns": true
-          }
-        ],
+        "include": [],
         "exclude": [],
         "strict": false
       },
@@ -445,11 +441,7 @@
       "productType": "NCOS",
       "shouldRecommend": false,
       "shouldFilter": {
-        "include": [
-          {
-            "campaigns": true
-          }
-        ],
+        "include": [],
         "exclude": [],
         "strict": false
       },

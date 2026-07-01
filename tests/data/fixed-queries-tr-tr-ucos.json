@@ -515,11 +515,7 @@
       "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": {
-        "include": [
-          {
-            "campaigns": true
-          }
-        ],
+        "include": [],
         "exclude": [],
         "strict": false
       },
@@ -536,11 +532,7 @@
       "productType": "UCOS",
       "shouldRecommend": false,
       "shouldFilter": {
-        "include": [
-          {
-            "campaigns": true
-          }
-        ],
+        "include": [],
         "exclude": [],
         "strict": false
       },
