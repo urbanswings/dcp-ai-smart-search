@@ -206,9 +206,6 @@ export async function evaluateSearchResult(
       return "PASS";
     }
 
-    if (!answer.includes("PASS")) {
-      console.warn(`[WARN] OpenAI Evaluation indicates failure: ${answer}`);
-    }
     return answer ?? "No response from OpenAI.";
   } catch (error) {
     console.warn(
