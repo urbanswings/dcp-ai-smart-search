@@ -954,6 +954,11 @@
         "label": "전송",
         "formattedValue": "수동",
         "value": "MANUAL"
+      },
+      {
+        "label": "전송",
+        "formattedValue": "NA",
+        "value": "UNDEFINED"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1054,6 +1059,10 @@
       {
         "formattedValue": "블루",
         "value": "2454067d"
+      },
+      {
+        "formattedValue": "화이트",
+        "value": "3c320896"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2270,6 +2279,10 @@
       {
         "formattedValue": "화이트",
         "value": "3c320896"
+      },
+      {
+        "formattedValue": "브라운",
+        "value": "3d3a08bd"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -3929,6 +3942,36 @@
       },
       {
         "value": "GS0078044"
+      },
+      {
+        "value": "GS0031906"
+      },
+      {
+        "value": "GS0079633"
+      },
+      {
+        "value": "GS00112406"
+      },
+      {
+        "value": "GS00111284"
+      },
+      {
+        "value": "GS0049456"
+      },
+      {
+        "value": "GS00110650"
+      },
+      {
+        "value": "GS00113559"
+      },
+      {
+        "value": "GS00111129"
+      },
+      {
+        "value": "GS00113602"
+      },
+      {
+        "value": "GS0053604"
       }
     ],
     "facetType": "MULTI_VALUE"

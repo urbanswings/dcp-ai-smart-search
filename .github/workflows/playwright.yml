@@ -230,7 +230,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: smart-search-results
+          name: "smart-search-results - [${{ inputs.ENVIRONMENT != '' && inputs.ENVIRONMENT || vars.ENVIRONMENT || 'PREPROD' }}][${{ inputs.COUNTRY != '' && inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE != '' && inputs.LANGUAGE || 'EN' }}] ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }} #${{ github.run_number }}"
           path: |
             playwright-report/
             results/json/
