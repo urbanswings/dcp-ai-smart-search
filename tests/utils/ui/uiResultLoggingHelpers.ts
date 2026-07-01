@@ -3,7 +3,9 @@ import { validateExpectedFacets } from "../facets/facetAssertionHelpers";
 import {
   addFailureReason,
   evaluateSmartSearchMessage,
+  extractMotorizationFromSmartSearchMessage,
   extractSmartSearchParameters,
+  getDetectedMotorizationValues,
   getCountStatus,
   getSmartSearchResultCount,
   isPassEvaluation,
@@ -73,6 +75,13 @@ export async function processAndLogUiResult({
   const resultsFacets = extractSmartSearchParameters(
     results.results.responseData,
   );
+  if (!Array.isArray(resultsFacets.motorization)) {
+    const motorizationFromMessage =
+      extractMotorizationFromSmartSearchMessage(smartSearchMessage);
+    if (motorizationFromMessage.length > 0) {
+      resultsFacets.motorization = motorizationFromMessage;
+    }
+  }
   let openaiEvaluation = await evaluateSmartSearchMessage({
     smartSearchMessage,
     aiEvaluationHints,
@@ -260,6 +269,10 @@ export async function processAndLogUiResult({
     actualInput,
     smartSearchMessage,
   );
+  const motorization = getDetectedMotorizationValues(
+    resultsFacets,
+    smartSearchMessage,
+  );
 
   logResultSummary({
     displayHasError,
@@ -299,6 +312,7 @@ export async function processAndLogUiResult({
     resultCount,
     uiVehicleCount,
     responseVehicleTotalCount,
+    motorization,
     responseTime: results.responseTime,
     statusCode: null,
     hasError: displayHasError,

@@ -1,8 +1,12 @@
+import fs from "fs";
+import path from "path";
 import {
   evaluateSearchResult,
   fetchTranslation,
   openaiChatCompletion,
 } from "../query/aiHelpers";
+import facetsMasterData from "../../data/facets-master-data.json";
+import { normalizeFacetToken } from "../facets/facetAssertionHelpers";
 import { isLanguageConsistencyAccepted } from "./shared";
 import { extractVehicleTotalCountFromMessage } from "./vehicleCountHelpers";
 
@@ -16,6 +20,150 @@ export interface FailureState {
 export interface TranslatedResultText {
   queryEn: any;
   smartSearchMessageEn: string;
+}
+
+const EMH_API_RESPONSE_PATH = path.resolve(
+  __dirname,
+  "../../data/emh-api-response.json",
+);
+
+let normalizedEmhApiResponseCache: string | null | undefined;
+
+function getNormalizedEmhApiResponse(): string | null {
+  if (normalizedEmhApiResponseCache !== undefined) {
+    return normalizedEmhApiResponseCache;
+  }
+
+  try {
+    if (!fs.existsSync(EMH_API_RESPONSE_PATH)) {
+      normalizedEmhApiResponseCache = null;
+      return normalizedEmhApiResponseCache;
+    }
+
+    normalizedEmhApiResponseCache = normalizeFacetToken(
+      fs.readFileSync(EMH_API_RESPONSE_PATH, "utf-8"),
+    );
+  } catch {
+    normalizedEmhApiResponseCache = null;
+  }
+
+  return normalizedEmhApiResponseCache;
+}
+
+function isMotorizationFoundInEmhApiResponse(motorization: string): boolean {
+  const normalizedMotorization = normalizeFacetToken(motorization);
+  const normalizedEmhApiResponse = getNormalizedEmhApiResponse();
+
+  return Boolean(
+    normalizedMotorization &&
+      normalizedEmhApiResponse?.includes(normalizedMotorization),
+  );
+}
+
+function normalizeMotorizationDisplayValue(value: string): string {
+  return value.replace(/\s+KR$/i, "").trim();
+}
+
+function getMotorizationCandidateValues(): string[] {
+  const candidates = new Set<string>();
+  const motorizationValues = (facetsMasterData as any)?.motorization?.values;
+  const modelDesignationValues = (facetsMasterData as any)?.modelDesignation
+    ?.values;
+
+  if (Array.isArray(modelDesignationValues)) {
+    for (const item of modelDesignationValues) {
+      const formattedValue = normalizeMotorizationDisplayValue(
+        String(item?.formattedValue || "").trim(),
+      );
+      if (formattedValue) {
+        candidates.add(formattedValue);
+      }
+    }
+  }
+
+  if (Array.isArray(motorizationValues)) {
+    for (const item of motorizationValues) {
+      const value = normalizeMotorizationDisplayValue(
+        String(item?.value || "").trim(),
+      );
+      if (value) {
+        candidates.add(value);
+      }
+    }
+  }
+
+  return Array.from(candidates);
+}
+
+export function extractMotorizationFromSmartSearchMessage(
+  smartSearchMessage: string,
+): string[] {
+  const normalizedMessage = normalizeFacetToken(smartSearchMessage || "");
+  if (!normalizedMessage) {
+    return [];
+  }
+
+  const motorizationValues = getMotorizationCandidateValues();
+  if (motorizationValues.length === 0) {
+    return [];
+  }
+
+  const matches = motorizationValues
+    .map((value: string) => ({
+      value,
+      normalizedValue: normalizeFacetToken(value),
+    }))
+    .filter(({ normalizedValue }) => {
+      return (
+        normalizedValue && normalizedMessage.includes(normalizedValue)
+      );
+    })
+    .sort((a, b) => {
+      const indexDiff =
+        normalizedMessage.indexOf(a.normalizedValue) -
+        normalizedMessage.indexOf(b.normalizedValue);
+      if (indexDiff !== 0) {
+        return indexDiff;
+      }
+
+      const normalizedLengthDiff =
+        b.normalizedValue.length - a.normalizedValue.length;
+      return normalizedLengthDiff || b.value.length - a.value.length;
+    })
+    .map(({ value }) => value);
+
+  const selectedMatches: string[] = [];
+  const selectedTokens: string[] = [];
+  for (const match of matches) {
+    const normalizedMatch = normalizeFacetToken(match);
+    if (
+      selectedTokens.some(
+        (token) =>
+          token.includes(normalizedMatch) ||
+          normalizedMatch.includes(token),
+      )
+    ) {
+      continue;
+    }
+
+    selectedMatches.push(match);
+    selectedTokens.push(normalizedMatch);
+  }
+
+  return selectedMatches;
+}
+
+export function getDetectedMotorizationValues(
+  resultsFacets: Record<string, any>,
+  smartSearchMessage: string,
+): string[] {
+  if (resultsFacets.motorization !== undefined) {
+    return Array.isArray(resultsFacets.motorization)
+      ? resultsFacets.motorization
+      : [String(resultsFacets.motorization)];
+  }
+
+  return extractMotorizationFromSmartSearchMessage(smartSearchMessage);
 }
 
 export function isPassEvaluation(
@@ -280,6 +428,32 @@ export function logResultSummary({
   console.log(`• Actual:    ${JSON.stringify(resultsFacets)}`);
   if (uiSelectedFiltersKV !== undefined) {
     console.log(`• UI:        ${JSON.stringify(uiSelectedFiltersKV)}`);
+  }
+  const motorizationValues = getDetectedMotorizationValues(
+    resultsFacets,
+    smartSearchMessage,
+  );
+  const modelDesignationMatches = motorizationValues.map((motorization) => ({
+    motorization,
+    found: isMotorizationFoundInEmhApiResponse(motorization),
+  }));
+  const modelDesignationStatus: ResultStatus =
+    motorizationValues.length === 0
+      ? "SKIP"
+      : modelDesignationMatches.every((match) => match.found)
+        ? "PASS"
+        : "FAIL";
+  console.log(
+    `\n${sectionMarker(modelDesignationStatus)} Model Designation:`,
+  );
+  if (motorizationValues.length === 0) {
+    console.log("• -");
+  } else {
+    const showItemMarkers = modelDesignationStatus === "FAIL";
+    for (const match of modelDesignationMatches) {
+      const foundMarker = showItemMarkers && match.found ? "✅ " : "";
+      console.log(`• ${foundMarker}${match.motorization}`);
+    }
   }
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 }

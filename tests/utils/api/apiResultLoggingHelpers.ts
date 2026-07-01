@@ -6,6 +6,7 @@ import {
   addFailureReason,
   evaluateSmartSearchMessage,
   extractSmartSearchParameters,
+  getDetectedMotorizationValues,
   getCountStatus,
   getSmartSearchResultCount,
   isPassEvaluation,
@@ -259,6 +260,10 @@ export async function processAndLogApiResult({
     actualInput,
     smartSearchMessage,
   );
+  const motorization = getDetectedMotorizationValues(
+    resultsFacets,
+    smartSearchMessage,
+  );
 
   logResultSummary({
     displayHasError,
@@ -294,6 +299,7 @@ export async function processAndLogApiResult({
     },
     resultCount,
     responseVehicleTotalCount,
+    motorization,
     responseTime: results.responseTime,
     statusCode: results.statusCode,
     hasError: displayHasError,
