@@ -551,7 +551,7 @@
       "aiEvaluationHints": {
         "value": [
           "Respond ONLY with: 'PASS' if the response clearly states that this is a channel for new vehicles/cars and declines the used-car request, while optionally redirecting the user to new Mercedes-Benz vehicles or the appropriate team.",
-          "FAIL if the response claims to show used cars, second-hand inventory, or otherwise treats used-car search as supported in this channel."
+          "FAIL if the response claims to show used cars or second-hand inventory directly within this channel's results, or otherwise implies this (new-vehicle) channel itself can fulfill the used-car search. Do NOT fail merely because the response mentions or points the user to a separate second-hand/used-car search or channel — that is a valid redirect, not support for used cars in this channel."
         ],
         "overwrite": true
       }
