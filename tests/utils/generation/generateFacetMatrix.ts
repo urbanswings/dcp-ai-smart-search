@@ -240,6 +240,13 @@ function getMappedFormattedValue(
     };
     return map[String(rawValue)] || null;
   }
+  if (facetKey === "stockType") {
+    const map: Record<string, string> = {
+      AVAILABLE: "Available",
+      IN_PIPELINE: "In Pipeline",
+    };
+    return map[String(rawValue)] || null;
+  }
   return null;
 }
 
@@ -570,7 +577,7 @@ function fallbackCompleteQuery(
     return `show me ${formattedValue.toLowerCase()} cars`;
   }
   if (facetKey === "fuelType") {
-    return `show me ${formattedValue.toLowerCase()} cars`;
+    return `show me ${toQueryLabel(facetKey, rawValue)}`;
   }
   if (facetKey === "bodyType") {
     return `show me ${toQueryLabel(facetKey, rawValue)}`;
@@ -636,6 +643,10 @@ function buildCompleteFilterText(
 ): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
     return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
+  }
+  if (facetKey === "fuelType") {
+    const label = toQueryLabel(facetKey, rawValue).replace(/ cars$/, "");
+    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${label}'`;
   }
   return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue}'`;
 }
