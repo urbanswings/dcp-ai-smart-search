@@ -740,7 +740,18 @@ function buildAcceptedFacetValueLabels(
       DIESEL: ["diesel"],
       ELECTRIC: ["electric", "electric vehicle", "ev"],
       PETROL: ["petrol", "gasoline"],
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: [
+        "hybrid diesel",
+        "diesel hybrid",
+        "plug-in hybrid diesel",
+        "plugin hybrid diesel",
+        "hybrid (diesel + electric)",
+        "diesel electric hybrid",
+      ],
       PETROL_ELECTRIC_PLUGIN_HYBRID: [
+        "hybrid petrol",
+        "petrol hybrid",
+        "hybrid gasoline",
         "plug-in hybrid",
         "plugin hybrid",
         "hybrid (petrol + electric)",
@@ -997,7 +1008,28 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   };
 }
 
+function getFacetFormattedValue(
+  facetKey: string,
+  rawValue: unknown,
+): string | null {
+  const facetData = globalFacets?.[facetKey];
+  if (facetData && Array.isArray(facetData.values)) {
+    for (const entry of facetData.values) {
+      if (entry?.value === rawValue && entry?.formattedValue) {
+        return String(entry.formattedValue).trim();
+      }
+    }
+  }
+  return null;
+}
+
 function toQueryLabel(facetKey: string, value: unknown): string {
+  // First try to get formattedValue from API response facet data
+  const apiFormattedValue = getFacetFormattedValue(facetKey, value);
+  if (apiFormattedValue) {
+    return apiFormattedValue;
+  }
+
   if (facetKey === "bodyType") {
     const map: Record<string, string> = {
       LIMOUSINE: "sedans",
@@ -1015,13 +1047,14 @@ function toQueryLabel(facetKey: string, value: unknown): string {
 
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
-      DIESEL: "diesel cars",
-      ELECTRIC: "electric cars",
-      PETROL: "petrol cars",
-      PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
+      DIESEL: "diesel",
+      ELECTRIC: "electric",
+      PETROL: "petrol",
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: "hybrid diesel",
+      PETROL_ELECTRIC_PLUGIN_HYBRID: "hybrid petrol",
     };
     return (
-      map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase()
+      map[String(value)] || `${titleCaseFromToken(value)}`.toLowerCase()
     );
   }
 
@@ -1093,6 +1126,12 @@ function setGlobalFacets(facets: Facets): void {
 }
 
 function toHintLabel(facetKey: string, value: unknown): string {
+  // First try to get formattedValue from API response facet data
+  const apiFormattedValue = getFacetFormattedValue(facetKey, value);
+  if (apiFormattedValue) {
+    return apiFormattedValue;
+  }
+
   if (facetKey === "color") {
     const colorMap = buildUUIDMapFromFacets(globalFacets, "color");
     const strValue = String(value).toLowerCase();
@@ -1123,10 +1162,11 @@ function toHintLabel(facetKey: string, value: unknown): string {
   }
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
-      DIESEL: "diesel cars",
-      ELECTRIC: "electric cars",
-      PETROL: "petrol cars",
-      PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
+      DIESEL: "diesel",
+      ELECTRIC: "electric",
+      PETROL: "petrol",
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: "hybrid diesel",
+      PETROL_ELECTRIC_PLUGIN_HYBRID: "hybrid petrol",
     };
     return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
@@ -1236,7 +1276,7 @@ function getLocalizedMatrixPhrases(): LocalizedMatrixPhrases {
       showMeOnly: "다음만 보여주세요",
       and: "및",
       or: "또는",
-      allVehiclesExcept: "다음을 제외한 모든 차량",
+      allVehiclesExcept: "를 제외한 모든 차량",
     },
     ja: {
       showMeOnly: "次のみを表示してください",
@@ -1246,6 +1286,23 @@ function getLocalizedMatrixPhrases(): LocalizedMatrixPhrases {
     },
   };
   return phrases[language] || phrases.en;
+}
+
+function buildExclusionQuery(
+  facetKey: string,
+  excludedValue: unknown,
+  phrases: LocalizedMatrixPhrases,
+): string {
+  const valueLabel = toQueryLabel(facetKey, excludedValue);
+  const language = getLanguageCode();
+  
+  // Korean uses postfix word order: <value> + suffix
+  if (language === "ko") {
+    return `${valueLabel} ${phrases.allVehiclesExcept}`;
+  }
+  
+  // Other languages use prefix word order: prefix + <value>
+  return `${phrases.allVehiclesExcept} ${valueLabel}`;
 }
 
 function buildMatrix(data: ApiResponse): GeneratedSuite {
@@ -1267,7 +1324,7 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
       if (allowedValues.length === 0) {
         continue;
       }
-      const query = `${phrases.allVehiclesExcept} ${toQueryLabel(facetKey, excludedValue)}`;
+      const query = buildExclusionQuery(facetKey, excludedValue, phrases);
       regressionQueries.push({
         value: query,
         skipOpenAiEvaluation: true,
