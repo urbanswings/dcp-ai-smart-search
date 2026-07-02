@@ -22,9 +22,8 @@ const FACET_ORDER = [
   "bodyType",
   "fuelType",
   "color",
-  "stockType",
   "brand",
-  "seats",
+  "price",
 ];
 
 // Facets to exclude from query generation
@@ -59,13 +58,11 @@ export const INCLUDE_FACETS = [
   "modelYear",
   "motorization",
   "packages",
-  "page",
   "price",
   "stockType",
   "seats",
   "upholstery",
   "upholsteryPolish",
-  "vehicleCategory",
 ];
 
 export function isIncludedFacet(facetKey: string): boolean {
@@ -1207,9 +1204,54 @@ function pairwise<T>(values: T[]): Array<[T, T]> {
   return out;
 }
 
+interface LocalizedMatrixPhrases {
+  showMeOnly: string;
+  and: string;
+  or: string;
+  allVehiclesExcept: string;
+}
+
+function getLocalizedMatrixPhrases(): LocalizedMatrixPhrases {
+  const language = getLanguageCode();
+  const phrases: Record<string, LocalizedMatrixPhrases> = {
+    en: {
+      showMeOnly: "show me only",
+      and: "and",
+      or: "or",
+      allVehiclesExcept: "all vehicles except",
+    },
+    tr: {
+      showMeOnly: "bana sadece göster",
+      and: "ve",
+      or: "veya",
+      allVehiclesExcept: "hariç tüm araçlar",
+    },
+    th: {
+      showMeOnly: "แสดงให้ฉันดูเฉพาะ",
+      and: "และ",
+      or: "หรือ",
+      allVehiclesExcept: "ยานพาหนะทั้งหมดยกเว้น",
+    },
+    ko: {
+      showMeOnly: "다음만 보여주세요",
+      and: "및",
+      or: "또는",
+      allVehiclesExcept: "다음을 제외한 모든 차량",
+    },
+    ja: {
+      showMeOnly: "次のみを表示してください",
+      and: "と",
+      or: "または",
+      allVehiclesExcept: "次以外のすべての車両",
+    },
+  };
+  return phrases[language] || phrases.en;
+}
+
 function buildMatrix(data: ApiResponse): GeneratedSuite {
   const facets = data?.data?.search?.facets || {};
   setGlobalFacets(facets);
+  const phrases = getLocalizedMatrixPhrases();
 
   const regressionQueries: RegressionQuery[] = [];
   const informativeHintsByQuery: Record<string, string[]> = {};
@@ -1225,7 +1267,7 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
       if (allowedValues.length === 0) {
         continue;
       }
-      const query = `all vehicles except ${toQueryLabel(facetKey, excludedValue)}`;
+      const query = `${phrases.allVehiclesExcept} ${toQueryLabel(facetKey, excludedValue)}`;
       regressionQueries.push({
         value: query,
         skipOpenAiEvaluation: true,
@@ -1246,8 +1288,8 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
     for (const [a, b] of pairwise(values)) {
       const left = toQueryLabel(facetKey, a);
       const right = toQueryLabel(facetKey, b);
-      const andQuery = `show me only ${left} and ${right}`;
-      const orQuery = `show me only ${left} or ${right}`;
+      const andQuery = `${phrases.showMeOnly} ${left} ${phrases.and} ${right}`;
+      const orQuery = `${phrases.showMeOnly} ${left} ${phrases.or} ${right}`;
 
       regressionQueries.push(
         {

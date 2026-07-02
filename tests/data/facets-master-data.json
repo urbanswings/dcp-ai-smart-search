@@ -904,6 +904,18 @@
       {
         "formattedValue": "전기차 7월 구매 혜택",
         "value": "4e951417"
+      },
+      {
+        "formattedValue": "C-Class 7월 구매 혜택",
+        "value": "dd360fd7"
+      },
+      {
+        "formattedValue": "GLC 7월 구매 혜택",
+        "value": "b0fc0e47"
+      },
+      {
+        "formattedValue": "140주년 기념 스페셜 에디션",
+        "value": "d84217ff"
       }
     ],
     "facetType": "MULTI_VALUE"
