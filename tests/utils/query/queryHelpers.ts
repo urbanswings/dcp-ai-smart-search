@@ -7,6 +7,7 @@ import {
   facetDisplayName,
   isIncludedFacet,
   readJson,
+  toQueryLabel,
 } from "../generation/generateFacetMatrix.js";
 import * as promptEngine from "./promptEngineHelper";
 
@@ -380,7 +381,10 @@ async function generateMissingFacetValuesSuiteOnTheFly(
   const regressionQueries: FixedQueryCase[] = [];
 
   for (const entry of missingValues) {
-    const valueLabel = entry.formattedValue;
+    const valueLabel =
+      facetKey === "stockType"
+        ? toQueryLabel(facetKey, entry.rawValue)
+        : entry.formattedValue;
     const query = await promptEngine.generateQueryWithVariation(
       null,
       facetKey,

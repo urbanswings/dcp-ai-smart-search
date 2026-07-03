@@ -1070,8 +1070,8 @@ function toQueryLabel(facetKey: string, value: unknown): string {
 
   if (facetKey === "stockType") {
     const map: Record<string, string> = {
-      AVAILABLE: "available vehicles",
-      IN_PIPELINE: "in-pipeline vehicles",
+      AVAILABLE: "in-stock",
+      IN_PIPELINE: "future",
     };
     return (
       map[String(value)] ||
