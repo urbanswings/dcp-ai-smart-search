@@ -2120,17 +2120,25 @@
     }
 
     function formatFacetValue(value) {
-      if (value && typeof value === "object" && !Array.isArray(value)) {
-        const hasMinMax = Object.prototype.hasOwnProperty.call(value, "min") || Object.prototype.hasOwnProperty.call(value, "max");
-        if (hasMinMax) {
-          const minPart = Object.prototype.hasOwnProperty.call(value, "min") ? "min: " + String(value.min) : "";
-          const maxPart = Object.prototype.hasOwnProperty.call(value, "max") ? "max: " + String(value.max) : "";
-          return [minPart, maxPart].filter(Boolean).join(", ");
+      if (Array.isArray(value)) {
+        if (!value.length) {
+          return "[]";
         }
-        return Object.keys(value)
-          .map((key) => key + ": " + String(value[key]))
-          .join(", ");
+        return "[" + value.map((item) => formatFacetValue(item)).join(", ") + "]";
       }
+
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const entries = Object.keys(value)
+          .filter((key) => !String(key).startsWith("__"))
+          .map((key) => key + ": " + formatFacetValue(value[key]));
+
+        if (!entries.length) {
+          return "{}";
+        }
+
+        return "{" + entries.join(", ") + "}";
+      }
+
       return String(value);
     }
 

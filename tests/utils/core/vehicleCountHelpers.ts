@@ -15,6 +15,21 @@ function parseCountToken(countText: string): number | null {
     eight: 8,
     nine: 9,
     ten: 10,
+    // Turkish
+    bir: 1,
+    iki: 2,
+    uc: 3,
+    "üç": 3,
+    dort: 4,
+    "dört": 4,
+    bes: 5,
+    "beş": 5,
+    alti: 6,
+    "altı": 6,
+    yedi: 7,
+    sekiz: 8,
+    dokuz: 9,
+    on: 10,
   };
 
   if (wordCounts[normalized] !== undefined) {
@@ -52,9 +67,10 @@ function extractVehicleTotalCountFromMessageByPattern(
     return null;
   }
 
-  const numericCountToken = "(?:\\d{1,3}(?:,\\d{3})+|\\d+)(?![\\p{L}\\p{M}_-])";
+  const numericCountToken =
+    "(?<![\\d.,])(?:\\d{1,3}(?:[.,]\\d{3})+|\\d+)(?![\\d.,])(?![\\p{L}\\p{M}_-])";
   const wordCountToken =
-    "(?:one|two|three|four|five|six|seven|eight|nine|ten)(?!-)";
+    "(?:one|two|three|four|five|six|seven|eight|nine|ten|bir|iki|uc|üç|dort|dört|bes|beş|alti|altı|yedi|sekiz|dokuz|on)(?!-)";
   const countToken = `(${numericCountToken}|${wordCountToken})`;
   const localizedVehicleNouns = [
     "vehicles?",
@@ -218,6 +234,41 @@ function isLikelyVehicleDescriptorNumber(
   );
 }
 
+function hasExplicitCountMention(message: string, count: number): boolean {
+  const escapedCount = String(count).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const digitPattern = new RegExp(
+    `(?<![\\d.,])${escapedCount}(?![\\d.,])`,
+    "iu",
+  );
+  if (digitPattern.test(message)) {
+    return true;
+  }
+
+  if (count >= 1 && count <= 10) {
+    const numberWordsByValue: Record<number, string[]> = {
+      1: ["one", "bir"],
+      2: ["two", "iki"],
+      3: ["three", "uc", "üç"],
+      4: ["four", "dort", "dört"],
+      5: ["five", "bes", "beş"],
+      6: ["six", "alti", "altı"],
+      7: ["seven", "yedi"],
+      8: ["eight", "sekiz"],
+      9: ["nine", "dokuz"],
+      10: ["ten", "on"],
+    };
+    const words = numberWordsByValue[count] || [];
+    for (const word of words) {
+      const wordPattern = new RegExp(`\\b${word}\\b`, "iu");
+      if (wordPattern.test(message)) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
 export async function extractVehicleTotalCountFromMessage(
   message: string,
 ): Promise<number | null> {
@@ -252,6 +303,9 @@ export async function extractVehicleTotalCountFromMessage(
 
   const detectedByAi = parseVehicleTotalCountDetectionAnswer(answer);
   if (detectedByAi !== null) {
+    if (!hasExplicitCountMention(normalizedMessage, detectedByAi)) {
+      return null;
+    }
     if (isLikelyVehicleDescriptorNumber(normalizedMessage, detectedByAi)) {
       return null;
     }

@@ -101,10 +101,10 @@ async function generateCompleteSuiteOnTheFly(
 ): Promise<GeneratedFacetSuite> {
   const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const sourceData = readJson(sourceDataPath);
-  const scopedSourceData = filterFacetsInApiResponse(
-    sourceData,
-    facetKeys || [],
-  );
+  const scopedSourceData = filterFacetsInApiResponse(sourceData, facetKeys || []);
+  if (Array.isArray(facetKeys) && facetKeys.length > 0) {
+    return buildComplete(sourceData, facetKeys);
+  }
   return buildComplete(scopedSourceData);
 }
 

@@ -85,11 +85,14 @@ interface FacetRange {
   max: number;
 }
 
+const ENGINE_POWER_KW_PER_HP = 1.343;
+
 interface RangeQueryCase {
   formattedValue: string;
   rawValue: number;
   filterValue: string;
   expectedValue: number;
+  shouldFilterValue: { min?: number; max?: number } | true;
 }
 
 interface Facets {
@@ -294,15 +297,126 @@ function getFacetListEntries(
 }
 
 function getFacetRange(facets: Facets, facetKey: string): FacetRange | null {
+  // For engine power, keep scenario unit but prefer EMH HP source for KW scenarios.
+  if (facetKey === "enginePowerKW") {
+    const convertedFromHp = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      "enginePowerKW",
+    );
+    if (convertedFromHp) {
+      return convertedFromHp;
+    }
+  }
+
+  const values = facets?.[facetKey]?.values;
+  if (!values || typeof values !== "object" || Array.isArray(values)) {
+    const convertedFallbackRange = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      facetKey,
+    );
+    return convertedFallbackRange;
+  }
+  const min = Number((values as Record<string, unknown>).min);
+  const max = Number((values as Record<string, unknown>).max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    const convertedFallbackRange = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      facetKey,
+    );
+    return convertedFallbackRange;
+  }
+  return { min, max };
+}
+
+function getDirectFacetRange(facets: Facets, facetKey: string): FacetRange | null {
   const values = facets?.[facetKey]?.values;
   if (!values || typeof values !== "object" || Array.isArray(values)) {
     return null;
   }
+
   const min = Number((values as Record<string, unknown>).min);
   const max = Number((values as Record<string, unknown>).max);
   if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
     return null;
   }
+
+  return { min, max };
+}
+
+function resolveEffectiveFacetKeyForShouldFilter(
+  facets: Facets,
+  facetKey: string,
+): string {
+  if (facetKey !== "enginePowerHP" && facetKey !== "enginePowerKW") {
+    return facetKey;
+  }
+
+  // Prefer backend/base facet key from EMH response.
+  if (getDirectFacetRange(facets, "enginePowerHP")) {
+    return "enginePowerHP";
+  }
+  if (getDirectFacetRange(facets, "enginePowerKW")) {
+    return "enginePowerKW";
+  }
+
+  return facetKey;
+}
+
+function convertEnginePowerValue(
+  sourceFacetKey: string,
+  targetFacetKey: string,
+  value: number,
+): number {
+  if (sourceFacetKey === targetFacetKey) {
+    return Math.round(value);
+  }
+  if (sourceFacetKey === "enginePowerKW" && targetFacetKey === "enginePowerHP") {
+    return Math.round(value * ENGINE_POWER_KW_PER_HP);
+  }
+  if (sourceFacetKey === "enginePowerHP" && targetFacetKey === "enginePowerKW") {
+    return Math.round(value / ENGINE_POWER_KW_PER_HP);
+  }
+  return Math.round(value);
+}
+
+function getConvertedEnginePowerRangeFromCounterpart(
+  facets: Facets,
+  targetFacetKey: string,
+): FacetRange | null {
+  if (targetFacetKey !== "enginePowerHP" && targetFacetKey !== "enginePowerKW") {
+    return null;
+  }
+
+  const sourceFacetKey =
+    targetFacetKey === "enginePowerHP" ? "enginePowerKW" : "enginePowerHP";
+  const sourceValues = facets?.[sourceFacetKey]?.values;
+  if (!sourceValues || typeof sourceValues !== "object" || Array.isArray(sourceValues)) {
+    return null;
+  }
+
+  const sourceMin = Number((sourceValues as Record<string, unknown>).min);
+  const sourceMax = Number((sourceValues as Record<string, unknown>).max);
+  if (!Number.isFinite(sourceMin) || !Number.isFinite(sourceMax) || sourceMin === sourceMax) {
+    return null;
+  }
+
+  const convertedMin = convertEnginePowerValue(
+    sourceFacetKey,
+    targetFacetKey,
+    sourceMin,
+  );
+  const convertedMax = convertEnginePowerValue(
+    sourceFacetKey,
+    targetFacetKey,
+    sourceMax,
+  );
+
+  const min = Math.min(convertedMin, convertedMax);
+  const max = Math.max(convertedMin, convertedMax);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    return null;
+  }
+
   return { min, max };
 }
 
@@ -851,6 +965,7 @@ function getRangeValueMatrix(
       rawValue: midpoint,
       filterValue: formattedMidpoint,
       expectedValue: midpoint,
+      shouldFilterValue: true as const,
     },
     {
       formattedValue: formatRangePhrase(
@@ -863,6 +978,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint,
+      shouldFilterValue: { max: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -875,6 +991,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint,
+      shouldFilterValue: { max: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -887,6 +1004,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint + 1,
+      shouldFilterValue: { min: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -899,11 +1017,15 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint + 1,
+      shouldFilterValue: { min: midpoint },
     },
   ];
 }
 
-async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
+async function buildComplete(
+  data: ApiResponse,
+  targetFacetKeys?: string[],
+): Promise<GeneratedSuite> {
   const facets = data?.data?.search?.facets || {};
   setGlobalFacets(facets);
   const queryMap = new Map<string, CompleteQuery>();
@@ -912,7 +1034,12 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   const aiContext = promptEngine.createPromptContext();
   const motorizationModelMap = buildMotorizationModelMap(data);
 
-  for (const facetKey of Object.keys(facets)) {
+  const facetKeysToProcess =
+    Array.isArray(targetFacetKeys) && targetFacetKeys.length > 0
+      ? targetFacetKeys.filter((key) => Object.prototype.hasOwnProperty.call(facets, key))
+      : Object.keys(facets);
+
+  for (const facetKey of facetKeysToProcess) {
     // Skip excluded facets
     if (EXCLUDE_FACETS.includes(facetKey)) {
       continue;
@@ -983,8 +1110,30 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
             maxTokens: promptConfig.maxTokens,
           },
         );
+        const effectiveFacetKey = resolveEffectiveFacetKeyForShouldFilter(
+          facets,
+          facetKey,
+        );
+
+        let effectiveShouldFilterValue: { min?: number; max?: number } | true;
+        if (rangeValue.shouldFilterValue === true) {
+          effectiveShouldFilterValue = true;
+        } else if (effectiveFacetKey === facetKey) {
+          effectiveShouldFilterValue = rangeValue.shouldFilterValue;
+        } else {
+          const raw = rangeValue.shouldFilterValue as { min?: number; max?: number };
+          const converted: { min?: number; max?: number } = {};
+          if (raw.min !== undefined) {
+            converted.min = convertEnginePowerValue(facetKey, effectiveFacetKey, raw.min);
+          }
+          if (raw.max !== undefined) {
+            converted.max = convertEnginePowerValue(facetKey, effectiveFacetKey, raw.max);
+          }
+          effectiveShouldFilterValue = converted;
+        }
+
         addCompleteQuery(queryMap, query, facetKey, rangeValue.filterValue, {
-          include: [{ [facetKey]: [rangeValue.expectedValue] }],
+          include: [{ [effectiveFacetKey]: effectiveShouldFilterValue }],
           exclude: [],
           strict: false,
         });

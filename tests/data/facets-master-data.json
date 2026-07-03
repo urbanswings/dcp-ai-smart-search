@@ -164,6 +164,14 @@
         "tags": [
           "NEW"
         ]
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLB",
+        "value": "GLB_NEW",
+        "tags": [
+          "NEW"
+        ]
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -583,6 +591,9 @@
       },
       {
         "value": "GLE 400 e 4MATIC"
+      },
+      {
+        "value": "CLA 220"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -920,6 +931,34 @@
       {
         "formattedValue": "GLE 7월 구매 혜택",
         "value": "b1260e49"
+      },
+      {
+        "formattedValue": "$5,000 Deposit Contribution",
+        "value": "a73d0b36"
+      },
+      {
+        "formattedValue": "$6,000 Deposit Contribution",
+        "value": "a7580b37"
+      },
+      {
+        "formattedValue": "$8,000 Deposit Contribution",
+        "value": "a78e0b39"
+      },
+      {
+        "formattedValue": "All new CLA",
+        "value": "305c057c"
+      },
+      {
+        "formattedValue": "From $118,888 Driveaway",
+        "value": "7e59091b"
+      },
+      {
+        "formattedValue": "CLE 53 限定車",
+        "value": "5b1a09e9"
+      },
+      {
+        "formattedValue": "新型CLA先行予約",
+        "value": "c42a0f57"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1327,6 +1366,14 @@
       {
         "formattedValue": "일렉트릭 아트 라인",
         "value": "354813cf"
+      },
+      {
+        "formattedValue": "Electric Art ライン",
+        "value": "9c880cc4"
+      },
+      {
+        "formattedValue": "プログレッシブ",
+        "value": "d2be1039"
       }
     ],
     "facetType": "MULTI_VALUE"
