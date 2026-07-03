@@ -63,6 +63,20 @@ interface GenerationOptions {
 }
 
 const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
+  campaigns: {
+    tr: "kampanyalar",
+    th: "แคมเปญ",
+    ko: "캠페인",
+    ja: "キャンペーン",
+    hi: "अभियान",
+    ta: "பிரச்சாரங்கள்",
+    te: "క్యాంపెయిన్‌లు",
+    bn: "ক্যাম্পেইন",
+    gu: "કૅમ્પેઇન",
+    kn: "ಪ್ರಚಾರಗಳು",
+    ml: "ക്യാമ്പെയ്‌നുകൾ",
+    mr: "मोहीम",
+  },
   bodyType: {
     tr: "gövde tipi",
     th: "ประเภทรถ",
@@ -329,6 +343,143 @@ function isEnglishLanguage(language: string): boolean {
   return normalizeLanguageCode(language) === "en";
 }
 
+function getLocalizedSentenceTemplate(
+  language: string,
+  styleHint: string,
+  keyLabel: string,
+  valueLabel: string,
+): string {
+  const normalizedLanguage = normalizeLanguageCode(language);
+
+  const styleKey = styleHint.includes("'<facet name> <filter value>'")
+    ? "exact"
+    : styleHint.includes("direct command")
+      ? "direct"
+      : styleHint.includes("feature-led")
+        ? "feature"
+        : styleHint.includes("shortlist")
+          ? "shortlist"
+          : styleHint.includes("conversational ask")
+            ? "ask"
+            : styleHint.includes("explore/discover")
+              ? "explore"
+              : styleHint.includes("minimal keyword")
+                ? "minimal"
+                : styleHint.includes("preference-led")
+                  ? "preference"
+                  : "default";
+
+  if (normalizedLanguage === "ko") {
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("direct command")) {
+      return `${keyLabel} ${valueLabel}로 보여줘.`;
+    }
+    if (styleHint.includes("feature-led")) {
+      return `${keyLabel} 기준으로 ${valueLabel} 차량을 추천해줘.`;
+    }
+    if (styleHint.includes("shortlist")) {
+      return `${valueLabel} ${keyLabel} 중심으로 후보를 추려줘.`;
+    }
+    if (styleHint.includes("conversational ask")) {
+      return `${valueLabel} ${keyLabel} 차량을 찾아줄 수 있을까?`;
+    }
+    if (styleHint.includes("explore/discover")) {
+      return `${valueLabel} ${keyLabel} 옵션을 살펴보고 싶어.`;
+    }
+    if (styleHint.includes("minimal keyword")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("preference-led")) {
+      return `${valueLabel} ${keyLabel}를 선호해.`;
+    }
+    return `${valueLabel} ${keyLabel} 차량 보여줘.`;
+  }
+
+  if (normalizedLanguage === "ja") {
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("direct command")) {
+      return `${keyLabel}が${valueLabel}の車を見せてください。`;
+    }
+    if (styleHint.includes("feature-led")) {
+      return `${keyLabel}を基準に${valueLabel}の車を提案してください。`;
+    }
+    if (styleHint.includes("shortlist")) {
+      return `${valueLabel}の${keyLabel}で候補を絞ってください。`;
+    }
+    if (styleHint.includes("conversational ask")) {
+      return `${valueLabel}の${keyLabel}の車を探せますか？`;
+    }
+    if (styleHint.includes("explore/discover")) {
+      return `${valueLabel}の${keyLabel}オプションを見たいです。`;
+    }
+    if (styleHint.includes("minimal keyword")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("preference-led")) {
+      return `${valueLabel}の${keyLabel}を希望します。`;
+    }
+    return `${valueLabel}の${keyLabel}の車を表示してください。`;
+  }
+
+  if (normalizedLanguage === "th") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `แสดงรถที่${keyLabel}เป็น${valueLabel}`,
+      feature: `ช่วยแนะนำรถตาม${keyLabel} ${valueLabel}`,
+      shortlist: `ช่วยคัดตัวเลือก${valueLabel}ใน${keyLabel}`,
+      ask: `ช่วยค้นหารถที่${keyLabel}เป็น${valueLabel}ได้ไหม`,
+      explore: `อยากดูตัวเลือก${valueLabel}สำหรับ${keyLabel}`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `ฉันต้องการ${keyLabel}แบบ${valueLabel}`,
+      default: `ขอดูรถที่${keyLabel}เป็น${valueLabel}`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  if (normalizedLanguage === "tr") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `${keyLabel} ${valueLabel} olan araclari goster.`,
+      feature: `${keyLabel} kriterinde ${valueLabel} araclari oner.`,
+      shortlist: `${valueLabel} ${keyLabel} icin kisa liste hazirla.`,
+      ask: `${keyLabel} ${valueLabel} olan arac bulabilir misin?`,
+      explore: `${valueLabel} ${keyLabel} seceneklerini kesfetmek istiyorum.`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `${valueLabel} ${keyLabel} tercih ediyorum.`,
+      default: `${valueLabel} ${keyLabel} araclari gormek istiyorum.`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  if (normalizedLanguage === "hi") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `${keyLabel} ${valueLabel} wali gadiyan dikhao.`,
+      feature: `${keyLabel} ${valueLabel} ke adhar par gadiyan suggest karo.`,
+      shortlist: `${valueLabel} ${keyLabel} ke liye shortlist banao.`,
+      ask: `kya aap ${keyLabel} ${valueLabel} wali gadi dhoondh sakte hain?`,
+      explore: `main ${valueLabel} ${keyLabel} options explore karna chahta hoon.`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `mujhe ${valueLabel} ${keyLabel} pasand hai.`,
+      default: `mujhe ${valueLabel} ${keyLabel} wali gadiyan dikhaiye.`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  // Safe non-English default sentence form for remaining locales.
+  if (styleKey === "exact" || styleKey === "minimal") {
+    return `${keyLabel} ${valueLabel}`;
+  }
+  if (styleKey === "ask") {
+    return `${keyLabel} ${valueLabel} ?`;
+  }
+  return `${keyLabel} ${valueLabel} options`;
+}
+
 function getLocalizedFacetLabel(
   facetKey: string,
   facetDisplayNameFn: (key: string) => string,
@@ -407,31 +558,9 @@ function buildStyleHintFallbackQuery(
 
   // For non-English locales, avoid generating hard-coded English wrappers.
   if (!isEnglishLanguage(language)) {
-    if (styleHint.includes("'<facet name> <filter value>'")) {
-      return normalizeWhitespace(`${keyLabel} ${valueLabel}`);
-    }
-    if (styleHint.includes("direct command")) {
-      return normalizeWhitespace(`${keyLabel}=${valueLabel}`);
-    }
-    if (styleHint.includes("feature-led")) {
-      return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
-    }
-    if (styleHint.includes("shortlist")) {
-      return normalizeWhitespace(`${valueLabel} | ${keyLabel}`);
-    }
-    if (styleHint.includes("conversational ask")) {
-      return normalizeWhitespace(`${valueLabel}? ${keyLabel}`);
-    }
-    if (styleHint.includes("explore/discover")) {
-      return normalizeWhitespace(`${keyLabel} / ${valueLabel}`);
-    }
-    if (styleHint.includes("minimal keyword")) {
-      return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
-    }
-    if (styleHint.includes("preference-led")) {
-      return normalizeWhitespace(`${valueLabel} (${keyLabel})`);
-    }
-    return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
+    return normalizeWhitespace(
+      getLocalizedSentenceTemplate(language, styleHint, keyLabel, valueLabel),
+    );
   }
 
   if (styleHint.includes("'<facet name> <filter value>'")) {
@@ -481,19 +610,59 @@ function buildVariedFallbackPhrase(
   );
 
   if (!isEnglishLanguage(language)) {
-    const localeNeutralTemplates = [
-      `${keyLabel} ${valueLabel}`,
-      `${valueLabel} ${keyLabel}`,
-      `${keyLabel}: ${valueLabel}`,
-      `${keyLabel}=${valueLabel}`,
-      `${valueLabel} (${keyLabel})`,
-      `${keyLabel} / ${valueLabel}`,
-      `${valueLabel} | ${keyLabel}`,
-      `${valueLabel}? ${keyLabel}`,
+    const localeSentenceTemplates = [
+      getLocalizedSentenceTemplate(
+        language,
+        "Use exact form '<facet name> <filter value>'",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a feature-led style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a shortlist style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a conversational ask style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use an explore/discover style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a minimal keyword style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a preference-led style",
+        keyLabel,
+        valueLabel,
+      ),
     ];
-    const idx = context.templateCursor % localeNeutralTemplates.length;
+    const idx = context.templateCursor % localeSentenceTemplates.length;
     context.templateCursor += 1;
-    return normalizeWhitespace(localeNeutralTemplates[idx]);
+    return normalizeWhitespace(localeSentenceTemplates[idx]);
   }
 
   const templates = [

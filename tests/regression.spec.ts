@@ -24,7 +24,7 @@ import {
 import path from "path";
 import fs from "fs/promises";
 
-test.describe("AI Smart Search - Regression", () => {
+test.describe("[SmartSearch] Regression", () => {
   const describeName = "Regression";
   const emhApiResponsePath = path.join(__dirname, "data/emh-api-response.json");
   const supportedCountries = ["AU", "IN", "JP", "KR", "SG", "TH", "TR"];

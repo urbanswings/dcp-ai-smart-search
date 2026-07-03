@@ -296,7 +296,7 @@ test.beforeAll(async () => {
   }
 });
 
-test.describe("AI Smart Search - Sanity", () => {
+test.describe("[SmartSearch] Sanity", () => {
   const describeName = "Sanity";
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
@@ -464,7 +464,7 @@ test.describe("AI Smart Search - Sanity", () => {
   );
 });
 
-test.describe("AI Smart Search - Vehicles MB", () => {
+test.describe("[SmartSearch] Vehicles MB", () => {
   const describeName = "Vehicles MB";
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
@@ -914,7 +914,7 @@ test.describe("AI Smart Search - Vehicles MB", () => {
   });
 });
 
-test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
+test.describe("[SmartSearch] Vehicles MB - Range Facets", () => {
   const describeName = "Vehicles MB - Range Facets";
   registerSmartSearchSuiteHooks(describeName);
 
@@ -952,7 +952,7 @@ test.describe("AI Smart Search - Vehicles MB - Range Facets", () => {
   }
 });
 
-test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
+test.describe("[SmartSearch] Vehicles MB - Negative Facets", () => {
   const describeName = "Vehicles MB - Negative Facets";
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
@@ -1029,7 +1029,7 @@ test.describe("AI Smart Search - Vehicles MB - Negative Facets", () => {
   }
 });
 
-test.describe("AI Smart Search - Vehicles Non-MB", () => {
+test.describe("[SmartSearch] Vehicles Non-MB", () => {
   const describeName = "Vehicles Non-MB";
   test.beforeEach(async ({}, testInfo) => {
     const env = ENVIRONMENT;
@@ -1247,7 +1247,7 @@ test.describe("AI Smart Search - Vehicles Non-MB", () => {
   });
 });
 
-test.describe("AI Smart Search - Input Robustness", () => {
+test.describe("[SmartSearch] Input Robustness", () => {
   const describeName = "Input Robustness";
   registerSmartSearchSuiteHooks(describeName);
 
@@ -1504,7 +1504,7 @@ test.describe("AI Smart Search - Input Robustness", () => {
   );
 });
 
-test.describe("AI Smart Search - Constraint Handling", () => {
+test.describe("[SmartSearch] Constraint Handling", () => {
   const describeName = "Constraint Handling";
   registerSmartSearchSuiteHooks(describeName);
 
@@ -1783,7 +1783,7 @@ test.describe("AI Smart Search - Constraint Handling", () => {
   });
 });
 
-test.describe("AI Smart Search - Conversational Behavior", () => {
+test.describe("[SmartSearch] Conversational Behavior", () => {
   const describeName = "Conversational Behavior";
   registerSmartSearchSuiteHooks(describeName);
 
@@ -2116,7 +2116,7 @@ test.describe("AI Smart Search - Conversational Behavior", () => {
   );
 });
 
-test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
+test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
   const describeName = "Safety / Policy / Abuse";
   registerSmartSearchSuiteHooks(describeName);
 
@@ -2345,7 +2345,7 @@ test.describe("AI Smart Search - Safety / Policy / Abuse", () => {
   });
 });
 
-test.describe("AI Smart Search - Reliability", () => {
+test.describe("[SmartSearch] Reliability", () => {
   const describeName = "Reliability";
   registerSmartSearchSuiteHooks(describeName);
 
