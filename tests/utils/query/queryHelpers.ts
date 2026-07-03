@@ -4,9 +4,11 @@ import { extractMissingFacetValuesFromData } from "../facets/facetValueHelpers";
 import {
   buildComplete,
   buildMatrix,
+  facetDisplayName,
   isIncludedFacet,
   readJson,
 } from "../generation/generateFacetMatrix.js";
+import * as promptEngine from "./promptEngineHelper";
 
 const DATA_DIR = path.join(__dirname, "../../data");
 
@@ -374,10 +376,27 @@ async function generateMissingFacetValuesSuiteOnTheFly(
     stockData,
   );
 
-  const regressionQueries: FixedQueryCase[] = missingValues.map((entry) => {
+  const queryContext = promptEngine.createPromptContext();
+  const regressionQueries: FixedQueryCase[] = [];
+
+  for (const entry of missingValues) {
     const valueLabel = entry.formattedValue;
-    return {
-      value: `show me ${valueLabel} ${facetKey}`,
+    const query = await promptEngine.generateQueryWithVariation(
+      null,
+      facetKey,
+      valueLabel,
+      entry.rawValue,
+      undefined,
+      undefined,
+      facetDisplayName,
+      queryContext,
+      {
+        language: process.env.LANGUAGE || "en",
+      },
+    );
+
+    regressionQueries.push({
+      value: query,
       facet: facetKey,
       filterValue: entry.rawValue,
       shouldRecommend: false,
@@ -387,8 +406,8 @@ async function generateMissingFacetValuesSuiteOnTheFly(
         strict: false,
       },
       aiEvaluationHints: createUnavailableFacetValueHint(facetKey, valueLabel),
-    };
-  });
+    });
+  }
 
   return {
     generatedAt: new Date().toISOString(),

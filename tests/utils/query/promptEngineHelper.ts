@@ -12,13 +12,13 @@ const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
 const COMPLETE_QUERY_STYLE_HINTS = [
   "Use exact form '<facet name> <filter value>'",
-  // "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
-  // "Use a feature-led style",
-  // "Use a shortlist style",
-  // "Use a conversational ask style",
-  // "Use an explore/discover style",
-  // "Use a minimal keyword style",
-  // "Use a preference-led style",
+  "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
+  "Use a feature-led style",
+  "Use a shortlist style",
+  "Use a conversational ask style",
+  "Use an explore/discover style",
+  "Use a minimal keyword style",
+  "Use a preference-led style",
 ];
 
 const REPETITIVE_COMPLETE_QUERY_PREFIXES = [
@@ -325,6 +325,10 @@ function normalizeLanguageCode(language: string): string {
   return normalizeWhitespace(language).toLowerCase().split(/[-_]/)[0] || "en";
 }
 
+function isEnglishLanguage(language: string): boolean {
+  return normalizeLanguageCode(language) === "en";
+}
+
 function getLocalizedFacetLabel(
   facetKey: string,
   facetDisplayNameFn: (key: string) => string,
@@ -386,6 +390,78 @@ function buildFacetFirstQuery(
   return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
 }
 
+function buildStyleHintFallbackQuery(
+  styleHint: string,
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+  facetDisplayNameFn: (key: string) => string,
+  language: string,
+): string {
+  const valueLabel = normalizeWhitespace(formattedValue || rawValue);
+  const keyLabel = getLocalizedFacetLabel(
+    facetKey,
+    facetDisplayNameFn,
+    language,
+  );
+
+  // For non-English locales, avoid generating hard-coded English wrappers.
+  if (!isEnglishLanguage(language)) {
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return normalizeWhitespace(`${keyLabel} ${valueLabel}`);
+    }
+    if (styleHint.includes("direct command")) {
+      return normalizeWhitespace(`${keyLabel}=${valueLabel}`);
+    }
+    if (styleHint.includes("feature-led")) {
+      return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
+    }
+    if (styleHint.includes("shortlist")) {
+      return normalizeWhitespace(`${valueLabel} | ${keyLabel}`);
+    }
+    if (styleHint.includes("conversational ask")) {
+      return normalizeWhitespace(`${valueLabel}? ${keyLabel}`);
+    }
+    if (styleHint.includes("explore/discover")) {
+      return normalizeWhitespace(`${keyLabel} / ${valueLabel}`);
+    }
+    if (styleHint.includes("minimal keyword")) {
+      return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+    }
+    if (styleHint.includes("preference-led")) {
+      return normalizeWhitespace(`${valueLabel} (${keyLabel})`);
+    }
+    return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
+  }
+
+  if (styleHint.includes("'<facet name> <filter value>'")) {
+    return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("direct command")) {
+    return normalizeWhitespace(`filter ${keyLabel} ${valueLabel}`);
+  }
+  if (styleHint.includes("feature-led")) {
+    return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
+  }
+  if (styleHint.includes("shortlist")) {
+    return normalizeWhitespace(`shortlist ${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("conversational ask")) {
+    return normalizeWhitespace(`can you find ${keyLabel} ${valueLabel}`);
+  }
+  if (styleHint.includes("explore/discover")) {
+    return normalizeWhitespace(`explore ${valueLabel} ${keyLabel} options`);
+  }
+  if (styleHint.includes("minimal keyword")) {
+    return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("preference-led")) {
+    return normalizeWhitespace(`prefer ${valueLabel} ${keyLabel}`);
+  }
+
+  return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+}
+
 /**
  * Build varied fallback phrase by rotating through templates
  */
@@ -403,6 +479,23 @@ function buildVariedFallbackPhrase(
     facetDisplayNameFn,
     language,
   );
+
+  if (!isEnglishLanguage(language)) {
+    const localeNeutralTemplates = [
+      `${keyLabel} ${valueLabel}`,
+      `${valueLabel} ${keyLabel}`,
+      `${keyLabel}: ${valueLabel}`,
+      `${keyLabel}=${valueLabel}`,
+      `${valueLabel} (${keyLabel})`,
+      `${keyLabel} / ${valueLabel}`,
+      `${valueLabel} | ${keyLabel}`,
+      `${valueLabel}? ${keyLabel}`,
+    ];
+    const idx = context.templateCursor % localeNeutralTemplates.length;
+    context.templateCursor += 1;
+    return normalizeWhitespace(localeNeutralTemplates[idx]);
+  }
+
   const templates = [
     `${valueLabel} ${keyLabel} options`,
     `vehicles with ${valueLabel} ${keyLabel}`,
@@ -542,11 +635,19 @@ async function generateQueryWithVariation(
   const fallback = fallbackFn
     ? fallbackFn(facetKey, formattedValue, rawValue)
     : exactQuery;
+  const styleHint = pickNextCompleteStyle(context);
+  const styledFallback = buildStyleHintFallbackQuery(
+    styleHint,
+    facetKey,
+    formattedValue,
+    rawValue,
+    facetDisplayNameFn,
+    language,
+  );
 
   if (!client || !systemPrompt || !userPromptTemplate) {
-    // return normalizeWhitespace(formattedValue);
     return enforceCompleteQueryVariation(
-      fallback,
+      styledFallback || fallback,
       facetKey,
       formattedValue,
       rawValue,
@@ -561,7 +662,6 @@ async function generateQueryWithVariation(
       ? filterTextFn(facetKey, formattedValue, rawValue)
       : `${getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language)} ${formattedValue}`;
 
-    const styleHint = pickNextCompleteStyle(context);
     const resolvedSystemPrompt = String(systemPrompt).replace(
       /\{LANGUAGE\}/g,
       language,
@@ -582,7 +682,6 @@ async function generateQueryWithVariation(
       resolvedUserPrompt,
       maxTokens,
     );
-    // return generated;
     const generatedVariation = enforceCompleteQueryVariation(
       generated || fallback,
       facetKey,
@@ -598,7 +697,7 @@ async function generateQueryWithVariation(
       `[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`,
     );
     return enforceCompleteQueryVariation(
-      fallback,
+      styledFallback || fallback,
       facetKey,
       formattedValue,
       rawValue,
