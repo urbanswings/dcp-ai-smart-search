@@ -674,15 +674,15 @@
   },
   "price": {
     "values": {
-      "min": 64421.55,
-      "max": 530966.4
+      "min": 1.99,
+      "max": 999888777.66
     },
     "facetType": "RANGE"
   },
   "monthlyRate": {
     "values": {
-      "min": 207.52,
-      "max": 2064.7
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },
@@ -1000,8 +1000,8 @@
   },
   "enginePowerHP": {
     "values": {
-      "min": 163,
-      "max": 680
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },
@@ -4238,8 +4238,8 @@
   },
   "enginePowerKW": {
     "values": {
-      "min": 120,
-      "max": 410
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },

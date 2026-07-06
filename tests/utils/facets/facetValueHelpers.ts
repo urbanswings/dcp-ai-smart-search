@@ -3,13 +3,55 @@ export interface FacetValueEntry {
   formattedValue: string;
 }
 
+function normalizeFacetValue(value: unknown): string {
+  return String(value ?? "").trim();
+}
+
+function isInvalidFacetValue(value: string): boolean {
+  return !value || value.toUpperCase() === "UNDEFINED";
+}
+
+function getFacetValuesNode(sourceData: any, facetKey: string): any {
+  return (
+    sourceData?.data?.search?.facets?.[facetKey]?.values ||
+    sourceData?.[facetKey]?.values
+  );
+}
+
+function createEntry(rawValue: string, formattedValue?: string): FacetValueEntry {
+  return {
+    rawValue,
+    formattedValue: formattedValue || rawValue,
+  };
+}
+
 export function extractFacetValuesFromData(
   sourceData: any,
   facetKey: string,
 ): FacetValueEntry[] {
-  const facetValues =
-    sourceData?.data?.search?.facets?.[facetKey]?.values ||
-    sourceData?.[facetKey]?.values;
+  const facetValues = getFacetValuesNode(sourceData, facetKey);
+
+  if (
+    facetValues &&
+    typeof facetValues === "object" &&
+    !Array.isArray(facetValues)
+  ) {
+    const seen = new Set<string>();
+    const values: FacetValueEntry[] = [];
+    const boundaryCandidates = [facetValues.min, facetValues.max];
+
+    for (const candidate of boundaryCandidates) {
+      const rawValue = normalizeFacetValue(candidate);
+      if (isInvalidFacetValue(rawValue) || seen.has(rawValue)) {
+        continue;
+      }
+      seen.add(rawValue);
+      values.push(createEntry(rawValue));
+    }
+
+    return values;
+  }
+
   if (!Array.isArray(facetValues)) {
     return [];
   }
@@ -23,7 +65,7 @@ export function extractFacetValuesFromData(
         ? String(entry)
         : String(entry?.value ?? "");
     const rawValue = raw.trim();
-    if (!rawValue || rawValue.toUpperCase() === "UNDEFINED") {
+    if (isInvalidFacetValue(rawValue)) {
       continue;
     }
 
@@ -37,10 +79,7 @@ export function extractFacetValuesFromData(
         ? String(entry.formattedValue).trim()
         : rawValue;
 
-    values.push({
-      rawValue,
-      formattedValue: formattedValue || rawValue,
-    });
+    values.push(createEntry(rawValue, formattedValue));
   }
 
   return values;
