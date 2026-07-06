@@ -1901,6 +1901,21 @@
       return match ? match[1].toUpperCase() : "";
     }
 
+    function extractLanguageFromFileName(fileName) {
+      const normalizedFileName = normalizePath(fileName).split("/").pop() || "";
+      const match = normalizedFileName.match(/^[A-Za-z]{2,3}_([A-Za-z]{2,8})_/);
+      if (!match) {
+        return "";
+      }
+
+      const languageToken = String(match[1] || "").toUpperCase();
+      if (["NCOS", "UCOS", "API", "UI", "BOTH", "PROD", "PREPROD"].includes(languageToken)) {
+        return "";
+      }
+
+      return languageToken;
+    }
+
     function slugifyMetadataValue(value) {
       return String(value || "")
         .normalize("NFKD")
@@ -2048,6 +2063,53 @@
 
     function getRowCountry(row, fallbackCountry = "") {
       return String(row && (row.__viewerCountry || row.country || (row._metadata && row._metadata.country)) || fallbackCountry || "").toUpperCase();
+    }
+
+    function detectLanguageFromLocalizedField(value) {
+      if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return "";
+      }
+
+      const keys = Object.keys(value)
+        .map((key) => String(key || "").trim().toLowerCase())
+        .filter(Boolean);
+
+      if (!keys.length) {
+        return "";
+      }
+
+      const localCandidate = keys.find((key) => key !== "en" && key !== "english");
+      if (localCandidate) {
+        return localCandidate.toUpperCase();
+      }
+
+      if (keys.includes("en") || keys.includes("english")) {
+        return "EN";
+      }
+
+      return keys[0].toUpperCase();
+    }
+
+    function getRowLanguage(row, fallbackLanguage = "") {
+      const explicitLanguage = String(
+        row && (row.__viewerLanguage || row.language || row.lang || row.locale || (row._metadata && row._metadata.language)) || ""
+      ).trim();
+
+      if (explicitLanguage) {
+        return explicitLanguage.toUpperCase();
+      }
+
+      const queryLanguage = detectLanguageFromLocalizedField(row && row.query);
+      if (queryLanguage) {
+        return queryLanguage;
+      }
+
+      const responseLanguage = detectLanguageFromLocalizedField(row && row.response);
+      if (responseLanguage) {
+        return responseLanguage;
+      }
+
+      return String(fallbackLanguage || "").toUpperCase();
     }
 
     function filterFilesByDescribeAndTitle(folder, files) {
@@ -2209,8 +2271,9 @@
       const rowsByFile = await Promise.all(files.map((fileName) => {
         const relativePath = getRelativePathForFolderFile(folder, fileName);
         const country = extractCountryFromFileName(fileName);
+        const language = extractLanguageFromFileName(fileName);
         return getRowsForRelativePath(relativePath).then((rows) =>
-          rows.map((row) => Object.assign({}, row, { __viewerCountry: country }))
+          rows.map((row) => Object.assign({}, row, { __viewerCountry: country, __viewerLanguage: language }))
         );
       }));
 
@@ -2864,7 +2927,9 @@
       const screenshotPath = screenshotResolution.screenshotPath;
       const screenshotFile = screenshotResolution.fileObj;
       const embeddedDataUri = screenshotResolution.embeddedDataUri;
-      const jiraCopyText = buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, facetGroups.actual, screenshotPath, getRowCountry(rowData, currentTableRenderOptions.country));
+      const selectedRowCountry = getRowCountry(rowData, currentTableRenderOptions.country) || "-";
+      const selectedRowLanguage = getRowLanguage(rowData, currentTableRenderOptions.language) || "-";
+      const jiraCopyText = buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, facetGroups.actual, screenshotPath, selectedRowCountry);
       const hasPreviousRow = selectedRowIndex > 0;
       const hasNextRow = selectedRowIndex < currentRows.length - 1;
       const screenshotNavHtml = currentRows.length > 1
@@ -2929,6 +2994,10 @@
               "<button type=\"button\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira ticket description\" aria-label=\"Copy Jira ticket description\">Get JIRA</button></div>" +
           "</div>" +
           "<div class=\"selectedRowRight\">" +
+            "<div class=\"detailGrid\" style=\"grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:8px;\">" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Country</div><div class=\"detailValue\">" + escapeHtml(selectedRowCountry) + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Language</div><div class=\"detailValue\">" + escapeHtml(selectedRowLanguage) + "</div></div>" +
+            "</div>" +
             "<div class=\"detailLabel\">Screenshot" + (screenshotFile ? " <span style=\"font-weight:400;text-transform:none;font-size:11px;color:var(--muted)\">(click to view fullscreen)</span>" : "") + "</div>" +
             screenshotStageHtml +
             screenshotNavHtml +
@@ -3511,9 +3580,10 @@
       try {
         const parsed = JSON.parse(text);
         const fileCountry = extractCountryFromFileName(fileSelect.value);
+        const fileLanguage = extractLanguageFromFileName(fileSelect.value);
         const rows = (Array.isArray(parsed) ? parsed : [parsed])
           .filter((row) => row && typeof row === "object")
-          .map((row) => Object.assign({}, row, { __viewerCountry: fileCountry }));
+          .map((row) => Object.assign({}, row, { __viewerCountry: fileCountry, __viewerLanguage: fileLanguage }));
         renderTableRows(rows);
         previewPane.textContent = JSON.stringify(parsed, null, 2);
       } catch {

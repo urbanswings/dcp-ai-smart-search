@@ -471,6 +471,20 @@ function formatFacetValueForQuery(
   if (facetKey === "price" || facetKey === "monthlyRate") {
     return formatLocalizedPriceValue(rawValue);
   }
+  if (facetKey === "bodyType") {
+    return toQueryLabel(facetKey, rawValue);
+  }
+  return String(formattedValue || rawValue);
+}
+
+function getCompleteDisplayValue(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
+  if (facetKey === "bodyType") {
+    return toQueryLabel(facetKey, rawValue);
+  }
   return String(formattedValue || rawValue);
 }
 
@@ -1051,10 +1065,15 @@ async function buildComplete(
 
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
+      const displayValue = getCompleteDisplayValue(
+        facetKey,
+        entry.formattedValue,
+        entry.rawValue,
+      );
       const query = await promptEngine.generateQueryWithVariation(
         getOpenAIClient(),
         facetKey,
-        entry.formattedValue,
+        displayValue,
         entry.rawValue,
         promptConfig.systemPrompt,
         promptConfig.userPromptTemplate,
@@ -1071,7 +1090,7 @@ async function buildComplete(
         queryMap,
         query,
         facetKey,
-        entry.formattedValue || entry.rawValue,
+        displayValue,
         buildCompleteShouldFilter(
           facetKey,
           entry.rawValue,
@@ -1173,6 +1192,22 @@ function getFacetFormattedValue(
 }
 
 function toQueryLabel(facetKey: string, value: unknown): string {
+  if (facetKey === "bodyType") {
+    const map: Record<string, string> = {
+      LIMOUSINE: "sedans",
+      SUV_OFFROADER: "SUVs",
+      HATCHBACK: "hatchbacks",
+      COUPE: "coupes",
+      CABRIO_ROADSTER: "cabriolets",
+      PEOPLE_CARRIER: "MPV",
+    };
+
+    const canonicalLabel = map[String(value)];
+    if (canonicalLabel) {
+      return canonicalLabel;
+    }
+  }
+
   // First try to get formattedValue from API response facet data
   const apiFormattedValue = getFacetFormattedValue(facetKey, value);
   if (apiFormattedValue) {
@@ -1186,7 +1221,7 @@ function toQueryLabel(facetKey: string, value: unknown): string {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return (
       map[String(value)] ||
@@ -1326,7 +1361,7 @@ function toHintLabel(facetKey: string, value: unknown): string {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
