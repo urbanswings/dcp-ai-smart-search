@@ -235,6 +235,78 @@ function matchesFacetCandidates(
   );
 }
 
+function parseUpholsteryCompositeParts(value: unknown): string[] {
+  const rawValue = String(value || "").trim().toUpperCase();
+  if (!rawValue.startsWith("UPHOLSTERY_COLOR_")) {
+    return [];
+  }
+
+  const rawParts = rawValue
+    .replace(/^UPHOLSTERY_COLOR_/, "")
+    .split("_")
+    .filter(Boolean);
+  if (rawParts.length < 2) {
+    return [];
+  }
+
+  return rawParts.map((part) => normalizeFacetToken(part)).filter(Boolean);
+}
+
+function getNormalizedFacetValueSet(
+  resultsFacets: Record<string, any>,
+  key: string,
+): Set<string> {
+  return new Set(
+    collectPrimitiveFacetValues(resultsFacets[key])
+      .map((value) => normalizeFacetToken(String(value || "")))
+      .filter(Boolean),
+  );
+}
+
+function isSplitUpholsteryCompositePresent(
+  expected: unknown,
+  resultsFacets: Record<string, any>,
+): boolean {
+  const parts = parseUpholsteryCompositeParts(expected);
+  if (parts.length < 2) {
+    return false;
+  }
+
+  const upholsteryValues = getNormalizedFacetValueSet(resultsFacets, "upholstery");
+  const colorValues = getNormalizedFacetValueSet(resultsFacets, "color");
+  if (upholsteryValues.size === 0 || colorValues.size === 0) {
+    return false;
+  }
+
+  const combinedValues = new Set<string>([...upholsteryValues, ...colorValues]);
+  const allPartsPresent = parts.every((part) => combinedValues.has(part));
+  if (!allPartsPresent) {
+    return false;
+  }
+
+  return parts.some((part) => upholsteryValues.has(part));
+}
+
+function isUpholsteryValueCoveredByCompositeExpectation(
+  actualValue: unknown,
+  expectedValues: unknown[],
+  resultsFacets: Record<string, any>,
+): boolean {
+  const normalizedActual = normalizeFacetToken(String(actualValue || ""));
+  if (!normalizedActual) {
+    return false;
+  }
+
+  return expectedValues.some((expected) => {
+    const parts = parseUpholsteryCompositeParts(expected);
+    if (parts.length < 2 || !parts.includes(normalizedActual)) {
+      return false;
+    }
+
+    return isSplitUpholsteryCompositePresent(expected, resultsFacets);
+  });
+}
+
 export async function validateExpectedFacets({
   actualFacets,
   resultsFacets,
@@ -411,6 +483,13 @@ export async function validateExpectedFacets({
           continue;
         }
 
+        if (
+          key === "upholstery" &&
+          isSplitUpholsteryCompositePresent(expected, resultsFacets)
+        ) {
+          continue;
+        }
+
         failureReasons.push(`Missing required facet value: ${key}=${expected}`);
       }
 
@@ -421,6 +500,17 @@ export async function validateExpectedFacets({
         for (const actual of actualValues) {
           const rawActual = String(actual).trim().toUpperCase();
           if (!expectedSet.has(rawActual)) {
+            if (
+              key === "upholstery" &&
+              isUpholsteryValueCoveredByCompositeExpectation(
+                actual,
+                expectedValues,
+                resultsFacets,
+              )
+            ) {
+              continue;
+            }
+
             failureReasons.push(
               `Unexpected facet value in ${key}: ${actual} (expected only: ${expectedValues.join(", ")})`,
             );
