@@ -173,6 +173,7 @@ function extractVehicleTotalCountFromMessageByPattern(
   const countedNounPhrase = `(?:available\\s+|mevcut\\s+)?(?:[\\p{L}\\p{M}\\p{N}_À-ÿ-]+\\s+){0,8}${noun}`;
   const countPatterns = [
     new RegExp(`\\bfound\\s+(a|an)\\s+${noun}\\s+matching\\b`, "iu"),
+    new RegExp(`จำนวน\\s*${countToken}\\s*${noun}`, "iu"),
     new RegExp(
       `\\b(?:total(?: of)?|currently(?:,)?\\s+we\\s+have|we\\s+(?:currently\\s+)?have|there\\s+(?:are|is)(?:\\s+currently)?|found|selection\\s+of)\\s+${countToken}\\s+${countedNounPhrase}\\b`,
       "iu",
@@ -311,6 +312,27 @@ function hasExplicitCountMention(message: string, count: number): boolean {
   return false;
 }
 
+function hasExplicitCountContext(message: string, count: number): boolean {
+  const escapedCount = String(count).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const localizedVehicleNouns =
+    "(?:vehicles?|cars?|options?|results?|models?|matches?|sedans?|suvs?|hatchbacks?|coupes?|convertibles?|cabriolets?|roadsters?|wagons?|estates?|limousines?|vans?|minivans?|mpvs?|trucks?|pickups?|araç(?:lar)?|arac(?:lar)?|seçenek(?:ler)?|secenek(?:ler)?|sonuç(?:lar)?|sonuc(?:lar)?|モデル|車両|車|台|オプション|選択肢|結果|차량|자동차|옵션|결과|모델|대|รถ|คัน|ตัวเลือก|รายการ|ผลลัพธ์|รุ่น|वाहन|कार|विकल्प|परिणाम|मॉडल|गाड़ी|गाड़ियाँ|গাড়ি|যানবাহন|বিকল্প|ফলাফল|মডেল|વાહન|કાર|વિકલ્પ|પરિણામ|મોડેલ|ವಾಹನ|ಕಾರು|ಆಯ್ಕೆ|ಫಲಿತಾಂಶ|ಮಾದರಿ|വാഹനം|കാർ|ഓപ്ഷൻ|ഫലം|മോഡൽ|पर्याय|निकाल|मॉडेल|வாகன(?:ங்கள்)?|கார்|விருப்ப(?:ங்கள்)?|முடிவு(?:கள்)?|மாடல்(?:கள்)?|వాహన(?:ాలు)?|కారు|ఎంపిక(?:లు)?|ఫలిత(?:ాలు)?|మోడల్(?:లు)?)";
+  const countMarkers =
+    "(?:total(?:\\s+of)?|number\\s+of|count(?:\\s+of)?|currently(?:,)?\\s+we\\s+have|we\\s+(?:currently\\s+)?have|there\\s+(?:are|is)(?:\\s+currently)?|found|selection\\s+of|จำนวน|เรามี|ทั้งหมด|พบ)";
+
+  const countWithNounPattern = new RegExp(
+    `${escapedCount}\\s*${localizedVehicleNouns}`,
+    "iu",
+  );
+  const countWithMarkerPattern = new RegExp(
+    `${countMarkers}[\\s\\S]{0,40}${escapedCount}(?:\\s*${localizedVehicleNouns})?`,
+    "iu",
+  );
+
+  return (
+    countWithNounPattern.test(message) || countWithMarkerPattern.test(message)
+  );
+}
+
 export async function extractVehicleTotalCountFromMessage(
   message: string,
 ): Promise<number | null> {
@@ -346,6 +368,9 @@ export async function extractVehicleTotalCountFromMessage(
   const detectedByAi = parseVehicleTotalCountDetectionAnswer(answer);
   if (detectedByAi !== null) {
     if (!hasExplicitCountMention(normalizedMessage, detectedByAi)) {
+      return null;
+    }
+    if (!hasExplicitCountContext(normalizedMessage, detectedByAi)) {
       return null;
     }
     if (isLikelyVehicleDescriptorNumber(normalizedMessage, detectedByAi)) {
