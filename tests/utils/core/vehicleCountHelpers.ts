@@ -72,7 +72,7 @@ function extractVehicleTotalCountFromMessageByPattern(
   const compactNumericCountToken =
     "(?<![\\d.,])(?:\\d{1,3}(?:[.,]\\d{3})+|\\d+)(?![\\d.,])";
   const wordCountToken =
-    "(?:one|two|three|four|five|six|seven|eight|nine|ten|bir|iki|uc|üç|dort|dört|bes|beş|alti|altı|yedi|sekiz|dokuz|on)(?!-)";
+    "(?<![\\p{L}\\p{M}])(?:one|two|three|four|five|six|seven|eight|nine|ten|bir|iki|uc|üç|dort|dört|bes|beş|alti|altı|yedi|sekiz|dokuz|on)(?![\\p{L}\\p{M}-])";
   const countToken = `(${numericCountToken}|${wordCountToken})`;
   const compactCountToken = `(${compactNumericCountToken}|${wordCountToken})`;
   const localizedVehicleNouns = [
