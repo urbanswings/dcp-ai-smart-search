@@ -172,6 +172,14 @@
         "tags": [
           "NEW"
         ]
+      },
+      {
+        "label": "モデル",
+        "formattedValue": "EQS",
+        "value": "EQS_NEW",
+        "tags": [
+          "NEW"
+        ]
       }
     ],
     "facetType": "MULTI_VALUE"

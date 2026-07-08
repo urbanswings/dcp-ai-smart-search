@@ -201,15 +201,34 @@ function extractVehicleTotalCountFromMessageByPattern(
       ) {
         continue;
       }
+      // Check for year patterns in various languages (Turkish: yılına ait, model yılı; Japanese: 年型; Korean: 년형; Thai: ปีการผลิต)
       if (
         parsedCount >= 1900 &&
-        parsedCount <= 2100 &&
-        /\bmodels?\b/i.test(matchedText) &&
-        !/\b(total|results?|matches?|options?|vehicles?|cars?)\b/i.test(
-          matchedText,
-        )
+        parsedCount <= 2100
       ) {
-        continue;
+        const yearPatterns = [
+          /yılına\s+ait/i,           // Turkish: "model year of"
+          /model\s+yılı/i,           // Turkish: "model year"
+          /年型/,                     // Japanese: model year
+          /년형/,                     // Korean: model year
+          /ปีการผลิต/,                 // Thai: model year
+          /मॉडल\s+वर्ष/i,             // Hindi: model year
+          /मॉडल\s+साल/i,             // Hindi: model year
+          /মডেল\s+বছর/i,             // Bengali: model year
+          /მოდელი\s+წელი/i,          // Georgian: model year
+        ];
+        if (yearPatterns.some(pattern => pattern.test(matchedText))) {
+          continue;
+        }
+        // For "models?" context, check if it lacks explicit count context
+        if (
+          /\bmodels?\b/i.test(matchedText) &&
+          !/\b(total|results?|matches?|options?|vehicles?|cars?)\b/i.test(
+            matchedText,
+          )
+        ) {
+          continue;
+        }
       }
       if (
         /(\bmodels?\b|모델)/iu.test(matchedText) &&

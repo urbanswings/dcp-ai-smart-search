@@ -1,0 +1,1276 @@
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:39:07.674Z]
+
+RCA:
+The regression appears healthy: the search parser and facet mapper are correctly recognizing upholstery color phrases, including single-color and two-tone variants, and mapping them to the expected canonical facet IDs. No obvious normalization, tokenization, or country-specific facet resolution issues are present in this run.
+
+Test Approach:
+Validate that a representative set of upholstery queries continues to resolve to the correct AU facet values for both single colors and compound color names. Confirm no errors are returned, the facet list contains only the expected upholstery code(s), and result counts remain non-zero to ensure the filter is applied without over-restricting the search.
+
+Test Summary:
+- Total test entries: 7
+- Passed: 7
+- Failed: 0
+- Main patterns observed:
+  - All upholstery queries mapped to the expected canonical facet IDs
+  - Two-tone color queries were parsed correctly
+  - No API errors or evaluation mismatches occurred
+
+Findings:
+- No facet mapping regressions detected in AU upholstery handling
+- Result volumes vary by color, indicating filters are active and not collapsing to empty sets
+
+Recommendations:
+- Keep this scenario in the AU regression suite as a guardrail for facet normalization
+- Add edge-case coverage for synonyms and punctuation variants (for example, “grey/black”, “gray-black”, “beige & black”)
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:40:19.903Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color queries mapped correctly to the expected single facet value.
+  - Dual-color variants were recognized consistently across slash-separated inputs.
+  - No API errors or evaluation mismatches appeared in the run.
+
+Findings:
+- All generated facet selections matched expectations for both single-color and compound-color upholstery terms.
+- Result counts varied widely by color, but there were no signs of incorrect facet assignment or missing normalization.
+
+Recommendations:
+- Keep this suite in CI to guard against regressions in color tokenization and facet mapping.
+- Add negative/ambiguous upholstery phrasing cases to catch overmatching in future releases.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:41:26.427Z]
+
+Test Summary:
+- Total test entries: 7
+- Passed: 1
+- Failed: 6
+- Main patterns observed:
+  - Combined interior colors are being decomposed into single-color upholstery facets.
+  - In several cases, valid composite upholstery values are missing while fallback single-color values remain.
+  - Brown/beige variants over-expand into both base and composite upholstery facet values.
+
+Findings:
+- The JP upholstery facet mapper is not consistently preserving dual-tone interior tokens like gray/black, white/black, beige/black, and brown/black.
+- One black-interior query passed, indicating the issue is selective and likely tied to composite-color normalization rather than all upholstery extraction.
+
+Recommendations:
+- Review the JP facet resolution rules for upholstery to ensure dual-color interiors map to the correct composite facet only, without adding base-color upholstery values.
+- Add regression coverage for single-color versus dual-tone interior phrases to catch both missing composite mappings and spurious extra facet values.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:43:05.929Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 9
+- Failed: 2
+- Main patterns observed:
+  - Single-color upholstery mappings are stable across gray, beige, brown, and black.
+  - Most dual-tone color queries map correctly to the expected upholstery facet codes.
+  - Failures are concentrated in mixed-color cases where response text and facet extraction diverge.
+
+Findings:
+- One dual-tone query returned a count mismatch in the natural-language response versus backend results, indicating the answer generation layer is not aligned with retrieved resultCount.
+- One white/black query produced no upholstery facet at all, suggesting the extractor or synonym normalization failed to recognize the requested color pair.
+
+Recommendations:
+- Fix response rendering to use backend resultCount consistently, and add a regression check for numeric count parity.
+- Review upholstery facet parsing/normalization for white/black variants, including multilingual token handling, and add targeted coverage for missing dual-tone mappings.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:43:49.050Z]
+
+Test Summary:
+- Total test entries: 6
+- Passed: 5
+- Failed: 1
+- Main patterns observed:
+  - Upholstery facet extraction is correct for single and dual-color queries.
+  - One failure is tied to result-count narration, not facet mapping.
+  - The mismatch appears in a natural-language query with a conversational prefix.
+
+Findings:
+- The backend facet classification correctly resolved `UPHOLSTERY_COLOR_GREY_BLACK`, but the generated response reported an incorrect total count.
+- The issue suggests the search assistant is mixing up displayed count text with actual backend resultCount, likely due to stale or hallucinated count generation.
+
+Recommendations:
+- Verify count generation is always sourced from backend response metadata, not LLM-produced text.
+- Add regression coverage for conversational queries that include both facet intent and count reporting.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:44:31.165Z]
+
+Test Summary:
+- Total test entries: 4
+- Passed: 4
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color queries were correctly mapped to the upholstery facet.
+  - Mixed/interior phrasing was resolved to the expected combined upholstery value.
+  - No execution errors or evaluation mismatches were observed.
+
+Findings:
+- All four regression cases passed with exact facet alignment between expected and actual outputs.
+- One query also returned a paint color facet alongside upholstery, which is not flagged as a failure but may indicate broader facet activation than strictly required.
+
+Recommendations:
+- Keep a watch on queries that mention “color” to ensure paint facets do not become noisy or over-triggered in future regressions.
+- Add at least one negative control case to verify upholstery queries do not incorrectly broaden into unrelated exterior color facets.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T02:46:06.593Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color intents were mapped to the correct facet values.
+  - Multi-color combinations were normalized consistently, including slash-separated variants.
+  - No parsing or API execution errors appeared in the run.
+
+Findings:
+- The regression is healthy: all expected upholstery facets matched the actual output across single-color and multi-color queries.
+- Result counts vary widely by color, which is expected, but these runs still confirm facet extraction is stable in the TR locale.
+
+Recommendations:
+- Keep this scenario in the nightly regression suite to guard against locale-specific synonym drift.
+- Add a few negative controls for non-upholstery terms to confirm facet isolation remains precise.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:14:11.951Z]
+
+Test Summary:
+- Total test entries: 7
+- Passed: 7
+- Failed: 0
+- Main patterns observed:
+  - Single-color upholstery queries mapped to the correct facet values.
+  - Dual-tone upholstery variants were resolved consistently across all tested colors.
+  - No API errors or mismatched facet extractions were observed.
+
+Findings:
+- The regression set is fully green for AU upholstery facet interpretation.
+- Result counts vary as expected by color specificity, with no indication of over-filtering or facet drift.
+
+Recommendations:
+- Keep this scenario in the AU smoke/regression suite to catch future facet normalization regressions.
+- Add a few negative/ambiguous upholstery phrases to verify fallback behavior remains stable.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:15:21.266Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color facets matched expected canonical values across single and dual-color queries.
+  - No query parsing, facet mapping, or API execution errors were observed.
+  - Result counts varied normally by color combination, with no obvious over- or under-filtering.
+
+Findings:
+- All evaluated upholstery facet resolutions returned the expected facet IDs, including slash-delimited multi-color inputs.
+- No regressions were detected in this IN locale MCFE upholstery set; parsing and normalization appear stable.
+
+Recommendations:
+- Keep this locale/color mapping coverage in the regression suite to catch future synonym or delimiter parsing drift.
+- Add a small sentinel set for ambiguous color phrasing to guard against facet expansion or misclassification.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:16:21.490Z]
+
+Test Summary:
+- Total test entries: 7
+- Passed: 3
+- Failed: 4
+- Main patterns observed:
+  - Single-color upholstery queries sometimes return an extra composite black variant.
+  - Two-tone upholstery queries often expand into both base colors instead of the intended combined facet.
+  - Some queries are misrouted to paint color facets, indicating intent/entity ambiguity.
+
+Findings:
+- The JP upholstery facet mapper is inconsistently normalizing interior color phrases, especially when black is involved, causing duplicate or over-broad facet values.
+- Mixed-color interior requests are not consistently collapsed into the expected combined upholstery facet, which breaks multi-color facet precision.
+
+Recommendations:
+- Tighten upholstery entity resolution rules for JP to prefer exact interior combinations over base-color expansions when black appears in the phrase.
+- Add regression coverage for both single-color and two-tone upholstery queries, including negative checks to prevent paint-color facet leakage.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:17:59.477Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 9
+- Failed: 2
+- Main patterns observed:
+  - Most single-color and common dual-color upholstery mappings resolved correctly.
+  - Two failures were tied to color-combination handling and facet extraction consistency.
+  - One failure showed a response/result-count mismatch; the other showed a missing upholstery facet with a localized value mismatch.
+
+Findings:
+- The beige/brown query returned the correct facet but the response metadata reported an inflated total count, indicating a count aggregation or response formatting bug in the search layer.
+- The white/black query failed facet extraction entirely and surfaced the localized color name instead of the normalized upholstery key, suggesting a synonym/translation normalization gap for dual-color upholstery values.
+
+Recommendations:
+- Verify backend count calculation and the API contract for total-result messaging, especially for low-result dual-color facet queries.
+- Extend facet normalization coverage for localized and compound upholstery colors, and add regression checks for both key presence and canonical value mapping.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:18:43.843Z]
+
+Test Summary:
+- Total test entries: 6
+- Passed: 6
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color combinations were mapped to the correct facet IDs.
+  - Mixed natural-language and filter-style queries were interpreted consistently.
+  - No API errors or evaluation mismatches occurred.
+
+Findings:
+- All six SG upholstery regression cases matched the expected facet values exactly.
+- Result counts varied by color combination, but no unexpected facet leakage or parsing failures were observed.
+
+Recommendations:
+- Keep this scenario in the nightly regression suite to guard against facet tokenization regressions.
+- Add adjacent edge cases for punctuation variants and singular/plural upholstery phrasing to reduce residual parsing risk.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:19:18.920Z]
+
+RCA:
+The regression is likely validating a facet-mapping model that correctly disambiguates interior color phrases to upholstery taxonomy values. The main risk area is lexical normalization and entity routing: terms like “interior color,” “interior colours,” and mixed-color mentions must be mapped to upholstery rather than exterior paint, while compound color phrases must resolve to a combined upholstery facet. The current results suggest the intent classifier and facet resolver are aligned for these variants, with one query also surfacing a paint-color facet in parallel, indicating possible cross-domain facet leakage that should be controlled if not intended.
+
+Test Approach:
+Run targeted regression queries covering single-color, compound-color, and synonym variants for interior/upholstery descriptions across locales. Verify the returned facet includes the expected upholstery code, ensure no incorrect exclusion or misrouting to paint facets, and compare result counts for stability. Add a negative check for queries containing “interior color” to confirm the system does not prioritize exterior paint unless explicitly requested.
+
+Test Summary:
+- Total test entries: 4
+- Passed: 4
+- Failed: 0
+- Main patterns observed:
+  - Upholstery facets matched expected color intents in all cases
+  - Compound color phrasing resolved to a combined upholstery value
+  - One query returned an extra paint color facet alongside upholstery
+  - No execution errors or evaluation mismatches
+
+Findings:
+- All regression cases passed, indicating the upholstery facet mapping is functioning correctly for TH queries.
+- The first case produced an additional paint-color facet, which may indicate facet bleed between interior and exterior color entities.
+
+Recommendations:
+- Add a guardrail test to prevent paint facets from appearing on interior-color-only queries unless explicitly requested.
+- Expand coverage with more TH synonym and multi-color combinations to catch taxonomy routing drift.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:20:51.186Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color queries mapped to the expected facet values.
+  - Multi-color slash variants were normalized correctly.
+  - No API errors or missing facet outputs were observed.
+
+Findings:
+- No functional regressions detected in TR upholstery facet extraction for this run.
+- Result counts varied widely by color combination, but facet classification remained consistent.
+
+Recommendations:
+- Keep this fixture in the regression suite to guard against future color-normalization regressions.
+- Add a few negative or ambiguous phrasing cases to cover residual parsing risks.
+
+Conclusion:
+- PASS
+
+
+────────────────────────────────────────────────────────────
+[AI Analysis — 2026-07-07T03:31:21.319Z]
+
+RCA:
+The bug is likely in the JP interior-color normalization and facet expansion layer, where dual-tone upholstery phrases are not being preserved as a single composite entity. Instead, the parser sometimes splits them into base colors, drops the composite upholstery key, or leaks into paint-color facets. This points to inconsistent synonym/locale handling for compound color tokens and an overly permissive fallback that expands black-containing interiors into multiple facet values rather than the exact upholstery code.
+
+Test Approach:
+Create regression cases for JP single-color and dual-tone upholstery queries, especially combinations involving black and localized variants. Verify the response returns only the expected upholstery facet code, with no extra base-color or paint facets. Add negative checks for over-expansion and locale-specific synonyms, and confirm count/result alignment remains stable when the correct composite facet is applied.
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:32:42.914Z]
+
+RCA:
+The regression likely comes from inconsistent query parsing for composite upholstery colors. The search pipeline handles some color pairs as a single upholstery facet, but fails on certain separator patterns or synonyms, especially slash-form queries and mixed-language normalization. In the failing cases, the intent extractor either decomposes the compound color into separate tokens or drops the facet entirely, which causes missing/incorrect facet filtering and overly broad result sets.
+
+Test Approach:
+Validate that composite upholstery colors are always normalized to the correct single facet across separators and variants: slash, hyphen, and conjunction forms, plus synonym spellings like grey/gray. Confirm the engine returns the upholstery facet and does not leak paint-color facets. Include negative checks to ensure individual color facets are excluded and that no facet is omitted for white/black-style queries.
+
+Test Summary:
+- Total test entries: 9
+- Passed: 6
+- Failed: 3
+- Main patterns observed:
+  - Composite upholstery colors work for space/conjunction variants but fail on slash-separated queries
+  - Gray/grey normalization is inconsistent for composite facets
+  - One failure drops the upholstery facet entirely, causing broad/noisy results
+
+Findings:
+- `grey/black upholstery` and `gray-black upholstery` fail to map consistently to the expected composite upholstery facet behavior.
+- `white/black upholstery` returns no upholstery facet and an excessive result count, indicating facet extraction or fallback handling broke for this pattern.
+
+Recommendations:
+- Add/restore normalization rules for separator variants and spelling aliases before facet mapping.
+- Add regression coverage for composite-color queries with strict facet assertions and missing-facet checks.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:37:45.454Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 5
+- Failed: 6
+- Main patterns observed:
+  - Facet normalization failures for upholstery values
+  - Brand-specific queries sometimes drop or mis-handle the brand facet
+  - Model intent confusion between closely related models (GLA vs GLC)
+  - One result-count/message consistency issue for Mercedes-Maybach
+
+Findings:
+- Upholstery beige is mapped to an invalid or unrecognized facet token, causing required facet validation to fail.
+- Some brand-intent queries return relevant inventory but omit the expected Mercedes-Benz brand facet or substitute broader model results.
+- The GLA-related query was resolved to GLC, indicating weak semantic disambiguation across similar model families.
+- The Mercedes-Maybach prompt produced an inconsistent response summary versus backend count, suggesting response generation and retrieval are not aligned.
+
+Recommendations:
+- Fix facet dictionary/ontology mapping for upholstery color to use the expected canonical value.
+- Tighten intent-to-facet extraction and post-filter validation for brand and modelIdentifier before response generation.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:39:07.234Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 3
+- Failed: 8
+- Main patterns observed:
+  - Facet normalization mismatches on localized values and brand/model aliases.
+  - OR-intent handling is incomplete for fuel type queries.
+  - Some range/query interpretations are present but not always reflected in evaluation language or facet output.
+
+Findings:
+- Beige upholstery queries are mapped to a raw enum label instead of the expected canonical facet value, causing validation failures on both short and conversational inputs.
+- Queries asking for “petrol or electric” only return petrol, indicating the search pipeline is collapsing OR conditions into a single facet rather than preserving multiple allowed values.
+- Brand intent is misclassified for Mercedes-Maybach queries, with the system returning the sub-brand as the selected brand when the expected canonical brand facet is Mercedes-Benz.
+- Model matching is inconsistent: a GLA intent is correctly recognized in one test, but a similar query returns GLS, suggesting semantic drift or ranking bias in model facet selection.
+- Price-under queries can generate the correct range facet, but at least one case still fails because the response text does not explicitly express the constraint in user-facing terms.
+
+Recommendations:
+- Standardize facet mapping for localized colors, brands, and models to canonical IDs before evaluation and retrieval.
+- Add regression coverage for multi-value OR filters and brand/sub-brand normalization, including conversational paraphrases and edge cases.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:40:39.155Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 3
+- Failed: 8
+- Main patterns observed:
+  - Upholstery intent is mapped to incorrect facet IDs/extra variants.
+  - Model matching is over-broad or misclassified for GLA-related queries.
+  - Brand-specific queries for Mercedes-Maybach are losing the brand facet entirely.
+  - Some semantic-facet matches pass, but response-quality checks still fail on wording/clarity.
+
+Findings:
+- Beige upholstery queries consistently resolve to multiple wrong upholstery values instead of the required single beige facet, indicating a facet normalization or synonym-mapping defect.
+- GLA intent is being translated to unrelated model identifiers such as E, AMGGT, G, and GLS, showing weak model disambiguation and poor category containment.
+- Mercedes-Maybach queries do not retain the expected brand facet, suggesting brand extraction is failing for sub-brand/trim-like terminology.
+- A fuel-type OR query passes facet validation in one case but fails the response-evaluation layer in another, pointing to inconsistent downstream answer generation.
+
+Recommendations:
+- Review and correct the facet mapping dictionary for upholstery and modelIdentifier, with special handling for sub-brand/model aliases and multilingual variations.
+- Align the response generator with the facet resolver so that valid filtered results are described clearly and consistently in user-facing output.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:42:09.280Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 3
+- Failed: 8
+- Main patterns observed:
+  - Facet normalization mismatch on upholstery values
+  - Brand intent misclassified to Mercedes-Maybach instead of Mercedes-Benz
+  - Model filtering for GLA is leaking unrelated model identifiers
+  - Some natural-language variants trigger incorrect validation despite correct facet output
+
+Findings:
+- Upholstery queries are mapping to a UI label/value that does not match the expected backend facet code, causing consistent facet assertion failures.
+- Brand and model intent resolution is unstable for specific named entities, with over-broad or wrong facet assignments and leakage from adjacent vehicle families.
+- At least one query failed on evaluation text despite the returned facets matching expectation, indicating a test harness or response-parsing inconsistency in addition to search logic issues.
+
+Recommendations:
+- Align facet synonym mapping and canonical value translation for upholstery, brand, and model identifiers across indexing, retrieval, and evaluation layers.
+- Review NLU/entity extraction and post-filtering logic for model and brand constraints; add regression coverage for near-match brand/model queries and validator parsing.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:43:40.774Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 5
+- Failed: 6
+- Main patterns observed:
+  - Brand/recommendation queries sometimes drop required brand facet or substitute unrelated model facets.
+  - Beig e upholstery intent is not being mapped into the search filters, causing empty facet extraction.
+  - Price-under queries are normalized to an incorrect much-lower range, and one branded variant query fails to preserve the price intent.
+  - Model-specific GLA searches are inconsistent when phrased conversationally, with GLE returned instead of GLA.
+
+Findings:
+- Facet extraction is unstable for natural-language rephrasings: explicit brand/model intents can be lost or replaced with a different facet key/value.
+- Price normalization appears miscalibrated for Turkish lira formatting, collapsing “under ₺15.000.000” into a 500,000–5,000,000 range.
+
+Recommendations:
+- Tighten intent-to-facet mapping for brand, modelIdentifier, upholstery, and price across paraphrases; add regression cases for conversational variants.
+- Review locale-specific currency parsing and range conversion rules, especially TL separators and max-threshold handling.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:45:02.744Z]
+
+RCA:
+The search pipeline is likely mis-mapping entity-to-facet values in the TH locale, causing the intent parser and facet resolver to emit non-canonical facet tokens or drop expected multi-value OR conditions. Specifically, color/trim and brand normalization appear inconsistent: “beige upholstery” resolves to a localized upholstery token that the evaluator does not recognize, “petrol or electric” is collapsed to only one fuel facet instead of preserving both options, and “Mercedes-Maybach” is being incorrectly normalized or constrained to the base Mercedes-Benz brand. This points to a taxonomy/alias mapping regression in the multilingual facet dictionary or LLM post-processing layer.
+
+Test Approach:
+Create regression cases that verify canonical facet output for locale-specific synonyms, OR-query preservation, and brand/model disambiguation. Validate that beige upholstery maps to the expected upholstery facet ID, that petrol-or-electric returns both fuelType facets, and that Mercedes-Maybach remains distinct from Mercedes-Benz unless the query explicitly requests the parent brand. Include short and verbose variants of each query to confirm the fix works across phrasing styles and does not regress modelIdentifier or brand-only queries.
+
+Test Summary:
+- Total test entries: 11
+- Passed: 5
+- Failed: 6
+- Main patterns observed:
+  - Facet normalization mismatch for upholstery values
+  - OR-condition loss for fuel type queries
+  - Brand taxonomy confusion between Mercedes-Benz and Mercedes-Maybach
+
+Findings:
+- Beige upholstery queries returned a non-canonical facet token, failing expected facet-ID matching.
+- Disjunctive fuel intent was reduced to a single facet value, dropping the electric branch.
+- Mercedes-Maybach was incorrectly treated as Mercedes-Benz, indicating brand hierarchy or alias mapping leakage.
+
+Recommendations:
+- Update the locale facet dictionary and post-processing normalization to emit canonical facet IDs consistently.
+- Add regression coverage for multi-value OR intents and brand hierarchy separation, with explicit checks for Mercedes-Maybach versus Mercedes-Benz.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:46:41.619Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 5
+- Failed: 6
+- Main patterns observed:
+  - Facet value normalization mismatch for upholstery
+  - Brand/model intent confusion for Mercedes-Maybach and GLA
+  - Non-buggy controls like fuel type and price parsing are stable
+
+Findings:
+- Beige upholstery queries are returning the wrong facet token (`UPHOLSTERY_COLOR_BEIGE` instead of the expected upholstery code), indicating a mapping/ontology issue in facet translation.
+- Queries mentioning Mercedes-Maybach or GLA are not consistently constraining results to the requested intent; brand/model extraction is either missing or falling back to unrelated model identifiers.
+
+Recommendations:
+- Fix the facet synonym-to-ID mapping for upholstery and validate the output against the expected canonical facet values.
+- Review entity resolution for brand vs. model vs. sub-brand handling, then add regression cases for Maybach and GLA intent preservation.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:47:41.763Z]
+
+RCA:
+The upholstery color parser and facet mapper are correctly recognizing both single-color and compound-color queries in the AU index. Multi-token color phrases and slash-delimited variants are being normalized to the expected upholstery facet IDs without ambiguity or country-specific facet drift, so this regression appears stable.
+
+Test Approach:
+Run targeted regression queries for single-color, dual-color, and mixed phrasing across AU upholstery searches, then compare the returned facet IDs against the expected normalized mappings. Verify both exact facet inclusion and absence of parsing errors, while also checking that result counts remain non-zero and consistent with known inventory patterns.
+
+Test Summary:
+- Total test entries: 7
+- Passed: 7
+- Failed: 0
+- Main patterns observed:
+  - Single-color upholstery terms mapped correctly
+  - Dual-color slash formats normalized as expected
+  - No parsing or facet-resolution errors detected
+
+Findings:
+- All executed cases passed with exact expected upholstery facet IDs.
+- Compound color handling remained consistent across varied query phrasing.
+
+Recommendations:
+- Keep this MCFE AU upholstery set in the regression suite to catch future normalization drift.
+- Add a few negative queries to confirm non-upholstery colors do not overmatch the upholstery facet.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:48:58.149Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color facet mappings matched expected facet IDs.
+  - No query parsing or API execution errors were returned.
+  - Mixed-color combinations were resolved consistently across all variants.
+
+Findings:
+- Facet extraction is stable for single-color and dual-color upholstery queries in IN.
+- Result counts vary widely by color combination, which suggests inventory distribution is influencing relevance but not facet correctness.
+
+Recommendations:
+- Keep this MCFE set in regression to catch future synonym or color-combination mapping drift.
+- Add a few negative/control queries to verify non-upholstery terms do not incorrectly trigger upholstery facets.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:49:55.084Z]
+
+RCA:
+The search pipeline is inconsistently normalizing compound interior-color queries into upholstery facets. Single-color interior terms are mapped correctly, but dual-color phrases are often decomposed into separate base color facets or mixed with an over-generated compound value, which causes duplicate/incorrect upholstery facet sets. In one case, the intent is routed to paint color instead of upholstery, indicating a slot-mapping or entity-classification fallback issue for “white/black” combinations.
+
+Test Approach:
+Run targeted facet assertions for single-color and dual-color upholstery queries across JP, verifying only the expected upholstery facet is returned and paint color is not substituted. Add cases for hyphenated, slash-separated, and natural-language compound colors to confirm consistent normalization, no duplicate base-color facets, and correct handling of white/black as upholstery rather than exterior color.
+
+Test Summary:
+- Total test entries: 7
+- Passed: 2
+- Failed: 5
+- Main patterns observed:
+  - Compound upholstery colors are expanded into extra base-color facets.
+  - Some queries return both valid and invalid upholstery values together.
+  - One query is misrouted to paint color instead of upholstery.
+
+Findings:
+- 5 of 7 cases failed, concentrated on multi-color upholstery mapping.
+- “White/black” was classified incorrectly, producing paint color facets and missing upholstery entirely.
+
+Recommendations:
+- Tighten compound-color normalization so only the intended upholstery combination is emitted.
+- Add regression coverage for paired interior colors to prevent base-color leakage and facet-domain misclassification.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:51:29.970Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 10
+- Failed: 1
+- Main patterns observed:
+  - Single-point failure on a two-tone upholstery query involving white/black
+  - All other single-color and mixed-color upholstery mappings matched expected facet codes
+  - Failure shows facet extraction did not populate the required upholstery key despite broad result retrieval
+
+Findings:
+- The white/black query was not normalized or mapped to the expected upholstery facet, indicating a locale/value dictionary gap for that color combination.
+- The search fallback returned many results, but the facet layer failed validation, suggesting retrieval succeeded while structured facet attribution broke downstream.
+
+Recommendations:
+- Add/update synonym and translation mapping for white/black upholstery to ensure it resolves to `UPHOLSTERY_COLOR_WHITE_BLACK` consistently.
+- Re-run MCFE coverage for all two-tone upholstery variants, especially those with locale-specific color terms, to verify facet key generation and normalization.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:52:14.454Z]
+
+Test Summary:
+- Total test entries: 6
+- Passed: 6
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color combinations were mapped to the expected facet IDs.
+  - No parsing errors or missing facet extractions in conversational and filter-style queries.
+  - Result counts varied by color combo, but remained valid and non-zero where expected.
+
+Findings:
+- The SG upholstery facet extraction is stable across single-color and dual-color queries.
+- No regressions observed in handling punctuation, slash-separated colors, or natural-language phrasing.
+
+Recommendations:
+- Keep monitoring for edge cases with three-part color names, synonyms, and typos.
+- Add a few negative tests to confirm non-upholstery terms do not incorrectly trigger the upholstery facet.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:52:49.813Z]
+
+RCA:
+The regression appears healthy: the search pipeline is correctly mapping interior color language to the upholstery facet across single-color and combined-color queries. The one notable behavior is that a generic color facet is also returned for “black,” suggesting the intent classifier may still surface both paint and cabin-color interpretations when the wording is ambiguous, but it does not break the upholstery extraction.
+
+Test Approach:
+Validate that upholstery facet normalization works for direct color mentions, descriptive phrasing, and dual-color inputs. Confirm exact facet values for single and combined interior colors, and verify ambiguity handling by checking that related non-upholstery facets do not override or suppress the expected upholstery match.
+
+Test Summary:
+- Total test entries: 4
+- Passed: 4
+- Failed: 0
+- Main patterns observed:
+  - Upholstery facet was matched correctly for all queries
+  - Combined beige/brown interior mapped to the expected composite upholstery code
+  - One query also returned a paint color facet alongside upholstery
+
+Findings:
+- No functional failures were observed in the upholstery facet evaluation.
+- Ambiguous color language can still produce extra non-target facets, which may be acceptable but should be monitored for ranking noise.
+
+Recommendations:
+- Add a guardrail check to ensure upholstery remains the primary facet for interior-color queries.
+- Expand coverage with more ambiguous phrasing to detect unintended cross-facet leakage.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T03:54:14.077Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color variants and compound colors were consistently mapped to the expected facet IDs.
+  - Queries containing synonym-like wording such as “flooring” still resolved correctly to upholstery facets.
+  - No API errors or facet mismatches appeared in this TR upholstery regression run.
+
+Findings:
+- All executed regression cases passed with exact facet alignment between expected and actual outputs.
+- Result counts varied widely, but there were no signs of over-filtering, missing facet extraction, or country-specific normalization issues.
+
+Recommendations:
+- Keep this scenario in the regression suite to guard against future synonym or compound-color mapping regressions.
+- Add a small set of negative controls later to confirm unrelated terms do not accidentally resolve to upholstery facets.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:13:44.020Z]
+
+Test Summary:
+- Total test entries: 7
+- Passed: 7
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color-only and two-tone color queries were parsed correctly.
+  - Facet mapping matched expected AU upholstery codes across all cases.
+  - No API errors or evaluation mismatches; result counts varied but stayed valid.
+
+Findings:
+- No regressions detected in AU upholstery facet extraction for single and compound colors.
+- Two-tone slash-separated inputs and natural language variants were normalized consistently.
+
+Recommendations:
+- Keep this scenario in the nightly regression suite to guard against tokenizer or synonym drift.
+- Add one or two edge cases for ambiguous upholstery phrasing or punctuation variants to increase coverage.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:14:46.824Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color queries mapped to the expected facet codes.
+  - Multi-color variants with slash notation were correctly normalized.
+  - No API errors or evaluation mismatches were observed.
+
+Findings:
+- Facet extraction for single-color and bi-color upholstery terms is behaving correctly in the IN locale.
+- Query intent signals like “filter,” “prefer,” and “options” did not interfere with facet detection.
+
+Recommendations:
+- Keep this regression set in nightly coverage to guard against future synonym/normalization regressions.
+- Add a few negative controls and ambiguous phrasing cases to verify no over-matching on non-upholstery color terms.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:15:33.015Z]
+
+RCA:
+The search pipeline is inconsistently mapping interior color phrases to upholstery facet values. Single-color upholstery terms are mostly resolved correctly, but mixed-color queries are being expanded into multiple separate facet tokens instead of a single combined upholstery value, causing duplicate and unexpected facet matches. In one case, the system also misrouted an interior query into the exterior paint color facet, suggesting a fallback or entity-classification error when composite color parsing fails.
+
+Test Approach:
+Validate that upholstery queries map to the exact expected facet value for both single-color and dual-color interior phrases across JP. Add cases for brown/black, beige/black, gray/black, and white/black to confirm no extra upholstery values are returned and no paint-color facet leakage occurs. Verify that mixed-color requests produce one combined upholstery facet only, while plain color requests still return the correct single upholstery facet.
+
+Test Summary:
+- Total test entries: 7
+- Passed: 2
+- Failed: 5
+- Main patterns observed:
+  - Mixed interior color phrases are decomposed into separate upholstery values instead of one composite facet
+  - Some queries return both composite and single-color upholstery facets, creating over-broad matches
+  - One query was misclassified into exterior paint color instead of upholstery
+
+Findings:
+- Composite upholstery mappings for dual-color interiors are not normalized consistently, causing unexpected extra facet values.
+- The white/black case fell back to paint-color facets and dropped the upholstery key entirely, indicating a routing or entity extraction failure.
+
+Recommendations:
+- Fix the upholstery facet parser to emit only the canonical combined value for dual-color interior phrases.
+- Add regression assertions that reject paint-color facets for interior-color queries and fail when upholstery is missing or over-expanded.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:16:57.082Z]
+
+Test Summary:
+- Total test entries: 11
+- Passed: 10
+- Failed: 1
+- Main patterns observed:
+  - Single failure on a compound upholstery color mapping
+  - All other single- and dual-tone color facet mappings resolved correctly
+  - Failure produced no upholstery facet and fell back to broad results
+
+Findings:
+- The system failed to normalize or map the Korean white/black upholstery variant to the expected facet key, indicating a lexicon gap or tokenizer/alias issue for that color combination.
+- The failed query returned an unfiltered result set, which suggests the facet extraction step aborted before applying the upholstery constraint.
+
+Recommendations:
+- Add/verify multilingual synonym and variant coverage for white/black upholstery in the KR facet dictionary and mapping rules.
+- Add regression coverage for additional hyphen/slash compound colors in KR to ensure facet extraction still emits upholstery rather than defaulting to empty facets.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:17:32.861Z]
+
+Test Summary:
+- Total test entries: 6
+- Passed: 6
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color variants were correctly normalized to expected facet codes.
+  - Mixed-color upholstery queries were parsed consistently across phrasing styles.
+  - No API errors or facet mismatches were observed.
+
+Findings:
+- All queries returned the expected upholstery facet values, including compound colors like Beige/Black, Brown/Black, Grey/Black, and Red/Black.
+- Result counts varied widely by color, but all evaluations still matched the intended facet mapping.
+
+Recommendations:
+- Keep this suite in regression to protect against future synonym or delimiter parsing regressions.
+- Add a few negative cases for ambiguous upholstery mentions to validate exclusion behavior and reduce overmatching risk.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:18:05.190Z]
+
+Test Summary:
+- Total test entries: 4
+- Passed: 4
+- Failed: 0
+- Main patterns observed:
+  - Upholstery color facets were mapped correctly for black, brown, beige, and beige/brown queries.
+  - No search/runtime errors were returned in API mode.
+  - One query also surfaced a paint color facet alongside the expected upholstery facet.
+
+Findings:
+- The regression is healthy for the targeted TH upholstery facet mappings; all expected facet values were returned.
+- The black interior query additionally returned a paint color facet, which is not failing here but remains a coverage risk for facet disambiguation.
+
+Recommendations:
+- Add an assertion to ensure interior-color queries prioritize upholstery without unintentionally promoting paint-color facets.
+- Keep a mixed-attribute regression case for color-vs-interior wording to catch future ambiguity regressions.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-07T04:19:21.300Z]
+
+Test Summary:
+- Total test entries: 10
+- Passed: 10
+- Failed: 0
+- Main patterns observed:
+  - All upholstery color variants were correctly mapped to the expected facet codes.
+  - Mixed-color queries with slashes were normalized consistently.
+  - No API errors or facet extraction mismatches were observed.
+
+Findings:
+- The regression set is fully healthy for TR upholstery facet interpretation in PREPROD.
+- Result counts vary widely by color combination, but no invalid facet selections or missing mappings were detected.
+
+Recommendations:
+- Keep this MCFE coverage in the regression suite to protect color-token normalization and synonym handling.
+- Monitor adjacent facet groups for similar multi-color parsing issues, especially across other country locales.
+
+Conclusion:
+- PASS
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T00:49:02.675Z]
+
+RCA:
+The search parser is over-broadly matching adjacent motorization variants when a query contains shared base tokens and optional driveline/fuel markers. In the GLC case, the facet extractor appears to normalize or expand the requested trim into multiple candidate motorizations, causing closely related variants like “GLC 300 4MATIC” and “GLC 300 e 4MATIC” to be returned together instead of preserving a single exact facet value. This points to weak disambiguation between ICE and PHEV variants during motorization facet generation, likely due to token-level synonym/variant expansion without enough post-filtering by the full normalized string.
+
+Test Approach:
+Generate targeted regression cases for GLC 300-family motorizations with and without “e” and 4MATIC markers to verify only the exact requested motorization is surfaced. Validate both positive matching and exclusion behavior across nearby variants, and confirm result sets do not include sibling trims unless explicitly requested. Include checks for facet-level precision rather than only result count, so the fix is verified against both returned values and unintended expansions.
+
+Test Summary:
+- Total test entries: 23
+- Passed: 21
+- Failed: 2
+- Main patterns observed:
+  - Most motorization queries returned the exact expected facet values
+  - ModelIdentifier and stock/fuel facets were sometimes added as secondary facets but did not break evaluation
+  - Failures were concentrated in GLC 300 variant handling, especially around “e” vs non-“e” 4MATIC normalization
+
+Findings:
+- The GLC 300 queries returned both “GLC 300 4MATIC” and “GLC 300 e 4MATIC” instead of a single exact motorization.
+- The error pattern suggests variant expansion is not being constrained after normalization, causing sibling trims to leak into the facet response.
+
+Recommendations:
+- Tighten motorization matching for GLC 300-family queries to require exact normalized variant alignment before facet emission.
+- Add regression assertions that fail on any unexpected sibling motorization values, not just on missing expected values.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T00:49:48.285Z]
+
+Test Summary:
+- Total test entries: 9
+- Passed: 7
+- Failed: 2
+- Main patterns observed:
+  - Variant-to-facet extraction works for most queries with clear motorization strings.
+  - Failures are concentrated on higher-complexity motorization values with spacing/suffix nuances.
+  - In failed cases, the motorization facet is missing entirely rather than mapped incorrectly.
+
+Findings:
+- The parser is dropping motorization values for queries containing special formatting, such as the “+” suffix in “CLE 53 4MATIC+”, which suggests token normalization or query segmentation issues.
+- The “GLC 220 d 4MATIC” case indicates the search pipeline may be failing to preserve full variant text for multi-token diesel motorizations, causing facet generation to stop before motorization enrichment.
+
+Recommendations:
+- Review normalization/tokenization logic for motorization variants with symbols and multi-part tokens, and ensure the full variant string is retained through facet extraction.
+- Add regression coverage for edge cases including “+” suffixes, diesel trims with spaced tokens, and other compound motorization names to prevent partial facet loss.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T00:57:14.888Z]
+
+Test Summary:
+- Total test entries: 23
+- Passed: 20
+- Failed: 3
+- Main patterns observed:
+  - Most motorization facets resolve correctly across core model lines and trims.
+  - Failures cluster around mixed variant strings with electric/hybrid markers and one missing facet emission.
+  - A few responses return extra motorization values or omit the motorization facet entirely.
+
+Findings:
+- CLE 53 4MATIC+ did not emit a motorization facet, suggesting a parsing or classification gap for this trim pattern.
+- GLC 300 and GLC 300 e queries show inconsistent motorization disambiguation, with both variants returned or the wrong one prioritized.
+- Result payloads sometimes include additional facets like stockType or modelIdentifier without affecting pass/fail, indicating the main instability is in motorization extraction and normalization.
+
+Recommendations:
+- Update variant parsing rules to preserve full motorization tokens, especially for e/d/electric-hybrid and “+” suffix cases.
+- Add regression assertions for single-target motorization output on ambiguous GLC and CLE queries to prevent extra or missing facet values.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T00:58:02.583Z]
+
+RCA:
+The regression likely comes from inconsistent variant-to-facet normalization in the search pipeline. Multi-part motorization values with special tokens such as `4MATIC+` or spaced diesel formats are not being reliably extracted into the `motorization` facet, causing the query parser or facet mapper to drop the value entirely. In affected cases, the system still recognizes the base model but fails to persist the full variant as a facet, which points to a tokenization/aliasing gap rather than a retrieval issue.
+
+Test Approach:
+Run targeted regression cases covering motorization strings with special characters, spacing, and compound trims across multiple models. Validate that the expected `motorization` facet is always present and exact-match normalized, especially for `4MATIC+`, diesel variants, and models with similar naming patterns. Also verify that successful cases remain stable so the fix does not overcorrect and break existing facet extraction.
+
+Test Summary:
+- Total test entries: 9
+- Passed: 7
+- Failed: 2
+- Main patterns observed:
+  - Variant facet extraction works for most standard motorization strings.
+  - Failures are concentrated on complex variant formats, especially `4MATIC+` and one spaced diesel pattern.
+  - Base `modelIdentifier` is still recognized even when `motorization` is missing.
+
+Findings:
+- `CLE 53 4MATIC+` failed because the `motorization` facet was omitted entirely.
+- `GLC 220 d 4MATIC` failed with the same missing-facet symptom, suggesting a parser normalization gap for certain compound variant formats.
+
+Recommendations:
+- Fix motorization extraction rules to preserve special characters and whitespace-normalized variant tokens before facet emission.
+- Add regression coverage for `4MATIC+` and spaced diesel variants to prevent future facet-drop regressions.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T01:06:57.400Z]
+
+Test Summary:
+- Total test entries: 72
+- Passed: 47
+- Failed: 25
+- Main patterns observed:
+  - Missing `motorization` facet on several grade queries, especially for higher trim/AMG variants
+  - Over-inclusive motorization results returning sibling trims/related variants
+  - Query-to-facet normalization errors for spaced/compound names and localized inputs
+  - Response text count mismatches on a few numeric grade queries
+
+Findings:
+- Variant extraction is unstable for some model/trim combinations, causing the search layer to drop the `motorization` facet entirely.
+- Facet expansion is too broad in multiple cases, mixing close variants such as standard vs 4MATIC, PRO vs non-PRO, or L vs non-L trims.
+- Some localized queries and numeric grades are misparsed, leading to incorrect model selection or count narration mismatches.
+
+Recommendations:
+- Tighten grade-to-motorization mapping rules with explicit variant alias coverage and negative disambiguation for close trims.
+- Add regression checks for exact facet containment and result-count consistency across EN/JP queries, especially for AMG and long-wheelbase variants.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T01:12:08.662Z]
+
+Test Summary:
+- Total test entries: 37
+- Passed: 23
+- Failed: 14
+- Main patterns observed:
+  - Missing motorization facet on several detailed-model queries
+  - False positives from broader motorization expansion/variant overmatching
+  - Some responses return correct facet values but incorrect result counts
+
+Findings:
+- Several queries for high-value trims returned only `modelIdentifier` and omitted `motorization`, indicating the parser or facet mapper is not extracting variants reliably for some patterns.
+- Variant normalization appears overly aggressive in a few cases, adding extra motorization values such as a related derivative when the query requested a single exact trim.
+- A subset of failures is caused by response count mismatches even when the facet match looks correct, suggesting ranking/filtering or backend counting is inconsistent with the interpreted query.
+
+Recommendations:
+- Tighten the entity extraction rules for motorization, especially for exact-trim inputs with suffixes like `e`, `d`, `+`, and performance labels, and verify these are always emitted as required facets.
+- Add regression checks for one-to-one variant matching and result-count parity to prevent overbroad expansion and backend/query-count drift.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T01:16:01.446Z]
+
+Test Summary:
+- Total test entries: 26
+- Passed: 18
+- Failed: 8
+- Main patterns observed:
+  - Variant-to-motorization extraction works for many standard single-model queries.
+  - Failures cluster around model/variant ambiguity and missing facet generation.
+  - Some queries return unrelated model facets or inflated result counts, indicating fallback parsing issues.
+
+Findings:
+- The parser sometimes drops the motorization facet entirely for less common or longer variants, causing broad result sets instead of filtered matches.
+- Several failures show wrong model mapping or cross-model contamination, where the system assigns an incorrect modelIdentifier/motorization pair or produces a total-count message inconsistent with backend results.
+
+Recommendations:
+- Tighten variant entity recognition for edge cases like AMG/van/Sprinter/Vito and multi-token trims so motorization is always emitted when present.
+- Add regression checks for facet alignment and result-count consistency to catch misclassification and fallback-to-generic-search behavior.
+
+Conclusion:
+- FAIL
+
+
+────────────────────────────────────────────────────────────
+[AI Analysis — 2026-07-08T01:59:31.875Z]
+
+RCA:
+The search pipeline is likely failing in the variant-to-facet normalization layer for motorization queries. Certain trims with special tokens or multi-part names are not being preserved as exact canonical `motorization` facets, so the parser either drops the facet entirely or expands it into sibling variants. This points to tokenization and alias-matching gaps for compound trims such as `4MATIC+`, spaced diesel formats, and close model derivatives, with some cases also showing downstream count narration drift when the structured facet is missing or over-broad.
+
+Test Approach:
+Create regression cases that cover exact motorization matching for standard, compound, and symbol-bearing trims across affected model lines. Assert that the expected `motorization` facet is present exactly once, with no sibling variant leakage and no missing facet on edge formats. Include negative checks for over-expansion and verify backend result counts stay aligned with the selected facet so both extraction and response consistency are validated.
+
+
+────────────────────────────────────────────────────────────
+[AI Analysis — 2026-07-08T02:12:41.532Z]
+
+RCA:
+The regression is likely caused by a brittle normalization step in the variant extraction pipeline. When a query contains multi-part trim text or special tokens, the search system sometimes fails to preserve the exact canonical `motorization` facet and either drops it entirely or expands it into sibling variants. This indicates gaps in tokenization and alias resolution for compound trims, with a secondary impact on response consistency when the structured facet is missing or overly broad.
+
+Test Approach:
+Run focused regression cases for exact motorization matching across standard trims and edge formats with symbols, spacing, and close derivatives. Verify the expected `motorization` facet is returned exactly once, with no sibling variant leakage and no missing facet on special-form queries. Add negative assertions for over-expansion and confirm result counts stay aligned with the selected facet to validate both extraction accuracy and response consistency.
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T02:27:29.347Z]
+
+RCA:
+The regression is likely caused by inconsistent motorization normalization and variant disambiguation in the facet parser. In some cases the search pipeline drops the expected facet entirely for a specific trim suffix, and in others it over-generates near matches by returning both plug-in hybrid and non-hybrid GLC variants under a single query. This points to weak token-to-facet mapping rules for multi-part powertrain strings and incomplete exclusivity filtering when multiple similar motorization values exist in the index.
+
+Test Approach:
+Generate focused API regression cases for motorization queries that share the same base model but differ by suffixes such as e, d, 4MATIC, and 4MATIC+. Verify that each query returns exactly the intended motorization facet, does not omit required facet keys, and excludes adjacent variants. Include positive and negative checks for CLE and GLC patterns, plus baseline coverage for unaffected models to confirm the fix does not break broader facet extraction.
+
+Test Summary:
+- Total test entries: 23
+- Passed: 20
+- Failed: 3
+- Main patterns observed:
+  - Missing motorization facet for one CLE query
+  - GLC queries returned extra overlapping motorization values
+  - Most other AU motorization mappings and modelIdentifier facets were stable
+
+Findings:
+- One query failed due to a missing required motorization facet, indicating a parsing or extraction gap for that trim pattern.
+- Two GLC cases failed because the result set included an unintended adjacent motorization alongside the expected one, showing weak variant filtering.
+
+Recommendations:
+- Tighten motorization entity matching to enforce exact facet emission for each query token sequence, especially for CLE-style trims.
+- Add exclusion rules and regression assertions for overlapping GLC powertrains so hybrid and non-hybrid variants cannot co-occur unless explicitly requested.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T02:28:12.048Z]
+
+RCA:
+The search pipeline is likely failing to normalize and map certain motorization strings consistently in the facet extraction layer, especially for complex variant tokens like “4MATIC+” and diesel-style strings with spacing/special characters. In these cases, the intent is recognized well enough to return model-level hits, but the motorization facet is dropped or not emitted, suggesting an entity parsing or post-processing gap rather than a retrieval failure.
+
+Test Approach:
+Run targeted regression queries covering variant patterns that differ by punctuation, spacing, and suffixes across multiple models, then verify both facet presence and exact motorization values. Include positive cases already working, plus edge cases like “4MATIC+”, spaced numeric engines, and mixed character variants to confirm the fix preserves model hits while restoring the missing motorization facet.
+
+Test Summary:
+- Total test entries: 7
+- Passed: 5
+- Failed: 2
+- Main patterns observed:
+  - Motorization facet missing on specific complex variant strings
+  - ModelIdentifier still resolves correctly despite facet omission
+  - Failures are isolated to variant normalization/extraction, not broad search outage
+
+Findings:
+- “CLE 53 4MATIC+” returned results but omitted the required motorization facet.
+- “GLC 220 d 4MATIC” also lost the motorization facet, while simpler variants continued to pass.
+
+Recommendations:
+- Fix variant normalization rules for special characters, spacing, and suffix handling in facet extraction.
+- Add regression coverage for complex motorization patterns and assert both facet presence and exact facet value.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T02:36:32.790Z]
+
+Test Summary:
+- Total test entries: 72
+- Passed: 46
+- Failed: 26
+- Main patterns observed:
+  - Over-broad motorization facet expansion for some grades, returning sibling variants not requested
+  - Missing motorization facet entirely for several queries, especially on some AMG/CLA/CLE/GLS cases
+  - Response text count mismatches versus backend result counts
+  - A few grade strings were misread or partially truncated by the evaluator/parser
+
+Findings:
+- Several failures stem from variant disambiguation issues: the search returns multiple closely related motorization values when the query specifies one exact grade.
+- Some queries produce only modelIdentifier without motorization, indicating extraction/mapping dropped the grade token before facet assignment.
+- One result shows an incorrect count interpretation from the natural-language response, suggesting number parsing is confusing model/trim tokens with result totals.
+
+Recommendations:
+- Tighten motorization normalization and exact-match rules for grade-to-variant mapping, especially for plus/AMG/E PERFORMANCE and L/4MATIC distinctions.
+- Add regression checks for count extraction and facet completeness on queries that should yield a single exact motorization, including negative assertions against sibling variants.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T02:41:19.089Z]
+
+Test Summary:
+- Total test entries: 37
+- Passed: 24
+- Failed: 13
+- Main patterns observed:
+  - Motorization facet missing for several queries in larger model families
+  - Variant over-expansion/normalization causing extra motorization values to surface
+  - Response count mismatches on some exact-variant queries
+  - ModelIdentifier is often returned correctly, while motorization extraction is inconsistent
+
+Findings:
+- Queries for GLS, EQE, EQS, and some GLE/CLE variants frequently returned only modelIdentifier, indicating the motorization extractor is dropping detailed trims for certain patterns.
+- Some E-Class queries returned both the requested variant and a related alternate variant, showing facet normalization is over-broad and not strict enough for exact detailed-model intent.
+- A few failures are not facet-related but backend count mismatches, suggesting the search pipeline and message/evaluation layer are not aligned on result totals.
+
+Recommendations:
+- Tighten motorization parsing for electric and multi-token variants, with explicit coverage for suffixes like e, d, 4MATIC, +, and Performance.
+- Add regression checks for exact-variant isolation versus sibling-variant suppression, plus consistency validation between displayed counts and backend counts.
+
+Conclusion:
+- FAIL
+
+
+------------------------------------------------------------
+[AI Run Findings - 2026-07-08T02:44:49.015Z]
+
+Test Summary:
+- Total test entries: 26
+- Passed: 19
+- Failed: 7
+- Main patterns observed:
+  - Variant parsing is stable for many common passenger-car motorizations.
+  - Failures cluster around van/commercial lines and some AMG/GT/Sprinter/Vito cases.
+  - Several failed queries return unrelated models or omit the motorization facet entirely.
+
+Findings:
+- The parser is dropping or misclassifying motorization for specific long-tail variants such as C 63 S E PERFORMANCE, E 400 e 4MATIC, GT 63 4MATIC+, V 300, Sprinter 417, and Vito 124.
+- Some failures indicate model leakage into the wrong family, with the search engine returning unrelated facets like E 220 d 4MATIC, GLC 180, or no facets at all instead of the requested variant.
+
+Recommendations:
+- Expand synonym and entity mapping coverage for AMG, commercial vans, and electrified variants, especially multi-token motorization strings and model families with overlapping prefixes.
+- Add regression assertions for “no facet leakage” and required-facet presence on low-result and zero-result searches to catch fallback behavior that returns a generic model instead of the requested variant.
+
+Conclusion:
+- FAIL

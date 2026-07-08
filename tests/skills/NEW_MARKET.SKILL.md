@@ -90,6 +90,86 @@ To add a new language:
 3. Add facet name mappings in `LOCALIZED_FACET_NAMES_FOR_QUERY`
 4. Update `toQueryLabel()` and `toHintLabel()` functions for language-specific formatting
 
+### 3b. Localized Conversational Sentence Templates
+**Location**: `tests/utils/query/promptEngineHelper.ts` - `getLocalizedSentenceTemplate()` function
+
+The system generates conversational multi-facet queries in different styles for natural language variation. Each language implementation maps style hints to sentence templates with consistent structure.
+
+#### Supported Style Hints
+- `exact` - Minimal format: just facet + value labels
+- `direct` - Direct command form with imperative verb
+- `feature` - Feature-led recommendation style
+- `shortlist` - Shortlisting/filtering style
+- `ask` - Conversational question format
+- `explore` - Discovery/exploration style
+- `minimal` - Minimal keywords only
+- `preference` - Preference expression style
+- `default` - Default sentence format
+
+#### Existing Language Implementations
+
+**Turkish (TR)** - Already Supported
+```typescript
+if (normalizedLanguage === "tr") {
+  const templates: Record<string, string> = {
+    exact: `${keyLabel} ${valueLabel}`,
+    direct: `${keyLabel} ${valueLabel} olan araclari goster.`,
+    feature: `${keyLabel} kriterinde ${valueLabel} araclari oner.`,
+    shortlist: `${valueLabel} ${keyLabel} icin kisa liste hazirla.`,
+    ask: `${keyLabel} ${valueLabel} olan arac bulabilir misin?`,
+    explore: `${valueLabel} ${keyLabel} seceneklerini kesfetmek istiyorum.`,
+    minimal: `${valueLabel} ${keyLabel}`,
+    preference: `${valueLabel} ${keyLabel} tercih ediyorum.`,
+    default: `${valueLabel} ${keyLabel} araclari gormek istiyorum.`,
+  };
+  return templates[styleKey] || templates.default;
+}
+```
+
+**Thai (TH)** - Already Supported
+```typescript
+if (normalizedLanguage === "th") {
+  const templates: Record<string, string> = {
+    exact: `${keyLabel} ${valueLabel}`,
+    direct: `แสดงรถที่ ${keyLabel}เป็น${valueLabel}`,
+    feature: `ช่วยแนะนำรถตาม ${keyLabel} ${valueLabel}`,
+    shortlist: `ช่วยคัดตัวเลือก ${valueLabel}ใน${keyLabel}`,
+    ask: `ช่วยค้นหารถที่ ${keyLabel}เป็น${valueLabel}ได้ไหม`,
+    explore: `อยากดูตัวเลือก ${valueLabel}สำหรับ${keyLabel}`,
+    minimal: `${valueLabel} ${keyLabel}`,
+    preference: `ฉันต้องการ ${keyLabel}แบบ${valueLabel}`,
+    default: `ขอดูรถที่ ${keyLabel}เป็น${valueLabel}`,
+  };
+  return templates[styleKey] || templates.default;
+}
+```
+
+#### Adding a New Language Implementation
+
+To add sentence templates for a new language:
+
+1. Add a new conditional block in `getLocalizedSentenceTemplate()`:
+```typescript
+if (normalizedLanguage === "xx") {
+  const templates: Record<string, string> = {
+    exact: `${keyLabel} ${valueLabel}`,
+    direct: `[language-specific direct command with keyLabel and valueLabel]`,
+    feature: `[language-specific feature recommendation style]`,
+    shortlist: `[language-specific shortlist style]`,
+    ask: `[language-specific conversational question]`,
+    explore: `[language-specific exploration style]`,
+    minimal: `${valueLabel} ${keyLabel}`,
+    preference: `[language-specific preference expression]`,
+    default: `[language-specific default style]`,
+  };
+  return templates[styleKey] || templates.default;
+}
+```
+
+2. Ensure all templates use `${keyLabel}` and `${valueLabel}` placeholders consistently
+3. Test with `npm run generate:facet-matrix` to verify output quality
+4. Update this documentation with the new language code and example templates
+
 ### 4. AI Evaluation Rules
 **Location**: `tests/data/ai-evaluation-rules.json`
 
@@ -184,6 +264,7 @@ const GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES = {
 - [ ] Update `getCountryCode()` and `getLanguageCode()` mappings if needed
 - [ ] Update `RANGE_PHRASE_TEMPLATES` for localized range phrases
 - [ ] Update `LOCALIZED_FACET_NAMES_FOR_QUERY` mappings
+- [ ] Add localized sentence templates in `getLocalizedSentenceTemplate()` (promptEngineHelper.ts)
 - [ ] Update price formatting in `formatLocalizedPriceValue()`
 - [ ] Update body type/facet labels in `toQueryLabel()` and `toHintLabel()`
 
