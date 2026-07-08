@@ -274,9 +274,16 @@ npx playwright test --grep-invert @api
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Install Playwright Browsers
+
+```sh
+npx playwright install
+```
+
+### 3. Configure Environment
 
 Edit `.env` to set your test context:
+
 
 ```properties
 ENVIRONMENT=PREPROD   # Options: PREPROD, INT, DEV, PROD
@@ -295,7 +302,7 @@ PLAYWRIGHT_CDP_URL=http://localhost:9222
 # CDP_URL=http://localhost:9222
 ```
 
-### 3. Run Tests
+### 4. Run Tests
 
 ```sh
 npx playwright test
@@ -308,7 +315,7 @@ ENVIRONMENT=INT COUNTRY=JP LANGUAGE=EN PRODUCT=UCOS npx playwright test
 ENVIRONMENT=INT COUNTRY=JP LANGUAGE=JP PRODUCT=UCOS npx playwright test
 ```
 
-### 4. Generate HTML Report
+### 5. Generate HTML Report
 
 ```sh
 node generate-results-html.js
@@ -316,7 +323,7 @@ node generate-results-html.js
 
 - Output: `results/html/search-results-all-<timestamp>.html`
 
-### 4b. Generate Shareable Standalone Viewer (Embedded JSON)
+### 5b. Generate Shareable Standalone Viewer (Embedded JSON)
 
 ```sh
 node embed-results-into-viewer.js results/json/<run-folder> results/html/test-results-viewer-standalone.html
@@ -325,12 +332,12 @@ node embed-results-into-viewer.js results/json/<run-folder> results/html/test-re
 - Output: `results/html/test-results-viewer-standalone.html`
 - This embeds JSON directly into the HTML so the file can be shared and opened on another machine without selecting a local folder.
 
-### 5. Generate Non-Pass Results JSON
+### 6. Generate Non-Pass Results JSON
 
 ```sh
 node generate-results-json.js results/json/<run-folder>
 
-### 6. Run Regression Tests
+### 7. Run Regression Tests
 
 Use the dedicated regression suite in `tests/regression.spec.ts` for bug-focused validation and repeated-run stability checks.
 
