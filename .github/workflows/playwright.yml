@@ -148,7 +148,7 @@ on:
 
 jobs:
   test:
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted]
     environment: ${{ inputs.ENVIRONMENT }}
 
     steps:
