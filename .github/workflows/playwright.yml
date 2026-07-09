@@ -226,8 +226,7 @@ jobs:
         run: node generate-results-html.js
 
       - name: Upload test artifacts
-        id: upload-step
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         if: ${{ !cancelled() }}
         with:
           name: "smart-search-results - [${{ inputs.ENVIRONMENT != '' && inputs.ENVIRONMENT || vars.ENVIRONMENT || 'PREPROD' }}][${{ inputs.COUNTRY != '' && inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE != '' && inputs.LANGUAGE || 'EN' }}] ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }} #${{ github.run_number }}"
