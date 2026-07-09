@@ -233,11 +233,30 @@ jobs:
         if: ${{ !cancelled() }}
         run: node generate-results-html.js
 
+      - name: Build safe artifact metadata
+        if: ${{ !cancelled() }}
+        id: artifact-meta
+        env:
+          ENVIRONMENT: ${{ inputs.ENVIRONMENT != '' && inputs.ENVIRONMENT || vars.ENVIRONMENT || 'PREPROD' }}
+          COUNTRY: ${{ inputs.COUNTRY != '' && inputs.COUNTRY || 'AU' }}
+          LANGUAGE: ${{ inputs.LANGUAGE != '' && inputs.LANGUAGE || 'EN' }}
+          RAW_SCOPE: ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}
+        run: |
+          SAFE_SCOPE=$(printf '%s' "$RAW_SCOPE" | tr '\r\n' '  ' | sed -E 's/["\:<\>|*?\\/]+/-/g; s/[[:space:]]+/ /g; s/^[[:space:]-]+//; s/[[:space:]-]+$//; s/-{2,}/-/g')
+          if [ -z "$SAFE_SCOPE" ]; then
+            SAFE_SCOPE="Full Test Suite"
+          fi
+
+          ARTIFACT_NAME="smart-search-results - [${ENVIRONMENT}][${COUNTRY}-${LANGUAGE}] ${SAFE_SCOPE} #${GITHUB_RUN_NUMBER}"
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "safe_scope=$SAFE_SCOPE" >> "$GITHUB_OUTPUT"
+
       - name: Upload test artifacts
+        id: upload-step
         uses: actions/upload-artifact@v3
         if: ${{ !cancelled() }}
         with:
-          name: "smart-search-results - [${{ inputs.ENVIRONMENT != '' && inputs.ENVIRONMENT || vars.ENVIRONMENT || 'PREPROD' }}][${{ inputs.COUNTRY != '' && inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE != '' && inputs.LANGUAGE || 'EN' }}] ${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }} #${{ github.run_number }}"
+          name: ${{ steps.artifact-meta.outputs.artifact_name }}
           path: |
             playwright-report/
             results/json/
@@ -255,7 +274,7 @@ jobs:
           # Dynamically builds the exact direct download ZIP link:
           ARTIFACT_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts/${{ steps.upload-step.outputs.artifact-id }}"
           MARKET: "${{ inputs.COUNTRY || 'AU' }}-${{ inputs.LANGUAGE || 'EN' }}"
-          SCOPE: "${{ inputs.TEST_TITLE != 'None' && inputs.TEST_TITLE || (inputs.TEST_DESCRIBE != 'None' && inputs.TEST_DESCRIBE || 'Full Test Suite') }}"
+          SCOPE: "${{ steps.artifact-meta.outputs.safe_scope }}"
           ACTOR: "${{ github.actor }}"
         run: |
           if [ "$JOB_STATUS" = "success" ]; then
