@@ -148,7 +148,7 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, os-xlarge-amd64-linux]
     environment: ${{ inputs.ENVIRONMENT }}
 
     steps:
