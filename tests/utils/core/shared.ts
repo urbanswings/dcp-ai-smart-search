@@ -131,6 +131,26 @@ function getConsistencyFacets(result: any): any {
   return facets;
 }
 
+function isRunFailed(result: any): boolean {
+  if (typeof result?.hasError === "boolean") {
+    return result.hasError;
+  }
+
+  const results = result?.results;
+  if (results && typeof results === "object") {
+    return (
+      results.responseResult === "FAIL" ||
+      results.facetsResult === "FAIL" ||
+      results.countResult === "FAIL"
+    );
+  }
+
+  const normalizedEvaluation = String(result?.openaiEvaluation || "")
+    .trim()
+    .toUpperCase();
+  return normalizedEvaluation !== "" && normalizedEvaluation !== "PASS";
+}
+
 export function isLanguageConsistencyAccepted(result: string): boolean {
   const normalized = (result || "").trim().toUpperCase();
   if (!normalized) return false;
@@ -584,6 +604,21 @@ export async function runTestsRepeatedAndSaveResults(params: {
           (facetMatchCount / (resultsForQuery.length - 1)) *
           100
         ).toFixed(0);
+        const failedRunCount = resultsForQuery.filter((result) =>
+          isRunFailed(result),
+        ).length;
+        const allRunsFailed = failedRunCount === resultsForQuery.length;
+        const allRunsPassed = failedRunCount === 0;
+        const overallIcon = allRunsFailed
+          ? "❌"
+          : allRunsPassed
+            ? "✅"
+            : "⚠️";
+        const overallStatusText = allRunsFailed
+          ? "Failed Consistently"
+          : allRunsPassed
+            ? "Passed Consistently"
+            : `Intermittent Failures (${failedRunCount} / ${resultsForQuery.length} failed)`;
         // Add consistencyRating to each result in resultsForQuery
         for (const result of resultsForQuery) {
           result.consistencyRating = Number(percent);
@@ -638,6 +673,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
         console.info(
           `• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`,
         );
+        console.info(`• ${overallIcon} Overall: ${overallStatusText}`);
         console.info(`${line}\n`);
         uiResults.push(resultsForQuery);
       }
@@ -716,6 +752,21 @@ export async function runTestsRepeatedAndSaveResults(params: {
         (facetMatchCount / (resultsForQuery.length - 1)) *
         100
       ).toFixed(0);
+      const failedRunCount = resultsForQuery.filter((result) =>
+        isRunFailed(result),
+      ).length;
+      const allRunsFailed = failedRunCount === resultsForQuery.length;
+      const allRunsPassed = failedRunCount === 0;
+      const overallIcon = allRunsFailed
+        ? "❌"
+        : allRunsPassed
+          ? "✅"
+          : "⚠️";
+      const overallStatusText = allRunsFailed
+        ? "Failed Consistently"
+        : allRunsPassed
+          ? "Passed Consistently"
+          : `Intermittent Failures (${failedRunCount} / ${resultsForQuery.length} failed)`;
       // Add consistencyRating to each result in resultsForQuery
       for (const result of resultsForQuery) {
         result.consistencyRating = Number(percent);
@@ -770,6 +821,7 @@ export async function runTestsRepeatedAndSaveResults(params: {
       console.info(
         `• ${facetIcon} Facets: ${facetPercent}% (${facetMatchCount} / ${resultsForQuery.length - 1} matched)`,
       );
+      console.info(`• ${overallIcon} Overall: ${overallStatusText}`);
       console.info(`${line}\n`);
       apiResults.push(resultsForQuery);
     }
