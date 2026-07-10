@@ -11,7 +11,7 @@ on:
 
 jobs:
   execute-playwright-automation:
-    runs-on: ubuntu-latest
+    runs-on: [linux, self-hosted]
     
     steps:
       # 2. Pull down your repository code
