@@ -749,6 +749,10 @@
       min-width: 0;
     }
 
+    .selectedRowRight > * + * {
+      margin-top: 10px;
+    }
+
     .screenshotStage {
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -3271,7 +3275,6 @@
       rowViewPane.innerHTML =
         "<div class=\"selectedRowSplit\">" +
           "<div class=\"selectedRowLeft\">" +
-            "<div class=\"detailBlock " + evaluationBlockClass + "\"><div class=\"detailGrid\" style=\"grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0;\"><div class=\"detailItem\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailValue\">" + escapeHtml(evaluation) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Country</div><div class=\"detailValue\">" + escapeHtml(selectedRowCountry) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Language</div><div class=\"detailValue\">" + escapeHtml(selectedRowLanguage) + "</div></div></div></div>" +
             "<div class=\"langGrid\">" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:var(--text)\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
@@ -3290,13 +3293,14 @@
               "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "responseTime") || "-") + "</div></div>" +
               "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "statusCode") || "-") + "</div></div>" +
             "</div>" +
-            "<div><button type=\"button\" data-copy-all=\"" + encodeURIComponent(combinedCopyText) + "\" title=\"Copy Query (EN), Response (EN), Actual Facets\" aria-label=\"Copy Query (EN), Response (EN), Actual Facets\">Copy All (3)</button> " +
-              "<button type=\"button\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira ticket description\" aria-label=\"Copy Jira ticket description\">Get JIRA</button></div>" +
+            screenshotNavHtml +
           "</div>" +
           "<div class=\"selectedRowRight\">" +
-            screenshotNavHtml +
-            "<div class=\"detailLabel\">Summary Failure Reasons</div>" +
-            summaryFailureReasonsHtml +
+              "<div class=\"detailBlock " + evaluationBlockClass + "\"><div class=\"detailGrid\" style=\"grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0;\"><div class=\"detailItem\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailValue\">" + escapeHtml(evaluation) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Country</div><div class=\"detailValue\">" + escapeHtml(selectedRowCountry) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Language</div><div class=\"detailValue\">" + escapeHtml(selectedRowLanguage) + "</div></div></div></div>" +
+            "<div class=\"detailBlock detailBlockFail\">" +
+              "<div class=\"detailLabel\">Summary Failure Reasons</div>" +
+              summaryFailureReasonsHtml +
+            "</div>" +
             "<div class=\"detailLabel\">Screenshot" + (screenshotFile ? " <span style=\"font-weight:400;text-transform:none;font-size:11px;color:var(--muted)\">(click to view fullscreen)</span>" : "") + "</div>" +
             screenshotStageHtml +
             "<div class=\"detailLabel\">Screenshot Path</div>" +
