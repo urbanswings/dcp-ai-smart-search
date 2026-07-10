@@ -71,7 +71,7 @@ export async function processAndLogUiResult({
       assertions: {
         response: {
           status: "FAIL",
-          feedback: `UI call failed with error: ${results.error}`,
+          failureReasons: [`UI call failed with error: ${results.error}`],
         },
         facets: {
           expected: null,
@@ -316,6 +316,42 @@ export async function processAndLogUiResult({
   });
   console.log("\n");
 
+  // Parse openaiEvaluation and separate response vs facet failures
+  let responseFailureReasons: string[] = [];
+  let facetFailureReasons: string[] = [];
+  
+  if (openaiEvaluation && openaiEvaluation !== "PASS" && openaiEvaluation !== "No results to evaluate") {
+    const parts = openaiEvaluation.split(" | ");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+      
+      if (trimmed.includes("Facets check failed:")) {
+        const detail = trimmed.replace("Facets check failed:", "").trim();
+        facetFailureReasons.push(detail);
+      } else {
+        responseFailureReasons.push(trimmed);
+      }
+    }
+  }
+  
+  // response failures: only from openaiEvaluation (non-facet parts)
+  const allResponseFailures: string[] = [...responseFailureReasons];
+  
+  // facet failures: from failureReasons array (populated by validateExpectedFacets)
+  const allFacetFailures: string[] = [...failureReasons];
+  for (const reason of facetFailureReasons) {
+    if (!allFacetFailures.includes(reason)) {
+      allFacetFailures.push(reason);
+    }
+  }
+  
+  // Build summary failures (consolidated from both)
+  const summaryFailures: string[] = [];
+  summaryFailures.push(...allResponseFailures);
+  summaryFailures.push(...allFacetFailures);
+  const uniqueSummaryFailures = Array.from(new Set(summaryFailures));
+
   return {
     metadata: {
       timestamp: new Date().toISOString(),
@@ -348,7 +384,7 @@ export async function processAndLogUiResult({
     assertions: {
       response: {
         status: responseCheckPassed ? "PASS" : "FAIL",
-        feedback: openaiEvaluation,
+        ...(allResponseFailures.length && { failureReasons: allResponseFailures }),
       },
       facets: {
         expected: actualFacets,
@@ -356,6 +392,7 @@ export async function processAndLogUiResult({
         status: facetsCheckPassed ? "PASS" : "FAIL",
         ui: uiSelectedFiltersKV,
         uiFacetComparison,
+        ...(allFacetFailures.length && { failureReasons: allFacetFailures }),
       },
       count: {
         expected: null,
@@ -370,10 +407,11 @@ export async function processAndLogUiResult({
       },
     },
     summary: {
-      overallStatus: openaiEvaluation === "PASS" ? "PASS" : "FAIL",
+      overallStatus: responseCheckPassed && facetsCheckPassed ? "PASS" : "FAIL",
       resultCount,
       vehicleCount: responseVehicleTotalCount || uiVehicleCount,
       motorization,
+      ...(uniqueSummaryFailures.length && { failureReasons: uniqueSummaryFailures }),
     },
   };
 }

@@ -260,7 +260,7 @@
     }
 
     .filterRow {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto auto;
       align-items: end;
     }
 
@@ -292,6 +292,19 @@
     .scrollMetaBtn:not(:disabled):hover {
       background: var(--success);
       border-color: var(--success);
+      color: #ffffff;
+    }
+
+    .createJiraBtn {
+      white-space: nowrap;
+      background: #dbeafe;
+      border-color: var(--accent-soft);
+      color: var(--accent-strong);
+    }
+
+    .createJiraBtn:not(:disabled):hover {
+      background: var(--accent);
+      border-color: var(--accent-strong);
       color: #ffffff;
     }
 
@@ -773,6 +786,19 @@
       font-size: 12px;
       padding: 8px;
       white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .failureReasonsList {
+      margin: 0 0 8px 18px;
+      padding: 0;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .failureReasonsList li {
+      margin: 0 0 4px 0;
       overflow-wrap: anywhere;
       word-break: break-word;
     }
@@ -1288,8 +1314,9 @@
           <button class="selectNavBtn" id="titleNextBtn" type="button" aria-label="Next testTitle">&#8250;</button>
         </div>
       </div>
-      <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset dropdowns</button>
-      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>
+      <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset Form</button>
+      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>      
+      <button id="createJiraBtn" class="createJiraBtn" type="button" title="Create JIRA ticket for all failed queries">Create JIRA</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
     </div>
 
@@ -1447,8 +1474,9 @@
         if (fieldName === "testMode") return row.metadata?.testMode || row.testMode || "";
         if (fieldName === "query") return row.request?.query || row.query || "";
         if (fieldName === "openaiEvaluation") {
-          const feedback = row.assertions?.response?.feedback || row.openaiEvaluation || "";
-          return String(feedback || "").trim();
+          // Use summary.overallStatus to reflect all failures (response + facets)
+          const status = row.summary?.overallStatus || row.assertions?.response?.status || row.openaiEvaluation || "";
+          return String(status || "").trim();
         }
         if (fieldName === "response") return row.response?.message || row.response || "";
         if (fieldName === "country") return row.metadata?.country || row.country || "";
@@ -1483,6 +1511,7 @@
     const titleNextBtn = document.getElementById("titleNextBtn");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
     const scrollMetaBtn = document.getElementById("scrollMetaBtn");
+    const createJiraBtn = document.getElementById("createJiraBtn");
     const metaGrid = document.getElementById("metaGrid");
     const chartRowsToggleBtn = document.getElementById("chartRowsToggleBtn");
     const chartsPanel = document.getElementById("chartsPanel");
@@ -2267,6 +2296,56 @@
       return String(value);
     }
 
+    function formatFacetValueForJira(value) {
+      // Special formatting for JIRA to avoid macro interpretation
+      if (Array.isArray(value)) {
+        if (!value.length) {
+          return "[]";
+        }
+        return "[" + value.map((item) => formatFacetValueForJira(item)).join(", ") + "]";
+      }
+
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        const entries = Object.keys(value)
+          .filter((key) => !String(key).startsWith("__"))
+          .map((key) => key + "=" + formatFacetValueForJira(value[key]));
+
+        if (!entries.length) {
+          return "(empty)";
+        }
+
+        // Use parentheses and equals instead of curly braces to avoid JIRA macro issues
+        return "(" + entries.join(", ") + ")";
+      }
+
+      return String(value);
+    }
+
+    function formatFacetsForJira(facets) {
+      // Format facets for JIRA output with proper escaping
+      if (!facets || typeof facets !== "object") {
+        return "-";
+      }
+
+      const lines = [];
+      for (const key of Object.keys(facets)) {
+        const value = facets[key];
+        if (Array.isArray(value)) {
+          if (!value.length) {
+            lines.push(" * " + key + ": -");
+            continue;
+          }
+          value.forEach((item) => {
+            lines.push(" * " + key + ": " + formatFacetValueForJira(item));
+          });
+        } else {
+          lines.push(" * " + key + ": " + formatFacetValueForJira(value));
+        }
+      }
+
+      return lines.length ? lines.join("\n") : "-";
+    }
+
     function toStaticValue(values) {
       const cleaned = values.filter((v) => String(v || "").trim() !== "");
       if (!cleaned.length) {
@@ -2941,6 +3020,19 @@
       return lines.length ? lines : [" **** None"];
     }
 
+    function toJiraObservationLines(rowData) {
+      const reasons = Array.isArray(rowData?.summary?.failureReasons)
+        ? rowData.summary.failureReasons
+        : [];
+      const cleaned = reasons
+        .map((reason) => String(reason || "").trim())
+        .filter((reason) => reason !== "");
+      if (!cleaned.length) {
+        return [" **** None"];
+      }
+      return cleaned.map((reason) => " **** {color:#de350b}" + reason + "{color}");
+    }
+
     function buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, actualFacets, screenshotPath, country) {
       const results = getRowField(rowData, "results");
       const responseResult = (results && results.responseResult) || (rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : ""));
@@ -2969,6 +3061,8 @@
 
       detailLines.push(" *** Filtering:");
       detailLines.push(...toJiraFacetLines(actualFacets));
+      detailLines.push(" *** Observations");
+      detailLines.push(...toJiraObservationLines(rowData));
 
       return [
         "{panel:title=Elaborate details|titleBGColor=#858585}",
@@ -2985,6 +3079,84 @@
         "{panel:title=Any attachments?|titleBGColor=#858585}",
         " * Screenshot",
         screenshotName ? " ** !" + screenshotName + "|thumbnail!" : " ** NA",
+        "{panel}",
+      ].join("\n");
+    }
+
+    function buildJiraTicketForFailedQueries(failedRows) {
+      // Collect all query details in one elaborate section
+      const elaborateDetails = failedRows.map((rowData, idx) => {
+        const normalized = normalizeRowSchema(rowData);
+        
+        const queryLocal = getLocalizedText(getRowField(normalized, "query")) || "-";
+        const queryEn = getEnglishText(getRowField(normalized, "query")) || "-";
+        const responseLocal = getLocalizedText(getRowField(normalized, "response")) || "-";
+        const responseEn = getEnglishText(getRowField(normalized, "response")) || "-";
+        
+        const country = getRowCountry(normalized, "") || "-";
+        const results = getRowField(normalized, "results");
+        const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
+        const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
+        const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim();
+        const marker = responseResult === "FAIL" || facetsResult === "FAIL" || String(openaiEvaluation).toUpperCase().includes("FAIL") || normalized?.hasError ? "(x)" : "(/)";
+        
+        const countryText = country || "-";
+        const primaryQuery = String(queryLocal || queryEn || "-").trim();
+        const primaryResponse = String(responseLocal || responseEn || "-").trim();
+        const englishQuery = String(queryEn || "").trim();
+        const englishResponse = String(responseEn || "").trim();
+        const hasEnglishTranslation =
+          Boolean(englishQuery || englishResponse) &&
+          (englishQuery !== primaryQuery || englishResponse !== primaryResponse);
+        
+        const facets = getRowField(normalized, "facets");
+        const facetGroups = splitExpectedAndActualFacets(facets);
+        const facetsFormatted = formatFacetsForJira(facetGroups.actual);
+        
+        const queryDetails = [
+          " * " + marker + " Q #" + (idx + 1) + " (" + countryText + "): " + primaryQuery,
+          " ** A: " + primaryResponse,
+        ];
+
+        if (hasEnglishTranslation) {
+          queryDetails.push(" *** EN: " + (englishQuery || "-"));
+          queryDetails.push(" **** A: " + (englishResponse || "-"));
+        }
+        
+        queryDetails.push(" *** Filtering:");
+        if (facetsFormatted && String(facetsFormatted).trim() && facetsFormatted !== "-") {
+          // Convert facet lines from " * " to " **** " format
+          const facetLines = String(facetsFormatted).split("\n").map(line => {
+            if (line.startsWith(" * ")) {
+              return " **** " + line.substring(3);
+            }
+            return " **** " + line;
+          });
+          queryDetails.push(...facetLines);
+        } else {
+          queryDetails.push(" **** None");
+        }
+
+        queryDetails.push(" *** Observations");
+        queryDetails.push(...toJiraObservationLines(normalized));
+        
+        return queryDetails.join("\n");
+      }).join("\n");
+
+      return [
+        "{panel:title=Elaborate details|titleBGColor=#858585}",
+        elaborateDetails,
+        "{panel}",
+        "{panel:title=Steps|titleBGColor=#858585}",
+        " * Do a SmartSearch for each of the listed queries above",
+        "{panel}",
+        "{panel:title=Expected behaviour|titleBGColor=#858585}",
+        " * All queries should return accurate response messages",
+        " * All facet filters should work correctly",
+        "{panel}",
+        "{panel:title=Any attachments?|titleBGColor=#858585}",
+        " * Screenshots",
+        " ** NA",
         "{panel}",
       ].join("\n");
     }
@@ -3027,6 +3199,12 @@
       const embeddedDataUri = screenshotResolution.embeddedDataUri;
       const selectedRowCountry = getRowCountry(rowData, currentTableRenderOptions.country) || "-";
       const selectedRowLanguage = getRowLanguage(rowData, currentTableRenderOptions.language) || "-";
+      const summaryFailureReasons = Array.isArray(rowData?.summary?.failureReasons)
+        ? rowData.summary.failureReasons.filter((reason) => String(reason || "").trim() !== "")
+        : [];
+      const summaryFailureReasonsHtml = summaryFailureReasons.length
+        ? "<ul class=\"failureReasonsList\">" + summaryFailureReasons.map((reason) => "<li>" + escapeHtml(String(reason)) + "</li>").join("") + "</ul>"
+        : "<div class=\"screenshotPath\">-</div>";
       const jiraCopyText = buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, facetGroups.actual, screenshotPath, selectedRowCountry);
       const hasPreviousRow = selectedRowIndex > 0;
       const hasNextRow = selectedRowIndex < currentRows.length - 1;
@@ -3069,7 +3247,7 @@
       rowViewPane.innerHTML =
         "<div class=\"selectedRowSplit\">" +
           "<div class=\"selectedRowLeft\">" +
-            "<div class=\"detailBlock " + evaluationBlockClass + "\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailTextWide\">" + escapeHtml(evaluation) + "</div></div>" +
+            "<div class=\"detailBlock " + evaluationBlockClass + "\"><div class=\"detailGrid\" style=\"grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:0;\"><div class=\"detailItem\"><div class=\"detailLabel\">Evaluation</div><div class=\"detailValue\">" + escapeHtml(evaluation) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Country</div><div class=\"detailValue\">" + escapeHtml(selectedRowCountry) + "</div></div><div class=\"detailItem\"><div class=\"detailLabel\">Language</div><div class=\"detailValue\">" + escapeHtml(selectedRowLanguage) + "</div></div></div></div>" +
             "<div class=\"langGrid\">" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:var(--text)\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
@@ -3092,13 +3270,11 @@
               "<button type=\"button\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira ticket description\" aria-label=\"Copy Jira ticket description\">Get JIRA</button></div>" +
           "</div>" +
           "<div class=\"selectedRowRight\">" +
-            "<div class=\"detailGrid\" style=\"grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:8px;\">" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Country</div><div class=\"detailValue\">" + escapeHtml(selectedRowCountry) + "</div></div>" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Language</div><div class=\"detailValue\">" + escapeHtml(selectedRowLanguage) + "</div></div>" +
-            "</div>" +
+            screenshotNavHtml +
+            "<div class=\"detailLabel\">Summary Failure Reasons</div>" +
+            summaryFailureReasonsHtml +
             "<div class=\"detailLabel\">Screenshot" + (screenshotFile ? " <span style=\"font-weight:400;text-transform:none;font-size:11px;color:var(--muted)\">(click to view fullscreen)</span>" : "") + "</div>" +
             screenshotStageHtml +
-            screenshotNavHtml +
             "<div class=\"detailLabel\">Screenshot Path</div>" +
             screenshotPathHtml +
           "</div>" +
@@ -4004,6 +4180,35 @@
       const stickyOffset = filterPanel ? filterPanel.offsetHeight + 12 : 12;
       const targetTop = metaGrid.getBoundingClientRect().top + window.scrollY - stickyOffset;
       window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    });
+
+    createJiraBtn.addEventListener("click", async () => {
+      const failedQueries = currentRows.filter(row => {
+        const normalized = normalizeRowSchema(row);
+        const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
+        const results = getRowField(normalized, "results");
+        const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
+        const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
+        return responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || normalized?.hasError;
+      });
+
+      if (failedQueries.length === 0) {
+        createJiraBtn.textContent = "No failures";
+        setTimeout(() => { createJiraBtn.textContent = "Create JIRA"; }, 1200);
+        return;
+      }
+
+      const jiraText = buildJiraTicketForFailedQueries(failedQueries);
+      try {
+        await copyToClipboard(jiraText);
+        const original = createJiraBtn.innerHTML;
+        createJiraBtn.textContent = "OK";
+        setTimeout(() => {
+          createJiraBtn.innerHTML = original;
+        }, 900);
+      } catch {
+        createJiraBtn.textContent = "ERR";
+      }
     });
 
     chartRowsToggleBtn.addEventListener("click", () => {

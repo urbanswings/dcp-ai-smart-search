@@ -12,6 +12,7 @@ Usage:
 import json
 import sys
 import glob
+import re
 from pathlib import Path
 from datetime import datetime
 import argparse
@@ -93,14 +94,42 @@ def build_new_structure(old_obj):
     if backend_count is not None:
         count_assertion["backendCount"] = backend_count
     
-    # Parse openaiEvaluation for response assertion
-    response_assertion = {
-        "status": old_obj.get("results", {}).get("responseResult", "UNKNOWN"),
-    }
-    
+    # Parse openaiEvaluation and categorize feedback
     openai_eval = old_obj.get("openaiEvaluation", "")
+    response_result = old_obj.get("results", {}).get("responseResult", "UNKNOWN")
+    facets_result = old_obj.get("results", {}).get("facetsResult", "UNKNOWN")
+    
+    # Separate response failures from facet failures
+    response_failure_reasons = []
+    facet_failure_reasons = []
+    
     if openai_eval:
-        response_assertion["feedback"] = openai_eval
+        # Split by pipe to separate response and facet failures
+        parts = openai_eval.split(" | ")
+        
+        for part in parts:
+            part = part.strip()
+            if not part:
+                continue
+            
+            # Check if this is a facet failure
+            if "Facets check failed:" in part:
+                # Extract failure details
+                facet_detail = part.replace("Facets check failed:", "").strip()
+                # Split multiple facet failures by semicolon
+                for facet_fail in facet_detail.split(";"):
+                    facet_fail = facet_fail.strip()
+                    if facet_fail:
+                        facet_failure_reasons.append(facet_fail)
+            else:
+                # This is a response failure
+                response_failure_reasons.append(part)
+    
+    response_assertion = {
+        "status": response_result,
+    }
+    if response_failure_reasons:
+        response_assertion["failureReasons"] = response_failure_reasons
     
     # Build new structure
     new_obj = {
@@ -138,15 +167,30 @@ def build_new_structure(old_obj):
         }
     }
     
-    # Add failure reasons to summary if present
-    failure_reasons = []
-    if facets_failures:
-        failure_reasons.extend(facets_failures)
-    if openai_eval and "FAIL" in openai_eval:
-        failure_reasons.append(openai_eval)
+    # Add facet failure reasons to facets section
+    if facets_failures or facet_failure_reasons:
+        facet_reasons_list = []
+        facet_reasons_list.extend(facets_failures)
+        facet_reasons_list.extend(facet_failure_reasons)
+        new_obj["assertions"]["facets"]["failureReasons"] = facet_reasons_list
     
-    if failure_reasons:
-        new_obj["summary"]["failureReasons"] = failure_reasons
+    # Consolidate all failure reasons in summary
+    all_failure_reasons = []
+    
+    # Add response failures
+    if response_failure_reasons:
+        all_failure_reasons.extend(response_failure_reasons)
+    
+    # Add facet failures
+    if facets_failures:
+        all_failure_reasons.extend(facets_failures)
+    
+    # Add parsed facet failures
+    if facet_failure_reasons:
+        all_failure_reasons.extend(facet_failure_reasons)
+    
+    if all_failure_reasons:
+        new_obj["summary"]["failureReasons"] = all_failure_reasons
     
     # Add structured facet failures if any
     if facet_failures_list:
