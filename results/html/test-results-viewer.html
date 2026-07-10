@@ -1251,6 +1251,7 @@
     </div>
     <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
 
+    <div id="viewerContent" hidden>
     <div class="introCard">
       <p class="introTitle">Overall Summary</p>
       <div class="summaryGrid">
@@ -1411,6 +1412,7 @@
       </div>
       <pre class="detailJson" id="currentQueryJsonPane">Select a table row to view current query JSON.</pre>
     </div>
+    </div>
   </main>
 
   <div class="screenshotPopover" id="screenshotPopover" aria-hidden="true">
@@ -1559,6 +1561,7 @@
     const iicImportCloseBtn = document.getElementById("iicImportCloseBtn");
     const embeddedResultsData = document.getElementById("embeddedResultsData");
     const embeddedEchartsLib = document.getElementById("embeddedEchartsLib");
+    const viewerContent = document.getElementById("viewerContent");
 
     let rootLabel = "selected-root";
     let selectedFiles = [];
@@ -1580,6 +1583,13 @@
     let testTitlePassRateChartInstance = null;
     const fileMetadataCache = new Map();
     const fileRowsCache = new Map();
+
+    function setViewerLoadedState(isLoaded) {
+      if (!viewerContent) {
+        return;
+      }
+      viewerContent.hidden = !isLoaded;
+    }
 
     function ensureEmbeddedEchartsLoaded() {
       if (window.echarts || !embeddedEchartsLib) {
@@ -1926,6 +1936,7 @@
         return false;
       }
 
+      setViewerLoadedState(true);
       fileMetadataCache.clear();
       rootLabel = embeddedPayload.rootLabel;
       selectedFiles = embeddedPayload.files;
@@ -3389,6 +3400,7 @@
       fileMetadataCache.clear();
       fileRowsCache.clear();
       if (!selectedFiles.length) {
+        setViewerLoadedState(false);
         infoText.textContent = "No folder selected.";
         folderSelect.innerHTML = "";
         countrySelect.innerHTML = "<option value=\"ALL\">All countries</option>";
@@ -3415,6 +3427,8 @@
         renderTestTitlePassRateList(chartTestTitlePassRateChart, []);
         return;
       }
+
+      setViewerLoadedState(true);
 
       try {
         folders = buildFolderMap(selectedFiles, rootLabel);
@@ -4257,6 +4271,7 @@
     folderInput.addEventListener("change", () => {
       selectedFiles = Array.from(folderInput.files || []);
       if (!selectedFiles.length) {
+        setViewerLoadedState(false);
         infoText.textContent = "Folder selection canceled.";
         return;
       }
@@ -4277,6 +4292,7 @@
       void readRootFromSelectedFiles();
     });
 
+    setViewerLoadedState(false);
     loadEmbeddedResultsIfPresent();
 
     screenshotPrevBtn.addEventListener("click", () => {

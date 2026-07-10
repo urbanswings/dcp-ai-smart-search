@@ -85,6 +85,16 @@ export async function setupContextAndPage(browser?: Browser): Promise<Page> {
         const response = await route.fetch();
         const originalPayload = await response.json();
 
+        // Handle cases where srp may not exist in the payload
+        if (!originalPayload.srp) {
+          route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify(originalPayload),
+          });
+          return;
+        }
+
         const modifiedPayload = {
           ...originalPayload,
           srp: {

@@ -909,12 +909,6 @@ export async function runTestsAndSaveResults(params: {
     const page = await setupContextAndPage(browser);
     try {
       for (let i = 0; i < queries.length; i++) {
-        // Check if page is still valid before proceeding
-        if (page.isClosed()) {
-          console.warn("[WARN] Page was closed, stopping UI test run");
-          break;
-        }
-
         const query = queries[i];
         const results = await performUISmartSearchAndGetResults(page, query);
         const entry = await processAndLogUiResult({

@@ -1,0 +1,47 @@
+name: Confluence Triggered SmartSearch Tests
+
+# 1. This enables manual execution via the GitHub Enterprise API
+on:
+  workflow_dispatch:
+    inputs:
+      triggered_by:
+        description: 'Metadata or source of trigger'
+        required: false
+        default: 'Confluence Dashboard Button'
+
+jobs:
+  execute-playwright-automation:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 2. Pull down your repository code
+      - name: Checkout Code Base
+        uses: actions/checkout@v4
+
+      # 3. Setup Node.js runtime environment
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-with-registry: '20'
+          cache: 'npm'
+
+      # 4. Install test frameworks and dependencies
+      - name: Install Project Dependencies
+        run: npm ci
+
+      # 5. Install Playwright browser engines
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # 6. Execute your fixed test layout suites
+      - name: Execute SmartSearch Test Suites
+        run: npx playwright test
+
+      # 7. Archive test logs and artifact snapshots
+      - name: Archive Execution Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-execution-report
+          path: playwright-report/
+          retention-days: 30
