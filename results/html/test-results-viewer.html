@@ -2780,10 +2780,10 @@
     }
 
     function resetRowView() {
-      if (currentScreenshotObjectUrl) {
+      if (currentScreenshotObjectUrl && currentScreenshotObjectUrl.startsWith("blob:")) {
         URL.revokeObjectURL(currentScreenshotObjectUrl);
-        currentScreenshotObjectUrl = "";
       }
+      currentScreenshotObjectUrl = "";
       selectedRowIndex = -1;
       rowViewTitle.textContent = "Selected Row View";
       rowViewPane.innerHTML = "Click a table row to view that row's data.";
@@ -2792,10 +2792,27 @@
     }
 
     function releaseScreenshotObjectUrl() {
-      if (currentScreenshotObjectUrl) {
+      if (currentScreenshotObjectUrl && currentScreenshotObjectUrl.startsWith("blob:")) {
         URL.revokeObjectURL(currentScreenshotObjectUrl);
-        currentScreenshotObjectUrl = "";
       }
+      currentScreenshotObjectUrl = "";
+    }
+
+    function buildDirectScreenshotUrl(rawScreenshotPath) {
+      const normalized = normalizePath(String(rawScreenshotPath || "").replace(/^\.\//, ""));
+      if (!normalized) {
+        return "";
+      }
+
+      if (normalized.startsWith("results/screenshots/")) {
+        return "../screenshots/" + normalized.slice("results/screenshots/".length);
+      }
+
+      if (normalized.startsWith("screenshots/")) {
+        return "../" + normalized;
+      }
+
+      return "";
     }
 
     function buildScreenshotPathCandidates(rawScreenshotPath) {
@@ -3197,6 +3214,7 @@
       const screenshotPath = screenshotResolution.screenshotPath;
       const screenshotFile = screenshotResolution.fileObj;
       const embeddedDataUri = screenshotResolution.embeddedDataUri;
+      const directScreenshotUrl = buildDirectScreenshotUrl(screenshotPath);
       const selectedRowCountry = getRowCountry(rowData, currentTableRenderOptions.country) || "-";
       const selectedRowLanguage = getRowLanguage(rowData, currentTableRenderOptions.language) || "-";
       const summaryFailureReasons = Array.isArray(rowData?.summary?.failureReasons)
@@ -3224,6 +3242,12 @@
           "</div>";
       } else if (screenshotFile) {
         currentScreenshotObjectUrl = URL.createObjectURL(screenshotFile);
+        screenshotStageHtml =
+          "<div class=\"screenshotStage\">" +
+            "<img class=\"screenshotImg\" src=\"" + escapeHtml(currentScreenshotObjectUrl) + "\" alt=\"Screenshot for selected query\" data-screenshot-hover=\"1\" title=\"Click to view fullscreen\" />" +
+          "</div>";
+      } else if (directScreenshotUrl) {
+        currentScreenshotObjectUrl = directScreenshotUrl;
         screenshotStageHtml =
           "<div class=\"screenshotStage\">" +
             "<img class=\"screenshotImg\" src=\"" + escapeHtml(currentScreenshotObjectUrl) + "\" alt=\"Screenshot for selected query\" data-screenshot-hover=\"1\" title=\"Click to view fullscreen\" />" +
