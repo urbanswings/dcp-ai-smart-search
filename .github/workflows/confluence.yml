@@ -1,5 +1,8 @@
 name: Confluence Triggered SmartSearch Tests
 
+# This changes the title of each run dynamically based on your dropdown choices 
+run-name: "[${{ github.event.inputs.environment }}][${{ github.event.inputs.market }}] ${{ github.event.inputs.test_suite == 'all' && 'Full Test Suite' || github.event.inputs.test_suite }}"
+
 on:
   workflow_dispatch:
     inputs:
@@ -36,14 +39,13 @@ jobs:
       - name: Install Playwright Browser Engines
         run: npx playwright install --with-deps
 
-      # Maps runtime environments to configuration arguments inside your project
       - name: Execute SmartSearch Test Suites
         env:
           TARGET_ENV: ${{ github.event.inputs.environment }}
           TARGET_MARKET: ${{ github.event.inputs.market }}
         run: |
           echo "Target Environment: $TARGET_ENV"
-          echo "Target Market Language context: $TARGET_MARKET"
+          echo "Target Market: $TARGET_MARKET"
           
           if [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
             echo "Launching complete automation run sequence"
