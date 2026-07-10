@@ -8,6 +8,10 @@ on:
         description: 'Metadata or source of trigger'
         required: false
         default: 'Confluence Dashboard Button'
+      test_suite: # 👈 Added this missing declaration to resolve the 422 error
+        description: 'The specific test suite description block to execute'
+        required: true
+        default: 'all'
 
 jobs:
   execute-playwright-automation:
@@ -22,7 +26,7 @@ jobs:
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-with-registry: '20'
+          node-version: '20' # Note: fixed 'node-with-registry' typo to standard 'node-version'
           cache: 'npm'
 
       # 4. Install test frameworks and dependencies
@@ -33,9 +37,16 @@ jobs:
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # 6. Execute your fixed test layout suites
+      # 6. Dynamically execute based on the Confluence selection
       - name: Execute SmartSearch Test Suites
-        run: npx playwright test
+        run: |
+          if [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
+            echo "Running entire test suite..."
+            npx playwright test
+          else
+            echo "Running specific test suite: [SmartSearch] ${{ github.event.inputs.test_suite }}"
+            npx playwright test --grep "\[SmartSearch\] ${{ github.event.inputs.test_suite }}"
+          fi
 
       # 7. Archive test logs and artifact snapshots
       - name: Archive Execution Artifacts
