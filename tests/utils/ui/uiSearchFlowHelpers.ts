@@ -21,26 +21,25 @@ type SmartSearchResponseCapture = {
 };
 
 export function getSmartSearchLocators(page: Page): SmartSearchLocators {
+  const host = page.locator("wb7-input.smart-search__input").first();
+
   return {
-    searchInputArea: page
-      .locator(".smart-search__input, wb7-input.smart-search__input")
-      .first(),
-    searchButton: page
-      .locator(
-        ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button",
-      )
-      .or(page.locator("wb7-input-action button"))
-      .or(page.locator(".smart-search__input button"))
-      .or(
-        page.locator(
-          "button[aria-label*='search' i], button[title*='search' i]",
-        ),
-      )
-      .first(),
+    searchInputArea: host,
+    
     input: page
-      .locator("wb7-input.smart-search__input wb7-grey-box input")
-      .or(page.locator(".smart-search__input input"))
-      .or(page.locator("input[placeholder*='search' i]"))
+      .locator("wb7-input.smart-search__input input[type='search'][inputmode='search']")
+      .or(host.locator("input[id^='input-']"))
+      .or(host.locator("input[aria-invalid]"))
+      .first(),
+
+    searchButton: page
+      // 1. Chained Selection: This forces Playwright to cross both shadow boundaries in order
+      .locator(".smart-search__action-button button[aria-label='検索']")
+      // 2. Class Chaining: Direct route through the smart search action block element
+      .or(page.locator("wb7-input-action.smart-search__action-button button"))
+      // 3. Exact target fallback using the specific icon layout name string
+      .or(page.locator(".smart-search__action-button button:has(wb7-icon[name*='arrow-right'])"))
+      .filter({ visible: true })
       .first(),
   };
 }
@@ -54,16 +53,15 @@ export async function waitForSmartSearchControls(
       state: "visible",
       timeout: 15000,
     });
-    console.debug("[DEBUG] Waiting for search button to be visible...");
-    await locators.searchButton.waitFor({ state: "visible", timeout: 10000 });
-    for (let j = 0; j < 10; j++) {
-      const enabled = await locators.searchButton.isEnabled();
-      console.debug(
-        `[DEBUG] Search button enabled: ${enabled} (attempt ${j + 1}/10)`,
-      );
-      if (enabled) break;
-      await page.waitForTimeout(1000);
-    }
+    console.debug("[DEBUG] Waiting for input field to be not read-only...");
+    await page.waitForFunction(
+      (el) => {
+        if (!el) return false;
+        return !(el as HTMLInputElement).readOnly;
+      },
+      await locators.searchInputArea.elementHandle(),
+      { timeout: 10000 },
+    );
     return null;
   } catch (e: any) {
     const details = e?.message || e;
@@ -77,7 +75,6 @@ export async function fillSmartSearchInput(
   actualInput: any,
 ): Promise<string | null> {
   try {
-
     await input.waitFor({ state: "visible", timeout: 10000 });
     await input.fill(" ");
     await input.fill(actualInput);

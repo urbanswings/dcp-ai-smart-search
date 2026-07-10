@@ -117,6 +117,7 @@ export async function processAndLogUiResult({
   let responseCheckPassed = true;
   let facetsCheckPassed = true;
   let countCheckPassed = true;
+  const failureReasons: string[] = [];
   let uiFacetComparison: {
     matches: boolean;
     missingFacetValues: string[];
@@ -187,6 +188,9 @@ export async function processAndLogUiResult({
   if (actualFacets === false) {
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
+      failureReasons.push(
+        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
+      );
       addUiFailureReason(
         `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
       );
@@ -194,6 +198,7 @@ export async function processAndLogUiResult({
   } else if (actualFacets === true) {
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
+      failureReasons.push("Expected at least one filter to be applied, but got none");
       addUiFailureReason(
         `Expected at least one filter to be applied, but got none`,
       );
@@ -209,6 +214,7 @@ export async function processAndLogUiResult({
 
     if (!facetValidation.passed) {
       facetsCheckPassed = false;
+      failureReasons.push(...facetValidation.failureReasons);
       addUiFailureReason(
         `BE Facets check failed: ${facetValidation.failureReasons.join("; ")}`,
       );
@@ -266,6 +272,7 @@ export async function processAndLogUiResult({
   }
   if (testFacets && facetMismatches.length > 0) {
     facetsCheckPassed = false;
+    failureReasons.push(...facetMismatches);
     addUiFailureReason(facetMismatches.join(" | "));
   }
 
