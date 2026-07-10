@@ -18,6 +18,7 @@
 require("dotenv/config");
 const fs = require("fs");
 const path = require("path");
+const adapter = require("./lib/resultSchemaAdapter.js");
 
 const RESULTS_DIR = process.argv[2] || "results/json/2026-04-14_PREPROD";
 const QUERIES_FILE = "tests/data/queries-by-test.json";
@@ -523,8 +524,10 @@ for (const [group, tests] of Object.entries(queriesByTest)) {
         const records = JSON.parse(
           fs.readFileSync(path.join(RESULTS_DIR, latestFile), "utf-8"),
         );
-        nonPassResults = records.filter(
-          (r) => r.testTitle === testTitle && r.openaiEvaluation !== "PASS",
+        // Normalize records and filter by testTitle and non-PASS status
+        const normalized = records.map(r => ({ ...r, _fields: adapter.extractFields(r) }));
+        nonPassResults = normalized.filter(
+          (r) => r._fields.testCase === testTitle && r._fields.overallStatus !== "PASS",
         );
       }
     } else {
@@ -542,8 +545,10 @@ for (const [group, tests] of Object.entries(queriesByTest)) {
         const records = JSON.parse(
           fs.readFileSync(path.join(RESULTS_DIR, latestFile), "utf-8"),
         );
+        // Normalize records and filter by non-PASS status
+        const normalized = records.map(r => ({ ...r, _fields: adapter.extractFields(r) }));
         nonPassResults.push(
-          ...records.filter((r) => r.openaiEvaluation !== "PASS"),
+          ...normalized.filter((r) => r._fields.overallStatus !== "PASS"),
         );
       }
     }
@@ -552,14 +557,17 @@ for (const [group, tests] of Object.entries(queriesByTest)) {
       total_fixed: v.total_fixed,
       total_ai: v.total_ai,
       non_pass_count: nonPassResults.length,
-      non_pass_results: nonPassResults.map((r) => ({
-        query: r.query?.en ?? r.query,
-        response: r.response?.en ?? r.response,
-        evaluation: r.openaiEvaluation,
-        timestamp: r.timestamp,
-        hasError: r.hasError,
-        screenshotPath: r.screenshotPath ?? null,
-      })),
+      non_pass_results: nonPassResults.map((r) => {
+        const fields = r._fields || adapter.extractFields(r);
+        return {
+          query: fields.queryText || (r.query?.en ?? r.query),
+          response: fields.responseMessage || (r.response?.en ?? r.response),
+          evaluation: fields.responseFeedback || fields.overallStatus,
+          timestamp: r.metadata?.timestamp || r.timestamp,
+          hasError: fields.hasError,
+          screenshotPath: r.screenshotPath ?? null,
+        };
+      }),
     };
   }
 }

@@ -482,7 +482,7 @@ function getCompleteDisplayValue(
   formattedValue: string,
   rawValue: unknown,
 ): string {
-  if (facetKey === "bodyType") {
+  if (facetKey === "bodyType" || facetKey === "fuelType") {
     return toQueryLabel(facetKey, rawValue);
   }
   return String(formattedValue || rawValue);
@@ -1192,26 +1192,10 @@ function getFacetFormattedValue(
 }
 
 function toQueryLabel(facetKey: string, value: unknown): string {
-  if (facetKey === "bodyType") {
-    const map: Record<string, string> = {
-      LIMOUSINE: "sedans",
-      SUV_OFFROADER: "SUVs",
-      HATCHBACK: "hatchbacks",
-      COUPE: "coupes",
-      CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "MPV",
-    };
-
-    const canonicalLabel = map[String(value)];
-    if (canonicalLabel) {
-      return canonicalLabel;
-    }
-  }
-
   // First try to get formattedValue from API response facet data
   const apiFormattedValue = getFacetFormattedValue(facetKey, value);
   if (apiFormattedValue) {
-    return apiFormattedValue;
+    value = apiFormattedValue;
   }
 
   if (facetKey === "bodyType") {

@@ -32,11 +32,27 @@ dcp-ai-smart-search/
 ├── tsconfig.json                  # TypeScript configuration
 ├── generate-results-html.js       # HTML report generator
 ├── generate-results-json.js       # Non-pass results JSON generator
+├── migrate-results-schema.py      # Migrate old JSON files to new schema format
 ├── clean-old-results.sh           # Script to clean old test results
+├── lib/
+│   └── resultSchemaAdapter.js     # Schema detection & conversion for backward compatibility
+├── results/
+│   ├── html/
+│   │   ├── test-results-viewer.html      # Interactive viewer (reads both schemas)
+│   │   └── search-results-all-*.html     # Generated HTML reports
+│   └── json/                      # Test result JSON files
 ├── tests/
 │   ├── search.spec.ts             # Main test suite
+│   ├── regression.spec.ts         # Regression test suite
 │   ├── zephyr_scale_import.csv    # Zephyr Scale test case export
 │   ├── utils/
+│   │   ├── api/
+│   │   │   └── apiResultLoggingHelpers.ts    # Logs API test results (generates new schema)
+│   │   ├── ui/
+│   │   │   └── uiResultLoggingHelpers.ts     # Logs UI test results (generates new schema)
+│   │   ├── core/
+│   │   │   ├── resultEvaluationHelpers.ts    # Evaluates test results with OpenAI
+│   │   │   └── searchResultTypes.ts          # Type definitions
 │   │   ├── testHelpers.ts         # UI test helper functions
 │   │   ├── apiHelpers.ts          # API test helper functions
 │   │   ├── shared.ts              # Shared utilities
@@ -48,9 +64,6 @@ dcp-ai-smart-search/
 │       ├── emh-urls.json          # EMH environment URLs
 │       ├── search-api-response-kr-ucos-dcp.json  # KR UCOS API response
 │       └── search-queries.json     # Non-MB brand/model queries
-├── results/                       # Test results (gitignored)
-│   ├── json/                      # JSON result files
-│   └── html/                      # HTML reports
 ├── test-results/                  # Playwright test artifacts (gitignored)
 ├── .playwright-cache/             # Playwright browser cache (gitignored)
 └── .playwright-tmp/               # Playwright temp files (gitignored)
@@ -265,6 +278,86 @@ npx playwright test --grep-invert @api
 
 ---
 
+## Test Result Schema
+
+All test results are stored as JSON files with the following **new 5-section schema** (generated automatically by test helpers):
+
+```json
+{
+  "metadata": {
+    "timestamp": "2026-07-09T05:24:05.914Z",
+    "testMode": "api",          // "api" or "ui"
+    "testSuite": "Regression",  // Old field: testDescribe
+    "testCase": "Intermittent Issues Check (IIC)",  // Old field: testTitle
+    "language": "en"
+  },
+  "request": {
+    "query": {
+      "en": "A180 grade",
+      "th": "ปริญญา A180"
+    }
+  },
+  "response": {
+    "message": {
+      "en": "I found vehicles matching...",
+      "th": "ฉันพบรถยนต์ที่ตรงกัน..."
+    },
+    "statusCode": 200,
+    "responseTime": 8143,
+    "hasError": false,
+    "data": {
+      "resultCount": 2,
+      "vehicleCount": 2,
+      "motorization": ["CLE 300 4MATIC"]
+    }
+  },
+  "assertions": {
+    "response": {
+      "status": "PASS",
+      "feedback": "PASS"
+    },
+    "facets": {
+      "expected": { "include": { "motorization": ["CLE 300 4MATIC"] } },
+      "actual": { "motorization": ["CLE 300 4MATIC"] },
+      "status": "PASS"
+    },
+    "count": {
+      "expected": null,
+      "actual": 2,
+      "status": "PASS",
+      "backendCount": 2
+    }
+  },
+  "summary": {
+    "overallStatus": "PASS",
+    "resultCount": 2,
+    "vehicleCount": 2,
+    "motorization": ["CLE 300 4MATIC"]
+  }
+}
+```
+
+### Schema Migration
+
+**New test runs automatically generate results in this new schema format** (no manual migration needed).
+
+If you have **legacy result files** in the old flat schema format, use the migration script:
+
+```sh
+python3 migrate-results-schema.py results/json/<old-folder> results/json/<new-folder>
+```
+
+The migration tool converts:
+- Old flat structure → New organized 5-section structure
+- Old field names → New field paths (e.g., `testDescribe` → `metadata.testSuite`)
+- Maintains backward compatibility via [lib/resultSchemaAdapter.js](lib/resultSchemaAdapter.js)
+
+### Viewing Results
+
+- **Interactive Viewer:** `results/html/test-results-viewer.html` (supports both old and new schemas)
+- **Generated Reports:** `results/html/search-results-all-<timestamp>.html` (uses [lib/resultSchemaAdapter.js](lib/resultSchemaAdapter.js) for compatibility)
+
+---
 
 ## Usage
 
@@ -336,8 +429,27 @@ node embed-results-into-viewer.js results/json/<run-folder> results/html/test-re
 
 ```sh
 node generate-results-json.js results/json/<run-folder>
+```
 
-### 7. Run Regression Tests
+### 7. Migrate Old Result Files to New Schema (Optional)
+
+If you have result files in the old flat schema format and need to convert them to the new 5-section schema format:
+
+```sh
+python3 migrate-results-schema.py results/json/<old-folder> results/json/<new-folder>
+```
+
+- **Input:** Old schema JSON files (flat structure with `testDescribe`, `testTitle`, `query`, etc. at root level)
+- **Output:** New schema JSON files with organized sections:
+  - `metadata` (testSuite, testCase, timestamp, language, etc.)
+  - `request` (query)
+  - `response` (message, statusCode, responseTime, hasError, data)
+  - `assertions` (response.feedback, facets with expected/actual)
+  - `summary` (overallStatus, resultCount, vehicleCount, etc.)
+
+**Note:** New test runs automatically generate results in the new schema format. This script is only needed to convert legacy result files for historical analysis or comparison.
+
+### 8. Run Regression Tests
 
 Use the dedicated regression suite in `tests/regression.spec.ts` for bug-focused validation and repeated-run stability checks.
 

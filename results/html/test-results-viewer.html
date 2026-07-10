@@ -1415,6 +1415,60 @@
   <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 
   <script>
+    // ─────────────────────────────────────────────────────────────
+    // Schema Adapter: Support both old and new result schemas
+    // ─────────────────────────────────────────────────────────────
+    function normalizeRowSchema(row) {
+      if (!row || typeof row !== "object") return row;
+      if (row._schemaMarked) return row;
+      const isNew = !!(row.metadata && (row.metadata.testSuite || row.metadata.testCase || row.metadata.testMode));
+      const isOld = !!(row.testDescribe || row.testTitle || row.testMode);
+      return Object.assign({}, row, { _schemaMarked: true, _schemaType: isNew ? "new" : (isOld ? "old" : "unknown") });
+    }
+    
+    function getRowField(row, fieldName) {
+      if (!row) return undefined;
+      
+      // Determine schema type more carefully
+      let schema = row._schemaType;
+      if (!schema) {
+        const hasNewSchema = !!(row.metadata && (row.metadata.testSuite || row.metadata.testCase || row.metadata.testMode));
+        const hasOldSchema = !!(row.testDescribe || row.testTitle || row.testMode);
+        schema = hasNewSchema ? "new" : (hasOldSchema ? "old" : "unknown");
+      }
+      
+      // For old schema, return field directly
+      if (schema === "old") return row[fieldName];
+      
+      // For new schema, map field names to paths
+      if (schema === "new") {
+        if (fieldName === "testDescribe") return row.metadata?.testSuite || row.testDescribe || "";
+        if (fieldName === "testTitle") return row.metadata?.testCase || row.testTitle || "";
+        if (fieldName === "testMode") return row.metadata?.testMode || row.testMode || "";
+        if (fieldName === "query") return row.request?.query || row.query || "";
+        if (fieldName === "openaiEvaluation") {
+          const feedback = row.assertions?.response?.feedback || row.openaiEvaluation || "";
+          return String(feedback || "").trim();
+        }
+        if (fieldName === "response") return row.response?.message || row.response || "";
+        if (fieldName === "country") return row.metadata?.country || row.country || "";
+        if (fieldName === "language" || fieldName === "lang" || fieldName === "locale") return row.metadata?.language || row.language || row.lang || row.locale || "";
+        if (fieldName === "facets") return row.assertions?.facets || row.facets || null;
+        if (fieldName === "statusCode") return row.response?.statusCode || row.statusCode || "";
+        if (fieldName === "responseTime") return row.response?.responseTime || row.responseTime || "";
+        if (fieldName === "resultCount") return row.summary?.resultCount || row.resultCount || row.backendResultCount || row.response?.data?.resultCount || "";
+        if (fieldName === "hasError") return row.response?.hasError !== undefined ? row.response.hasError : (row.hasError || false);
+        if (fieldName === "results") return {
+          responseResult: row.assertions?.response?.status || row.results?.responseResult || "",
+          facetsResult: row.assertions?.facets?.status || row.results?.facetsResult || ""
+        };
+        if (fieldName === "timestamp") return row.metadata?.timestamp || row.timestamp || "";
+      }
+      
+      // Fallback to direct field access
+      return row[fieldName];
+    }
+    
     const pickBtn = document.getElementById("pickBtn");
     const iicImportBtn = document.getElementById("iicImportBtn");
     const folderSelect = document.getElementById("folderSelect");
@@ -1811,7 +1865,8 @@
             for (const row of content) {
               if (row && typeof row === "object") {
                 totalRows++;
-                const eval_result = String(row.openaiEvaluation || "").trim().toUpperCase();
+                const normalized = normalizeRowSchema(row);
+                const eval_result = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
                 if (eval_result === "PASS") {
                   passRows++;
                 }
@@ -1982,11 +2037,14 @@
         const text = await fileObj.text();
         const parsed = JSON.parse(text);
         const firstRow = Array.isArray(parsed) ? parsed[0] : parsed;
+        const normalized = normalizeRowSchema(firstRow);
+        const testDescribe = String(getRowField(normalized, "testDescribe") || "").trim();
+        const testTitle = String(getRowField(normalized, "testTitle") || "").trim();
         const metadata = {
-          testDescribe: String(firstRow && firstRow.testDescribe || "").trim(),
-          testTitle: String(firstRow && firstRow.testTitle || "").trim(),
-          testDescribeSlug: slugifyMetadataValue(firstRow && firstRow.testDescribe) || slugMetadata.testDescribeSlug,
-          testTitleSlug: slugifyMetadataValue(firstRow && firstRow.testTitle) || slugMetadata.testTitleSlug,
+          testDescribe,
+          testTitle,
+          testDescribeSlug: slugifyMetadataValue(testDescribe) || slugMetadata.testDescribeSlug,
+          testTitleSlug: slugifyMetadataValue(testTitle) || slugMetadata.testTitleSlug,
         };
         fileMetadataCache.set(relativePath, metadata);
         return metadata;
@@ -2062,7 +2120,9 @@
     }
 
     function getRowCountry(row, fallbackCountry = "") {
-      return String(row && (row.__viewerCountry || row.country || (row._metadata && row._metadata.country)) || fallbackCountry || "").toUpperCase();
+      const normalized = normalizeRowSchema(row);
+      const country = normalized && (normalized.__viewerCountry || getRowField(normalized, "country") || (normalized._metadata && normalized._metadata.country));
+      return String(country || fallbackCountry || "").toUpperCase();
     }
 
     function detectLanguageFromLocalizedField(value) {
@@ -2091,20 +2151,23 @@
     }
 
     function getRowLanguage(row, fallbackLanguage = "") {
+      const normalized = normalizeRowSchema(row);
+      if (!normalized) return String(fallbackLanguage || "").toUpperCase();
+      
       const explicitLanguage = String(
-        row && (row.__viewerLanguage || row.language || row.lang || row.locale || (row._metadata && row._metadata.language)) || ""
+        (normalized.__viewerLanguage || getRowField(normalized, "language") || getRowField(normalized, "lang") || getRowField(normalized, "locale") || (normalized._metadata && normalized._metadata.language)) || ""
       ).trim();
 
       if (explicitLanguage) {
         return explicitLanguage.toUpperCase();
       }
 
-      const queryLanguage = detectLanguageFromLocalizedField(row && row.query);
+      const queryLanguage = detectLanguageFromLocalizedField(getRowField(normalized, "query"));
       if (queryLanguage) {
         return queryLanguage;
       }
 
-      const responseLanguage = detectLanguageFromLocalizedField(row && row.response);
+      const responseLanguage = detectLanguageFromLocalizedField(getRowField(normalized, "response"));
       if (responseLanguage) {
         return responseLanguage;
       }
@@ -2254,7 +2317,9 @@
       try {
         const text = await fileObj.text();
         const parsed = JSON.parse(text);
-        const rows = (Array.isArray(parsed) ? parsed : [parsed]).filter((row) => row && typeof row === "object");
+        const rows = (Array.isArray(parsed) ? parsed : [parsed])
+          .filter((row) => row && typeof row === "object")
+          .map((row) => normalizeRowSchema(row));
         fileRowsCache.set(normalizedRel, rows);
         return rows;
       } catch {
@@ -2374,7 +2439,8 @@
         const stats = marketStats.get(country);
         for (const row of rows) {
           stats.total += 1;
-          const evalValue = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+          const normalized = normalizeRowSchema(row);
+          const evalValue = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
           if (evalValue === "PASS") {
             stats.pass += 1;
           }
@@ -2416,13 +2482,14 @@
         }
 
         for (const row of rows) {
-          const label = String(row && row.testTitle || "").trim() || getCachedFileMetadata(folder, fileName).testTitle || "Untitled";
+          const normalized = normalizeRowSchema(row);
+          const label = String(getRowField(normalized, "testTitle") || "").trim() || getCachedFileMetadata(folder, fileName).testTitle || "Untitled";
           if (!titleStats.has(label)) {
             titleStats.set(label, { pass: 0, total: 0 });
           }
           const stats = titleStats.get(label);
           stats.total += 1;
-          const evalValue = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+          const evalValue = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
           if (evalValue === "PASS") {
             stats.pass += 1;
           }
@@ -2475,11 +2542,20 @@
       }
 
       chartQueryCountValue.textContent = String(total);
-      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
-      const failCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "FAIL").length;
+      const passCount = rows.filter((item) => {
+        const normalized = normalizeRowSchema(item);
+        return String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase() === "PASS";
+      }).length;
+      const failCount = rows.filter((item) => {
+        const normalized = normalizeRowSchema(item);
+        return String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase() === "FAIL";
+      }).length;
       const otherCount = Math.max(0, total - passCount - failCount);
       const responseTimesForSummary = rows
-        .map((row) => toNumberOrNull(row && row.responseTime))
+        .map((row) => {
+          const normalized = normalizeRowSchema(row);
+          return toNumberOrNull(getRowField(normalized, "responseTime"));
+        })
         .filter((value) => value !== null);
       const avgMs = responseTimesForSummary.length
         ? Math.round(responseTimesForSummary.reduce((sum, value) => sum + value, 0) / responseTimesForSummary.length)
@@ -2493,7 +2569,8 @@
 
       const evalCounts = new Map();
       rows.forEach((row) => {
-        const raw = String(row && row.openaiEvaluation || "").trim().toUpperCase();
+        const normalized = normalizeRowSchema(row);
+        const raw = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
         const label = raw === "PASS" || raw === "FAIL" ? raw : "OTHER";
         evalCounts.set(label, (evalCounts.get(label) || 0) + 1);
       });
@@ -2503,7 +2580,10 @@
       renderEvaluationChart(evalRows, total);
 
       const numericTimes = rows
-        .map((row) => toNumberOrNull(row && row.responseTime))
+        .map((row) => {
+          const normalized = normalizeRowSchema(row);
+          return toNumberOrNull(getRowField(normalized, "responseTime"));
+        })
         .filter((value) => value !== null)
         .sort((a, b) => a - b);
 
@@ -2553,8 +2633,11 @@
 
     function getCurrentQueryValues() {
       return [...new Set(currentRows
-        .filter((row) => row && typeof row === "object" && Object.prototype.hasOwnProperty.call(row, "query"))
-        .map((row) => getIicImportQueryValue(row.query)))];
+        .filter((row) => row && typeof row === "object")
+        .map((row) => {
+          const normalized = normalizeRowSchema(row);
+          return getIicImportQueryValue(getRowField(normalized, "query"));
+        }))];
     }
 
     function buildIicImportPayload() {
@@ -2578,9 +2661,18 @@
     }
 
     function renderFileMeta(rows, options = {}) {
-      modeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testMode));
-      describeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testDescribe));
-      titleValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => item && item.testTitle));
+      modeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => {
+        const normalized = normalizeRowSchema(item);
+        return getRowField(normalized, "testMode") || (item && item.testMode);
+      }));
+      describeValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => {
+        const normalized = normalizeRowSchema(item);
+        return getRowField(normalized, "testDescribe") || (item && item.testDescribe);
+      }));
+      titleValue.textContent = options.forceAllMetadata ? "All" : toStaticValue(rows.map((item) => {
+        const normalized = normalizeRowSchema(item);
+        return getRowField(normalized, "testTitle") || (item && item.testTitle);
+      }));
 
       const total = rows.length;
       if (!total) {
@@ -2589,7 +2681,10 @@
         return;
       }
 
-      const passCount = rows.filter((item) => String(item && item.openaiEvaluation || "").trim().toUpperCase() === "PASS").length;
+      const passCount = rows.filter((item) => {
+        const normalized = normalizeRowSchema(item);
+        return String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase() === "PASS";
+      }).length;
       const passPercent = Math.round((passCount / total) * 100);
       passRateValue.textContent = passPercent + "% (" + passCount + "/" + total + ")";
       setPassRateCardState(passPercent);
@@ -2847,10 +2942,11 @@
     }
 
     function buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, actualFacets, screenshotPath, country) {
-      const responseResult = rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : "");
-      const facetsResult = rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : "");
-      const openaiEvaluation = String(rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "").trim().toUpperCase();
-      const jiraSummary = String(rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-").trim();
+      const results = getRowField(rowData, "results");
+      const responseResult = (results && results.responseResult) || (rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : ""));
+      const facetsResult = (results && results.facetsResult) || (rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : ""));
+      const openaiEvaluation = String(getRowField(rowData, "openaiEvaluation") || "").trim().toUpperCase();
+      const jiraSummary = String(getRowField(rowData, "openaiEvaluation") || "-").trim();
       const marker = responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || rowData?.hasError ? "(x)" : "(/)";
       const countryText = country || "-";
       const screenshotName = getFileNameFromPath(screenshotPath);
@@ -2901,17 +2997,19 @@
 
       releaseScreenshotObjectUrl();
 
-      const rowData = currentRows[selectedRowIndex];
-      const evaluation = rowData && rowData.openaiEvaluation ? rowData.openaiEvaluation : "-";
+      const rowData = normalizeRowSchema(currentRows[selectedRowIndex]);
+      const evaluation = getRowField(rowData, "openaiEvaluation") || "-";
       const evaluationBlockClass = toEvaluationBlockClass(evaluation);
       rowViewTitle.textContent = "Selected Row View: #" + (selectedRowIndex + 1);
-      const queryLocal = getLocalizedText(rowData && rowData.query) || "-";
-      const queryEn = getEnglishText(rowData && rowData.query) || "-";
-      const responseLocal = getLocalizedText(rowData && rowData.response) || "-";
-      const responseEn = getEnglishText(rowData && rowData.response) || "-";
-      const facetGroups = splitExpectedAndActualFacets(rowData ? rowData.facets : undefined);
-      const responseResult = rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : "");
-      const facetsResult = rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : "");
+      const queryLocal = getLocalizedText(getRowField(rowData, "query")) || "-";
+      const queryEn = getEnglishText(getRowField(rowData, "query")) || "-";
+      const responseLocal = getLocalizedText(getRowField(rowData, "response")) || "-";
+      const responseEn = getEnglishText(getRowField(rowData, "response")) || "-";
+      const facets = getRowField(rowData, "facets");
+      const facetGroups = splitExpectedAndActualFacets(facets);
+      const results = getRowField(rowData, "results");
+      const responseResult = (results && results.responseResult) || (rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : ""));
+      const facetsResult = (results && results.facetsResult) || (rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : ""));
       const responseBlockClass = toResultDetailClass(responseResult);
       const facetsBlockClass = toResultDetailClass(facetsResult);
       const responseBlockStyle = toResultBorderStyle(responseResult);
@@ -2985,10 +3083,10 @@
               "<div class=\"detailBlock " + facetsBlockClass + "\" style=\"" + facetsBlockStyle + "\"><div class=\"detailHeader\"><div class=\"detailLabel\">Actual Facets [" + escapeHtml(facetsResultLabel) + "]</div><button type=\"button\" class=\"copyIconBtn\" data-copy-facets=\"" + encodeURIComponent(actualFacetsCopyText) + "\" title=\"Copy Actual Facets\" aria-label=\"Copy Actual Facets\">&#128203;</button></div><div class=\"chipRow\">" + formatFacetChips(facetGroups.actual) + "</div></div>" +
             "</div>" +
             "<div class=\"detailGrid\">" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.timestampSG ? rowData.timestampSG : (rowData && rowData.timestamp ? rowData.timestamp : "-")) + "</div></div>" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.resultCount !== undefined ? rowData.resultCount : "-") + "</div></div>" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.responseTime !== undefined ? rowData.responseTime : "-") + "</div></div>" +
-              "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(rowData && rowData.statusCode !== undefined ? rowData.statusCode : "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Timestamp</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "timestamp") || rowData.timestampSG || "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Result Count</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "resultCount") || "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Response Time (ms)</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "responseTime") || "-") + "</div></div>" +
+              "<div class=\"detailItem\"><div class=\"detailLabel\">Status</div><div class=\"detailValue\">" + escapeHtml(getRowField(rowData, "statusCode") || "-") + "</div></div>" +
             "</div>" +
             "<div><button type=\"button\" data-copy-all=\"" + encodeURIComponent(combinedCopyText) + "\" title=\"Copy Query (EN), Response (EN), Actual Facets\" aria-label=\"Copy Query (EN), Response (EN), Actual Facets\">Copy All (3)</button> " +
               "<button type=\"button\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira ticket description\" aria-label=\"Copy Jira ticket description\">Get JIRA</button></div>" +
@@ -3035,28 +3133,36 @@
       updateIicImportAvailability();
       tableTitle.textContent = options.title || ("Results Table: " + rows.length + " row(s)");
       const html = rows.map((item, index) => {
-        const queryLocal = getLocalizedText(item && item.query);
-        const queryEn = getEnglishText(item && item.query);
-        const responseLocal = getLocalizedText(item && item.response);
-        const responseEn = getEnglishText(item && item.response);
-        const isError = item && item.hasError;
-        const indexClass = isError === true ? "indexCellError" : (isError === false ? "indexCellOk" : "indexCellUnknown");
-        const country = getRowCountry(item, options.country);
+        const normalized = normalizeRowSchema(item);
+        const queryLocal = getLocalizedText(getRowField(normalized, "query"));
+        const queryEn = getEnglishText(getRowField(normalized, "query"));
+        const responseLocal = getLocalizedText(getRowField(normalized, "response"));
+        const responseEn = getEnglishText(getRowField(normalized, "response"));
+        const evaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
+        const isPassed = evaluation === "PASS" || (String(evaluation || "").startsWith("PASS") && !String(evaluation || "").includes("FAIL"));
+        const isFailed = evaluation === "FAIL" || (String(evaluation || "").toUpperCase().includes("FAIL"));
+        const indexClass = isPassed ? "indexCellOk" : (isFailed ? "indexCellError" : "indexCellUnknown");
+        const country = getRowCountry(normalized, options.country);
+        const testTitle = getRowField(normalized, "testTitle") || "";
+        const openaiEval = getRowField(normalized, "openaiEvaluation") || "";
+        const resultCount = getRowField(normalized, "resultCount") || "";
+        const responseTime = getRowField(normalized, "responseTime") || "";
+        const statusCode = getRowField(normalized, "statusCode") || "";
 
         const selectedClass = selectedRowIndex === index ? " selectedRow" : "";
 
         return "<tr data-row-index=\"" + index + "\" class=\"" + selectedClass + "\">" +
           "<td class=\"mono " + indexClass + "\">" + (index + 1) + "</td>" +
-          "<td><span class=\"truncate\" title=\"" + escapeHtml(item && item.testTitle ? item.testTitle : "") + "\">" + escapeHtml(item && item.testTitle ? item.testTitle : "") + "</span></td>" +
+          "<td><span class=\"truncate\" title=\"" + escapeHtml(testTitle) + "\">" + escapeHtml(testTitle) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(queryLocal) + "\">" + escapeHtml(queryLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(queryEn) + "\">" + escapeHtml(queryEn) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseLocal) + "\">" + escapeHtml(responseLocal) + "</span></td>" +
           "<td><span class=\"truncate\" title=\"" + escapeHtml(responseEn) + "\">" + escapeHtml(responseEn) + "</span></td>" +
           "<td class=\"countryColumn mono\">" + escapeHtml(country) + "</td>" +
-          "<td>" + escapeHtml(item && item.openaiEvaluation ? item.openaiEvaluation : "") + "</td>" +
-          "<td class=\"mono\">" + escapeHtml(item && item.resultCount !== undefined ? item.resultCount : "") + "</td>" +
-          "<td class=\"mono\">" + escapeHtml(item && item.responseTime !== undefined ? item.responseTime : "") + "</td>" +
-          "<td class=\"mono\">" + escapeHtml(item && item.statusCode !== undefined ? item.statusCode : "") + "</td>" +
+          "<td>" + escapeHtml(openaiEval) + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(resultCount !== undefined && resultCount !== "" ? resultCount : "") + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(responseTime !== undefined && responseTime !== "" ? responseTime : "") + "</td>" +
+          "<td class=\"mono\">" + escapeHtml(statusCode) + "</td>" +
         "</tr>";
       }).join("") + (rows.length < 5 ? renderEmptyTableRows(5 - rows.length) : "");
 

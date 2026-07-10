@@ -59,16 +59,41 @@ export async function processAndLogApiResult({
       `API call failed with error for '${actualInput}': ${results.error}`,
     );
     return {
-      testMode: "api",
-      testDescribe,
-      testTitle,
-      query: {
-        [`${lang}`]: actualInput,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        testMode: "api",
+        testSuite: testDescribe,
+        testCase: testTitle,
+        language: lang,
       },
-      openaiEvaluation: `API call failed with error: ${results.error}`,
-      responseResult: "FAIL",
-      facetsResult: "FAIL",
-      hasError: true,
+      request: {
+        query: {
+          [`${lang}`]: actualInput,
+        },
+      },
+      response: {
+        message: null,
+        statusCode: results.statusCode || 0,
+        responseTime: results.responseTime || 0,
+        hasError: true,
+        data: null,
+      },
+      assertions: {
+        response: {
+          status: "FAIL",
+          feedback: `API call failed with error: ${results.error}`,
+        },
+        facets: {
+          expected: null,
+          actual: null,
+          status: "FAIL",
+        },
+      },
+      summary: {
+        overallStatus: "FAIL",
+        resultCount: 0,
+        vehicleCount: 0,
+      },
     };
   }
 
@@ -282,46 +307,62 @@ export async function processAndLogApiResult({
   });
 
   return {
-    timestamp: new Date().toISOString(),
-    timestampSG: new Date().toLocaleString("en-SG", {
-      timeZone: "Asia/Singapore",
-    }),
-    testMode: "api",
-    testDescribe,
-    testTitle,
-    query: {
-      [`${lang}`]: actualInput,
-      en: queryEn,
+    metadata: {
+      timestamp: new Date().toISOString(),
+      testMode: "api",
+      testSuite: testDescribe,
+      testCase: testTitle,
+      language: lang,
+    },
+    request: {
+      query: {
+        [`${lang}`]: actualInput,
+        en: queryEn,
+      },
     },
     response: {
-      [`${lang}`]: smartSearchMessage,
-      en: smartSearchMessageEn,
+      message: {
+        [`${lang}`]: smartSearchMessage,
+        en: smartSearchMessageEn,
+      },
+      statusCode: results.statusCode,
+      responseTime: results.responseTime,
+      hasError: displayHasError,
+      data: {
+        resultCount,
+        vehicleCount: responseVehicleTotalCount,
+        motorization,
+      },
     },
-    resultCount,
-    responseVehicleTotalCount,
-    motorization,
-    responseTime: results.responseTime,
-    statusCode: results.statusCode,
-    hasError: displayHasError,
-    error: results.error,
-    // apiResponse,
-    openaiEvaluation: openaiEvaluation,
-    results: {
-      responseResult: responseCheckPassed ? "PASS" : "FAIL",
-      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
-      countResult:
-        responseVehicleTotalCount === null
-          ? "SKIP"
-          : countCheckPassed
-            ? "PASS"
-            : "FAIL",
-      responseVehicleTotalCount,
-      backendResultCount: resultCount,
+    assertions: {
+      response: {
+        status: responseCheckPassed ? "PASS" : "FAIL",
+        feedback: openaiEvaluation,
+      },
+      facets: {
+        expected: actualFacets,
+        actual: resultsFacets,
+        status: facetsCheckPassed ? "PASS" : "FAIL",
+        failureReasons: !facetsCheckPassed ? failureReasons : undefined,
+      },
+      count: {
+        expected: null,
+        actual: resultCount,
+        status:
+          responseVehicleTotalCount === null
+            ? "SKIP"
+            : countCheckPassed
+              ? "PASS"
+              : "FAIL",
+        backendCount: resultCount,
+      },
     },
-    facets: {
-      expected: actualFacets,
-      actual: resultsFacets,
-      failureReasons: !facetsCheckPassed ? failureReasons : undefined,
+    summary: {
+      overallStatus: openaiEvaluation === "PASS" ? "PASS" : "FAIL",
+      resultCount,
+      vehicleCount: responseVehicleTotalCount,
+      motorization,
+      failureReasons: failureReasons.length ? failureReasons : undefined,
     },
   };
 }

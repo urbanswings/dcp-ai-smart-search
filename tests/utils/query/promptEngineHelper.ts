@@ -841,6 +841,9 @@ async function generateQueryWithVariation(
     language,
   );
 
+  if (styleHint.includes("'<facet name> <filter value>'"))
+    return normalizeWhitespace(exactQuery);  
+
   if (!client || !systemPrompt || !userPromptTemplate) {
     return enforceCompleteQueryVariation(
       styledFallback || fallback,
@@ -867,10 +870,6 @@ async function generateQueryWithVariation(
       .replace(/\{filterText\}/g, filterText)
       .replace(/\{styleHint\}/g, styleHint);
     const resolvedUserPrompt = `${resolvedUserPromptBase}\nStyle requirement: ${styleHint}.`;
-
-    // If the style hint is the exact query format, skip AI generation and return the exact query to ensure we have that variation covered
-    if (styleHint.includes("'<facet name> <filter value>'"))
-      return normalizeWhitespace(exactQuery);
 
     const generated = await generateOpenAiQuery(
       client,
