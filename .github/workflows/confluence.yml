@@ -1,14 +1,17 @@
 name: Confluence Triggered SmartSearch Tests
 
-# 1. This enables manual execution via the GitHub Enterprise API
 on:
   workflow_dispatch:
     inputs:
-      triggered_by:
-        description: 'Metadata or source of trigger'
-        required: false
-        default: 'Confluence Dashboard Button'
-      test_suite: # 👈 Added this missing declaration to resolve the 422 error
+      environment:
+        description: 'Target target runtime instance environment selector'
+        required: true
+        default: 'PREPROD'
+      market:
+        description: 'Target localized user market context container filter'
+        required: true
+        default: 'AU-EN'
+      test_suite:
         description: 'The specific test suite description block to execute'
         required: true
         default: 'all'
@@ -18,37 +21,38 @@ jobs:
     runs-on: [linux, self-hosted]
     
     steps:
-      # 2. Pull down your repository code
       - name: Checkout Code Base
         uses: actions/checkout@v4
 
-      # 3. Setup Node.js runtime environment
       - name: Setup Node.js Environment
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Note: fixed 'node-with-registry' typo to standard 'node-version'
+          node-version: '20'
           cache: 'npm'
 
-      # 4. Install test frameworks and dependencies
       - name: Install Project Dependencies
         run: npm ci
 
-      # 5. Install Playwright browser engines
-      - name: Install Playwright Browsers
+      - name: Install Playwright Browser Engines
         run: npx playwright install --with-deps
 
-      # 6. Dynamically execute based on the Confluence selection
+      # Maps runtime environments to configuration arguments inside your project
       - name: Execute SmartSearch Test Suites
+        env:
+          TARGET_ENV: ${{ github.event.inputs.environment }}
+          TARGET_MARKET: ${{ github.event.inputs.market }}
         run: |
+          echo "Target Environment: $TARGET_ENV"
+          echo "Target Market Language context: $TARGET_MARKET"
+          
           if [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
-            echo "Running entire test suite..."
+            echo "Launching complete automation run sequence"
             npx playwright test
           else
-            echo "Running specific test suite: [SmartSearch] ${{ github.event.inputs.test_suite }}"
+            echo "Filtering targeting constraints directly down to: [SmartSearch] ${{ github.event.inputs.test_suite }}"
             npx playwright test --grep "\[SmartSearch\] ${{ github.event.inputs.test_suite }}"
           fi
 
-      # 7. Archive test logs and artifact snapshots
       - name: Archive Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v4
