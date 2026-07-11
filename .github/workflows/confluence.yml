@@ -62,3 +62,43 @@ jobs:
           name: playwright-execution-report
           path: playwright-report/
           retention-days: 30
+
+      # New Step: Report final metrics back to the Confluence source page
+      - name: Report Results to Confluence
+        if: always() # Ensures this runs even if the Playwright tests fail
+        run: |
+          # 1. Define status styling based on pipeline outcome
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_COLOR="green"
+            STATUS_TEXT="PASSED ✅"
+          else
+            STATUS_COLOR="red"
+            STATUS_TEXT="FAILED ❌"
+          fi
+
+          # 2. Build out a direct console link to this specific workflow run
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # 3. HTML payload for the Confluence storage format comment
+          COMMENT_BODY="<p><strong>SmartSearch Run Report:</strong></p><ul><li><strong>Environment:</strong> <code>${{ github.event.inputs.environment }}</code></li><li><strong>Market:</strong> <code>${{ github.event.inputs.market }}</code></li><li><strong>Suite:</strong> <code>${{ github.event.inputs.test_suite }}</code></li><li><strong>Result:</strong> <span style='color:${STATUS_COLOR};font-weight:bold;'>${STATUS_TEXT}</span></li><li><strong>Execution Logs:</strong> <a href='${RUN_URL}'>View GitHub Run #${{ github.run_number }}</a></li></ul>"
+
+          # 4. Escape quotes carefully for the JSON curl payload string construction
+          ESC_BODY=$(echo "$COMMENT_BODY" | sed 's/"/\\"/g')
+
+          # 5. Send POST request to Confluence Data Center REST API
+          curl -v -X POST "https://${{ secrets.CONFLUENCE_DOMAIN }}/rest/api/content" \
+            -H "Authorization: Bearer ${{ secrets.CONFLUENCE_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"type\": \"comment\",
+              \"container\": {
+                \"id\": \"1003688880\",
+                \"type\": \"page\"
+              },
+              \"body\": {
+                \"storage\": {
+                  \"value\": \"${ESC_BODY}\",
+                  \"representation\": \"storage\"
+                }
+              }
+            }"
