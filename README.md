@@ -258,6 +258,52 @@ npx playwright test --grep-invert @api
 ### 1. Test Execution
 
 - Run tests via Playwright with configurable modes (`npm test` or specific mode scripts).
+
+---
+
+## Jira Integration
+
+The results viewer supports creating Jira bugs directly from the selected query view in `results/html/test-results-viewer.html`.
+
+### Recommended Setup
+
+Jira creation now uses Jira's own Create Issue page as the review draft step. The viewer does not auto-create tickets.
+
+Configure Jira values in the viewer settings (⚙️):
+
+- Jira Instance URL
+- Project Key
+- Issue Type
+- Project ID (numeric, for prefilled draft)
+- Issue Type ID (numeric, for prefilled draft)
+
+Notes:
+
+- If Project ID and Issue Type ID are set, the viewer opens Jira Create Issue with summary and description prefilled.
+- If numeric IDs are missing, the viewer opens Jira Create Issue and copies the draft text to clipboard for manual paste.
+
+### Viewer Usage
+
+1. Open the test results viewer.
+2. Click the Jira settings gear.
+3. Confirm Jira URL, project key, issue type, and numeric IDs (if available).
+4. Select a failed query row.
+5. Click `Create JIRA` in the selected query section.
+6. Jira Create Issue page opens in a new tab with draft content.
+7. Review everything directly in Jira, add labels manually, and click Jira's `Create` button.
+
+The created Jira issue includes:
+
+- Summary
+- Affected markets
+- Environment details
+- Structured description sections
+- Labels (manual user input in Jira)
+- Query, response, facets, and failure reasons
+
+### Optional Direct API Method
+
+If your team later wants direct API-based creation again, you can use the optional local bridge/backend approach. That mode creates issues automatically and requires Jira API credentials in a secure server-side context.
 - Each scenario generates queries (some via OpenAI), executes them via UI/API/both, and logs results.
 - Results are saved as JSON files in `results/json/` with mode indicators.
 

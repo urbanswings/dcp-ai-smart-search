@@ -308,6 +308,19 @@
       color: #ffffff;
     }
 
+    .queryActionRow {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .queryActionRow .createJiraBtn,
+    .queryActionRow .copyIconBtn {
+      height: 34px;
+      min-width: 0;
+    }
+
     .selectNavGroup {
       display: grid;
       grid-template-columns: 40px minmax(0, 1fr) 40px;
@@ -1112,14 +1125,15 @@
 
     .modalCard {
       width: min(960px, 100%);
-      max-height: min(80vh, 900px);
+      max-height: min(94vh, 980px);
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
       box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
-      padding: 18px;
+      padding: 14px;
       display: grid;
-      gap: 12px;
+      gap: 8px;
+      overflow-y: auto;
     }
 
     .modalHeader {
@@ -1174,6 +1188,179 @@
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       word-break: break-word;
+    }
+
+    .jiraModalField {
+      box-sizing: border-box;
+      width: 100%;
+      height: 40px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--card);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 13px;
+    }
+
+    .jiraAutocomplete {
+      position: relative;
+    }
+
+    .jiraAutocompleteList {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+      max-height: 220px;
+      overflow-y: auto;
+      z-index: 140;
+    }
+
+    .jiraAutocompleteOption {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 10px;
+      border: none;
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--card);
+      color: var(--text);
+      font-size: 13px;
+      cursor: pointer;
+      height: auto;
+      border-radius: 0;
+    }
+
+    .jiraAutocompleteOption:last-child {
+      border-bottom: none;
+    }
+
+    .jiraAutocompleteOption:hover,
+    .jiraAutocompleteOption.jiraAutocompleteActive {
+      background: var(--accent-soft);
+    }
+
+    .jiraAutocompleteOptionDetail {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .jiraAutocompleteEmpty {
+      padding: 8px 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .jiraDescTabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .jiraDescTabBtn {
+      height: 28px;
+      padding: 0 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .jiraDescTabBtn.jiraDescTabActive {
+      background: var(--text);
+      border-color: var(--text);
+      color: #ffffff;
+    }
+
+    .jiraDescVisual {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      padding: 10px;
+      max-height: 170px;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .jiraWikiPanel {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+
+    .jiraWikiPanel:last-child {
+      margin-bottom: 0;
+    }
+
+    .jiraWikiPanelTitle {
+      padding: 6px 10px;
+      font-weight: 700;
+      color: #ffffff;
+      background: #858585;
+    }
+
+    .jiraWikiPanelBody {
+      padding: 10px;
+    }
+
+    .jiraWikiPanelBody ul {
+      margin: 2px 0;
+      padding-left: 20px;
+    }
+
+    .jiraWikiPanelBody > ul {
+      margin-top: 0;
+    }
+
+    .jiraIconFail,
+    .jiraIconPass {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      margin-right: 2px;
+    }
+
+    .jiraIconFail {
+      background: var(--danger);
+    }
+
+    .jiraIconPass {
+      background: var(--success);
+    }
+
+    .jiraAttachmentChip {
+      display: inline-block;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    .configTextarea {
+      width: 100%;
+      min-height: 88px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: var(--card);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.45;
+      resize: vertical;
     }
 
     @media (max-width: 700px) {
@@ -1247,8 +1434,10 @@
         <li>Runtime mode: choose your <strong>tests/json</strong> (or <strong>results/json</strong>) folder and filters load automatically.</li>
         <li>Embedded mode: if <strong>embeddedResultsData</strong> has files, results load on page open.</li>
         <li>This viewer runs fully client-side with no external JS required.</li>
+        <li><strong>Jira Integration</strong>: Open a failed query in the selected row view and use <em>Create JIRA</em> there. A preview opens so you can verify/edit the summary and description, then submit directly to Jira via the local bridge (<span class="mono">npm run jira:bridge</span>), which authenticates with your <span class="mono">JIRA_API_TOKEN</span>. Configure Jira using the ⚙️ icon.</li>
       </ul>
     </div>
+
     <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
 
     <div id="viewerContent" hidden>
@@ -1321,8 +1510,80 @@
       </div>
       <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset Form</button>
       <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>      
-      <button id="createJiraBtn" class="createJiraBtn" type="button" title="Create JIRA ticket for all failed queries">Create JIRA</button>
+      <button id="jiraConfigToggleBtn" class="createJiraBtn" type="button" title="Configure Jira settings" style="padding: 0 12px;">⚙️</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
+    </div>
+
+    <div class="introCard" id="jiraConfigCard" hidden>
+      <p class="introTitle">Jira Configuration</p>
+      <div class="row">
+        <div>
+          <label for="jiraUrlInput">Jira Instance URL</label>
+          <input type="text" id="jiraUrlInput" placeholder="e.g., jira.company.io" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="jira.mercedes-benz.io" />
+        </div>
+        <div>
+          <label for="jiraProjectInput">Project Key</label>
+          <input type="text" id="jiraProjectInput" placeholder="e.g., DCPOS" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="DCPOS" />
+        </div>
+        <div>
+          <label for="jiraIssueTypeInput">Issue Type</label>
+          <input type="text" id="jiraIssueTypeInput" placeholder="e.g., Bug" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="Bug" />
+        </div>
+      </div>
+      <div class="row rowTwoCol" style="margin-top: 10px;">
+        <div>
+          <label for="jiraProjectIdInput">Project ID</label>
+          <input type="text" id="jiraProjectIdInput" placeholder="Numeric Jira project ID for prefilled draft" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="27101" />
+        </div>
+        <div>
+          <label for="jiraIssueTypeIdInput">Issue Type ID</label>
+          <input type="text" id="jiraIssueTypeIdInput" placeholder="Numeric Jira issue type ID" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="1" />
+        </div>
+      </div>
+      <div class="row rowTwoCol" style="margin-top: 10px;">
+        <div>
+          <label for="jiraBridgeUrlInput">Jira Bridge URL</label>
+          <input type="text" id="jiraBridgeUrlInput" placeholder="e.g., http://localhost:8787" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="http://localhost:8787" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <div class="info" style="margin-top: 0;">Run <span class="mono">npm run jira:bridge</span> locally first. It reads <span class="mono">JIRA_API_TOKEN</span> from your <span class="mono">.env</span> and creates the issue via the Jira REST API.</div>
+        </div>
+      </div>
+      <div class="row rowTwoCol" style="margin-top: 10px;">
+        <div>
+          <label for="jiraBoardIdInput">Board ID (for Sprint dropdown)</label>
+          <input type="text" id="jiraBoardIdInput" placeholder="Optional numeric Agile board ID; auto-detected from Project Key if blank" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="3773" />
+        </div>
+        <div>
+          <label for="jiraSprintFieldIdInput">Sprint Field ID</label>
+          <input type="text" id="jiraSprintFieldIdInput" placeholder="e.g., customfield_10007" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="customfield_10800" />
+        </div>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <div>
+          <label for="jiraKnownLabelsInput">Known Labels (for Labels dropdown)</label>
+          <textarea
+            id="jiraKnownLabelsInput"
+            class="configTextarea"
+            style="min-height: 50px;"
+            placeholder="One per line or comma-separated, e.g.:&#10;smart-search&#10;regression&#10;facets"
+          >SMARTSEARCH</textarea>
+        </div>
+      </div>
+      <div class="row" style="margin-top: 10px;">
+        <div>
+          <label for="jiraPrefillParamsInput">Project Prefill Parameters</label>
+          <textarea
+            id="jiraPrefillParamsInput"
+            class="configTextarea"
+            placeholder="One per line: fieldKey=value\nExamples:\ncustomfield_12345={{COUNTRY}}\ncustomfield_10014=ABC-123\ncustomfield_10020=57\npriority=Minor\ncustomfield_19999=NatureOption"
+          ></textarea>
+          <div class="info">Only used by the "Open in Jira (manual)" fallback link, not by direct bridge submission.</div>
+        </div>
+      </div>
+      <div class="info">Create JIRA opens a preview so you can verify/edit the summary and description, then submits directly to Jira via the local bridge. Use "Open in Jira (manual)" as a fallback if the bridge isn't running.</div>
+      <button id="jiraConfigCloseBtn" class="primary" type="button" style="margin-top: 10px;">Save & Close</button>
     </div>
 
     <div class="info" id="infoText">No folder selected.</div>
@@ -1438,6 +1699,75 @@
     </div>
   </div>
 
+  <div class="modalOverlay" id="jiraPreviewModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="jiraPreviewTitle">
+    <div class="modalCard">
+      <div class="modalHeader">
+        <div>
+          <h2 class="modalTitle" id="jiraPreviewTitle">Verify Jira Bug Before Submitting</h2>
+          <p class="modalText" id="jiraPreviewMeta">Review and edit the fields below, then submit to Jira.</p>
+        </div>
+      </div>
+      <div class="detailGrid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div class="detailItem">
+          <div class="detailLabel">Project</div>
+          <div class="detailValue" id="jiraPreviewProject">-</div>
+        </div>
+        <div class="detailItem">
+          <div class="detailLabel">Issue Type</div>
+          <div class="detailValue" id="jiraPreviewIssueType">-</div>
+        </div>
+      </div>
+      <div class="detailGrid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div>
+          <label for="jiraPreviewMarketsSelect">Affected Market(s)</label>
+          <select id="jiraPreviewMarketsSelect" multiple size="3" style="width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 4px;"></select>
+        </div>
+        <div>
+          <label for="jiraPreviewLabelsSelect">Labels</label>
+          <select id="jiraPreviewLabelsSelect" multiple size="3" style="width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 4px;"></select>
+          <div style="display: flex; gap: 6px; margin-top: 6px;">
+            <input type="text" id="jiraPreviewNewLabelInput" placeholder="Add a label..." class="jiraModalField" style="flex: 1;" />
+            <button id="jiraPreviewAddLabelBtn" type="button" style="padding: 0 16px;">Add</button>
+          </div>
+        </div>
+      </div>
+      <div class="detailGrid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div class="jiraAutocomplete" id="jiraAssigneeAutocomplete">
+          <label for="jiraPreviewAssigneeSearchInput">Assignee</label>
+          <input type="text" id="jiraPreviewAssigneeSearchInput" placeholder="Unassigned — type to search..." autocomplete="off" class="jiraModalField" />
+          <div class="jiraAutocompleteList" id="jiraPreviewAssigneeList" hidden></div>
+        </div>
+        <div>
+          <label for="jiraPreviewSprintSelect">Sprint</label>
+          <select id="jiraPreviewSprintSelect" class="jiraModalField">
+            <option value="">No sprint</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label for="jiraPreviewSummaryInput">Summary</label>
+        <input type="text" id="jiraPreviewSummaryInput" class="jiraModalField" />
+      </div>
+      <div>
+        <div class="detailHeader">
+          <label style="margin-bottom: 0;">Description</label>
+          <div class="jiraDescTabs">
+            <button type="button" id="jiraDescTabVisual" class="jiraDescTabBtn jiraDescTabActive" data-jira-desc-tab="visual">Visual</button>
+            <button type="button" id="jiraDescTabText" class="jiraDescTabBtn" data-jira-desc-tab="text">Text</button>
+          </div>
+        </div>
+        <div id="jiraPreviewDescriptionVisual" class="jiraDescVisual"></div>
+        <textarea id="jiraPreviewDescriptionInput" class="configTextarea jiraDescText" style="min-height: 170px; max-height: 170px; width: 100%; display: none;"></textarea>
+      </div>
+      <div class="info" id="jiraPreviewStatus"></div>
+      <div class="modalActions">
+        <button id="jiraPreviewManualBtn" type="button">Open in Jira (manual)</button>
+        <button id="jiraPreviewCloseBtn" type="button">Cancel</button>
+        <button id="jiraPreviewSubmitBtn" class="primary" type="button">Submit to Jira</button>
+      </div>
+    </div>
+  </div>
+
   <script id="embeddedResultsData" type="application/json">
     {
       "rootLabel": "",
@@ -1517,7 +1847,38 @@
     const titleNextBtn = document.getElementById("titleNextBtn");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
     const scrollMetaBtn = document.getElementById("scrollMetaBtn");
-    const createJiraBtn = document.getElementById("createJiraBtn");
+    const jiraConfigToggleBtn = document.getElementById("jiraConfigToggleBtn");
+    const jiraConfigCard = document.getElementById("jiraConfigCard");
+    const jiraConfigCloseBtn = document.getElementById("jiraConfigCloseBtn");
+    const jiraUrlInput = document.getElementById("jiraUrlInput");
+    const jiraProjectInput = document.getElementById("jiraProjectInput");
+    const jiraIssueTypeInput = document.getElementById("jiraIssueTypeInput");
+    const jiraProjectIdInput = document.getElementById("jiraProjectIdInput");
+    const jiraIssueTypeIdInput = document.getElementById("jiraIssueTypeIdInput");
+    const jiraPrefillParamsInput = document.getElementById("jiraPrefillParamsInput");
+    const jiraBridgeUrlInput = document.getElementById("jiraBridgeUrlInput");
+    const jiraBoardIdInput = document.getElementById("jiraBoardIdInput");
+    const jiraSprintFieldIdInput = document.getElementById("jiraSprintFieldIdInput");
+    const jiraKnownLabelsInput = document.getElementById("jiraKnownLabelsInput");
+    const jiraPreviewModal = document.getElementById("jiraPreviewModal");
+    const jiraPreviewProject = document.getElementById("jiraPreviewProject");
+    const jiraPreviewIssueType = document.getElementById("jiraPreviewIssueType");
+    const jiraPreviewMarketsSelect = document.getElementById("jiraPreviewMarketsSelect");
+    const jiraPreviewLabelsSelect = document.getElementById("jiraPreviewLabelsSelect");
+    const jiraPreviewNewLabelInput = document.getElementById("jiraPreviewNewLabelInput");
+    const jiraPreviewAddLabelBtn = document.getElementById("jiraPreviewAddLabelBtn");
+    const jiraPreviewAssigneeSearchInput = document.getElementById("jiraPreviewAssigneeSearchInput");
+    const jiraPreviewAssigneeList = document.getElementById("jiraPreviewAssigneeList");
+    const jiraPreviewSprintSelect = document.getElementById("jiraPreviewSprintSelect");
+    const jiraPreviewSummaryInput = document.getElementById("jiraPreviewSummaryInput");
+    const jiraPreviewDescriptionInput = document.getElementById("jiraPreviewDescriptionInput");
+    const jiraPreviewDescriptionVisual = document.getElementById("jiraPreviewDescriptionVisual");
+    const jiraDescTabVisual = document.getElementById("jiraDescTabVisual");
+    const jiraDescTabText = document.getElementById("jiraDescTabText");
+    const jiraPreviewStatus = document.getElementById("jiraPreviewStatus");
+    const jiraPreviewManualBtn = document.getElementById("jiraPreviewManualBtn");
+    const jiraPreviewCloseBtn = document.getElementById("jiraPreviewCloseBtn");
+    const jiraPreviewSubmitBtn = document.getElementById("jiraPreviewSubmitBtn");
     const metaGrid = document.getElementById("metaGrid");
     const chartRowsToggleBtn = document.getElementById("chartRowsToggleBtn");
     const chartsPanel = document.getElementById("chartsPanel");
@@ -3070,7 +3431,10 @@
       const responseResult = (results && results.responseResult) || (rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : ""));
       const facetsResult = (results && results.facetsResult) || (rowData && rowData.results ? rowData.results.facetsResult : (rowData ? rowData.facetsResult : ""));
       const openaiEvaluation = String(getRowField(rowData, "openaiEvaluation") || "").trim().toUpperCase();
-      const jiraSummary = String(getRowField(rowData, "openaiEvaluation") || "-").trim();
+      const failureReasons = Array.isArray(rowData?.summary?.failureReasons)
+        ? rowData.summary.failureReasons.map((reason) => String(reason || "").trim()).filter(Boolean)
+        : [];
+      const jiraSummary = failureReasons[0] || "Inconsistent responses for model when query is phrased differently.";
       const marker = responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || rowData?.hasError ? "(x)" : "(/)";
       const countryText = country || "-";
       const screenshotName = getFileNameFromPath(screenshotPath);
@@ -3106,7 +3470,7 @@
         " ** " + primaryQuery,
         "{panel}",
         "{panel:title=Expected behaviour|titleBGColor=#858585}",
-        " * Should return accurate response message",
+        " * Should be able to filter consistently",
         "{panel}",
         "{panel:title=Any attachments?|titleBGColor=#858585}",
         " * Screenshot",
@@ -3286,6 +3650,10 @@
       rowViewPane.innerHTML =
         "<div class=\"selectedRowSplit\">" +
           "<div class=\"selectedRowLeft\">" +
+            "<div class=\"queryActionRow\">" +
+              "<button type=\"button\" class=\"createJiraBtn\" data-create-jira-row=\"1\" title=\"Create Jira bug for this selected query\">Create JIRA</button>" +
+              "<button type=\"button\" class=\"copyIconBtn\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira draft\" aria-label=\"Copy Jira draft\">Copy Jira Draft</button>" +
+            "</div>" +
             "<div class=\"langGrid\">" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:var(--text)\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
@@ -4032,6 +4400,15 @@
         return;
       }
 
+      const createJiraRowButton = event.target.closest("button[data-create-jira-row]");
+      if (createJiraRowButton) {
+        if (selectedRowIndex < 0 || selectedRowIndex >= currentRows.length) {
+          return;
+        }
+        await createJiraForRows([currentRows[selectedRowIndex]], createJiraRowButton);
+        return;
+      }
+
       const facetsCopyButton = event.target.closest("button[data-copy-facets]");
       if (facetsCopyButton) {
         const encodedValue = facetsCopyButton.getAttribute("data-copy-facets") || "";
@@ -4224,8 +4601,590 @@
       window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
     });
 
-    createJiraBtn.addEventListener("click", async () => {
-      const failedQueries = currentRows.filter(row => {
+    // ─────────────────────────────────────────────────────────────
+    // Jira Integration: Configuration and Issue Creation
+    // ─────────────────────────────────────────────────────────────
+    
+    // Load Jira configuration from localStorage
+    function defaultJiraConfig() {
+      return {
+        url: "",
+        project: "",
+        issueType: "",
+        projectId: "",
+        issueTypeId: "",
+        prefillParams: "",
+        bridgeUrl: "http://localhost:8787",
+        boardId: "",
+        sprintFieldId: "",
+        knownLabels: "",
+      };
+    }
+
+    function loadJiraConfig() {
+      const stored = localStorage.getItem("jiraConfig");
+      if (stored) {
+        try {
+          return { ...defaultJiraConfig(), ...JSON.parse(stored) };
+        } catch (e) {
+          return defaultJiraConfig();
+        }
+      }
+      return defaultJiraConfig();
+    }
+    
+    // Save Jira configuration to localStorage
+    function saveJiraConfig(config) {
+      localStorage.setItem("jiraConfig", JSON.stringify(config));
+    }
+    
+    // Update form with stored Jira config
+    function updateJiraConfigUI() {
+      const config = loadJiraConfig();
+      if (config.url) jiraUrlInput.value = config.url;
+      if (config.project) jiraProjectInput.value = config.project;
+      if (config.issueType) jiraIssueTypeInput.value = config.issueType;
+      if (config.projectId) jiraProjectIdInput.value = config.projectId;
+      if (config.issueTypeId) jiraIssueTypeIdInput.value = config.issueTypeId;
+      if (config.prefillParams) jiraPrefillParamsInput.value = config.prefillParams;
+      jiraBridgeUrlInput.value = config.bridgeUrl || "http://localhost:8787";
+      if (config.boardId) jiraBoardIdInput.value = config.boardId;
+      if (config.sprintFieldId) jiraSprintFieldIdInput.value = config.sprintFieldId;
+      if (config.knownLabels) jiraKnownLabelsInput.value = config.knownLabels;
+    }
+    
+    // Initialize Jira config from localStorage on page load
+    updateJiraConfigUI();
+    
+    // Jira config toggle button
+    jiraConfigToggleBtn.addEventListener("click", () => {
+        const isHidden = jiraConfigCard.hidden;
+        jiraConfigCard.hidden = !isHidden;
+        if (isHidden) {
+          jiraConfigCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    });
+    
+    // Jira config close/save button
+    jiraConfigCloseBtn.addEventListener("click", () => {
+      const config = {
+        url: jiraUrlInput.value.trim(),
+        project: jiraProjectInput.value.trim(),
+        issueType: jiraIssueTypeInput.value.trim() || "Bug",
+        projectId: jiraProjectIdInput.value.trim(),
+        issueTypeId: jiraIssueTypeIdInput.value.trim(),
+        prefillParams: String(jiraPrefillParamsInput.value || "").trim(),
+        bridgeUrl: jiraBridgeUrlInput.value.trim() || "http://localhost:8787",
+        boardId: jiraBoardIdInput.value.trim(),
+        sprintFieldId: jiraSprintFieldIdInput.value.trim(),
+        knownLabels: String(jiraKnownLabelsInput.value || "").trim(),
+      };
+      saveJiraConfig(config);
+      jiraConfigCard.hidden = true;
+      jiraConfigCloseBtn.textContent = "Saved ✓";
+      setTimeout(() => { jiraConfigCloseBtn.textContent = "Save & Close"; }, 1500);
+    });
+
+    // Open Jira issue creation in new tab
+    function openJiraIssueInNewTab(url) {
+      window.open(url, "_blank");
+    }
+
+    function setButtonTemporaryState(button, label, timeoutMs = 1500) {
+      if (!button) {
+        return;
+      }
+      const original = button.innerHTML;
+      button.textContent = label;
+      setTimeout(() => {
+        button.innerHTML = original;
+      }, timeoutMs);
+    }
+
+    function buildJiraCreateIssueUrl(config, draftPayload) {
+      const jiraUrl = String(config.url || "jira.mercedes-benz.io").replace(/^https?:\/\//, "").replace(/\/$/, "");
+      const baseUrl = "https://" + jiraUrl;
+      const params = new URLSearchParams();
+      params.set("summary", draftPayload.summary || "");
+      params.set("description", draftPayload.description || "");
+
+      const dynamicValueMap = {
+        "{{COUNTRY}}": String(draftPayload?.metadata?.country || ""),
+        "{{LANGUAGE}}": String(draftPayload?.metadata?.language || ""),
+        "{{ENVIRONMENT}}": String(draftPayload?.metadata?.environment || ""),
+        "{{TEST_DESCRIBE}}": String(draftPayload?.metadata?.testDescribe || ""),
+        "{{TEST_TITLE}}": String(draftPayload?.metadata?.testTitle || ""),
+      };
+
+      const rawPrefillParams = String(config.prefillParams || "");
+      if (rawPrefillParams.trim()) {
+        const lines = rawPrefillParams.split("\n");
+        for (const rawLine of lines) {
+          const line = String(rawLine || "").trim();
+          if (!line || line.startsWith("#")) {
+            continue;
+          }
+
+          const separatorIndex = line.indexOf("=");
+          if (separatorIndex <= 0) {
+            continue;
+          }
+
+          const key = line.slice(0, separatorIndex).trim();
+          let value = line.slice(separatorIndex + 1).trim();
+          if (!key) {
+            continue;
+          }
+
+          for (const [token, tokenValue] of Object.entries(dynamicValueMap)) {
+            value = value.split(token).join(tokenValue);
+          }
+
+          if (value !== "") {
+            params.set(key, value);
+          }
+        }
+      }
+
+      if (config.projectId && config.issueTypeId) {
+        params.set("pid", String(config.projectId));
+        params.set("issuetype", String(config.issueTypeId));
+        return baseUrl + "/secure/CreateIssueDetails.jspa?" + params.toString();
+      }
+
+      return baseUrl + "/secure/CreateIssue!default.jspa";
+    }
+
+    function detectEnvironmentFromPath(pathValue) {
+      const upper = String(pathValue || "").toUpperCase();
+      if (upper.includes("PREPROD")) return "PREPROD";
+      if (upper.includes("PROD")) return "PROD";
+      if (upper.includes("QA")) return "QA";
+      if (upper.includes("UAT")) return "UAT";
+      if (upper.includes("DEV")) return "DEV";
+      return "-";
+    }
+
+    function getSelectedFileContext() {
+      const selectedPathValue = getSelectedRelativePath();
+      const row = selectedRowIndex >= 0 && selectedRowIndex < currentRows.length
+        ? normalizeRowSchema(currentRows[selectedRowIndex])
+        : null;
+      const metadata = row && row.metadata && typeof row.metadata === "object" ? row.metadata : {};
+      return {
+        selectedPath: selectedPathValue || "-",
+        environment: metadata.env || metadata.environment || detectEnvironmentFromPath(selectedPathValue),
+        product: metadata.product || "-",
+        vehicleCategory: metadata.vehicleCategory || metadata.vehicle_category || "-",
+        project: metadata.project || "-",
+        browserType: metadata.browserType || metadata.browser || "-",
+        testMode: row ? (getRowField(row, "testMode") || metadata.testMode || "-") : "-",
+      };
+    }
+
+    function buildJiraDraftForRow(rowData, rowIndex) {
+      const normalized = normalizeRowSchema(rowData);
+      const queryLocal = getLocalizedText(getRowField(normalized, "query")) || "-";
+      const queryEn = getEnglishText(getRowField(normalized, "query")) || "-";
+      const responseLocal = getLocalizedText(getRowField(normalized, "response")) || "-";
+      const responseEn = getEnglishText(getRowField(normalized, "response")) || "-";
+      const selectedRowCountry = getRowCountry(normalized, currentTableRenderOptions.country) || "-";
+      const testDescribe = String(getRowField(normalized, "testDescribe") || "-").trim();
+      const primaryQuery = String(queryLocal || queryEn || "SmartSearch query failure").trim();
+      const context = getSelectedFileContext();
+      const screenshotPath = resolveScreenshotFile(normalized).screenshotPath;
+      const facets = getRowField(normalized, "facets");
+      const facetGroups = splitExpectedAndActualFacets(facets);
+      const failureReasons = Array.isArray(normalized?.summary?.failureReasons)
+        ? normalized.summary.failureReasons.map((reason) => String(reason || "").trim()).filter(Boolean)
+        : [];
+
+      const summaryLead = failureReasons.length
+        ? failureReasons[0]
+        : ("Inconsistent Smart Search behavior for query: " + primaryQuery);
+      const summary = ("[" + selectedRowCountry + "] " + testDescribe + " - " + summaryLead)
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, 240);
+
+      return {
+        summary,
+        description: buildJiraTicketText(
+          normalized,
+          queryLocal,
+          queryEn,
+          responseLocal,
+          responseEn,
+          facetGroups.actual,
+          screenshotPath,
+          selectedRowCountry,
+        ),
+        environment: [
+          "Environment: " + context.environment,
+          "Market: " + selectedRowCountry,
+          "Language: " + (getRowLanguage(normalized, currentTableRenderOptions.language) || "-"),
+          "Product: " + context.product,
+          "Vehicle Category: " + context.vehicleCategory,
+          "Test Mode: " + context.testMode,
+        ].join(" | "),
+        affectedMarkets: selectedRowCountry !== "-" ? [selectedRowCountry] : [],
+        labels: [],
+        metadata: {
+          testDescribe,
+          testTitle: String(getRowField(normalized, "testTitle") || "-").trim(),
+          country: selectedRowCountry,
+          language: getRowLanguage(normalized, currentTableRenderOptions.language) || "-",
+          environment: context.environment,
+          product: context.product,
+          vehicleCategory: context.vehicleCategory,
+          resultFile: context.selectedPath,
+          rowIndex: rowIndex,
+        },
+      };
+    }
+
+    let currentJiraPreview = null;
+    let jiraAssigneeSearchTimer = null;
+
+    // ─────────────────────────────────────────────────────────────
+    // Jira wiki-markup → HTML renderer (approximate preview only)
+    // ─────────────────────────────────────────────────────────────
+    function escapeHtmlForJiraPreview(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    }
+
+    function renderJiraInlineMarkup(text) {
+      let html = escapeHtmlForJiraPreview(text);
+      html = html.replace(/\{color:(#[0-9a-fA-F]{3,6})\}([\s\S]*?)\{color\}/g, '<span style="color:$1">$2</span>');
+      html = html.replace(/\(x\)/g, '<span class="jiraIconFail">&#10005;</span>');
+      html = html.replace(/\(\/\)/g, '<span class="jiraIconPass">&#10003;</span>');
+      html = html.replace(/!([^|!\n]+)\|thumbnail!/g, '<span class="jiraAttachmentChip">&#128206; $1</span>');
+      html = html.replace(/!([^!\n]+)!/g, '<span class="jiraAttachmentChip">&#128206; $1</span>');
+      return html;
+    }
+
+    function renderJiraBulletBlock(bodyText) {
+      const lines = String(bodyText || "").split("\n");
+      let html = "";
+      const depthStack = [];
+
+      for (const rawLine of lines) {
+        const bulletMatch = rawLine.match(/^\s*(\*{1,6})\s?(.*)$/);
+        if (bulletMatch) {
+          const depth = bulletMatch[1].length;
+          const content = renderJiraInlineMarkup(bulletMatch[2]);
+          if (!depthStack.length || depth > depthStack[depthStack.length - 1]) {
+            html += "<ul><li>" + content;
+            depthStack.push(depth);
+          } else if (depth === depthStack[depthStack.length - 1]) {
+            html += "</li><li>" + content;
+          } else {
+            while (depthStack.length && depth < depthStack[depthStack.length - 1]) {
+              html += "</li></ul>";
+              depthStack.pop();
+            }
+            if (depthStack.length && depth === depthStack[depthStack.length - 1]) {
+              html += "</li><li>" + content;
+            } else {
+              html += "<ul><li>" + content;
+              depthStack.push(depth);
+            }
+          }
+        } else {
+          while (depthStack.length) {
+            html += "</li></ul>";
+            depthStack.pop();
+          }
+          if (rawLine.trim() !== "") {
+            html += "<div>" + renderJiraInlineMarkup(rawLine) + "</div>";
+          }
+        }
+      }
+
+      while (depthStack.length) {
+        html += "</li></ul>";
+        depthStack.pop();
+      }
+
+      return html;
+    }
+
+    function renderJiraWikiToHtml(rawText) {
+      const text = String(rawText || "");
+      const panelRegex = /\{panel(?::([^}]*))?\}([\s\S]*?)\{panel\}/g;
+      let html = "";
+      let lastIndex = 0;
+      let match;
+      let matchedAny = false;
+
+      while ((match = panelRegex.exec(text)) !== null) {
+        matchedAny = true;
+        const before = text.slice(lastIndex, match.index);
+        if (before.trim()) {
+          html += renderJiraBulletBlock(before);
+        }
+
+        const panelAttrs = match[1] || "";
+        const titleMatch = panelAttrs.match(/title=([^|]*)/);
+        const colorMatch = panelAttrs.match(/titleBGColor=(#[0-9a-fA-F]{3,6})/);
+        const title = titleMatch ? titleMatch[1].trim() : "";
+        const bgColor = colorMatch ? colorMatch[1] : "#858585";
+
+        html += '<div class="jiraWikiPanel">';
+        if (title) {
+          html += '<div class="jiraWikiPanelTitle" style="background:' + bgColor + '">' + escapeHtmlForJiraPreview(title) + "</div>";
+        }
+        html += '<div class="jiraWikiPanelBody">' + renderJiraBulletBlock(match[2]) + "</div>";
+        html += "</div>";
+
+        lastIndex = panelRegex.lastIndex;
+      }
+
+      const rest = text.slice(lastIndex);
+      if (rest.trim()) {
+        html += renderJiraBulletBlock(rest);
+      }
+
+      if (!matchedAny && !html) {
+        html = '<div class="metricEmpty">Nothing to preview yet.</div>';
+      }
+
+      return html;
+    }
+
+    function syncJiraDescriptionVisual() {
+      jiraPreviewDescriptionVisual.innerHTML = renderJiraWikiToHtml(jiraPreviewDescriptionInput.value);
+    }
+
+    function setJiraDescriptionTab(tab) {
+      const isVisual = tab === "visual";
+      jiraDescTabVisual.classList.toggle("jiraDescTabActive", isVisual);
+      jiraDescTabText.classList.toggle("jiraDescTabActive", !isVisual);
+      if (isVisual) {
+        syncJiraDescriptionVisual();
+      }
+      jiraPreviewDescriptionVisual.style.display = isVisual ? "block" : "none";
+      jiraPreviewDescriptionInput.style.display = isVisual ? "none" : "block";
+    }
+
+    jiraDescTabVisual.addEventListener("click", () => setJiraDescriptionTab("visual"));
+    jiraDescTabText.addEventListener("click", () => setJiraDescriptionTab("text"));
+
+    // ─────────────────────────────────────────────────────────────
+    // Preview modal: Affected Market / Labels dropdowns (local data)
+    // ─────────────────────────────────────────────────────────────
+    function populateJiraMarketsSelect(selectedMarkets) {
+      const known = [...countrySelect.options]
+        .map((opt) => opt.value)
+        .filter((value) => value && value !== "ALL");
+      const merged = [...new Set([...known, ...(selectedMarkets || [])])].sort((a, b) => a.localeCompare(b));
+
+      jiraPreviewMarketsSelect.innerHTML = "";
+      merged.forEach((code) => {
+        const opt = document.createElement("option");
+        opt.value = code;
+        opt.textContent = code;
+        opt.selected = (selectedMarkets || []).includes(code);
+        jiraPreviewMarketsSelect.appendChild(opt);
+      });
+    }
+
+    function parseKnownLabelsConfig(rawValue) {
+      return [...new Set(String(rawValue || "")
+        .split(/[\n,]/)
+        .map((label) => label.trim())
+        .filter(Boolean))];
+    }
+
+    const JIRA_HARDCODED_LABELS = ["SMARTSEARCH"];
+
+    function populateJiraLabelsSelect(selectedLabels, knownLabelsRaw) {
+      const known = parseKnownLabelsConfig(knownLabelsRaw);
+      const merged = [...new Set([...JIRA_HARDCODED_LABELS, ...known, ...(selectedLabels || [])])].sort((a, b) => a.localeCompare(b));
+
+      jiraPreviewLabelsSelect.innerHTML = "";
+      merged.forEach((label) => {
+        const opt = document.createElement("option");
+        opt.value = label;
+        opt.textContent = label;
+        opt.selected = (selectedLabels || []).includes(label);
+        jiraPreviewLabelsSelect.appendChild(opt);
+      });
+    }
+
+    jiraPreviewAddLabelBtn.addEventListener("click", () => {
+      const value = jiraPreviewNewLabelInput.value.trim();
+      if (!value) {
+        return;
+      }
+      const exists = [...jiraPreviewLabelsSelect.options].some((opt) => opt.value === value);
+      if (!exists) {
+        const opt = document.createElement("option");
+        opt.value = value;
+        opt.textContent = value;
+        jiraPreviewLabelsSelect.appendChild(opt);
+      }
+      [...jiraPreviewLabelsSelect.options].forEach((opt) => {
+        if (opt.value === value) opt.selected = true;
+      });
+      jiraPreviewNewLabelInput.value = "";
+    });
+
+    jiraPreviewNewLabelInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        jiraPreviewAddLabelBtn.click();
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // Preview modal: Assignee / Sprint dropdowns (live via bridge)
+    // ─────────────────────────────────────────────────────────────
+    async function jiraBridgeGet(bridgeUrl, path, params) {
+      const url = new URL(bridgeUrl.replace(/\/$/, "") + path);
+      Object.entries(params || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          url.searchParams.set(key, value);
+        }
+      });
+      const response = await fetch(url.toString());
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(body?.error || ("Bridge responded with status " + response.status));
+      }
+      return body;
+    }
+
+    let selectedJiraAssigneeId = "";
+
+    function hideJiraAssigneeList() {
+      jiraPreviewAssigneeList.hidden = true;
+      jiraPreviewAssigneeList.innerHTML = "";
+    }
+
+    function selectJiraAssignee(id, label) {
+      selectedJiraAssigneeId = id;
+      jiraPreviewAssigneeSearchInput.value = label;
+      hideJiraAssigneeList();
+    }
+
+    function renderJiraAssigneeList(users) {
+      jiraPreviewAssigneeList.innerHTML = "";
+
+      const unassignedBtn = document.createElement("button");
+      unassignedBtn.type = "button";
+      unassignedBtn.className = "jiraAutocompleteOption";
+      unassignedBtn.textContent = "Unassigned";
+      unassignedBtn.addEventListener("mousedown", (event) => {
+        event.preventDefault();
+        selectJiraAssignee("", "");
+      });
+      jiraPreviewAssigneeList.appendChild(unassignedBtn);
+
+      if (!users || !users.length) {
+        const empty = document.createElement("div");
+        empty.className = "jiraAutocompleteEmpty";
+        empty.textContent = "No matching users.";
+        jiraPreviewAssigneeList.appendChild(empty);
+      } else {
+        users.forEach((user) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "jiraAutocompleteOption";
+          btn.innerHTML = escapeHtmlForJiraPreview(user.label) +
+            (user.detail ? '<span class="jiraAutocompleteOptionDetail">' + escapeHtmlForJiraPreview(user.detail) + "</span>" : "");
+          btn.addEventListener("mousedown", (event) => {
+            event.preventDefault();
+            selectJiraAssignee(user.id, user.label);
+          });
+          jiraPreviewAssigneeList.appendChild(btn);
+        });
+      }
+
+      jiraPreviewAssigneeList.hidden = false;
+    }
+
+    async function refreshJiraAssigneeOptions(config, query) {
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787");
+      try {
+        const { users } = await jiraBridgeGet(bridgeUrl, "/jira/assignable-users", {
+          project: config.project,
+          query: query || "",
+        });
+        renderJiraAssigneeList(users);
+      } catch (error) {
+        jiraPreviewAssigneeList.innerHTML = "";
+        jiraPreviewAssigneeList.hidden = true;
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Could not load assignable users: " + (error?.message || error);
+      }
+    }
+
+    jiraPreviewAssigneeSearchInput.addEventListener("input", () => {
+      if (!currentJiraPreview) {
+        return;
+      }
+      selectedJiraAssigneeId = "";
+      clearTimeout(jiraAssigneeSearchTimer);
+      const query = jiraPreviewAssigneeSearchInput.value.trim();
+      jiraAssigneeSearchTimer = setTimeout(() => {
+        refreshJiraAssigneeOptions(currentJiraPreview.config, query);
+      }, 300);
+    });
+
+    jiraPreviewAssigneeSearchInput.addEventListener("focus", () => {
+      if (!currentJiraPreview) {
+        return;
+      }
+      refreshJiraAssigneeOptions(currentJiraPreview.config, jiraPreviewAssigneeSearchInput.value.trim());
+    });
+
+    jiraPreviewAssigneeSearchInput.addEventListener("blur", () => {
+      hideJiraAssigneeList();
+    });
+
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("#jiraAssigneeAutocomplete")) {
+        hideJiraAssigneeList();
+      }
+    });
+
+    async function refreshJiraSprintOptions(config) {
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787");
+      jiraPreviewSprintSelect.innerHTML = '<option value="">No sprint</option>';
+
+      if (!config.sprintFieldId) {
+        return;
+      }
+
+      try {
+        let boardId = String(config.boardId || "").trim();
+        if (!boardId) {
+          const { boards } = await jiraBridgeGet(bridgeUrl, "/jira/boards", { project: config.project });
+          boardId = boards && boards.length ? String(boards[0].id) : "";
+        }
+        if (!boardId) {
+          return;
+        }
+
+        const { sprints } = await jiraBridgeGet(bridgeUrl, "/jira/sprints", { boardId });
+        (sprints || []).forEach((sprint) => {
+          const opt = document.createElement("option");
+          opt.value = sprint.id;
+          opt.textContent = sprint.name + (sprint.state ? " (" + sprint.state + ")" : "");
+          jiraPreviewSprintSelect.appendChild(opt);
+        });
+      } catch (error) {
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Could not load sprints: " + (error?.message || error);
+      }
+    }
+
+    async function createJiraForRows(rows, feedbackButton) {
+      const failedQueries = rows.filter((row) => {
         const normalized = normalizeRowSchema(row);
         const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
         const results = getRowField(normalized, "results");
@@ -4235,21 +5194,150 @@
       });
 
       if (failedQueries.length === 0) {
-        createJiraBtn.textContent = "No failures";
-        setTimeout(() => { createJiraBtn.textContent = "Create JIRA"; }, 1200);
+        setButtonTemporaryState(feedbackButton, "No failure", 1200);
         return;
       }
 
-      const jiraText = buildJiraTicketForFailedQueries(failedQueries);
+      const config = loadJiraConfig();
+      if (!config.url || !config.project) {
+        alert("Please configure Jira settings using the ⚙️ icon first!");
+        jiraConfigCard.hidden = false;
+        jiraConfigCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        return;
+      }
+
+      if (failedQueries.length !== 1) {
+        alert("Please select one query row and create Jira from the selected row panel.");
+        return;
+      }
+
+      const draftPayload = buildJiraDraftForRow(failedQueries[0], selectedRowIndex + 1);
+      showJiraPreviewModal(draftPayload, config, feedbackButton);
+    }
+
+    function showJiraPreviewModal(draftPayload, config, feedbackButton) {
+      currentJiraPreview = { draftPayload, config, feedbackButton };
+      jiraPreviewProject.textContent = config.project || "-";
+      jiraPreviewIssueType.textContent = config.issueType || "Bug";
+      jiraPreviewSummaryInput.value = draftPayload.summary || "";
+      jiraPreviewDescriptionInput.value = draftPayload.description || "";
+      jiraPreviewStatus.textContent = "";
+      jiraPreviewStatus.style.color = "";
+      jiraPreviewSubmitBtn.disabled = false;
+      jiraPreviewSubmitBtn.textContent = "Submit to Jira";
+
+      populateJiraMarketsSelect(draftPayload.affectedMarkets || []);
+      populateJiraLabelsSelect(draftPayload.labels || [], config.knownLabels);
+      jiraPreviewNewLabelInput.value = "";
+      jiraPreviewAssigneeSearchInput.value = "";
+      selectedJiraAssigneeId = "";
+      hideJiraAssigneeList();
+      jiraPreviewSprintSelect.innerHTML = '<option value="">No sprint</option>';
+
+      setJiraDescriptionTab("visual");
+
+      jiraPreviewModal.classList.add("visible");
+      jiraPreviewModal.setAttribute("aria-hidden", "false");
+
+      refreshJiraSprintOptions(config);
+    }
+
+    function closeJiraPreviewModal() {
+      jiraPreviewModal.classList.remove("visible");
+      jiraPreviewModal.setAttribute("aria-hidden", "true");
+      currentJiraPreview = null;
+    }
+
+    jiraPreviewCloseBtn.addEventListener("click", () => {
+      closeJiraPreviewModal();
+    });
+
+    jiraPreviewModal.addEventListener("click", (event) => {
+      if (event.target === jiraPreviewModal) {
+        closeJiraPreviewModal();
+      }
+    });
+
+    jiraPreviewManualBtn.addEventListener("click", () => {
+      if (!currentJiraPreview) {
+        return;
+      }
+      const { draftPayload, config } = currentJiraPreview;
+      const editedPayload = {
+        ...draftPayload,
+        summary: jiraPreviewSummaryInput.value.trim(),
+        description: jiraPreviewDescriptionInput.value,
+      };
+      const jiraCreateUrl = buildJiraCreateIssueUrl(config, editedPayload);
+      openJiraIssueInNewTab(jiraCreateUrl);
+    });
+
+    jiraPreviewSubmitBtn.addEventListener("click", async () => {
+      if (!currentJiraPreview) {
+        return;
+      }
+      const { draftPayload, config, feedbackButton } = currentJiraPreview;
+      const summary = jiraPreviewSummaryInput.value.trim();
+      const description = jiraPreviewDescriptionInput.value.trim();
+
+      if (!summary || !description) {
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Summary and description are required.";
+        return;
+      }
+
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787").replace(/\/$/, "");
+      jiraPreviewSubmitBtn.disabled = true;
+      jiraPreviewSubmitBtn.textContent = "Submitting...";
+      jiraPreviewStatus.style.color = "";
+      jiraPreviewStatus.textContent = "Submitting to Jira via local bridge...";
+
+      const selectedMarkets = [...jiraPreviewMarketsSelect.selectedOptions].map((opt) => opt.value);
+      const selectedLabels = [...jiraPreviewLabelsSelect.selectedOptions].map((opt) => opt.value);
+      const assigneeId = selectedJiraAssigneeId;
+      const sprintId = jiraPreviewSprintSelect.value;
+
       try {
-        await copyToClipboard(jiraText);
-        const original = createJiraBtn.innerHTML;
-        createJiraBtn.textContent = "OK";
+        const response = await fetch(bridgeUrl + "/jira/issues", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            projectKey: config.project,
+            issueType: config.issueType || "Bug",
+            summary,
+            description,
+            environment: draftPayload.environment || "",
+            affectedMarkets: selectedMarkets.length ? selectedMarkets : (draftPayload.affectedMarkets || []),
+            labels: selectedLabels,
+            assigneeId,
+            sprintFieldId: config.sprintFieldId || "",
+            sprintId,
+          }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(result?.error || ("Bridge responded with status " + response.status));
+        }
+
+        jiraPreviewStatus.style.color = "var(--success-text)";
+        jiraPreviewStatus.textContent = "Created " + (result.key || "issue") + (result.browseUrl ? " — opening..." : ".");
+        setButtonTemporaryState(feedbackButton, "Created " + (result.key || ""), 2500);
+
+        if (result.browseUrl) {
+          openJiraIssueInNewTab(result.browseUrl);
+        }
+
         setTimeout(() => {
-          createJiraBtn.innerHTML = original;
-        }, 900);
-      } catch {
-        createJiraBtn.textContent = "ERR";
+          closeJiraPreviewModal();
+        }, 1200);
+      } catch (error) {
+        jiraPreviewSubmitBtn.disabled = false;
+        jiraPreviewSubmitBtn.textContent = "Submit to Jira";
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Failed to create Jira issue: " + (error?.message || error) +
+          ". Is the bridge running (npm run jira:bridge) at " + bridgeUrl + "? You can also use \"Open in Jira (manual)\".";
       }
     });
 
