@@ -258,55 +258,8 @@ npx playwright test --grep-invert @api
 ### 1. Test Execution
 
 - Run tests via Playwright with configurable modes (`npm test` or specific mode scripts).
-
----
-
-## Jira Integration
-
-The results viewer supports creating Jira bugs directly from the selected query view in `results/html/test-results-viewer.html`.
-
-### Recommended Setup
-
-Jira creation now uses Jira's own Create Issue page as the review draft step. The viewer does not auto-create tickets.
-
-Configure Jira values in the viewer settings (⚙️):
-
-- Jira Instance URL
-- Project Key
-- Issue Type
-- Project ID (numeric, for prefilled draft)
-- Issue Type ID (numeric, for prefilled draft)
-
-Notes:
-
-- If Project ID and Issue Type ID are set, the viewer opens Jira Create Issue with summary and description prefilled.
-- If numeric IDs are missing, the viewer opens Jira Create Issue and copies the draft text to clipboard for manual paste.
-
-### Viewer Usage
-
-1. Open the test results viewer.
-2. Click the Jira settings gear.
-3. Confirm Jira URL, project key, issue type, and numeric IDs (if available).
-4. Select a failed query row.
-5. Click `Create JIRA` in the selected query section.
-6. Jira Create Issue page opens in a new tab with draft content.
-7. Review everything directly in Jira, add labels manually, and click Jira's `Create` button.
-
-The created Jira issue includes:
-
-- Summary
-- Affected markets
-- Environment details
-- Structured description sections
-- Labels (manual user input in Jira)
-- Query, response, facets, and failure reasons
-
-### Optional Direct API Method
-
-If your team later wants direct API-based creation again, you can use the optional local bridge/backend approach. That mode creates issues automatically and requires Jira API credentials in a secure server-side context.
 - Each scenario generates queries (some via OpenAI), executes them via UI/API/both, and logs results.
 - Results are saved as JSON files in `results/json/` with mode indicators.
-
 
 ### 2. Result Processing
 
@@ -321,6 +274,36 @@ If your team later wants direct API-based creation again, you can use the option
 
 - For the "AI Response Consistency" test, each query is executed 3 times.
 - The script checks that all 3 OpenAI evaluations are identical, logging a warning if not.
+
+---
+
+## Jira Integration
+
+The results viewer (`results/html/test-results-viewer.html`) can create Jira bugs directly from a selected failed query, via a local bridge script (`jira-api-bridge.js`) that talks to the Jira REST API using your `.env` credentials. Before submitting, a preview modal lets you review and edit everything.
+
+### Setup
+
+1. Add Jira credentials to your local `.env` (see `.env.example` for the full list): `JIRA_BASE_URL`, `JIRA_API_TOKEN`, `JIRA_AUTH_TYPE` (`bearer` for a PAT, or `basic` with `JIRA_USER_EMAIL`), and optionally `JIRA_AFFECTED_MARKETS_FIELD`/`JIRA_AFFECTED_MARKETS_MODE` and `JIRA_ASSIGNEE_FIELD_MODE`. Keep the real token in your local `.env` only — never commit it.
+2. Start the bridge: `npm run jira:bridge` (listens on `JIRA_BRIDGE_PORT`, default `8787`).
+3. Open the viewer and configure Jira settings via the ⚙️ icon:
+   - **Jira Instance URL**, **Project Key**, **Issue Type**
+   - **Jira Bridge URL** (default `http://localhost:8787`)
+   - **Board ID** and **Sprint Field ID** — needed for the Sprint dropdown to fetch real sprints (Board ID auto-detects from Project Key if left blank, but that only works reliably when the project has a single board)
+   - **Known Labels** — seeds the Labels dropdown (in addition to a hardcoded `SMARTSEARCH` label that's always present)
+   - **Project ID** / **Issue Type ID** (numeric, optional) — only used by the "Open in Jira (manual)" fallback link, not by direct submission
+
+### Viewer Usage
+
+1. Select a failed query row in the results table.
+2. Click **Create JIRA** in the selected-row panel.
+3. A preview modal opens with the summary and description pre-filled from the query/response/facets/failure reasons:
+   - **Description** has **Visual**/**Text** tabs — Visual renders the Jira wiki markup (panels, bullets, pass/fail icons) so you can eyeball it; Text is the raw editable markup.
+   - **Affected Market(s)** and **Labels** are multi-select dropdowns (Labels also has a free-text "Add" box for one-off tags).
+   - **Assignee** is a live-searching autocomplete against Jira's assignable-users API (results filter as you type).
+   - **Sprint** is populated live from the configured board's active/future sprints.
+4. Edit anything that needs adjusting, then either:
+   - **Submit to Jira** — creates the issue directly via the REST API (through the local bridge) and opens it once created, or
+   - **Open in Jira (manual)** — falls back to Jira's own Create Issue page with the summary/description prefilled, for when the bridge isn't running.
 
 ---
 
