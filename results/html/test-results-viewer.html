@@ -260,7 +260,7 @@
     }
 
     .filterRow {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto auto;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto auto auto;
       align-items: end;
     }
 
@@ -1510,6 +1510,7 @@
       </div>
       <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset Form</button>
       <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>      
+      <button id="createJiraBtn" class="createJiraBtn" type="button" title="Copy a Jira ticket draft for all failed queries">Create JIRA</button>
       <button id="jiraConfigToggleBtn" class="createJiraBtn" type="button" title="Configure Jira settings" style="padding: 0 12px;">⚙️</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
     </div>
@@ -1847,6 +1848,7 @@
     const titleNextBtn = document.getElementById("titleNextBtn");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
     const scrollMetaBtn = document.getElementById("scrollMetaBtn");
+    const createJiraBtn = document.getElementById("createJiraBtn");
     const jiraConfigToggleBtn = document.getElementById("jiraConfigToggleBtn");
     const jiraConfigCard = document.getElementById("jiraConfigCard");
     const jiraConfigCloseBtn = document.getElementById("jiraConfigCloseBtn");
@@ -4599,6 +4601,29 @@
       const stickyOffset = filterPanel ? filterPanel.offsetHeight + 12 : 12;
       const targetTop = metaGrid.getBoundingClientRect().top + window.scrollY - stickyOffset;
       window.scrollTo({ top: Math.max(0, targetTop), behavior: "smooth" });
+    });
+
+    createJiraBtn.addEventListener("click", async () => {
+      const failedQueries = currentRows.filter((row) => {
+        const normalized = normalizeRowSchema(row);
+        const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
+        const results = getRowField(normalized, "results");
+        const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
+        const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
+        return responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || normalized?.hasError;
+      });
+
+      if (failedQueries.length === 0) {
+        setButtonTemporaryState(createJiraBtn, "No failures", 1200);
+        return;
+      }
+
+      try {
+        await copyToClipboard(buildJiraTicketForFailedQueries(failedQueries));
+        setButtonTemporaryState(createJiraBtn, "Copied", 1200);
+      } catch {
+        setButtonTemporaryState(createJiraBtn, "Copy failed", 1200);
+      }
     });
 
     // ─────────────────────────────────────────────────────────────
