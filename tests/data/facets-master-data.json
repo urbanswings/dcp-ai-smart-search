@@ -602,6 +602,15 @@
       },
       {
         "value": "CLA 220"
+      },
+      {
+        "value": "Sprinter 317"
+      },
+      {
+        "value": "Sprinter 519"
+      },
+      {
+        "value": "eSprinter 320"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1382,6 +1391,10 @@
       {
         "formattedValue": "プログレッシブ",
         "value": "d2be1039"
+      },
+      {
+        "formattedValue": "SELECT",
+        "value": "182703dc"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4262,13 +4275,25 @@
     "facetType": "RANGE"
   },
   "loadspaceLength": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 3316,
+      "max": 4351
+    }
   },
   "loadspaceWidth": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 1555,
+      "max": 1555
+    }
   },
   "loadspaceHeight": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 1846,
+      "max": 1846
+    }
   },
   "wheelbase": {
     "values": {

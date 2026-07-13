@@ -332,6 +332,7 @@ export class SearchApiClient {
         profileId: `${config.country}-${vehicleTypeKey}`,
         query: actualInput,
         sortingType: "price-asc",
+        vehicleCategory: config.vehicleCategory
       },
       query: undefined,
     };
