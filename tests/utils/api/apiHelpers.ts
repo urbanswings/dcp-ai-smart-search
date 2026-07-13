@@ -3,8 +3,8 @@ import fs from "fs/promises";
 import http from "http";
 import path from "path";
 import {
-  GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES,
   getEmhGraphqlQuery,
+  getSmartSearchGraphqlQuery,
 } from "./graphqlQueries";
 import type { ApiSearchResult } from "../core/searchResultTypes";
 
@@ -319,9 +319,6 @@ export class SearchApiClient {
       };
     }
 
-    const vehicleTypeKey = config.product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES";
-    const queryKey = `${config.country.toUpperCase()}-${vehicleTypeKey}`;
-
     const payload: any = {
       operationName: "GetSmartSearchResults",
       variables: {
@@ -329,7 +326,9 @@ export class SearchApiClient {
         isUcos: config.product === "UCOS",
         language: config.language,
         limit: 12,
-        profileId: `${config.country}-${vehicleTypeKey}`,
+        profileId: `${config.country}-${
+          config.product === "UCOS" ? "USED_VEHICLES" : "NEW_VEHICLES"
+        }`,
         query: actualInput,
         sortingType: "price-asc",
         vehicleCategory: config.vehicleCategory
@@ -337,7 +336,11 @@ export class SearchApiClient {
       query: undefined,
     };
 
-    payload.query = GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES[queryKey] || GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES["AU-NEW_VEHICLES"];
+    payload.query = getSmartSearchGraphqlQuery(
+      config.country,
+      config.product,
+      config.vehicleCategory,
+    );
     return payload;
   }
 
@@ -656,7 +659,7 @@ export async function fetchEmhApiResponse(): Promise<any> {
         sortingType: "price-asc",
         vehicleCategory: vehicleCategory,
       },
-      query: getEmhGraphqlQuery(country, product),
+      query: getEmhGraphqlQuery(country, product, vehicleCategory),
     };
 
     if (process.env.API_ENDPOINT_LOCAL === "true") {
