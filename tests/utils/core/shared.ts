@@ -199,7 +199,6 @@ export async function areAllResponsesConsistentOneShot(
     const answer = await generateOpenAIQuery(
       systemPrompt,
       userPrompt,
-      80,
       "NO",
     );
     const raw = String(answer || "").trim();

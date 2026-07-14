@@ -253,7 +253,6 @@ export async function generateQueriesFromFacets(
     count: number;
     systemPrompt: string;
     userPromptTemplate: string;
-    maxTokens: number;
     fallback: string;
   },
 ): Promise<
@@ -341,7 +340,6 @@ export async function generateQueriesFromFacets(
     const query = await generateOpenAIQuery(
       aiPromptData.systemPrompt,
       aiPromptData.userPromptTemplate.replace(/\{filterText\}/g, filterText),
-      aiPromptData.maxTokens,
     );
 
     console.log("\n");
@@ -444,7 +442,6 @@ export async function generateDateNumericQueriesFromFacets(
     count: number;
     systemPrompt: string;
     userPromptTemplate: string;
-    maxTokens: number;
     fallback: string;
   },
 ): Promise<DateNumericFacetQuery[]> {
@@ -465,7 +462,6 @@ export async function generateDateNumericQueriesFromFacets(
           /\{filterText\}/g,
           rangeQueryValue.filterText,
         ),
-        aiPromptData.maxTokens,
         aiPromptData.fallback,
       );
       const inStock = isFacetInStock(facet);

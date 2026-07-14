@@ -1,7 +1,7 @@
 import { AzureOpenAI } from "openai";
+import { OPENAI_MAX_TOKENS } from "./openaiConfig";
 
 const OPENAI_CHAT_MODEL = process.env.NEXUS_GPT_MODEL || "gpt-4o-mini";
-const OPENAI_DEFAULT_MAX_TOKENS = 200; // Increased from 40 to support query generation with gpt-5-mini
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
 /**
@@ -59,7 +59,6 @@ interface GenerationOptions {
     formattedValue: string,
     rawValue: unknown,
   ) => string;
-  maxTokens?: number;
 }
 
 const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
@@ -778,7 +777,6 @@ async function generateOpenAiQuery(
   client: AzureOpenAI,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = OPENAI_DEFAULT_MAX_TOKENS,
 ): Promise<string> {
   console.log("[prompt-engine] Generating query with AI...");
   console.log(`[prompt-engine] System prompt: ${systemPrompt}`);
@@ -789,7 +787,7 @@ async function generateOpenAiQuery(
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],    
-    max_completion_tokens: maxTokens,
+    max_completion_tokens: OPENAI_MAX_TOKENS,
   });
   return completion?.choices?.[0]?.message?.content?.trim() || "";
 }
@@ -820,7 +818,7 @@ async function generateQueryWithVariation(
   context: PromptContext,
   options: GenerationOptions = {},
 ): Promise<string> {
-  const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
+  const { language = "en", fallbackFn, filterTextFn } = options;
   const exactQuery = buildFacetFirstQuery(
     facetKey,
     formattedValue,
@@ -875,7 +873,6 @@ async function generateQueryWithVariation(
       client,
       resolvedSystemPrompt,
       resolvedUserPrompt,
-      maxTokens,
     );
     const generatedVariation = enforceCompleteQueryVariation(
       generated || fallback,

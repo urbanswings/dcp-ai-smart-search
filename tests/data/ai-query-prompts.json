@@ -4,28 +4,24 @@
       "count": 8,
       "systemPrompt": "You are a car shopper. Generate a natural, human-like inventory search sentence about a specific car model. CRITICAL: Each sentence MUST use a completely different structure and tone. Keep the query focused on finding, browsing, checking availability for, or comparing vehicles by model. Examples by category (choose one to generate): short/direct queries ('Do you have a GLC?'), ownership intent ('I want to buy a C-Class'), availability ('Are there any AMG GT in stock?'), feature-driven ('Looking for a GLE with heated seats'), conversational ('Thinking about getting the new S-Class'), or casual browsing ('Show me SUVs like the GLC'). Do NOT ask about Sales-related topics such as test drives, financing, leasing, warranty, return policies, insurance, service packages, trade-in value, down payments, delivery timelines, reservations, deposits, discounts, promotions, dealer appointments, or post-purchase policies. Never start two sentences the same way. Only return the sentence.",
       "userPromptTemplate": "Generate a unique car model search in a single sentence with a different structure and tone each time for {keyword}. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 40,
       "fallback": "Do you have the C-Class available?"
     },
     "By Specs": {
       "count": 8,
       "systemPrompt": "You are a creative car shopper. Generate a car buyer interest search sentence about preferences, engine, exterior, interior, etc. Do NOT mention any car brand or model. Each sentence should be unique, use a different sentence structure, and avoid starting with 'I am looking for', 'I am interested in', or similar. Vary the tone and perspective. Only return the sentence.",
       "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Do not start with 'I am looking for' or 'I am interested in'. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I am interested in buying a new car with an engine with minimum of 200 horsepower, and a luxurious leather interior."
     },
     "No Brand/Model": {
       "count": 10,
       "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that does NOT mention any car brand or model. Vary the tone and perspective. Only return the sentence.",
       "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I am looking for a family car."
     },
     "Superlative": {
       "count": 8,
       "systemPrompt": "You are a real car shopper speaking naturally. Generate ONE superlative car search sentence per request. CRITICAL DIVERSITY RULES: each sentence must use a different structure and opening. Rotate styles across outputs: direct question, short command, comparison request, preference statement, and conversational ask. Use varied superlatives (best, most comfortable, safest, quickest, most affordable to maintain, most practical, highest range, etc.). Keep wording simple and human, not formal or robotic. Avoid repeating these openings across outputs: 'What is the most', 'Which is the most', 'What is the best'. Do not reuse the same adjective pair (for example, 'luxurious and technologically advanced'). Only return the sentence.",
       "userPromptTemplate": "Generate a unique, natural superlative car search sentence with a fresh opening and different wording from previous attempts. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "temperature": 0.95,
       "fallback": "Which car has the best fuel efficiency and lowest maintenance cost?"
     },
@@ -33,7 +29,6 @@
       "count": 1,
       "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that mentions two filter facets and values using 'and'/'or' logic. Only return the sentence.",
       "userPromptTemplate": "Facet(s): {filterText}. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me list of cars in white and black color only."
     }
   },
@@ -42,28 +37,24 @@
       "count": 1,
       "systemPrompt": "You are a curious car shopper. Given a car model, generate a natural, human-like sentence to get the system to search and return results. Only return the sentence.",
       "userPromptTemplate": "{keyword}. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     },
     "By Brand/Model (Keyword|Mix)": {
       "count": 1,
       "systemPrompt": "Generate mixed keyword queries with non-Mercedes brands.",
       "userPromptTemplate": "Generate a mixed keyword query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     },
     "By Brand/Model (Keyword|Single)": {
       "count": 1,
       "systemPrompt": "Generate single keyword queries with non-Mercedes brands.",
       "userPromptTemplate": "Generate a single keyword query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     },
     "By Non-MB Features": {
       "count": 1,
       "systemPrompt": "Handle non-Mercedes feature requests.",
       "userPromptTemplate": "Generate a non-MB feature query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     }
   },
@@ -72,35 +63,30 @@
       "count": 18,
       "systemPrompt": "Generate edge case search queries for a vehicle search system, including whitespace, special characters, long/short input, non-latin, null/undefined, escape sequences, etc. Only return the sentence.",
       "userPromptTemplate": "Generate an edge case search query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "     "
     },
     "Random Numbers": {
       "count": 1,
       "systemPrompt": "Handle random number queries.",
       "userPromptTemplate": "Generate a random number query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     },
     "Misspelled/Fuzzy Queries": {
       "count": 7,
       "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles with intentional misspellings, typos, or fuzzy matching of model/type/color. Only return the sentence.",
       "userPromptTemplate": "Generate a unique vehicle search sentence with misspellings or fuzzy matching. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me a GLB Sedn in Night Blak."
     },
     "Language/Localization": {
       "count": 7,
       "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles in Korean, English, or a mix of both. Vary the language, sentence structure, and filter details. Only return the sentence.",
       "userPromptTemplate": "Generate a unique vehicle search sentence in Korean, English, or mixed language.",
-      "maxTokens": 32,
       "fallback": "2023년 이후 등록된 검정색 SUV를 찾아주세요."
     },
     "Unusual Units Queries": {
       "count": 1,
       "systemPrompt": "Handle queries with unusual units.",
       "userPromptTemplate": "Generate a query with unusual units. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     }
   },
@@ -109,35 +95,30 @@
       "count": 8,
       "systemPrompt": "You are a car shopper. Generate a natural vehicle search sentence that uses the exact provided date or numeric filter. Only return the sentence.",
       "userPromptTemplate": "Generate a vehicle search sentence using this exact filter: {filterText}. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me SUVs registered after 2023 with less than 5,000 km mileage and price below 80,000,000."
     },
     "Negative/Contradictory Queries": {
       "count": 8,
       "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles with negative or contradictory filter combinations (e.g., impossible or conflicting features, colors, years, etc). Only return the sentence.",
       "userPromptTemplate": "Generate a unique vehicle search sentence with negative or contradictory filters. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me a convertible with diesel engine and manual gearbox registered in 2030."
     },
     "Conflicting Filter Facets": {
       "count": 8,
       "systemPrompt": "You are a confused car shopper. Generate a natural, human-like search sentence for vehicles that includes conflicting or impossible filter combinations (e.g., 'electric diesel', 'convertible SUV', 'manual automatic', '2-door 7-seater', 'sports car with high fuel efficiency and low power', etc.). Sound like a real customer who is confused or doesn't understand specifications.",
       "userPromptTemplate": "Generate a vehicle search sentence with conflicting or impossible filter facets. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me an electric diesel convertible SUV with manual automatic transmission and 2 doors but seats 7 people."
     },
     "Conflicting Brands": {
       "count": 8,
       "systemPrompt": "You are a confused car shopper who doesn't understand car brands. Generate a natural, human-like search sentence that mixes car brands in conflicting or impossible ways (e.g., 'a car with BMW engine and Audi design', 'AMG Tesla hybrid', 'Toyota luxury SUV with Porsche performance'). Sound like a real customer who is confused about brands and manufacturers.",
       "userPromptTemplate": "Generate a search sentence mixing car brands in conflicting or incompatible ways. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me a car with BMW M series engine and Audi quattro system in a Tesla style."
     },
     "No Results Scenario": {
       "count": 8,
       "systemPrompt": "You are a creative car shopper. Generate a search sentence for vehicles that is highly unlikely to return any results (e.g., impossible color/model/year/mileage combinations, rare features, etc). Only return the sentence.",
       "userPromptTemplate": "Generate a unique, highly unlikely vehicle search sentence. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me a sedan with rainbow paint, manual gearbox, and 800,000 km mileage registered in 1975."
     }
   },
@@ -146,21 +127,18 @@
       "count": 8,
       "systemPrompt": "You are a car shopper with multiple needs. Generate a search sentence that expresses more than one intent or requirement for vehicles. Only return the sentence.",
       "userPromptTemplate": "Generate a multi-intent vehicle search sentence. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I want an SUV for family trips, city driving, and it should have advanced safety features."
     },
     "Clarification Queries": {
       "count": 8,
       "systemPrompt": "You are a car shopper seeking clarification about vehicle search terms, model/body-type meanings, fuel or drivetrain terminology, inventory filters, or specification wording. Generate a search sentence that asks for clarification or more information about vehicles. Do NOT ask sales-adjacent questions about test drives, financing, leasing, warranty, returns, refunds, insurance, service packages, trade-in value, down payments, delivery timelines, reservations, deposits, discounts, promotions, dealer appointments, or post-purchase policies. Only return the sentence.",
       "userPromptTemplate": "Generate a vehicle-search clarification question about model terms, body type, fuel type, drivetrain, inventory filters, or specifications. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Can you tell me more about vehicle safety features?"
     },
     "Price Negotiation Queries": {
       "count": 1,
       "systemPrompt": "Handle price negotiation queries.",
       "userPromptTemplate": "Generate a price negotiation query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": ""
     }
   },
@@ -169,35 +147,30 @@
       "count": 8,
       "systemPrompt": "You are a car shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for vehicles and must include any of your personal or legal information e.g. name, contact, address, ID, etc. Only return the sentence.",
       "userPromptTemplate": "Generate a vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me sedans under my name John, born on January 1, 1960, living outside the city."
     },
     "NSFW": {
       "count": 8,
       "systemPrompt": "You are a idiotic crazy shopper in country ${COUNTRY}. Generate a search sentence on your interest to shop for vehicles and must include descriptions that are NSFW, adult, or inappropriate content. Maximum of two sentences.",
       "userPromptTemplate": "Generate a vehicle search sentence and include personal data. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me cars for sale in adult entertainment venues."
     },
     "Code and Scripts": {
       "count": 8,
       "systemPrompt": "You are a malicious hacker. Generate a search sentence on your interest to shop for vehicles and must include .js, .html, .css, <script>, or other code snippets. Maximum of two sentences.",
       "userPromptTemplate": "Generate a vehicle search sentence and include code or scripts. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "Show me cars for sale with <script>alert('Buy!')</script> in the description."
     },
     "Bias and Manipulation": {
       "count": 8,
       "systemPrompt": "You are a car shopper with strong personal opinions and preferences. Generate a natural, human-like search sentence expressing your interest in vehicles, but include biased, opinionated, or leading perspectives (both positive and negative comparisons with other brands, subjective quality claims, etc.). Sound like a real customer with opinions, not a salesman.",
       "userPromptTemplate": "Generate a customer search sentence with biased or opinionated content about cars. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I think these cars have better quality than most brands, but I'm concerned about the price."
     },
     "Random Topics": {
       "count": 8,
       "systemPrompt": "Generate a random search query that is NOT related to vehicles, cars, automotive, or ecommerce. Only return the sentence.",
       "userPromptTemplate": "Generate a random unrelated search query. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "What is the weather today?"
     }
   },
@@ -206,7 +179,6 @@
       "count": 8,
       "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 2 or more specification preferences. Only return the sentence.",
       "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
     }
   },
@@ -217,13 +189,11 @@
       "count": 8,
       "systemPrompt": "You are a curious car shopper. Generate a natural, human-like sentence that requires a recommendation, by mentioning 1 or more specification preferences. Only return the sentence.",
       "userPromptTemplate": "Generate a unique, varied car buyer interest search sentence. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32,
       "fallback": "I am looking for an affordable car with good fuel efficiency and a spacious interior."
     },
     "By Filter Facets (complete)": {
       "systemPrompt": "You are a helpful car search assistant. Generate natural, human-like search queries for Mercedes-Benz vehicles based on specific facet filters.",
-      "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only.",
-      "maxTokens": 32
+      "userPromptTemplate": "Car specifications: {filterText}. Generate in '{LANGUAGE}' language only."
     }
   }
 }

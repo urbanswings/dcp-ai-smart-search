@@ -250,7 +250,6 @@ async function buildComplete(data) {
           language: process.env.LANGUAGE || "en",
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
-          maxTokens: promptConfig.maxTokens,
         },
       );
       addCompleteQuery(
@@ -296,7 +295,6 @@ async function buildComplete(data) {
             language: process.env.LANGUAGE || "en",
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
-            maxTokens: promptConfig.maxTokens,
           },
         );
         addCompleteQuery(queryMap, query, facetKey, value, {

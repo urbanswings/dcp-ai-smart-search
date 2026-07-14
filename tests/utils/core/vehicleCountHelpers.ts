@@ -380,7 +380,6 @@ export async function extractVehicleTotalCountFromMessage(
       "Support non-English responses too.",
     ].join("\n"),
     `Response:\n${normalizedMessage}`,
-    8,
     "NONE",
   );
 

@@ -352,12 +352,13 @@ function createUnavailableFacetValueHint(
   return {
     overwrite: true,
     value: [
-      `Respond with "PASS" if the response explicitly states the requested ${facetKey} (${valueLabel}) is unavailable, not available, couldn't find, no exact match, not in stock, or similar unavailability language.`,
-      `PASS is acceptable even if alternatives or other recommendations are offered afterward. The key is an upfront explicit unavailability statement.`,
-      `Examples of acceptable PASS responses: "couldn't find exact match", "not available", "no results for ${valueLabel}", "not in stock", "we don't have ${valueLabel}".`,
-      `FAIL only if: (1) response is completely silent about the request without any acknowledgment, OR (2) response only lists alternatives without ever stating the requested ${valueLabel} is unavailable/not found.`,
+      `Respond with "PASS" ONLY if the response explicitly states that the requested ${facetKey} (${valueLabel}) is unavailable, not available, not found, has no results, has no exact match, or is not in stock.`,
+      `Alternatives or other recommendations are acceptable only after that explicit unavailability statement.`,
+      `Words such as "closest", "similar", "alternative", or "other options" do NOT by themselves establish that ${valueLabel} is unavailable.`,
+      `If the response only offers closest/similar/alternative vehicles without explicitly stating that ${valueLabel} is unavailable or not found, respond with "MSG FAIL: requested ${facetKey} (${valueLabel}) unavailability not stated".`,
+      `If the response presents ${valueLabel} as available matching inventory, respond with "MSG FAIL: unavailable ${facetKey} (${valueLabel}) presented as available".`,
       `If the response is off-topic, unsafe, or unrelated to automotive search, respond with "MSG FAIL: off-topic or unsafe response".`,
-      "Explicitly stated unavailability = PASS. Respond with 'PASS' or provide specific failure reason.",
+      `Explicit unavailability is mandatory. Respond with "PASS" or the specific failure reason only.`,
     ],
   };
 }

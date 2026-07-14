@@ -172,7 +172,6 @@ interface GeneratedSuite {
 interface PromptConfig {
   systemPrompt?: string;
   userPromptTemplate?: string;
-  maxTokens?: number;
 }
 
 interface FacetMatrixHintRules {
@@ -1107,7 +1106,6 @@ async function buildComplete(
           language: process.env.LANGUAGE || "en",
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
-          maxTokens: promptConfig.maxTokens,
         },
       );
       addCompleteQuery(
@@ -1150,7 +1148,6 @@ async function buildComplete(
             language: process.env.LANGUAGE || "en",
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
-            maxTokens: promptConfig.maxTokens,
           },
         );
         const effectiveFacetKey = resolveEffectiveFacetKeyForShouldFilter(
