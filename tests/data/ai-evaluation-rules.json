@@ -15,7 +15,6 @@
       "Sentence 1: '{str1}'",
       "Sentence 2: '{str2}'"
     ],
-    "maxTokens": 3,
     "temperature": 0
   },
   "resultsEvaluation": {
@@ -57,7 +56,6 @@
       "(AC) If the user asks for competitor-specific technologies, features, or terms (e.g., VTEC, xDrive, quattro, EyeSight, e:HEV, SH-AWD), a polite decline plus Mercedes-Benz-focused guidance should be marked 'PASS' even if no exact feature match is provided."
     ],
     "userPromptTemplate": [],
-    "maxTokens": 20,
     "temperature": 0
   },
   "Vehicles MB": {
@@ -414,60 +412,66 @@
   "Vehicles MB - Negative Facets": {
     "By Filter Facets ('bodyType')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing bodyType filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable bodyType values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested bodyType, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested bodyType.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested bodyType is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested bodyType is unavailable or not found.",
+        "FAIL if the response presents the unavailable bodyType as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true
     },
     "By Filter Facets ('fuelType')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing fuelType filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable fuelType values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested fuelType, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested fuelType.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested fuelType is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested fuelType is unavailable or not found.",
+        "FAIL if the response presents the unavailable fuelType as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true
     },
     "By Filter Facets ('upholstery')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing upholstery filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable upholstery values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested upholstery, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested upholstery.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested upholstery is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested upholstery is unavailable or not found.",
+        "FAIL if the response presents the unavailable upholstery as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true
     },
     "By Filter Facets ('color')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing color filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable color values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested color, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested color.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested color is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested color is unavailable or not found.",
+        "FAIL if the response presents the unavailable color as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true
     },
     "By Filter Facets ('modelIdentifier')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing modelIdentifier filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable modelIdentifier values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested modelIdentifier, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested modelIdentifier.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested modelIdentifier is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested modelIdentifier is unavailable or not found.",
+        "FAIL if the response presents the unavailable modelIdentifier as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true
     },
     "By Filter Facets ('motorization')(-ve)": {
       "value": [
-        "Respond ONLY with: PASS if the assistant response correctly handles negative/missing motorization filter values in Mercedes-Benz Smart Search.",
-        "PASS if the response appropriately handles queries for missing or unavailable motorization values.",
-        "PASS if the response acknowledges the unavailability and offers alternatives.",
-        "FAIL if the response shows incorrect results for missing values.",
+        "Respond ONLY with: PASS if the response explicitly states that the requested motorization, the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.",
+        "PASS if the response says it could not find the exact answer or an exact match for the user's request, even if it does not repeat the requested motorization.",
+        "PASS if alternatives are offered only after explicitly acknowledging that the requested motorization is unavailable or not found.",
+        "FAIL if the response only says it found closest, similar, alternative, or other options without explicitly stating that the requested motorization is unavailable or not found.",
+        "FAIL if the response presents the unavailable motorization as available matching inventory.",
         "FAIL if the response is incoherent, unsafe, offensive, or unrelated to the filter."
       ],
       "overwrite": true

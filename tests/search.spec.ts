@@ -341,7 +341,7 @@ test.describe("[SmartSearch] Sanity", () => {
 
   test("By Fixed Query", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byFixedQuery;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -351,7 +351,6 @@ test.describe("[SmartSearch] Sanity", () => {
           count,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -388,7 +387,7 @@ test.describe("[SmartSearch] Sanity", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.recommendationModel;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -398,7 +397,6 @@ test.describe("[SmartSearch] Sanity", () => {
             count,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -681,7 +679,7 @@ test.describe("[SmartSearch] Vehicles MB", () => {
 
   test("By Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.byBrandModel;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -710,7 +708,6 @@ test.describe("[SmartSearch] Vehicles MB", () => {
               count,
               systemPrompt,
               userPromptTemplate.replace("{keyword}", keyword),
-              maxTokens,
               fallback,
             );
             const modelIdentifierFilterValue =
@@ -777,7 +774,7 @@ test.describe("[SmartSearch] Vehicles MB", () => {
 
   test("By Specs", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.bySpecs;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -787,7 +784,6 @@ test.describe("[SmartSearch] Vehicles MB", () => {
           count,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -821,7 +817,7 @@ test.describe("[SmartSearch] Vehicles MB", () => {
 
   test("No Brand/Model", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noBrandModel;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -831,7 +827,6 @@ test.describe("[SmartSearch] Vehicles MB", () => {
           count || 10,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -869,7 +864,6 @@ test.describe("[SmartSearch] Vehicles MB", () => {
       count,
       systemPrompt,
       userPromptTemplate,
-      maxTokens,
       fallback,
       temperature,
     } = aiPromptData[describeName]?.[test.info().title] || {};
@@ -881,7 +875,6 @@ test.describe("[SmartSearch] Vehicles MB", () => {
           count,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -1077,7 +1070,7 @@ test.describe("[SmartSearch] Vehicles Non-MB", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.sentenceSingle;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1098,7 +1091,6 @@ test.describe("[SmartSearch] Vehicles Non-MB", () => {
                 count,
                 systemPrompt,
                 userPromptTemplate.replace("{keyword}", keyword),
-                maxTokens,
                 fallback,
               );
               generatedQueries.push(queryValues);
@@ -1376,7 +1368,7 @@ test.describe("[SmartSearch] Input Robustness", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.misspelledFuzzy;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1386,7 +1378,6 @@ test.describe("[SmartSearch] Input Robustness", () => {
             count || 7,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -1424,7 +1415,7 @@ test.describe("[SmartSearch] Input Robustness", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.localization;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1434,7 +1425,6 @@ test.describe("[SmartSearch] Input Robustness", () => {
             count || 7,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -1513,7 +1503,7 @@ test.describe("[SmartSearch] Constraint Handling", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.dateNumeric;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1532,7 +1522,6 @@ test.describe("[SmartSearch] Constraint Handling", () => {
             count: count || 8,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           });
       await saveGeneratedQueriesIfAny(queries);
@@ -1603,7 +1592,7 @@ test.describe("[SmartSearch] Constraint Handling", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.negativeContradictory;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1613,7 +1602,6 @@ test.describe("[SmartSearch] Constraint Handling", () => {
             count || 8,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -1651,7 +1639,7 @@ test.describe("[SmartSearch] Constraint Handling", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.conflictingFilterFacets || [];
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1661,7 +1649,6 @@ test.describe("[SmartSearch] Constraint Handling", () => {
             count || 8,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -1696,7 +1683,7 @@ test.describe("[SmartSearch] Constraint Handling", () => {
 
   test("Conflicting Brands", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.conflictingBrands || [];
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1706,7 +1693,6 @@ test.describe("[SmartSearch] Constraint Handling", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -1740,7 +1726,7 @@ test.describe("[SmartSearch] Constraint Handling", () => {
 
   test("No Results Scenario", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.noResults;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1750,7 +1736,6 @@ test.describe("[SmartSearch] Constraint Handling", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -1897,7 +1882,7 @@ test.describe("[SmartSearch] Conversational Behavior", () => {
 
   test("Sales", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.sales;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -1907,7 +1892,6 @@ test.describe("[SmartSearch] Conversational Behavior", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -2122,7 +2106,7 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
 
   test("Personal Data", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.personalData;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2132,7 +2116,6 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -2166,7 +2149,7 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
 
   test("NSFW", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.nsfw;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2176,7 +2159,6 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -2210,7 +2192,7 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
 
   test("Code and Scripts", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.codeAndScripts;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2220,7 +2202,6 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -2257,7 +2238,7 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
     { tag: ["@ui", "@api"] },
     async ({ browser }) => {
       const fixedQueries = fixedQueriesData.biasAndManipulation;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2267,7 +2248,6 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
             count || 8,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);
@@ -2302,7 +2282,7 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
 
   test("Random Topics", { tag: ["@ui", "@api"] }, async ({ browser }) => {
     const fixedQueries = fixedQueriesData.randomTopics;
-    const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+    const { count, systemPrompt, userPromptTemplate, fallback } =
       aiPromptData[describeName]?.[test.info().title] || {};
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2312,7 +2292,6 @@ test.describe("[SmartSearch] Safety / Policy / Abuse", () => {
           count || 8,
           systemPrompt,
           userPromptTemplate,
-          maxTokens,
           fallback,
         );
     await saveGeneratedQueriesIfAny(queries);
@@ -2355,7 +2334,7 @@ test.describe("[SmartSearch] Reliability", () => {
     async ({ browser }) => {
       // This test runs the same set of queries multiple times to check for consistency in results and API responses using values from "By Fixed Query" test
       const fixedQueries = fixedQueriesData.forRegression;
-      const { count, systemPrompt, userPromptTemplate, maxTokens, fallback } =
+      const { count, systemPrompt, userPromptTemplate, fallback } =
         aiPromptData[describeName]?.[test.info().title] || {};
       const aiEvaluationRules =
         aiEvaluationRulesData[describeName]?.[test.info().title] || {};
@@ -2365,7 +2344,6 @@ test.describe("[SmartSearch] Reliability", () => {
             count || 8,
             systemPrompt,
             userPromptTemplate,
-            maxTokens,
             fallback,
           );
       await saveGeneratedQueriesIfAny(queries);

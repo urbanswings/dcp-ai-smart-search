@@ -188,7 +188,6 @@ export async function loadRegressionQueriesFromDescription(): Promise<
     analysis = await generateOpenAIQuery(
       ANALYSIS_PROMPT,
       description.trim(),
-      /* maxTokens */ 600,
       /* fallback */ "",
     );
     if (analysis.trim()) {
@@ -222,7 +221,6 @@ export async function loadRegressionQueriesFromDescription(): Promise<
     raw = await generateOpenAIQuery(
       SYSTEM_PROMPT,
       combinedInput,
-      /* maxTokens */ 4000,
       /* fallback */ "[]",
     );
   } catch (e) {
@@ -316,7 +314,6 @@ export async function summarizeRegressionRunWithAI(params: {
   let summary = await generateOpenAIQuery(
     RESULTS_ANALYSIS_PROMPT,
     userPrompt,
-    /* maxTokens */ 1200,
     /* fallback */ "",
   );
 

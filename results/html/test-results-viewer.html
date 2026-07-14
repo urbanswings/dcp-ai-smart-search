@@ -3431,31 +3431,11 @@
         return {};
       }
 
-      const preferredKeys = [
-        "timestamp",
-        "timestampSG",
-        "testMode",
-        "testDescribe",
-        "testTitle",
-        "query",
-        "response",
-        "resultCount",
-        "responseTime",
-        "statusCode",
-        "hasError",
-        "openaiEvaluation",
-        "results",
-        "facets",
-      ];
-      const jsonData = {};
-
-      for (const key of preferredKeys) {
-        if (Object.prototype.hasOwnProperty.call(rowData, key)) {
-          jsonData[key] = rowData[key];
-        }
-      }
-
-      return jsonData;
+      return Object.fromEntries(
+        Object.entries(rowData).filter(
+          ([key]) => key !== "_schemaMarked" && key !== "_schemaType",
+        ),
+      );
     }
 
     function getFileNameFromPath(pathValue) {
@@ -3552,84 +3532,6 @@
         "{panel:title=Any attachments?|titleBGColor=#858585}",
         " * Screenshot",
         screenshotName ? " ** !" + screenshotName + "|thumbnail!" : " ** NA",
-        "{panel}",
-      ].join("\n");
-    }
-
-    function buildJiraTicketForFailedQueries(failedRows) {
-      // Collect all query details in one elaborate section
-      const elaborateDetails = failedRows.map((rowData, idx) => {
-        const normalized = normalizeRowSchema(rowData);
-        
-        const queryLocal = getLocalizedText(getRowField(normalized, "query")) || "-";
-        const queryEn = getEnglishText(getRowField(normalized, "query")) || "-";
-        const responseLocal = getLocalizedText(getRowField(normalized, "response")) || "-";
-        const responseEn = getEnglishText(getRowField(normalized, "response")) || "-";
-        
-        const country = getRowCountry(normalized, "") || "-";
-        const results = getRowField(normalized, "results");
-        const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
-        const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
-        const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim();
-        const marker = responseResult === "FAIL" || facetsResult === "FAIL" || String(openaiEvaluation).toUpperCase().includes("FAIL") || normalized?.hasError ? "(x)" : "(/)";
-        
-        const countryText = country || "-";
-        const primaryQuery = String(queryLocal || queryEn || "-").trim();
-        const primaryResponse = String(responseLocal || responseEn || "-").trim();
-        const englishQuery = String(queryEn || "").trim();
-        const englishResponse = String(responseEn || "").trim();
-        const hasEnglishTranslation =
-          Boolean(englishQuery || englishResponse) &&
-          (englishQuery !== primaryQuery || englishResponse !== primaryResponse);
-        
-        const facets = getRowField(normalized, "facets");
-        const facetGroups = splitExpectedAndActualFacets(facets);
-        const facetsFormatted = formatFacetsForJira(facetGroups.actual);
-        
-        const queryDetails = [
-          " * " + marker + " Q #" + (idx + 1) + " (" + countryText + "): " + primaryQuery,
-          " ** A: " + primaryResponse,
-        ];
-
-        if (hasEnglishTranslation) {
-          queryDetails.push(" *** EN: " + (englishQuery || "-"));
-          queryDetails.push(" **** A: " + (englishResponse || "-"));
-        }
-        
-        queryDetails.push(" *** Filtering:");
-        if (facetsFormatted && String(facetsFormatted).trim() && facetsFormatted !== "-") {
-          // Convert facet lines from " * " to " **** " format
-          const facetLines = String(facetsFormatted).split("\n").map(line => {
-            if (line.startsWith(" * ")) {
-              return " **** " + line.substring(3);
-            }
-            return " **** " + line;
-          });
-          queryDetails.push(...facetLines);
-        } else {
-          queryDetails.push(" **** None");
-        }
-
-        queryDetails.push(" *** Observations");
-        queryDetails.push(...toJiraObservationLines(normalized));
-        
-        return queryDetails.join("\n");
-      }).join("\n");
-
-      return [
-        "{panel:title=Elaborate details|titleBGColor=#858585}",
-        elaborateDetails,
-        "{panel}",
-        "{panel:title=Steps|titleBGColor=#858585}",
-        " * Do a SmartSearch for each of the listed queries above",
-        "{panel}",
-        "{panel:title=Expected behaviour|titleBGColor=#858585}",
-        " * All queries should return accurate response messages",
-        " * All facet filters should work correctly",
-        "{panel}",
-        "{panel:title=Any attachments?|titleBGColor=#858585}",
-        " * Screenshots",
-        " ** NA",
         "{panel}",
       ].join("\n");
     }
