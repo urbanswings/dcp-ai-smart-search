@@ -42,12 +42,12 @@ function getAuthHeaders() {
   return { Authorization: `Bearer ${JIRA_API_TOKEN}` };
 }
 
-function parseRequestBody(req) {
+function parseRequestBody(req, maxBytes = 20 * 1024 * 1024) {
   return new Promise((resolve, reject) => {
     let raw = "";
     req.on("data", (chunk) => {
       raw += chunk;
-      if (raw.length > 1024 * 1024) {
+      if (raw.length > maxBytes) {
         reject(new Error("Request body too large."));
       }
     });
@@ -105,10 +105,32 @@ function buildFields(payload) {
     fields.environment = environment;
   }
 
-  if (JIRA_AFFECTED_MARKETS_FIELD && affectedMarkets.length) {
-    fields[JIRA_AFFECTED_MARKETS_FIELD] = JIRA_AFFECTED_MARKETS_MODE === "array"
+  const affectedMarketsFieldId = String(payload.affectedMarketsFieldId || JIRA_AFFECTED_MARKETS_FIELD || "").trim();
+  const affectedMarketOptionIds = Array.isArray(payload.affectedMarketOptionIds)
+    ? payload.affectedMarketOptionIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+
+  if (affectedMarketsFieldId && affectedMarketOptionIds.length) {
+    // Option-based (select/multiselect) custom field — needs {id: "..."} objects, not raw text.
+    fields[affectedMarketsFieldId] = affectedMarketOptionIds.map((id) => ({ id }));
+  } else if (affectedMarketsFieldId && affectedMarkets.length) {
+    // Fallback for plain text/labels custom fields.
+    fields[affectedMarketsFieldId] = JIRA_AFFECTED_MARKETS_MODE === "array"
       ? affectedMarkets
       : affectedMarkets.join(", ");
+  }
+
+  const priorityId = String(payload.priorityId || "").trim();
+  if (priorityId) {
+    fields.priority = { id: priorityId };
+  }
+
+  const affectedEnvironmentsFieldId = String(payload.affectedEnvironmentsFieldId || "").trim();
+  const affectedEnvironmentOptionIds = Array.isArray(payload.affectedEnvironmentOptionIds)
+    ? payload.affectedEnvironmentOptionIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : [];
+  if (affectedEnvironmentsFieldId && affectedEnvironmentOptionIds.length) {
+    fields[affectedEnvironmentsFieldId] = affectedEnvironmentOptionIds.map((id) => ({ id }));
   }
 
   const assigneeId = String(payload.assigneeId || "").trim();
@@ -188,6 +210,48 @@ async function createJiraIssue(payload) {
   };
 }
 
+function buildMultipartBody(fieldName, filename, contentType, buffer) {
+  const boundary = "----jiraBridgeBoundary" + Date.now().toString(16) + Math.random().toString(16).slice(2);
+  const preamble = Buffer.from(
+    `--${boundary}\r\n` +
+    `Content-Disposition: form-data; name="${fieldName}"; filename="${filename}"\r\n` +
+    `Content-Type: ${contentType}\r\n\r\n`,
+  );
+  const epilogue = Buffer.from(`\r\n--${boundary}--\r\n`);
+  return { boundary, body: Buffer.concat([preamble, buffer, epilogue]) };
+}
+
+async function uploadJiraAttachment(issueKey, filename, base64Content, contentType) {
+  if (!JIRA_BASE_URL) {
+    throw new Error("JIRA_BASE_URL is not set.");
+  }
+  if (!issueKey) {
+    throw new Error("issueKey is required.");
+  }
+  if (!base64Content) {
+    throw new Error("base64Content is required.");
+  }
+
+  const buffer = Buffer.from(base64Content, "base64");
+  const safeFilename = String(filename || "screenshot.png").replace(/[\\/]/g, "_");
+  const { boundary, body } = buildMultipartBody("file", safeFilename, contentType || "image/png", buffer);
+
+  const endpoint = `${JIRA_BASE_URL}/rest/api/2/issue/${encodeURIComponent(issueKey)}/attachments`;
+  const response = await axios.post(endpoint, body, {
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": `multipart/form-data; boundary=${boundary}`,
+      "X-Atlassian-Token": "no-check",
+    },
+    timeout: 30000,
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+  });
+
+  const attachments = Array.isArray(response?.data) ? response.data : [];
+  return attachments.map((attachment) => ({ id: attachment.id, filename: attachment.filename, size: attachment.size }));
+}
+
 async function fetchAssignableUsers(projectKey, query) {
   if (!JIRA_BASE_URL) {
     throw new Error("JIRA_BASE_URL is not set.");
@@ -252,6 +316,42 @@ async function fetchSprints(boardId) {
   return sprints.map((sprint) => ({ id: sprint.id, name: sprint.name, state: sprint.state }));
 }
 
+async function fetchFieldOptions(projectKey, issueTypeId, fieldId) {
+  if (!JIRA_BASE_URL) {
+    throw new Error("JIRA_BASE_URL is not set.");
+  }
+  if (!projectKey || !issueTypeId || !fieldId) {
+    throw new Error("project, issueTypeId, and fieldId are required.");
+  }
+
+  const response = await axios.get(
+    `${JIRA_BASE_URL}/rest/api/2/issue/createmeta/${encodeURIComponent(projectKey)}/issuetypes/${encodeURIComponent(issueTypeId)}`,
+    { headers: getAuthHeaders(), timeout: 15000 },
+  );
+
+  const fieldList = Array.isArray(response?.data?.values) ? response.data.values : [];
+  const field = fieldList.find((f) => f.fieldId === fieldId);
+  const allowedValues = field && Array.isArray(field.allowedValues) ? field.allowedValues : [];
+
+  return allowedValues
+    .filter((option) => !option.disabled)
+    .map((option) => ({ id: option.id, value: option.value }));
+}
+
+async function fetchPriorities() {
+  if (!JIRA_BASE_URL) {
+    throw new Error("JIRA_BASE_URL is not set.");
+  }
+
+  const response = await axios.get(`${JIRA_BASE_URL}/rest/api/2/priority`, {
+    headers: getAuthHeaders(),
+    timeout: 15000,
+  });
+
+  const priorities = Array.isArray(response?.data) ? response.data : [];
+  return priorities.map((priority) => ({ id: priority.id, name: priority.name }));
+}
+
 const server = http.createServer(async (req, res) => {
   if (!req.url) {
     sendJson(res, 404, { error: "Not found" });
@@ -314,11 +414,58 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === "GET" && requestUrl.pathname === "/jira/field-options") {
+    try {
+      const options = await fetchFieldOptions(
+        requestUrl.searchParams.get("project"),
+        requestUrl.searchParams.get("issueTypeId"),
+        requestUrl.searchParams.get("fieldId"),
+      );
+      sendJson(res, 200, { options });
+    } catch (error) {
+      const responseMessage = error?.response?.data || error?.message || "Unknown Jira bridge error";
+      sendJson(res, 500, { error: typeof responseMessage === "string" ? responseMessage : JSON.stringify(responseMessage) });
+    }
+    return;
+  }
+
+  if (req.method === "GET" && requestUrl.pathname === "/jira/priorities") {
+    try {
+      const priorities = await fetchPriorities();
+      sendJson(res, 200, { priorities });
+    } catch (error) {
+      const responseMessage = error?.response?.data || error?.message || "Unknown Jira bridge error";
+      sendJson(res, 500, { error: typeof responseMessage === "string" ? responseMessage : JSON.stringify(responseMessage) });
+    }
+    return;
+  }
+
   if (req.method === "POST" && requestUrl.pathname === "/jira/issues") {
     try {
       const payload = await parseRequestBody(req);
       const result = await createJiraIssue(payload);
       sendJson(res, 201, result);
+    } catch (error) {
+      const responseMessage = error?.response?.data || error?.message || "Unknown Jira bridge error";
+      const detail = typeof responseMessage === "string"
+        ? responseMessage
+        : JSON.stringify(responseMessage);
+      sendJson(res, 500, { error: detail });
+    }
+    return;
+  }
+
+  const attachmentMatch = req.method === "POST" && requestUrl.pathname.match(/^\/jira\/issues\/([^/]+)\/attachments$/);
+  if (attachmentMatch) {
+    try {
+      const payload = await parseRequestBody(req);
+      const result = await uploadJiraAttachment(
+        decodeURIComponent(attachmentMatch[1]),
+        payload.filename,
+        payload.contentBase64,
+        payload.contentType,
+      );
+      sendJson(res, 201, { attachments: result });
     } catch (error) {
       const responseMessage = error?.response?.data || error?.message || "Unknown Jira bridge error";
       const detail = typeof responseMessage === "string"

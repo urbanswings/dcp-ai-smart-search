@@ -260,7 +260,7 @@
     }
 
     .filterRow {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto auto;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto auto auto;
       align-items: end;
     }
 
@@ -313,12 +313,26 @@
       gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 10px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
     }
 
     .queryActionRow .createJiraBtn,
     .queryActionRow .copyIconBtn {
-      height: 34px;
+      height: 36px;
       min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .queryActionRow button[data-jira-config-toggle] {
+      flex: 0 0 auto;
+    }
+
+    .queryActionRow .createJiraBtn.confirmPassPending {
+      background: var(--warn-bg, #fef3c7);
+      border-color: var(--warn-text, #b45309);
+      color: var(--warn-text, #b45309);
+      font-weight: 600;
     }
 
     .selectNavGroup {
@@ -1124,15 +1138,15 @@
     }
 
     .modalCard {
-      width: min(960px, 100%);
-      max-height: min(94vh, 980px);
+      width: min(1100px, 96vw);
+      max-height: min(98vh, 1400px);
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 8px;
       box-shadow: 0 24px 80px rgba(15, 23, 42, 0.24);
-      padding: 14px;
+      padding: 16px;
       display: grid;
-      gap: 8px;
+      gap: 10px;
       overflow-y: auto;
     }
 
@@ -1188,6 +1202,41 @@
       white-space: pre-wrap;
       overflow-wrap: anywhere;
       word-break: break-word;
+    }
+
+    .jiraCheckboxFieldCol {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .jiraCheckboxGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      align-content: start;
+      gap: 8px 12px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 10px;
+      flex: 1;
+      min-height: 44px;
+      max-height: 160px;
+      overflow-y: auto;
+      background: var(--card);
+      box-sizing: border-box;
+    }
+
+    .jiraCheckboxItem {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .jiraCheckboxItem input {
+      margin: 0;
+      cursor: pointer;
     }
 
     .jiraModalField {
@@ -1283,8 +1332,8 @@
       border: 1px solid var(--border);
       border-radius: 8px;
       background: var(--card);
-      padding: 10px;
-      max-height: 170px;
+      padding: 12px;
+      max-height: 340px;
       overflow: auto;
       font-size: 13px;
       line-height: 1.5;
@@ -1509,13 +1558,18 @@
         </div>
       </div>
       <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset Form</button>
-      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>      
-      <button id="jiraConfigToggleBtn" class="createJiraBtn" type="button" title="Configure Jira settings" style="padding: 0 12px;">⚙️</button>
+      <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
     </div>
 
-    <div class="introCard" id="jiraConfigCard" hidden>
-      <p class="introTitle">Jira Configuration</p>
+    <div class="modalOverlay" id="jiraConfigModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="jiraConfigTitle">
+    <div class="modalCard" id="jiraConfigCard">
+      <div class="modalHeader">
+        <div>
+          <p class="introTitle" id="jiraConfigTitle" style="margin:0;">Jira Configuration</p>
+        </div>
+        <button id="jiraConfigDismissBtn" type="button">Cancel</button>
+      </div>
       <div class="row">
         <div>
           <label for="jiraUrlInput">Jira Instance URL</label>
@@ -1560,6 +1614,26 @@
           <input type="text" id="jiraSprintFieldIdInput" placeholder="e.g., customfield_10007" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="customfield_10800" />
         </div>
       </div>
+      <div class="row rowTwoCol" style="margin-top: 10px;">
+        <div>
+          <label for="jiraAffectedMarketsFieldIdInput">Affected Markets Field ID</label>
+          <input type="text" id="jiraAffectedMarketsFieldIdInput" placeholder="e.g., customfield_15237" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="customfield_15237" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <div class="info" style="margin-top: 0;">Jira's "Affected Market(s)" is an option-based multiselect, so codes like <span class="mono">JP</span> are matched live against Jira's real option list (e.g. "JP (Japan)") — not sent as raw text.</div>
+        </div>
+      </div>
+      <div class="row rowTwoCol" style="margin-top: 10px;">
+        <div>
+          <label for="jiraAffectedEnvironmentsFieldIdInput">Affected Environments Field ID</label>
+          <input type="text" id="jiraAffectedEnvironmentsFieldIdInput" placeholder="e.g., customfield_14407" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 4px;" value="customfield_14407" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <div class="info" style="margin-top: 0;">Same as Affected Market(s) — an option field, resolved live to Jira's real option (INT / PRE-PROD / PROD).</div>
+        </div>
+      </div>
       <div class="row" style="margin-top: 10px;">
         <div>
           <label for="jiraKnownLabelsInput">Known Labels (for Labels dropdown)</label>
@@ -1571,19 +1645,9 @@
           >SMARTSEARCH</textarea>
         </div>
       </div>
-      <div class="row" style="margin-top: 10px;">
-        <div>
-          <label for="jiraPrefillParamsInput">Project Prefill Parameters</label>
-          <textarea
-            id="jiraPrefillParamsInput"
-            class="configTextarea"
-            placeholder="One per line: fieldKey=value\nExamples:\ncustomfield_12345={{COUNTRY}}\ncustomfield_10014=ABC-123\ncustomfield_10020=57\npriority=Minor\ncustomfield_19999=NatureOption"
-          ></textarea>
-          <div class="info">Only used by the "Open in Jira (manual)" fallback link, not by direct bridge submission.</div>
-        </div>
-      </div>
       <div class="info">Create JIRA opens a preview so you can verify/edit the summary and description, then submits directly to Jira via the local bridge. Use "Open in Jira (manual)" as a fallback if the bridge isn't running.</div>
       <button id="jiraConfigCloseBtn" class="primary" type="button" style="margin-top: 10px;">Save & Close</button>
+    </div>
     </div>
 
     <div class="info" id="infoText">No folder selected.</div>
@@ -1718,20 +1782,16 @@
         </div>
       </div>
       <div class="detailGrid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
-        <div>
-          <label for="jiraPreviewMarketsSelect">Affected Market(s)</label>
-          <select id="jiraPreviewMarketsSelect" multiple size="3" style="width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 4px;"></select>
+        <div class="jiraCheckboxFieldCol">
+          <label>Affected Market(s)</label>
+          <div class="jiraCheckboxGrid" id="jiraPreviewMarketsCheckboxes"></div>
         </div>
-        <div>
-          <label for="jiraPreviewLabelsSelect">Labels</label>
-          <select id="jiraPreviewLabelsSelect" multiple size="3" style="width: 100%; border: 1px solid var(--border); border-radius: 4px; padding: 4px;"></select>
-          <div style="display: flex; gap: 6px; margin-top: 6px;">
-            <input type="text" id="jiraPreviewNewLabelInput" placeholder="Add a label..." class="jiraModalField" style="flex: 1;" />
-            <button id="jiraPreviewAddLabelBtn" type="button" style="padding: 0 16px;">Add</button>
-          </div>
+        <div class="jiraCheckboxFieldCol">
+          <label>Labels</label>
+          <div class="jiraCheckboxGrid" id="jiraPreviewLabelsCheckboxes"></div>
         </div>
       </div>
-      <div class="detailGrid" style="grid-template-columns: repeat(2, minmax(0, 1fr));">
+      <div class="detailGrid" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
         <div class="jiraAutocomplete" id="jiraAssigneeAutocomplete">
           <label for="jiraPreviewAssigneeSearchInput">Assignee</label>
           <input type="text" id="jiraPreviewAssigneeSearchInput" placeholder="Unassigned — type to search..." autocomplete="off" class="jiraModalField" />
@@ -1741,6 +1801,21 @@
           <label for="jiraPreviewSprintSelect">Sprint</label>
           <select id="jiraPreviewSprintSelect" class="jiraModalField">
             <option value="">No sprint</option>
+          </select>
+        </div>
+        <div>
+          <label for="jiraPreviewPrioritySelect">Priority</label>
+          <select id="jiraPreviewPrioritySelect" class="jiraModalField">
+            <option value="">Default</option>
+          </select>
+        </div>
+        <div>
+          <label for="jiraPreviewEnvironmentSelect">Affected Environment</label>
+          <select id="jiraPreviewEnvironmentSelect" class="jiraModalField">
+            <option value="">-- none --</option>
+            <option value="INT">INT</option>
+            <option value="PREPROD">PREPROD</option>
+            <option value="PROD">PROD</option>
           </select>
         </div>
       </div>
@@ -1757,7 +1832,7 @@
           </div>
         </div>
         <div id="jiraPreviewDescriptionVisual" class="jiraDescVisual"></div>
-        <textarea id="jiraPreviewDescriptionInput" class="configTextarea jiraDescText" style="min-height: 170px; max-height: 170px; width: 100%; display: none;"></textarea>
+        <textarea id="jiraPreviewDescriptionInput" class="configTextarea jiraDescText" style="min-height: 340px; max-height: 340px; width: 100%; display: none;"></textarea>
       </div>
       <div class="info" id="jiraPreviewStatus"></div>
       <div class="modalActions">
@@ -1847,29 +1922,31 @@
     const titleNextBtn = document.getElementById("titleNextBtn");
     const resetFiltersBtn = document.getElementById("resetFiltersBtn");
     const scrollMetaBtn = document.getElementById("scrollMetaBtn");
-    const jiraConfigToggleBtn = document.getElementById("jiraConfigToggleBtn");
+    const jiraConfigModal = document.getElementById("jiraConfigModal");
     const jiraConfigCard = document.getElementById("jiraConfigCard");
     const jiraConfigCloseBtn = document.getElementById("jiraConfigCloseBtn");
+    const jiraConfigDismissBtn = document.getElementById("jiraConfigDismissBtn");
     const jiraUrlInput = document.getElementById("jiraUrlInput");
     const jiraProjectInput = document.getElementById("jiraProjectInput");
     const jiraIssueTypeInput = document.getElementById("jiraIssueTypeInput");
     const jiraProjectIdInput = document.getElementById("jiraProjectIdInput");
     const jiraIssueTypeIdInput = document.getElementById("jiraIssueTypeIdInput");
-    const jiraPrefillParamsInput = document.getElementById("jiraPrefillParamsInput");
     const jiraBridgeUrlInput = document.getElementById("jiraBridgeUrlInput");
     const jiraBoardIdInput = document.getElementById("jiraBoardIdInput");
     const jiraSprintFieldIdInput = document.getElementById("jiraSprintFieldIdInput");
+    const jiraAffectedMarketsFieldIdInput = document.getElementById("jiraAffectedMarketsFieldIdInput");
+    const jiraAffectedEnvironmentsFieldIdInput = document.getElementById("jiraAffectedEnvironmentsFieldIdInput");
     const jiraKnownLabelsInput = document.getElementById("jiraKnownLabelsInput");
     const jiraPreviewModal = document.getElementById("jiraPreviewModal");
     const jiraPreviewProject = document.getElementById("jiraPreviewProject");
     const jiraPreviewIssueType = document.getElementById("jiraPreviewIssueType");
-    const jiraPreviewMarketsSelect = document.getElementById("jiraPreviewMarketsSelect");
-    const jiraPreviewLabelsSelect = document.getElementById("jiraPreviewLabelsSelect");
-    const jiraPreviewNewLabelInput = document.getElementById("jiraPreviewNewLabelInput");
-    const jiraPreviewAddLabelBtn = document.getElementById("jiraPreviewAddLabelBtn");
+    const jiraPreviewMarketsCheckboxes = document.getElementById("jiraPreviewMarketsCheckboxes");
+    const jiraPreviewLabelsCheckboxes = document.getElementById("jiraPreviewLabelsCheckboxes");
     const jiraPreviewAssigneeSearchInput = document.getElementById("jiraPreviewAssigneeSearchInput");
     const jiraPreviewAssigneeList = document.getElementById("jiraPreviewAssigneeList");
     const jiraPreviewSprintSelect = document.getElementById("jiraPreviewSprintSelect");
+    const jiraPreviewPrioritySelect = document.getElementById("jiraPreviewPrioritySelect");
+    const jiraPreviewEnvironmentSelect = document.getElementById("jiraPreviewEnvironmentSelect");
     const jiraPreviewSummaryInput = document.getElementById("jiraPreviewSummaryInput");
     const jiraPreviewDescriptionInput = document.getElementById("jiraPreviewDescriptionInput");
     const jiraPreviewDescriptionVisual = document.getElementById("jiraPreviewDescriptionVisual");
@@ -3650,10 +3727,6 @@
       rowViewPane.innerHTML =
         "<div class=\"selectedRowSplit\">" +
           "<div class=\"selectedRowLeft\">" +
-            "<div class=\"queryActionRow\">" +
-              "<button type=\"button\" class=\"createJiraBtn\" data-create-jira-row=\"1\" title=\"Create Jira bug for this selected query\">Create JIRA</button>" +
-              "<button type=\"button\" class=\"copyIconBtn\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira draft\" aria-label=\"Copy Jira draft\">Copy Jira Draft</button>" +
-            "</div>" +
             "<div class=\"langGrid\">" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\">Query</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryLocal) + "\" title=\"Copy Query\" aria-label=\"Copy Query\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryLocal) + "</div></div>" +
               "<div class=\"detailBlock\"><div class=\"detailHeader\"><div class=\"detailLabel\" style=\"font-weight:700;color:var(--text)\">Query (EN)</div><button type=\"button\" class=\"copyIconBtn\" data-copy-text=\"" + escapeHtml(queryEn) + "\" title=\"Copy Query (EN)\" aria-label=\"Copy Query (EN)\">&#128203;</button></div><div class=\"detailText\">" + escapeHtml(queryEn) + "</div></div>" +
@@ -3684,6 +3757,11 @@
             screenshotStageHtml +
             "<div class=\"detailLabel\">Screenshot Path</div>" +
             screenshotPathHtml +
+            "<div class=\"queryActionRow\">" +
+              "<button type=\"button\" class=\"createJiraBtn\" data-create-jira-row=\"1\" title=\"Create Jira bug for this selected query\">Create JIRA</button>" +
+              "<button type=\"button\" class=\"copyIconBtn\" data-copy-jira=\"" + encodeURIComponent(jiraCopyText) + "\" title=\"Copy Jira draft\" aria-label=\"Copy Jira draft\">Copy Jira Draft</button>" +
+              "<button type=\"button\" class=\"createJiraBtn\" data-jira-config-toggle=\"1\" title=\"Configure Jira settings\" style=\"padding: 0 12px;\">&#9881;&#65039;</button>" +
+            "</div>" +
           "</div>" +
         "</div>";
     }
@@ -4405,7 +4483,35 @@
         if (selectedRowIndex < 0 || selectedRowIndex >= currentRows.length) {
           return;
         }
-        await createJiraForRows([currentRows[selectedRowIndex]], createJiraRowButton);
+        const selectedRow = currentRows[selectedRowIndex];
+        if (!rowIndicatesFailure(selectedRow)) {
+          const isConfirming = createJiraRowButton.dataset.confirmPass === "1";
+          if (!isConfirming) {
+            createJiraRowButton.dataset.confirmPass = "1";
+            createJiraRowButton.textContent = "No failure — click again to create bug anyway";
+            createJiraRowButton.classList.add("confirmPassPending");
+            clearTimeout(jiraConfirmPassResetTimer);
+            jiraConfirmPassResetTimer = setTimeout(() => {
+              delete createJiraRowButton.dataset.confirmPass;
+              createJiraRowButton.textContent = "Create JIRA";
+              createJiraRowButton.classList.remove("confirmPassPending");
+            }, 4000);
+            return;
+          }
+          clearTimeout(jiraConfirmPassResetTimer);
+          delete createJiraRowButton.dataset.confirmPass;
+          createJiraRowButton.textContent = "Create JIRA";
+          createJiraRowButton.classList.remove("confirmPassPending");
+          await createJiraForRows([selectedRow], createJiraRowButton, { forcePass: true });
+          return;
+        }
+        await createJiraForRows([selectedRow], createJiraRowButton);
+        return;
+      }
+
+      const jiraConfigToggleButton = event.target.closest("button[data-jira-config-toggle]");
+      if (jiraConfigToggleButton) {
+        toggleJiraConfigCard();
         return;
       }
 
@@ -4613,24 +4719,47 @@
         issueType: "",
         projectId: "",
         issueTypeId: "",
-        prefillParams: "",
         bridgeUrl: "http://localhost:8787",
         boardId: "",
         sprintFieldId: "",
         knownLabels: "",
+        affectedMarketsFieldId: "",
+        affectedEnvironmentsFieldId: "",
       };
     }
 
+    // Baked-in fallbacks applied whenever the resolved config value is empty, so
+    // stale localStorage saved before a field existed (or saved blank) doesn't
+    // silently shadow these defaults forever. Non-empty saved values still win.
+    const JIRA_HARDCODED_DEFAULTS = {
+      url: "jira.mercedes-benz.io",
+      project: "DCPOS",
+      issueType: "Bug",
+      projectId: "27101",
+      issueTypeId: "1",
+      bridgeUrl: "http://localhost:8787",
+      boardId: "3773",
+      sprintFieldId: "customfield_10800",
+      affectedMarketsFieldId: "customfield_15237",
+      affectedEnvironmentsFieldId: "customfield_14407",
+    };
+
     function loadJiraConfig() {
       const stored = localStorage.getItem("jiraConfig");
+      let config = defaultJiraConfig();
       if (stored) {
         try {
-          return { ...defaultJiraConfig(), ...JSON.parse(stored) };
+          config = { ...defaultJiraConfig(), ...JSON.parse(stored) };
         } catch (e) {
-          return defaultJiraConfig();
+          config = defaultJiraConfig();
         }
       }
-      return defaultJiraConfig();
+      for (const [key, fallbackValue] of Object.entries(JIRA_HARDCODED_DEFAULTS)) {
+        if (!config[key]) {
+          config[key] = fallbackValue;
+        }
+      }
+      return config;
     }
     
     // Save Jira configuration to localStorage
@@ -4646,25 +4775,46 @@
       if (config.issueType) jiraIssueTypeInput.value = config.issueType;
       if (config.projectId) jiraProjectIdInput.value = config.projectId;
       if (config.issueTypeId) jiraIssueTypeIdInput.value = config.issueTypeId;
-      if (config.prefillParams) jiraPrefillParamsInput.value = config.prefillParams;
       jiraBridgeUrlInput.value = config.bridgeUrl || "http://localhost:8787";
       if (config.boardId) jiraBoardIdInput.value = config.boardId;
       if (config.sprintFieldId) jiraSprintFieldIdInput.value = config.sprintFieldId;
+      if (config.affectedMarketsFieldId) jiraAffectedMarketsFieldIdInput.value = config.affectedMarketsFieldId;
+      if (config.affectedEnvironmentsFieldId) jiraAffectedEnvironmentsFieldIdInput.value = config.affectedEnvironmentsFieldId;
       if (config.knownLabels) jiraKnownLabelsInput.value = config.knownLabels;
     }
     
     // Initialize Jira config from localStorage on page load
     updateJiraConfigUI();
     
-    // Jira config toggle button
-    jiraConfigToggleBtn.addEventListener("click", () => {
-        const isHidden = jiraConfigCard.hidden;
-        jiraConfigCard.hidden = !isHidden;
-        if (isHidden) {
-          jiraConfigCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
+    // Jira config toggle button (rendered inside the selected-row query action row)
+    function openJiraConfigModal() {
+      jiraConfigModal.classList.add("visible");
+      jiraConfigModal.setAttribute("aria-hidden", "false");
+    }
+
+    function closeJiraConfigModal() {
+      jiraConfigModal.classList.remove("visible");
+      jiraConfigModal.setAttribute("aria-hidden", "true");
+    }
+
+    function toggleJiraConfigCard() {
+      if (jiraConfigModal.classList.contains("visible")) {
+        closeJiraConfigModal();
+      } else {
+        openJiraConfigModal();
+      }
+    }
+
+    jiraConfigDismissBtn.addEventListener("click", () => {
+      closeJiraConfigModal();
     });
-    
+
+    jiraConfigModal.addEventListener("click", (event) => {
+      if (event.target === jiraConfigModal) {
+        closeJiraConfigModal();
+      }
+    });
+
     // Jira config close/save button
     jiraConfigCloseBtn.addEventListener("click", () => {
       const config = {
@@ -4673,14 +4823,15 @@
         issueType: jiraIssueTypeInput.value.trim() || "Bug",
         projectId: jiraProjectIdInput.value.trim(),
         issueTypeId: jiraIssueTypeIdInput.value.trim(),
-        prefillParams: String(jiraPrefillParamsInput.value || "").trim(),
         bridgeUrl: jiraBridgeUrlInput.value.trim() || "http://localhost:8787",
         boardId: jiraBoardIdInput.value.trim(),
         sprintFieldId: jiraSprintFieldIdInput.value.trim(),
+        affectedMarketsFieldId: jiraAffectedMarketsFieldIdInput.value.trim(),
+        affectedEnvironmentsFieldId: jiraAffectedEnvironmentsFieldIdInput.value.trim(),
         knownLabels: String(jiraKnownLabelsInput.value || "").trim(),
       };
       saveJiraConfig(config);
-      jiraConfigCard.hidden = true;
+      closeJiraConfigModal();
       jiraConfigCloseBtn.textContent = "Saved ✓";
       setTimeout(() => { jiraConfigCloseBtn.textContent = "Save & Close"; }, 1500);
     });
@@ -4701,55 +4852,23 @@
       }, timeoutMs);
     }
 
-    function buildJiraCreateIssueUrl(config, draftPayload) {
+    function buildJiraCreateIssueUrl(config, draftPayload, extraParams) {
       const jiraUrl = String(config.url || "jira.mercedes-benz.io").replace(/^https?:\/\//, "").replace(/\/$/, "");
       const baseUrl = "https://" + jiraUrl;
       const params = new URLSearchParams();
       params.set("summary", draftPayload.summary || "");
       params.set("description", draftPayload.description || "");
 
-      const dynamicValueMap = {
-        "{{COUNTRY}}": String(draftPayload?.metadata?.country || ""),
-        "{{LANGUAGE}}": String(draftPayload?.metadata?.language || ""),
-        "{{ENVIRONMENT}}": String(draftPayload?.metadata?.environment || ""),
-        "{{TEST_DESCRIBE}}": String(draftPayload?.metadata?.testDescribe || ""),
-        "{{TEST_TITLE}}": String(draftPayload?.metadata?.testTitle || ""),
-      };
-
-      const rawPrefillParams = String(config.prefillParams || "");
-      if (rawPrefillParams.trim()) {
-        const lines = rawPrefillParams.split("\n");
-        for (const rawLine of lines) {
-          const line = String(rawLine || "").trim();
-          if (!line || line.startsWith("#")) {
-            continue;
-          }
-
-          const separatorIndex = line.indexOf("=");
-          if (separatorIndex <= 0) {
-            continue;
-          }
-
-          const key = line.slice(0, separatorIndex).trim();
-          let value = line.slice(separatorIndex + 1).trim();
-          if (!key) {
-            continue;
-          }
-
-          for (const [token, tokenValue] of Object.entries(dynamicValueMap)) {
-            value = value.split(token).join(tokenValue);
-          }
-
-          if (value !== "") {
-            params.set(key, value);
-          }
+      (extraParams || []).forEach(([key, value]) => {
+        if (key && value !== undefined && value !== null && value !== "") {
+          params.append(key, value);
         }
-      }
+      });
 
       if (config.projectId && config.issueTypeId) {
         params.set("pid", String(config.projectId));
         params.set("issuetype", String(config.issueTypeId));
-        return baseUrl + "/secure/CreateIssueDetails.jspa?" + params.toString();
+        return baseUrl + "/secure/CreateIssueDetails!init.jspa?" + params.toString();
       }
 
       return baseUrl + "/secure/CreateIssue!default.jspa";
@@ -4802,7 +4921,7 @@
       const summaryLead = failureReasons.length
         ? failureReasons[0]
         : ("Inconsistent Smart Search behavior for query: " + primaryQuery);
-      const summary = ("[" + selectedRowCountry + "] " + testDescribe + " - " + summaryLead)
+      const summary = ("[SMARTSEARCH][" + selectedRowCountry + "] " + testDescribe + " - " + summaryLead)
         .replace(/\s+/g, " ")
         .trim()
         .slice(0, 240);
@@ -4829,6 +4948,7 @@
         ].join(" | "),
         affectedMarkets: selectedRowCountry !== "-" ? [selectedRowCountry] : [],
         labels: [],
+        screenshotPath,
         metadata: {
           testDescribe,
           testTitle: String(getRowField(normalized, "testTitle") || "-").trim(),
@@ -4844,6 +4964,7 @@
     }
 
     let currentJiraPreview = null;
+    let jiraConfirmPassResetTimer = null;
     let jiraAssigneeSearchTimer = null;
 
     // ─────────────────────────────────────────────────────────────
@@ -4976,19 +5097,56 @@
     // ─────────────────────────────────────────────────────────────
     // Preview modal: Affected Market / Labels dropdowns (local data)
     // ─────────────────────────────────────────────────────────────
-    function populateJiraMarketsSelect(selectedMarkets) {
+    // Markets this suite tests against (see TEST_SUITE_BREAKDOWN.md) — always offered
+    // in the dropdown regardless of which countries happen to be in the loaded file.
+    const JIRA_SUPPORTED_MARKETS = {
+      JP: "Japan",
+      TR: "Turkey",
+      IN: "India",
+      AU: "Australia",
+      SG: "Singapore",
+      TH: "Thailand",
+      KR: "South Korea",
+    };
+
+    let jiraCheckboxItemSeq = 0;
+
+    function createJiraCheckboxItem(container, value, labelText, checked) {
+      const id = "jiraCheckbox_" + (jiraCheckboxItemSeq++);
+      const wrap = document.createElement("label");
+      wrap.className = "jiraCheckboxItem";
+      wrap.setAttribute("for", id);
+
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.id = id;
+      input.value = value;
+      input.checked = Boolean(checked);
+
+      const text = document.createElement("span");
+      text.textContent = labelText;
+
+      wrap.appendChild(input);
+      wrap.appendChild(text);
+      container.appendChild(wrap);
+      return input;
+    }
+
+    function getJiraCheckedValues(container) {
+      return [...container.querySelectorAll("input[type=checkbox]:checked")].map((input) => input.value);
+    }
+
+    function populateJiraMarketsCheckboxes(selectedMarkets) {
       const known = [...countrySelect.options]
         .map((opt) => opt.value)
         .filter((value) => value && value !== "ALL");
-      const merged = [...new Set([...known, ...(selectedMarkets || [])])].sort((a, b) => a.localeCompare(b));
+      const merged = [...new Set([...Object.keys(JIRA_SUPPORTED_MARKETS), ...known, ...(selectedMarkets || [])])]
+        .sort((a, b) => a.localeCompare(b));
 
-      jiraPreviewMarketsSelect.innerHTML = "";
+      jiraPreviewMarketsCheckboxes.innerHTML = "";
       merged.forEach((code) => {
-        const opt = document.createElement("option");
-        opt.value = code;
-        opt.textContent = code;
-        opt.selected = (selectedMarkets || []).includes(code);
-        jiraPreviewMarketsSelect.appendChild(opt);
+        const labelText = JIRA_SUPPORTED_MARKETS[code] || code;
+        createJiraCheckboxItem(jiraPreviewMarketsCheckboxes, code, labelText, (selectedMarkets || []).includes(code));
       });
     }
 
@@ -5001,44 +5159,16 @@
 
     const JIRA_HARDCODED_LABELS = ["SMARTSEARCH"];
 
-    function populateJiraLabelsSelect(selectedLabels, knownLabelsRaw) {
+    function populateJiraLabelsCheckboxes(selectedLabels, knownLabelsRaw) {
       const known = parseKnownLabelsConfig(knownLabelsRaw);
       const merged = [...new Set([...JIRA_HARDCODED_LABELS, ...known, ...(selectedLabels || [])])].sort((a, b) => a.localeCompare(b));
 
-      jiraPreviewLabelsSelect.innerHTML = "";
+      jiraPreviewLabelsCheckboxes.innerHTML = "";
       merged.forEach((label) => {
-        const opt = document.createElement("option");
-        opt.value = label;
-        opt.textContent = label;
-        opt.selected = (selectedLabels || []).includes(label);
-        jiraPreviewLabelsSelect.appendChild(opt);
+        const checked = JIRA_HARDCODED_LABELS.includes(label) || (selectedLabels || []).includes(label);
+        createJiraCheckboxItem(jiraPreviewLabelsCheckboxes, label, label, checked);
       });
     }
-
-    jiraPreviewAddLabelBtn.addEventListener("click", () => {
-      const value = jiraPreviewNewLabelInput.value.trim();
-      if (!value) {
-        return;
-      }
-      const exists = [...jiraPreviewLabelsSelect.options].some((opt) => opt.value === value);
-      if (!exists) {
-        const opt = document.createElement("option");
-        opt.value = value;
-        opt.textContent = value;
-        jiraPreviewLabelsSelect.appendChild(opt);
-      }
-      [...jiraPreviewLabelsSelect.options].forEach((opt) => {
-        if (opt.value === value) opt.selected = true;
-      });
-      jiraPreviewNewLabelInput.value = "";
-    });
-
-    jiraPreviewNewLabelInput.addEventListener("keydown", (event) => {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        jiraPreviewAddLabelBtn.click();
-      }
-    });
 
     // ─────────────────────────────────────────────────────────────
     // Preview modal: Assignee / Sprint dropdowns (live via bridge)
@@ -5177,21 +5307,174 @@
           opt.textContent = sprint.name + (sprint.state ? " (" + sprint.state + ")" : "");
           jiraPreviewSprintSelect.appendChild(opt);
         });
+        if ((sprints || []).length === 1) {
+          jiraPreviewSprintSelect.value = String(sprints[0].id);
+        }
       } catch (error) {
         jiraPreviewStatus.style.color = "var(--danger-text)";
         jiraPreviewStatus.textContent = "Could not load sprints: " + (error?.message || error);
       }
     }
 
-    async function createJiraForRows(rows, feedbackButton) {
-      const failedQueries = rows.filter((row) => {
-        const normalized = normalizeRowSchema(row);
-        const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
-        const results = getRowField(normalized, "results");
-        const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
-        const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
-        return responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || normalized?.hasError;
+    // This project only wants these priorities offered, even though Jira's global
+    // priority scheme has many more (Highest, Legal, Show Stopper, etc).
+    const JIRA_ALLOWED_PRIORITIES = ["Minor", "Major", "Critical", "Blocker"];
+
+    async function refreshJiraPriorityOptions(config) {
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787");
+      jiraPreviewPrioritySelect.innerHTML = '<option value="">Default</option>';
+
+      try {
+        const { priorities } = await jiraBridgeGet(bridgeUrl, "/jira/priorities", {});
+        const byName = new Map((priorities || []).map((priority) => [priority.name, priority]));
+        JIRA_ALLOWED_PRIORITIES.forEach((name) => {
+          const priority = byName.get(name);
+          if (!priority) {
+            return;
+          }
+          const opt = document.createElement("option");
+          opt.value = priority.id;
+          opt.textContent = priority.name;
+          jiraPreviewPrioritySelect.appendChild(opt);
+        });
+      } catch (error) {
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Could not load priorities: " + (error?.message || error);
+      }
+    }
+
+    // Jira's Affected Market(s) field is an option-based multiselect (values like
+    // "JP (Japan)" with numeric option ids) — this maps our short codes ("JP") to
+    // those option ids by matching the "CODE (" prefix in each allowed value.
+    let jiraMarketCodeToOption = new Map();
+
+    async function refreshJiraMarketOptionMap(config) {
+      jiraMarketCodeToOption = new Map();
+      if (!config.affectedMarketsFieldId) {
+        return;
+      }
+
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787");
+      try {
+        const { options } = await jiraBridgeGet(bridgeUrl, "/jira/field-options", {
+          project: config.project,
+          issueTypeId: config.issueTypeId,
+          fieldId: config.affectedMarketsFieldId,
+        });
+        (options || []).forEach((option) => {
+          const match = String(option.value || "").match(/^([A-Za-z0-9-]+)\s*\(/);
+          const code = match ? match[1].toUpperCase() : null;
+          if (code) {
+            jiraMarketCodeToOption.set(code, option);
+          }
+        });
+      } catch (error) {
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Could not load Affected Market options: " + (error?.message || error);
+      }
+    }
+
+    function resolveJiraMarketOptionIds(marketCodes) {
+      return (marketCodes || [])
+        .map((code) => jiraMarketCodeToOption.get(String(code || "").toUpperCase()))
+        .filter(Boolean)
+        .map((option) => option.id);
+    }
+
+    // Jira's "Affected Environment(s)" option values are inconsistently cased/punctuated
+    // (e.g. "PRE-PROD" instead of "PREPROD"), so match after stripping non-alphanumerics.
+    function normalizeJiraOptionKey(text) {
+      return String(text || "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    }
+
+    let jiraEnvironmentNameToOption = new Map();
+
+    async function refreshJiraEnvironmentOptionMap(config) {
+      jiraEnvironmentNameToOption = new Map();
+      if (!config.affectedEnvironmentsFieldId) {
+        return;
+      }
+
+      const bridgeUrl = String(config.bridgeUrl || "http://localhost:8787");
+      try {
+        const { options } = await jiraBridgeGet(bridgeUrl, "/jira/field-options", {
+          project: config.project,
+          issueTypeId: config.issueTypeId,
+          fieldId: config.affectedEnvironmentsFieldId,
+        });
+        (options || []).forEach((option) => {
+          jiraEnvironmentNameToOption.set(normalizeJiraOptionKey(option.value), option);
+        });
+      } catch (error) {
+        jiraPreviewStatus.style.color = "var(--danger-text)";
+        jiraPreviewStatus.textContent = "Could not load Affected Environment options: " + (error?.message || error);
+      }
+    }
+
+    function resolveJiraEnvironmentOptionIds(environmentName) {
+      if (!environmentName) {
+        return [];
+      }
+      const option = jiraEnvironmentNameToOption.get(normalizeJiraOptionKey(environmentName));
+      return option ? [option.id] : [];
+    }
+
+    function rowIndicatesFailure(row) {
+      const normalized = normalizeRowSchema(row);
+      const openaiEvaluation = String(getRowField(normalized, "openaiEvaluation") || "").trim().toUpperCase();
+      const results = getRowField(normalized, "results");
+      const responseResult = (results && results.responseResult) || (normalized && normalized.results ? normalized.results.responseResult : (normalized ? normalized.responseResult : ""));
+      const facetsResult = (results && results.facetsResult) || (normalized && normalized.results ? normalized.results.facetsResult : (normalized ? normalized.facetsResult : ""));
+      return responseResult === "FAIL" || facetsResult === "FAIL" || openaiEvaluation === "FAIL" || normalized?.hasError;
+    }
+
+    function captureScreenshotBlob() {
+      return new Promise((resolve) => {
+        const img = document.querySelector("#rowViewPane img.screenshotImg");
+        if (!img) {
+          resolve(null);
+          return;
+        }
+        const finish = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = img.naturalWidth || img.width;
+            canvas.height = img.naturalHeight || img.height;
+            if (!canvas.width || !canvas.height) {
+              resolve(null);
+              return;
+            }
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            canvas.toBlob((blob) => resolve(blob), "image/png");
+          } catch (error) {
+            resolve(null);
+          }
+        };
+        if (img.complete && img.naturalWidth) {
+          finish();
+        } else {
+          img.addEventListener("load", finish, { once: true });
+          img.addEventListener("error", () => resolve(null), { once: true });
+        }
       });
+    }
+
+    function blobToBase64(blob) {
+      return blob.arrayBuffer().then((buffer) => {
+        const bytes = new Uint8Array(buffer);
+        let binary = "";
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunkSize));
+        }
+        return btoa(binary);
+      });
+    }
+
+    async function createJiraForRows(rows, feedbackButton, options = {}) {
+      const forcePass = !!options.forcePass;
+      const failedQueries = forcePass ? rows.slice() : rows.filter(rowIndicatesFailure);
 
       if (failedQueries.length === 0) {
         setButtonTemporaryState(feedbackButton, "No failure", 1200);
@@ -5201,8 +5484,7 @@
       const config = loadJiraConfig();
       if (!config.url || !config.project) {
         alert("Please configure Jira settings using the ⚙️ icon first!");
-        jiraConfigCard.hidden = false;
-        jiraConfigCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        openJiraConfigModal();
         return;
       }
 
@@ -5212,6 +5494,8 @@
       }
 
       const draftPayload = buildJiraDraftForRow(failedQueries[0], selectedRowIndex + 1);
+      draftPayload.screenshotName = getFileNameFromPath(draftPayload.screenshotPath) || "screenshot.png";
+      draftPayload.screenshotBlob = await captureScreenshotBlob();
       showJiraPreviewModal(draftPayload, config, feedbackButton);
     }
 
@@ -5226,13 +5510,17 @@
       jiraPreviewSubmitBtn.disabled = false;
       jiraPreviewSubmitBtn.textContent = "Submit to Jira";
 
-      populateJiraMarketsSelect(draftPayload.affectedMarkets || []);
-      populateJiraLabelsSelect(draftPayload.labels || [], config.knownLabels);
-      jiraPreviewNewLabelInput.value = "";
+      populateJiraMarketsCheckboxes(draftPayload.affectedMarkets || []);
+      populateJiraLabelsCheckboxes(draftPayload.labels || [], config.knownLabels);
       jiraPreviewAssigneeSearchInput.value = "";
       selectedJiraAssigneeId = "";
       hideJiraAssigneeList();
       jiraPreviewSprintSelect.innerHTML = '<option value="">No sprint</option>';
+      jiraPreviewPrioritySelect.innerHTML = '<option value="">Default</option>';
+
+      const detectedEnvironment = normalizeJiraOptionKey(draftPayload?.metadata?.environment || "");
+      const environmentMatch = ["INT", "PREPROD", "PROD"].find((value) => normalizeJiraOptionKey(value) === detectedEnvironment);
+      jiraPreviewEnvironmentSelect.value = environmentMatch || "";
 
       setJiraDescriptionTab("visual");
 
@@ -5240,6 +5528,9 @@
       jiraPreviewModal.setAttribute("aria-hidden", "false");
 
       refreshJiraSprintOptions(config);
+      refreshJiraPriorityOptions(config);
+      refreshJiraMarketOptionMap(config);
+      refreshJiraEnvironmentOptionMap(config);
     }
 
     function closeJiraPreviewModal() {
@@ -5263,12 +5554,28 @@
         return;
       }
       const { draftPayload, config } = currentJiraPreview;
+      const selectedMarkets = getJiraCheckedValues(jiraPreviewMarketsCheckboxes);
+      const selectedLabels = getJiraCheckedValues(jiraPreviewLabelsCheckboxes);
+      const priorityId = jiraPreviewPrioritySelect.value;
+      const marketOptionIds = resolveJiraMarketOptionIds(selectedMarkets);
+      const environmentOptionIds = resolveJiraEnvironmentOptionIds(jiraPreviewEnvironmentSelect.value);
+
       const editedPayload = {
         ...draftPayload,
         summary: jiraPreviewSummaryInput.value.trim(),
         description: jiraPreviewDescriptionInput.value,
+        affectedMarkets: selectedMarkets.length ? selectedMarkets : (draftPayload.affectedMarkets || []),
       };
-      const jiraCreateUrl = buildJiraCreateIssueUrl(config, editedPayload);
+
+      const extraParams = [];
+      marketOptionIds.forEach((id) => extraParams.push([config.affectedMarketsFieldId, id]));
+      environmentOptionIds.forEach((id) => extraParams.push([config.affectedEnvironmentsFieldId, id]));
+      selectedLabels.forEach((label) => extraParams.push(["labels", label]));
+      if (priorityId) {
+        extraParams.push(["priority", priorityId]);
+      }
+
+      const jiraCreateUrl = buildJiraCreateIssueUrl(config, editedPayload, extraParams);
       openJiraIssueInNewTab(jiraCreateUrl);
     });
 
@@ -5292,10 +5599,14 @@
       jiraPreviewStatus.style.color = "";
       jiraPreviewStatus.textContent = "Submitting to Jira via local bridge...";
 
-      const selectedMarkets = [...jiraPreviewMarketsSelect.selectedOptions].map((opt) => opt.value);
-      const selectedLabels = [...jiraPreviewLabelsSelect.selectedOptions].map((opt) => opt.value);
+      const selectedMarkets = getJiraCheckedValues(jiraPreviewMarketsCheckboxes);
+      const selectedLabels = getJiraCheckedValues(jiraPreviewLabelsCheckboxes);
       const assigneeId = selectedJiraAssigneeId;
       const sprintId = jiraPreviewSprintSelect.value;
+      const priorityId = jiraPreviewPrioritySelect.value;
+      const resolvedMarkets = selectedMarkets.length ? selectedMarkets : (draftPayload.affectedMarkets || []);
+      const affectedMarketOptionIds = resolveJiraMarketOptionIds(resolvedMarkets);
+      const affectedEnvironmentOptionIds = resolveJiraEnvironmentOptionIds(jiraPreviewEnvironmentSelect.value);
 
       try {
         const response = await fetch(bridgeUrl + "/jira/issues", {
@@ -5307,11 +5618,16 @@
             summary,
             description,
             environment: draftPayload.environment || "",
-            affectedMarkets: selectedMarkets.length ? selectedMarkets : (draftPayload.affectedMarkets || []),
+            affectedMarkets: resolvedMarkets,
+            affectedMarketsFieldId: config.affectedMarketsFieldId || "",
+            affectedMarketOptionIds,
+            affectedEnvironmentsFieldId: config.affectedEnvironmentsFieldId || "",
+            affectedEnvironmentOptionIds,
             labels: selectedLabels,
             assigneeId,
             sprintFieldId: config.sprintFieldId || "",
             sprintId,
+            priorityId,
           }),
         });
 
@@ -5319,6 +5635,38 @@
 
         if (!response.ok) {
           throw new Error(result?.error || ("Bridge responded with status " + response.status));
+        }
+
+        if (result.key && draftPayload.screenshotBlob) {
+          jiraPreviewStatus.style.color = "";
+          jiraPreviewStatus.textContent = "Created " + result.key + ". Uploading screenshot attachment...";
+          try {
+            const contentBase64 = await blobToBase64(draftPayload.screenshotBlob);
+            const attachResponse = await fetch(bridgeUrl + "/jira/issues/" + encodeURIComponent(result.key) + "/attachments", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                filename: draftPayload.screenshotName || "screenshot.png",
+                contentType: draftPayload.screenshotBlob.type || "image/png",
+                contentBase64,
+              }),
+            });
+            if (!attachResponse.ok) {
+              const attachResult = await attachResponse.json().catch(() => ({}));
+              throw new Error(attachResult?.error || ("Bridge responded with status " + attachResponse.status));
+            }
+          } catch (attachError) {
+            jiraPreviewStatus.style.color = "var(--danger-text)";
+            jiraPreviewStatus.textContent = "Created " + result.key + ", but screenshot attachment failed: " + (attachError?.message || attachError);
+            setButtonTemporaryState(feedbackButton, "Created " + result.key, 2500);
+            if (result.browseUrl) {
+              openJiraIssueInNewTab(result.browseUrl);
+            }
+            setTimeout(() => {
+              closeJiraPreviewModal();
+            }, 1800);
+            return;
+          }
         }
 
         jiraPreviewStatus.style.color = "var(--success-text)";

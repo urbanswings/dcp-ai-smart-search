@@ -283,27 +283,28 @@ The results viewer (`results/html/test-results-viewer.html`) can create Jira bug
 
 ### Setup
 
-1. Add Jira credentials to your local `.env` (see `.env.example` for the full list): `JIRA_BASE_URL`, `JIRA_API_TOKEN`, `JIRA_AUTH_TYPE` (`bearer` for a PAT, or `basic` with `JIRA_USER_EMAIL`), and optionally `JIRA_AFFECTED_MARKETS_FIELD`/`JIRA_AFFECTED_MARKETS_MODE` and `JIRA_ASSIGNEE_FIELD_MODE`. Keep the real token in your local `.env` only — never commit it.
+1. Add Jira credentials to your local `.env` (see `.env.example` for the full list): `JIRA_BASE_URL`, `JIRA_API_TOKEN`, `JIRA_AUTH_TYPE` (`bearer` for a PAT, or `basic` with `JIRA_USER_EMAIL`), and optionally `JIRA_ASSIGNEE_FIELD_MODE`. Keep the real token in your local `.env` only — never commit it.
 2. Start the bridge: `npm run jira:bridge` (listens on `JIRA_BRIDGE_PORT`, default `8787`).
-3. Open the viewer and configure Jira settings via the ⚙️ icon:
+3. Select a failed query row, click **Create JIRA** in the selected-row panel, then the **⚙️** button next to it to configure Jira settings:
    - **Jira Instance URL**, **Project Key**, **Issue Type**
    - **Jira Bridge URL** (default `http://localhost:8787`)
    - **Board ID** and **Sprint Field ID** — needed for the Sprint dropdown to fetch real sprints (Board ID auto-detects from Project Key if left blank, but that only works reliably when the project has a single board)
-   - **Known Labels** — seeds the Labels dropdown (in addition to a hardcoded `SMARTSEARCH` label that's always present)
+   - **Affected Markets Field ID** / **Affected Environments Field ID** — the custom field IDs for "Affected Market(s)" / "Affected Environment(s)" (e.g. `customfield_15237` / `customfield_14407`). These are option-based select/multiselect fields (common in Jira), so the viewer resolves the checkbox/dropdown selections against Jira's real option list live and submits the correct option ID — plain text doesn't work against option fields.
+   - **Known Labels** — seeds the Labels checkboxes (in addition to a hardcoded `SMARTSEARCH` label that's always pre-checked)
    - **Project ID** / **Issue Type ID** (numeric, optional) — only used by the "Open in Jira (manual)" fallback link, not by direct submission
 
 ### Viewer Usage
 
 1. Select a failed query row in the results table.
 2. Click **Create JIRA** in the selected-row panel.
-3. A preview modal opens with the summary and description pre-filled from the query/response/facets/failure reasons:
+3. A preview modal opens with the summary (prefixed `[SMARTSEARCH]`) and description pre-filled from the query/response/facets/failure reasons:
    - **Description** has **Visual**/**Text** tabs — Visual renders the Jira wiki markup (panels, bullets, pass/fail icons) so you can eyeball it; Text is the raw editable markup.
-   - **Affected Market(s)** and **Labels** are multi-select dropdowns (Labels also has a free-text "Add" box for one-off tags).
+   - **Affected Market(s)** and **Labels** are checkboxes — markets always offer this suite's supported set (AU, IN, JP, KR, SG, TH, TR — see `TEST_SUITE_BREAKDOWN.md`) with the row's market pre-checked; labels include a free-text "Add" box for one-off tags.
    - **Assignee** is a live-searching autocomplete against Jira's assignable-users API (results filter as you type).
-   - **Sprint** is populated live from the configured board's active/future sprints.
+   - **Sprint**, **Priority** (Minor/Major/Critical/Blocker), and **Affected Environment** (INT/PREPROD/PROD, auto-detected from the row) are populated/resolved live from Jira.
 4. Edit anything that needs adjusting, then either:
    - **Submit to Jira** — creates the issue directly via the REST API (through the local bridge) and opens it once created, or
-   - **Open in Jira (manual)** — falls back to Jira's own Create Issue page with the summary/description prefilled, for when the bridge isn't running.
+   - **Open in Jira (manual)** — falls back to Jira's own Create Issue page with the summary/description/markets/labels/priority prefilled, for when the bridge isn't running.
 
 ---
 
