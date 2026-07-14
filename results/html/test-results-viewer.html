@@ -1510,7 +1510,7 @@
       </div>
       <button id="resetFiltersBtn" class="resetFiltersBtn" type="button">Reset Form</button>
       <button id="chartRowsToggleBtn" class="chartToggleBtn" type="button">Hide charts</button>      
-      <button id="createJiraBtn" class="createJiraBtn" type="button" title="Copy a Jira ticket draft for all failed queries">Create JIRA</button>
+      <button id="createJiraBtn" class="createJiraBtn" type="button" title="Copy a Jira ticket draft for all failed queries">Copy JIRA</button>
       <button id="jiraConfigToggleBtn" class="createJiraBtn" type="button" title="Configure Jira settings" style="padding: 0 12px;">⚙️</button>
       <button id="scrollMetaBtn" class="scrollMetaBtn" type="button">Summary</button>
     </div>
@@ -3408,6 +3408,132 @@
       return cleaned.map((reason) => " **** {color:#de350b}" + reason + "{color}");
     }
 
+    function isPassedJiraExample(rowData) {
+      const normalized = normalizeRowSchema(rowData);
+      const results = getRowField(normalized, "results");
+      const responseResult = String(results?.responseResult || "").trim().toUpperCase();
+      const facetsResult = String(results?.facetsResult || "").trim().toUpperCase();
+      const overallStatus = String(
+        normalized?.summary?.overallStatus || getRowField(normalized, "openaiEvaluation") || "",
+      ).trim().toUpperCase();
+
+      return (
+        overallStatus === "PASS" &&
+        responseResult !== "FAIL" &&
+        facetsResult !== "FAIL" &&
+        !normalized?.response?.hasError &&
+        !normalized?.hasError
+      );
+    }
+
+    function formatPassedObservationValue(value) {
+      if (value && typeof value === "object") {
+        return formatFacetValueForJira(value);
+      }
+      const text = String(value ?? "").trim();
+      if (!text) {
+        return "-";
+      }
+      if (/^[A-Z0-9_]+$/.test(text)) {
+        return text
+          .toLowerCase()
+          .split("_")
+          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+          .join(" ");
+      }
+      return text;
+    }
+
+    function toJiraPassedObservationLines(rowData) {
+      const facets = getRowField(rowData, "facets");
+      const expected = splitExpectedAndActualFacets(facets).expected;
+      const includedFacets = Array.isArray(expected?.include) ? expected.include : [];
+      const lines = [];
+
+      includedFacets.forEach((includedFacet) => {
+        if (!includedFacet || typeof includedFacet !== "object") {
+          return;
+        }
+        Object.entries(includedFacet).forEach(([facetKey, value]) => {
+          const values = Array.isArray(value) ? value : [value];
+          values.forEach((item) => {
+            lines.push(
+              " **** " + facetKey + " " + formatPassedObservationValue(item) +
+              " is filtered since it is available",
+            );
+          });
+        });
+      });
+
+      return lines.length ? lines : [" **** Passed query returned the expected available filters"];
+    }
+
+    function getJiraPassedExampleSignature(rowData) {
+      const facets = getRowField(normalizeRowSchema(rowData), "facets");
+      const expected = splitExpectedAndActualFacets(facets).expected;
+      const getFacetKeys = (groups) => {
+        if (!Array.isArray(groups)) {
+          return [];
+        }
+        return groups.flatMap((group) =>
+          group && typeof group === "object" ? Object.keys(group).sort() : [],
+        );
+      };
+      return [
+        "include=" + getFacetKeys(expected?.include).join(","),
+        "exclude=" + getFacetKeys(expected?.exclude).join(","),
+      ].join("|");
+    }
+
+    function selectPassedJiraExamples(rows, limit = 3) {
+      const selected = [];
+      const seenSignatures = new Set();
+
+      for (const rowData of rows) {
+        if (!isPassedJiraExample(rowData)) {
+          continue;
+        }
+        const signature = getJiraPassedExampleSignature(rowData);
+        if (seenSignatures.has(signature)) {
+          continue;
+        }
+        seenSignatures.add(signature);
+        selected.push(rowData);
+        if (selected.length >= limit) {
+          break;
+        }
+      }
+
+      return selected;
+    }
+
+    function buildJiraPassedExample(rowData, index) {
+      const normalized = normalizeRowSchema(rowData);
+      const queryLocal = getLocalizedText(getRowField(normalized, "query")) || "-";
+      const queryEn = getEnglishText(getRowField(normalized, "query")) || "-";
+      const responseLocal = getLocalizedText(getRowField(normalized, "response")) || "-";
+      const responseEn = getEnglishText(getRowField(normalized, "response")) || "-";
+      const country = getRowCountry(normalized, "") || "-";
+      const facets = getRowField(normalized, "facets");
+      const actualFacets = splitExpectedAndActualFacets(facets).actual;
+      const lines = [
+        " * Example #" + (index + 1),
+        " ** Q (" + country + "): " + queryLocal,
+        " *** A: " + responseLocal,
+      ];
+
+      if (queryEn || responseEn) {
+        lines.push(" ** EN: " + (queryEn || "-"));
+        lines.push(" *** A: " + (responseEn || "-"));
+      }
+
+      lines.push(" ** Filtering:");
+      lines.push(...toJiraFacetLines(actualFacets));
+      lines.push(" ** Observations");
+      lines.push(...toJiraPassedObservationLines(normalized));
+      return lines;
+    }
+
     function buildJiraTicketText(rowData, queryLocal, queryEn, responseLocal, responseEn, actualFacets, screenshotPath, country) {
       const results = getRowField(rowData, "results");
       const responseResult = (results && results.responseResult) || (rowData && rowData.results ? rowData.results.responseResult : (rowData ? rowData.responseResult : ""));
@@ -3461,7 +3587,7 @@
       ].join("\n");
     }
 
-    function buildJiraTicketForFailedQueries(failedRows) {
+    function buildJiraTicketForFailedQueries(failedRows, passedExampleRows = []) {
       // Collect all query details in one elaborate section
       const elaborateDetails = failedRows.map((rowData, idx) => {
         const normalized = normalizeRowSchema(rowData);
@@ -3521,6 +3647,10 @@
         return queryDetails.join("\n");
       }).join("\n");
 
+      const passedExamples = passedExampleRows
+        .slice(0, 3)
+        .flatMap((rowData, index) => buildJiraPassedExample(rowData, index));
+
       return [
         "{panel:title=Elaborate details|titleBGColor=#858585}",
         elaborateDetails,
@@ -3531,6 +3661,7 @@
         "{panel:title=Expected behaviour|titleBGColor=#858585}",
         " * All queries should return accurate response messages",
         " * All facet filters should work correctly",
+        ...passedExamples,
         "{panel}",
         "{panel:title=Any attachments?|titleBGColor=#858585}",
         " * Screenshots",
@@ -4598,8 +4729,12 @@
         return;
       }
 
+      const passedExamples = selectPassedJiraExamples(currentRows, 3);
+
       try {
-        await copyToClipboard(buildJiraTicketForFailedQueries(failedQueries));
+        await copyToClipboard(
+          buildJiraTicketForFailedQueries(failedQueries, passedExamples),
+        );
         setButtonTemporaryState(createJiraBtn, "Copied", 1200);
       } catch {
         setButtonTemporaryState(createJiraBtn, "Copy failed", 1200);
