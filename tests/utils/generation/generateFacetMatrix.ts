@@ -87,6 +87,30 @@ interface FacetRange {
 
 const ENGINE_POWER_KW_PER_HP = 1.343;
 
+const QUERY_UNIT_BY_FACET: Readonly<Record<string, string>> = {
+  enginePowerHP: "HP",
+  enginePowerKW: "kW",
+};
+
+export function appendFacetUnitForQuery(
+  facetKey: string,
+  value: unknown,
+): string {
+  const formattedValue = String(value ?? "").trim();
+  const unit = QUERY_UNIT_BY_FACET[facetKey];
+  if (!formattedValue || !unit) {
+    return formattedValue;
+  }
+
+  const escapedUnit = unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const alreadyContainsUnit = new RegExp(
+    `(?:^|\\s)${escapedUnit}(?=\\s|$)`,
+    "i",
+  ).test(formattedValue);
+
+  return alreadyContainsUnit ? formattedValue : `${formattedValue} ${unit}`;
+}
+
 interface RangeQueryCase {
   formattedValue: string;
   rawValue: number;
@@ -474,7 +498,7 @@ function formatFacetValueForQuery(
   if (facetKey === "bodyType") {
     return toQueryLabel(facetKey, rawValue);
   }
-  return String(formattedValue || rawValue);
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }
 
 function getCompleteDisplayValue(
@@ -485,7 +509,7 @@ function getCompleteDisplayValue(
   if (facetKey === "bodyType" || facetKey === "fuelType") {
     return toQueryLabel(facetKey, rawValue);
   }
-  return String(formattedValue || rawValue);
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }
 
 type RangePhraseKey = "lessThan" | "under" | "moreThan" | "above";
@@ -938,7 +962,7 @@ function toCompleteHintValueLabel(
   if (facetKey === "price" || facetKey === "monthlyRate") {
     return formatLocalizedPriceValue(rawValue);
   }
-  return String(formattedValue || rawValue);
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }
 
 function createCompleteRangeHints(

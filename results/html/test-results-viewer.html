@@ -3356,31 +3356,11 @@
         return {};
       }
 
-      const preferredKeys = [
-        "timestamp",
-        "timestampSG",
-        "testMode",
-        "testDescribe",
-        "testTitle",
-        "query",
-        "response",
-        "resultCount",
-        "responseTime",
-        "statusCode",
-        "hasError",
-        "openaiEvaluation",
-        "results",
-        "facets",
-      ];
-      const jsonData = {};
-
-      for (const key of preferredKeys) {
-        if (Object.prototype.hasOwnProperty.call(rowData, key)) {
-          jsonData[key] = rowData[key];
-        }
-      }
-
-      return jsonData;
+      return Object.fromEntries(
+        Object.entries(rowData).filter(
+          ([key]) => key !== "_schemaMarked" && key !== "_schemaType",
+        ),
+      );
     }
 
     function getFileNameFromPath(pathValue) {
