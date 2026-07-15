@@ -53,6 +53,7 @@ export async function processAndLogApiResult({
   const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  const actualCount = query?.totalVehicles ?? 0;
 
   if (results.error) {
     console.error(
@@ -205,10 +206,19 @@ export async function processAndLogApiResult({
     resultCount,
   );
   const responseVehicleTotalCount = countValidation.responseVehicleTotalCount;
+  const queryCountMismatch =
+    Boolean(actualFacets) && resultCount !== actualCount;
   let countCheckPassed = countValidation.countCheckPassed;
   if (!countValidation.countCheckPassed) {
     responseCheckPassed = false;
     addApiFailureReason(countValidation.failureReason || "");
+  }
+  if (queryCountMismatch) {
+    countCheckPassed = false;
+    responseCheckPassed = false;
+    addApiFailureReason(
+      `Result count does not match expected count from query (expected: ${actualCount}, got: ${resultCount})`,
+    );
   }
 
   if (actualFacets === false) {
@@ -275,10 +285,9 @@ export async function processAndLogApiResult({
   });
   const displayHasError = hasError || !evaluationPassed;
   const messageStatus = evaluationPassed ? "PASS" : "FAIL";
-  const countStatus = getCountStatus(
-    responseVehicleTotalCount,
-    countCheckPassed,
-  );
+  const countStatus = queryCountMismatch
+    ? "FAIL"
+    : getCountStatus(responseVehicleTotalCount, countCheckPassed);
   const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
   const { queryEn, smartSearchMessageEn } = await translateResultText(
     lang,
@@ -300,6 +309,7 @@ export async function processAndLogApiResult({
     actualInput,
     smartSearchMessage,
     translatedText: { queryEn, smartSearchMessageEn },
+    actualCount,
     responseVehicleTotalCount,
     resultCount,
     actualFacets,
@@ -382,14 +392,9 @@ export async function processAndLogApiResult({
         ...(allFacetFailures.length && { failureReasons: allFacetFailures }),
       },
       count: {
-        expected: null,
+        expected: actualFacets ? actualCount : null,
         actual: resultCount,
-        status:
-          responseVehicleTotalCount === null
-            ? "SKIP"
-            : countCheckPassed
-              ? "PASS"
-              : "FAIL",
+        status: countStatus,
         backendCount: resultCount,
       },
     },

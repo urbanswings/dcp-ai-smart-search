@@ -36,6 +36,7 @@ export interface ShouldFilterSpec {
 
 export interface FixedQueryCase {
   value: string;
+  totalVehicles?: number;
   shouldRecommend?: boolean;
   shouldFilter?: ShouldFilterSpec | Record<string, any> | boolean;
   aiEvaluationHints?: AiEvaluationHints;

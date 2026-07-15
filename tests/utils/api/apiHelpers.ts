@@ -19,6 +19,24 @@ const FACETS_MASTER_DATA_PATH = path.resolve(
   "../../data/facets-master-data.json",
 );
 
+function quoteShellArgument(value: string): string {
+  return `'${value.replace(/'/g, `'\\''`)}'`;
+}
+
+function buildPostCurlCommand(
+  apiUrl: string,
+  payload: unknown,
+  includeApiKey: boolean,
+): string {
+  return [
+    "curl --request POST",
+    `--url ${quoteShellArgument(apiUrl)}`,
+    `--header ${quoteShellArgument("Content-Type: application/json")}`,
+    ...(includeApiKey ? ['--header "X-Api-Key: $X_API_KEY"'] : []),
+    `--data-raw ${quoteShellArgument(JSON.stringify(payload))}`,
+  ].join(" \\\n  ");
+}
+
 export type { ApiSearchResult } from "../core/searchResultTypes";
 export { processAndLogApiResult } from "./apiResultLoggingHelpers";
 
@@ -624,26 +642,28 @@ async function syncFacetsMasterDataFromEmhResponse(
   return { addedKeys, addedValues };
 }
 
-export async function fetchEmhApiResponse(): Promise<any> {
+export async function fetchEmhApiResponse(
+  selectedFacets: Record<string, unknown> = {},
+  options: {
+    syncFacetsMasterData?: boolean;
+  } = {},
+): Promise<any> {
   const env = ENVIRONMENT || "INT";
   const country = process.env.COUNTRY || COUNTRY || "TR";
   const product = PRODUCT || "NCOS";
   const language = getLanguageCode();
   const vehicleCategory = VEHICLE_CATEGORY || "PASSENGER-CARS";
+  const isLocalEndpoint = process.env.API_ENDPOINT_LOCAL === "true";
 
   try {
     const apiUrl =
-      process.env.API_ENDPOINT_LOCAL === "true"
+      isLocalEndpoint
         ? "http://localhost:8080/api/v2/search/proxy"
         : env?.toUpperCase() === "PROD"
           ? "https://ap.api.oneweb.mercedes-benz.com/commerce/onesearch/graphql"
           : env?.toUpperCase() === "INT"
             ? "https://test.api.oneweb.mercedes-benz.com/commerce/onesearch/int/graphql"
             : "https://int.api.oneweb.mercedes-benz.com/commerce/onesearch/eu/graphql";
-
-    console.log(
-      `[EMH API] env=${env} country=${country} product=${product} language=${language} vehicleCategory=${vehicleCategory} endpoint=${apiUrl} xApiKey=${process.env.X_API_KEY ? "set" : "missing"}`,
-    );
 
     let graphqlPayload = {
       operationName: "GetSearchResults",
@@ -658,11 +678,13 @@ export async function fetchEmhApiResponse(): Promise<any> {
         }`,
         sortingType: "price-asc",
         vehicleCategory: vehicleCategory,
+        ...selectedFacets,
       },
       query: getEmhGraphqlQuery(country, product, vehicleCategory),
     };
+    console.log(`graphqlPayload: ${JSON.stringify(graphqlPayload.variables, null, 2)}`);
 
-    if (process.env.API_ENDPOINT_LOCAL === "true") {
+    if (isLocalEndpoint) {
       (graphqlPayload.variables as any) = {
         contextType: "B2C",
         isUcos: product === "UCOS",
@@ -687,15 +709,20 @@ export async function fetchEmhApiResponse(): Promise<any> {
         modelYear: null,
         enginePowerHP: null,
         enginePowerKW: null,
+        ...selectedFacets,
       };
       (graphqlPayload.query as any) =
         'query GetSearchResults($baumuster4: String, $bodyType: [BodyType!], $brand: [String!], $buildType: [String!], $campaigns: [String!], $color: [String!], $colorName: [String!], $colorPolish: [String!], $contextType: ContextType! = B2C, $dealerId: [String!], $dealerFittedOptions: [String!], $driveType: [TypeOfPropulsion!], $enginePowerHP: IntRange, $enginePowerKW: IntRange, $equipment: [String!], $estimatedArrivalDate: DateRange, $facelift: Int, $firstRegistrationDate: DateRange, $fuelType: [FuelTypeHarmonized!], $gearbox: [TransmissionCategory!], $generation: [Generation!], $isUcos: Boolean = false, $language: String, $lines: [String!], $limit: Int! = 10, $loadspaceHeight: IntRange, $loadspaceLength: IntRange, $loadspaceVolume: IntRange, $loadspaceWidth: IntRange, $maximumWeight: IntRange, $mileage: IntRange, $modelDesignation: [String!], $modelIdentifier: [VehicleClass!], $modelYear: IntRange, $monthlyRate: ValueRange, $motorization: [String!], $packages: [String!], $page: Int! = 0, $payload: IntRange, $price: ValueRange, $productCode: String, $productionDate: DateRange, $profileId: String!, $registrationType: [String!], $seats: [Int!], $sortingType: String! = "price-asc", $stockCategories: [String!], $stockType: [StockItemState!], $torque: IntRange, $typeClass: [String!], $ucNumber: String, $upholstery: [String!], $upholsteryName: [String!], $upholsteryPolish: [String!], $variantId: String, $vehicleCategory: String!, $vehicleHeight: IntRange, $wheelbase: IntRange) {\n  search(\n    baumuster4: $baumuster4\n    bodyType: $bodyType\n    brand: $brand\n    buildType: $buildType\n    campaigns: $campaigns\n    color: $color\n    colorName: $colorName\n    colorPolish: $colorPolish\n    contextType: $contextType\n    dealerId: $dealerId\n    dealerFittedOptions: $dealerFittedOptions\n    driveType: $driveType\n    enginePowerHP: $enginePowerHP\n    enginePowerKW: $enginePowerKW\n    equipment: $equipment\n    estimatedArrivalDate: $estimatedArrivalDate\n    facelift: $facelift\n    firstRegistrationDate: $firstRegistrationDate\n    fuelType: $fuelType\n    gearbox: $gearbox\n    generation: $generation\n    language: $language\n    lines: $lines\n    limit: $limit\n    loadspaceHeight: $loadspaceHeight\n    loadspaceLength: $loadspaceLength\n    loadspaceVolume: $loadspaceVolume\n    loadspaceWidth: $loadspaceWidth\n    maximumWeight: $maximumWeight\n    mileage: $mileage\n    modelDesignation: $modelDesignation\n    modelIdentifier: $modelIdentifier\n    modelYear: $modelYear\n    monthlyRate: $monthlyRate\n    motorization: $motorization\n    packages: $packages\n    page: $page\n    payload: $payload\n    price: $price\n    productCode: $productCode\n    productionDate: $productionDate\n    profileId: $profileId\n    registrationType: $registrationType\n    seats: $seats\n    sortingType: $sortingType\n    stockCategories: $stockCategories\n    stockType: $stockType\n    torque: $torque\n    typeClass: $typeClass\n    ucNumber: $ucNumber\n    upholstery: $upholstery\n    upholsteryName: $upholsteryName\n    upholsteryPolish: $upholsteryPolish\n    variantId: $variantId\n    vehicleCategory: $vehicleCategory\n    vehicleHeight: $vehicleHeight\n    wheelbase: $wheelbase\n  ) {\n    facets { bodyType { ...FormattedValueFacet } brand { ...FormattedValueFacet } buildType { ...SimpleCountFacet } campaigns { ...FormattedValueFacet } color { ...FormattedValueFacet } colorName { ...FormattedValueFacet } colorPolish { ...FormattedValueFacet } dealerFittedOptions { ...FormattedValueFacet } dealerId { ...SimpleCountFacet } driveType { ...FormattedValueFacet } enginePowerHP { ...RangeFacet } enginePowerKW { ...RangeFacet } equipment { ...FormattedValueFacet } estimatedArrivalDate { ...DateRangeFacet } fuelType { ...FormattedValueFacet } gearbox { ...FormattedValueFacet } generation { ...SimpleCountFacet } lines { ...FormattedValueFacet } loadspaceHeight { ...RangeFacet } loadspaceLength { ...RangeFacet } loadspaceVolume { ...RangeFacet } loadspaceWidth { ...RangeFacet } maximumWeight { ...RangeFacet } modelDesignation { ...FormattedValueFacet } modelIdentifier { ...FormattedValueFacet } modelYear { ...RangeFacet } monthlyRate { ...RangeFacet } motorization { ...SimpleCountFacet } packages { ...FormattedValueFacet } payload { ...RangeFacet } price { ...RangeFacet } productionDate { ...DateRangeFacet } registrationType { ...FormattedValueFacet } seats { ...NumberCountFacet } stockType { ...SimpleCountFacet } torque { ...RangeFacet } upholstery { ...FormattedValueFacet } upholsteryName { ...FormattedValueFacet } upholsteryPolish { ...FormattedValueFacet } vehicleHeight { ...RangeFacet } wheelbase { ...RangeFacet } mileage @include(if: $isUcos) { ...RangeFacet } firstRegistrationDate @include(if: $isUcos) { ...DateRangeFacet } stockCategories @include(if: $isUcos) { ...FormattedValueFacet } } navigation { currentLimit currentPage currentSortingCode totalPages totalResults } results { characteristics { stockCategories { code } highlights { label } campaigns { description footnote label } } consignorCompanyId emissionAndConsumption { attributes { displayValue id label mustShowIn unit value } footnotes testProcedure } envkv { co2Classes { primary secondary } } estimatedArrivalDate identification { code commissionNumber dcpProductType dealerId dealerGroupName mpcId variantId vin vxVehicleId } images { default } productionDate preProductionVehicle stock { stockType } stockCategory technicalInformation { engine { fuelType { ...TechnicalData } power { ...PowerData } } transmission { ...TechnicalData } } usedVehicleData @include(if: $isUcos) { mileage { ...IntegerTechnicalData } firstRegistrationDate vehicleInspection { maintenance } warranty { status unlimitedDistance } } vehicleModel { baumuster bodyType { ...TechnicalData } brand { ...TechnicalData } category { ...TechnicalData } facelift generation modelYear modelYearCode motorization name steeringPosition { ...TechnicalData } typeClass vehicleClass { ...TechnicalData } } wholesale } } }\n\nfragment DateRangeFacet on DateRangeFacet { values { min max count } facetType }\nfragment FormattedValueFacet on FormattedValueFacet { values { label formattedValue value count } facetType }\nfragment IntegerTechnicalData on IntegerTechnicalData { label formattedValue value unit }\nfragment PowerData on Power { label formattedValue combustionKw { ...IntegerTechnicalData } combustionHp { ...IntegerTechnicalData } electricKw { ...IntegerTechnicalData } electricHp { ...IntegerTechnicalData } combinedKw { ...IntegerTechnicalData } combinedHp { ...IntegerTechnicalData } }\nfragment RangeFacet on RangeFacet { values { min max count } facetType }\nfragment NumberCountFacet on NumberCountFacet { values { value count } facetType }\nfragment SimpleCountFacet on SimpleCountFacet { values { value count } facetType }\nfragment TechnicalData on TechnicalData { label formattedValue value unit }';
     }
 
+    // console.log(
+    //   `[curl]\n${buildPostCurlCommand(apiUrl, graphqlPayload, !isLocalEndpoint)}`,
+    // );
+
     const response = await axios.post(apiUrl, graphqlPayload, {
       headers: {
         "Content-Type": "application/json",
-        ...(process.env.API_ENDPOINT_LOCAL !== "true" && {
+        ...(!isLocalEndpoint && {
           "X-Api-Key": process.env.X_API_KEY || "",
         }),
       },
@@ -708,19 +735,19 @@ export async function fetchEmhApiResponse(): Promise<any> {
       return null;
     }
 
-    console.log("Successfully fetched EMH API response");
-
-    try {
-      const syncSummary = await syncFacetsMasterDataFromEmhResponse(
-        response.data,
-      );
-      console.log(
-        `Synced facets master data: ${syncSummary.addedKeys.length} keys, ${syncSummary.addedValues.length} values added`,
-      );
-    } catch (syncError) {
-      const syncErrorMessage =
-        syncError instanceof Error ? syncError.message : "Unknown sync error";
-      console.warn("Failed to sync facets master data:", syncErrorMessage);
+    if (options.syncFacetsMasterData !== false) {
+      try {
+        const syncSummary = await syncFacetsMasterDataFromEmhResponse(
+          response.data,
+        );
+        console.log(
+          `Synced facets master data: ${syncSummary.addedKeys.length} keys, ${syncSummary.addedValues.length} values added`,
+        );
+      } catch (syncError) {
+        const syncErrorMessage =
+          syncError instanceof Error ? syncError.message : "Unknown sync error";
+        console.warn("Failed to sync facets master data:", syncErrorMessage);
+      }
     }
 
     return response.data;

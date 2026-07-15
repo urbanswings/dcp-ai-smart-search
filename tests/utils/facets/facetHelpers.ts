@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { fetchEmhApiResponse } from "../api/apiHelpers";
 import { generateOpenAIQuery } from "../query/aiHelpers";
 import { extractMissingFacetValuesFromData } from "./facetValueHelpers";
 import { isIncludedFacet } from "../generation/generateFacetMatrix";
@@ -82,26 +83,7 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
   },
 };
 
-interface AndOrFacetMatrixQuery {
-  value: string;
-  facet: string;
-  operator: "AND" | "OR";
-  filterText: string;
-  filterValue: string;
-  shouldFilter:
-    | boolean
-    | {
-        include: Array<Record<string, Array<string | number>>>;
-        exclude: Array<Record<string, Array<string | number>>>;
-        strict: false;
-      };
-  aiEvaluationHints: {
-    value: string[];
-    overwrite: true;
-  };
-}
-
-interface PunctuatedFacetMatrixQuery {
+export interface FacetMatrixQuery {
   value: string;
   facet: string;
   filterText: string;
@@ -115,7 +97,30 @@ interface PunctuatedFacetMatrixQuery {
     value: string[];
     overwrite: true;
   };
+  totalVehicles: number;
 }
+
+interface AndOrFacetMatrixQuery extends FacetMatrixQuery {
+  operator: "AND" | "OR";
+}
+
+interface FacetMatrixValue {
+  queryValue: string;
+  expectedValue: string | number;
+  count?: number;
+}
+
+interface SelectedFacetMatrixValue {
+  facet: SimplifiedFacet;
+  value: FacetMatrixValue;
+}
+
+interface FacetRangeVariables {
+  min: number;
+  max: number;
+}
+
+const FACET_RANGE_LOWER_BOUND_PERCENT = 0.15;
 
 /**
  * Converts raw facets from EMH or DCP API responses to a simplified format
@@ -534,11 +539,7 @@ function getMappedFormattedValue(
   return null;
 }
 
-function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
-  queryValue: string;
-  expectedValue: string | number;
-  count?: number;
-}> {
+function getFacetMatrixValues(facet: SimplifiedFacet): FacetMatrixValue[] {
   if (facet.type === "range") {
     const min = Number(facet.min);
     const max = Number(facet.max);
@@ -572,6 +573,68 @@ function getFacetMatrixValues(facet: SimplifiedFacet): Array<{
 
 function isFacetMatrixValueInStock(value: { count?: number }): boolean {
   return value.count === undefined || Number(value.count) > 0;
+}
+
+function buildFacetRangeVariables(value: string | number): FacetRangeVariables {
+  const max = Math.round(Number(value));
+  if (!Number.isFinite(max)) {
+    throw new Error(`Invalid range facet value: ${String(value)}`);
+  }
+
+  return {
+    min: Math.round(max * (1 - FACET_RANGE_LOWER_BOUND_PERCENT)),
+    max,
+  };
+}
+
+function buildSelectedFacetVariables(
+  values: SelectedFacetMatrixValue[],
+): Record<string, unknown> {
+  return Object.fromEntries(
+    values
+      .map(
+        ({ facet, value }) =>
+          [
+            facet.code,
+            facet.type === "range"
+              ? buildFacetRangeVariables(value.expectedValue)
+              : [value.expectedValue],
+          ] as const,
+      )
+      .sort(([leftFacet], [rightFacet]) => leftFacet.localeCompare(rightFacet)),
+  );
+}
+
+async function getFacetSelectionTotalVehicles(
+  selectedFacetVariables: Record<string, unknown>,
+  cache?: Map<string, number>,
+): Promise<number> {
+  const cacheKey = JSON.stringify(selectedFacetVariables);
+  const cachedTotal = cache?.get(cacheKey);
+  if (cachedTotal !== undefined) {
+    return cachedTotal;
+  }
+
+  const crossCheckResponse = await fetchEmhApiResponse(selectedFacetVariables, {
+    syncFacetsMasterData: false,
+  });
+  if (!crossCheckResponse) {
+    throw new Error(
+      `GetSearchResults cross-check returned no response for ${cacheKey}`,
+    );
+  }
+
+  const totalVehicles = Number(
+    crossCheckResponse?.data?.search?.navigation?.totalResults,
+  );
+  if (!Number.isFinite(totalVehicles)) {
+    throw new Error(
+      `GetSearchResults cross-check returned an invalid totalResults for ${cacheKey}`,
+    );
+  }
+
+  cache?.set(cacheKey, totalVehicles);
+  return totalVehicles;
 }
 
 function buildAndOrQueryValue(
@@ -725,11 +788,11 @@ function createPunctuatedFacetHints(
   return hints;
 }
 
-export function generatePunctuatedFacetMatrixFromFacets(
+export async function generatePunctuatedFacetMatrixFromFacets(
   facets: SimplifiedFacet[],
-): PunctuatedFacetMatrixQuery[] {
+): Promise<FacetMatrixQuery[]> {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
-  const queries: PunctuatedFacetMatrixQuery[] = [];
+  const queries: FacetMatrixQuery[] = [];
 
   for (
     let firstIndex = 0;
@@ -795,6 +858,14 @@ export function generatePunctuatedFacetMatrixFromFacets(
                 valueLabel: value.queryValue,
                 inStock: isFacetMatrixValueInStock(value),
               }));
+              const selectedFacetVariables =
+                buildSelectedFacetVariables(values);
+              const totalVehicles = await getFacetSelectionTotalVehicles(
+                selectedFacetVariables,
+              );
+
+              // Skip combinations that result in zero vehicles to avoid generating queries that cannot be satisfied
+              if (totalVehicles <= 0) continue;
 
               queries.push({
                 value: buildPunctuatedFacetQueryValue(
@@ -824,6 +895,7 @@ export function generatePunctuatedFacetMatrixFromFacets(
                   value: createPunctuatedFacetHints(facetLabelsAndValues),
                   overwrite: true,
                 },
+                totalVehicles,
               });
             }
           }
@@ -839,11 +911,7 @@ function getFacetMatrixValuesByStock(
   facet: SimplifiedFacet,
   inStock: boolean,
   limit = UNAVAILABLE_AVAILABLE_VALUE_LIMIT,
-): Array<{
-  queryValue: string;
-  expectedValue: string | number;
-  count?: number;
-}> {
+): FacetMatrixValue[] {
   return getFacetMatrixValues(facet)
     .filter((value) => isFacetMatrixValueInStock(value) === inStock)
     .slice(0, limit);
@@ -872,9 +940,10 @@ async function loadUnavailableFacetMatrixValues(facetKey: string): Promise<
 
 export async function generateUnavailableAvailableFacetMatrixFromFacets(
   facets: SimplifiedFacet[],
-): Promise<PunctuatedFacetMatrixQuery[]> {
+): Promise<FacetMatrixQuery[]> {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
-  const queries: PunctuatedFacetMatrixQuery[] = [];
+  const queries: FacetMatrixQuery[] = [];
+  const totalVehiclesCache = new Map<string, number>();
 
   for (
     let firstIndex = 0;
@@ -927,6 +996,16 @@ export async function generateUnavailableAvailableFacetMatrixFromFacets(
           for (const unavailableValue of pairCase.unavailableValues) {
             const availableLabel = getFacetLabel(pairCase.availableFacet);
             const unavailableLabel = getFacetLabel(pairCase.unavailableFacet);
+            const selectedFacetVariables = buildSelectedFacetVariables([
+              {
+                facet: pairCase.availableFacet,
+                value: availableValue,
+              },
+            ]);
+            const totalVehicles = await getFacetSelectionTotalVehicles(
+              selectedFacetVariables,
+              totalVehiclesCache,
+            );
             queries.push({
               value: buildUnavailableAvailableFacetQueryValue(
                 pairCase.availableFacet,
@@ -969,6 +1048,7 @@ export async function generateUnavailableAvailableFacetMatrixFromFacets(
                 ]),
                 overwrite: true,
               },
+              totalVehicles,
             });
           }
         }
@@ -1026,11 +1106,12 @@ function createUnavailableAndOrFacetHints(
   return hints;
 }
 
-export function generateAndOrFacetMatrixFromFacets(
+export async function generateAndOrFacetMatrixFromFacets(
   facets: SimplifiedFacet[],
-): AndOrFacetMatrixQuery[] {
+): Promise<AndOrFacetMatrixQuery[]> {
   const facetByCode = new Map(facets.map((facet) => [facet.code, facet]));
   const queries: AndOrFacetMatrixQuery[] = [];
+  const totalVehiclesCache = new Map<string, number>();
 
   for (const anchorFacetCode of AND_OR_MATRIX_ANCHOR_FACETS) {
     const anchorFacet = facetByCode.get(anchorFacetCode);
@@ -1092,6 +1173,14 @@ export function generateAndOrFacetMatrixFromFacets(
               entry !== null,
           );
           const allValuesInStock = anchorInStock && targetInStock;
+          const selectedFacetVariables = buildSelectedFacetVariables([
+            { facet: anchorFacet, value: anchorValue },
+            { facet: targetFacet, value: targetValue },
+          ]);
+          const totalVehicles = await getFacetSelectionTotalVehicles(
+            selectedFacetVariables,
+            totalVehiclesCache,
+          );
 
           queries.push({
             value: buildAndOrQueryValue(
@@ -1130,6 +1219,7 @@ export function generateAndOrFacetMatrixFromFacets(
                   ),
               overwrite: true,
             },
+            totalVehicles,
           });
 
           queries.push({
@@ -1169,6 +1259,7 @@ export function generateAndOrFacetMatrixFromFacets(
                   ),
               overwrite: true,
             },
+            totalVehicles,
           });
         }
       }

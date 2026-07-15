@@ -291,7 +291,7 @@ test.describe("[SmartSearch] Vehicles MB", () => {
     );
     const queries = isFixedQueriesOnly()
       ? []
-      : generateAndOrFacetMatrixFromFacets(facets);
+      : await generateAndOrFacetMatrixFromFacets(facets);
     const aiEvaluationRules =
       aiEvaluationRulesData[describeName]?.[test.info().title] || {};
     await saveGeneratedQueriesIfAny(queries);
@@ -334,7 +334,7 @@ test.describe("[SmartSearch] Vehicles MB", () => {
     );
     const queries = isFixedQueriesOnly()
       ? []
-      : generatePunctuatedFacetMatrixFromFacets(facets);
+      : await generatePunctuatedFacetMatrixFromFacets(facets);
     await saveGeneratedQueriesIfAny(queries);
     const allQueries = mergeQueries(fixedQueries, queries);
     extendTimeoutForQueryCount(testInfo, allQueries.length);

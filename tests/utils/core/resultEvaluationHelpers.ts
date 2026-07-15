@@ -301,9 +301,6 @@ export async function validateLanguageConsistency(
           content: `Text#1: '${actualInput}'\nText#2: '${smartSearchMessage}'\nRespond with 'YES' only if they are the same language, otherwise respond with 2-digit language code of Text#1 and Text#2.`,
         },
       ],
-      {
-        max_completion_tokens: 50, // Increased from 10 for better reliability with gpt-5-mini
-      },
     );
     langCheckResult =
       langCompletion.choices?.[0]?.message?.content?.trim().toUpperCase() ||
@@ -365,6 +362,7 @@ export function logResultSummary({
   actualInput,
   smartSearchMessage,
   translatedText,
+  actualCount,
   responseVehicleTotalCount,
   resultCount,
   actualFacets,
@@ -381,6 +379,7 @@ export function logResultSummary({
   actualInput: any;
   smartSearchMessage: string;
   translatedText?: TranslatedResultText;
+  actualCount: number;
   responseVehicleTotalCount: number | null;
   resultCount: number;
   actualFacets: any;
@@ -410,10 +409,9 @@ export function logResultSummary({
 
   console.log("\n");
   console.log(`${sectionMarker(countStatus)} Count:`);
-  console.log(
-    `• Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`,
-  );
-  console.log(`• Backend:   ${resultCount}`);
+  console.log(`• Search-GraphQL:    ${actualCount}`);
+  console.log(`• Backend-GraphQL:   ${resultCount}`);
+  console.log(`• Message Response:  ${responseVehicleTotalCount === null ? "-" : responseVehicleTotalCount}`);
   if (uiVehicleCount !== undefined) {
     console.log(
       `• UI:        ${uiVehicleCount === null ? "-" : uiVehicleCount}`,
