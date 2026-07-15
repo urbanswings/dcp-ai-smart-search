@@ -190,19 +190,19 @@ Defines how OpenAI evaluates search responses. Key sections:
 ```
 
 ### 5. Locale-Specific Formatting
-**Location**: `tests/utils/generation/generateFacetMatrix.ts`
+**Location**: `tests/utils/core/currencyFormattingHelpers.ts`
 
 #### Price Formatting
 ```typescript
-function formatLocalizedPriceValue(value: unknown): string {
-  switch (getCountryCode()) {
-    case "TR": return `₺${formatLocalizedInteger(value, "tr-TR")}`;
-    case "AU": return `A$ ${formatLocalizedInteger(value, "en-AU")}`;
-    case "IN": return `₹ ${formatLocalizedInteger(value, "en-IN")}`;
-    case "SG": return `${formatLocalizedInteger(value, "en-SG")} SGD`;
-    case "KR": return `${formatLocalizedInteger(value, "ko-KR")} 원`;
-    case "TH": return `THB ${formatLocalizedInteger(value, "en-TH")}`;
-  }
+function getLocalizedCurrencyFormats(value: unknown): LocalizedCurrencyFormats {
+  // Return the canonical localized value and accepted query variants.
+  return {
+    primary: `CUR ${formatLocalizedInteger(value, "xx-XX")}`,
+    variants: [
+      `CUR ${formatLocalizedInteger(value, "xx-XX")}`,
+      `${formatLocalizedInteger(value, "xx-XX")} currency-name`,
+    ],
+  };
 }
 ```
 
@@ -265,7 +265,7 @@ const GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES = {
 - [ ] Update `RANGE_PHRASE_TEMPLATES` for localized range phrases
 - [ ] Update `LOCALIZED_FACET_NAMES_FOR_QUERY` mappings
 - [ ] Add localized sentence templates in `getLocalizedSentenceTemplate()` (promptEngineHelper.ts)
-- [ ] Update price formatting in `formatLocalizedPriceValue()`
+- [ ] Update price formatting in `getLocalizedCurrencyFormats()`
 - [ ] Update body type/facet labels in `toQueryLabel()` and `toHintLabel()`
 
 ### Phase 3: Generation
@@ -292,7 +292,7 @@ const GET_SMARTSEARCH_RESULTS_COUNTRY_QUERIES = {
 **Solution**: Check language code mapping in `getLanguageCode()` - ensure it returns correct 2-letter code.
 
 ### Issue: Price Formatting Incorrect
-**Solution**: Add currency case to `formatLocalizedPriceValue()` function.
+**Solution**: Add a currency case to `getLocalizedCurrencyFormats()`.
 
 ### Issue: Facet Values Not Translating
 **Solution**: Verify `toHintLabel()` and `toQueryLabel()` handle the facet type and add aliases if needed.
@@ -325,9 +325,15 @@ const newLanguage = {
 
 ### Adding New Country Price Format
 ```typescript
-// In formatLocalizedPriceValue():
+// In getLocalizedCurrencyFormats():
 case "XX":
-  return `${formatLocalizedInteger(value, "xx-XX")} CUR`;
+  return {
+    primary: `${formatLocalizedInteger(value, "xx-XX")} CUR`,
+    variants: [
+      `${formatLocalizedInteger(value, "xx-XX")} CUR`,
+      `CUR ${formatLocalizedInteger(value, "xx-XX")}`,
+    ],
+  };
 ```
 
 ## Testing the New Market

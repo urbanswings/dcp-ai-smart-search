@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { AzureOpenAI } from "openai";
 import path from "path";
+import { getLocalizedCurrencyFormats } from "../core/currencyFormattingHelpers";
 import { getOpenAIClient } from "../core/openaiClient";
 import * as promptEngine from "../query/promptEngineHelper";
 
@@ -443,16 +444,6 @@ function getConvertedEnginePowerRangeFromCounterpart(
   return { min, max };
 }
 
-function formatLocalizedInteger(value: unknown, locale: string): string {
-  const numericValue = Math.round(Number(value));
-  if (!Number.isFinite(numericValue)) {
-    return String(value);
-  }
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(
-    numericValue,
-  );
-}
-
 function getCountryCode(): string {
   return (process.env.COUNTRY || "AU").toUpperCase();
 }
@@ -467,32 +458,13 @@ function getLanguageCode(): string {
   return language;
 }
 
-function formatLocalizedPriceValue(value: unknown): string {
-  switch (getCountryCode()) {
-    case "TR":
-      return `₺${formatLocalizedInteger(value, "tr-TR")}`;
-    case "AU":
-      return `A$ ${formatLocalizedInteger(value, "en-AU")}`;
-    case "IN":
-      return `₹ ${formatLocalizedInteger(value, "en-IN")}`;
-    case "SG":
-      return `${formatLocalizedInteger(value, "en-SG")} SGD`;
-    case "KR":
-      return `${formatLocalizedInteger(value, "ko-KR")} 원`;
-    case "TH":
-      return `THB ${formatLocalizedInteger(value, "en-TH")}`;
-    default:
-      return formatLocalizedInteger(value, "en-US");
-  }
-}
-
 function formatFacetValueForQuery(
   facetKey: string,
   formattedValue: string,
   rawValue: unknown,
 ): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return formatLocalizedPriceValue(rawValue);
+    return getLocalizedCurrencyFormats(rawValue).primary;
   }
   if (facetKey === "bodyType") {
     return toQueryLabel(facetKey, rawValue);
@@ -790,7 +762,7 @@ function buildCompleteFilterText(
   rawValue: unknown,
 ): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
+    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || getLocalizedCurrencyFormats(rawValue).primary}'`;
   }
   if (facetKey === "fuelType") {
     const label = toQueryLabel(facetKey, rawValue).replace(/ cars$/, "");
@@ -959,7 +931,7 @@ function toCompleteHintValueLabel(
     return toHintLabel(facetKey, rawValue);
   }
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return formatLocalizedPriceValue(rawValue);
+    return getLocalizedCurrencyFormats(rawValue).primary;
   }
   return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }

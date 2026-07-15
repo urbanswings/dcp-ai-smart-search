@@ -1,5 +1,6 @@
 import fs from "fs/promises";
 import path from "path";
+import { getLocalizedCurrencyFormats } from "../core/currencyFormattingHelpers";
 import { extractMissingFacetValuesFromData } from "../facets/facetValueHelpers";
 import {
   buildComplete,
@@ -200,53 +201,10 @@ function formatExpandedThousands(value: number): string {
   return `${Math.round(value / 1000)} thousand`;
 }
 
-function getCountryCode(): string {
-  return (process.env.COUNTRY || "AU").toUpperCase();
-}
-
 function uniqueValues(values: string[]): string[] {
   return Array.from(
     new Set(values.map((value) => value.trim()).filter(Boolean)),
   );
-}
-
-function getCurrencyUnitVariants(value: number): string[] {
-  const formattedValue = formatWithThousandsSeparator(value);
-
-  switch (getCountryCode()) {
-    case "TR":
-      return [`₺${formattedValue}`, `${formattedValue} lira`];
-    case "TH":
-      return [
-        `THB ${formattedValue}`,
-        `${formattedValue} baht`,
-        `฿${formattedValue}`,
-      ];
-    case "KR":
-      return [`${formattedValue} 원`, `KRW ${formattedValue}`];
-    case "JP":
-      return [
-        `¥${formattedValue}`,
-        `${formattedValue} yen`,
-        `${formattedValue}円`,
-      ];
-    case "SG":
-      return [
-        `${formattedValue} SGD`,
-        `SGD ${formattedValue}`,
-        `S$${formattedValue}`,
-      ];
-    case "AU":
-      return [`A$ ${formattedValue}`, `AUD ${formattedValue}`];
-    case "IN":
-      return [
-        `₹ ${formattedValue}`,
-        `${formattedValue} rupees`,
-        `INR ${formattedValue}`,
-      ];
-    default:
-      return [];
-  }
 }
 
 function getNumericUnitValueVariants(
@@ -260,7 +218,10 @@ function getNumericUnitValueVariants(
   ];
 
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return uniqueValues([...baseVariants, ...getCurrencyUnitVariants(value)]);
+    return uniqueValues([
+      ...baseVariants,
+      ...getLocalizedCurrencyFormats(value).variants,
+    ]);
   }
 
   if (facetKey === "mileage") {
