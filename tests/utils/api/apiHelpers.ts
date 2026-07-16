@@ -275,6 +275,10 @@ export class SearchApiClient {
       const payload = this.buildEmhPayload(query, config);
 
       const response = await this.performEmhPost(endpoint, payload, requestConfig, config.isLocalEndpoint);
+      if (response.data?.errors) {
+        console.error(`[EMH] POST step-1 GraphQL errors:`, JSON.stringify(response.data.errors).slice(0, 500));
+        throw new Error(`API Error: ${JSON.stringify(response.data.errors)}`);
+      }
 
       const responseTime = Date.now() - responseStartTime;
       const responseData = this.parseResponseData(response.data);

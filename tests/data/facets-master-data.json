@@ -611,6 +611,24 @@
       },
       {
         "value": "eSprinter 320"
+      },
+      {
+        "value": "Sprinter 311"
+      },
+      {
+        "value": "Sprinter 315"
+      },
+      {
+        "value": "Sprinter 415"
+      },
+      {
+        "value": "Vito 116"
+      },
+      {
+        "value": "Vito 119"
+      },
+      {
+        "value": "Sprinter null"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -674,6 +692,16 @@
         "label": "ボディタイプ",
         "formattedValue": "シューティングブレーク",
         "value": "SHOOTING_BRAKE"
+      },
+      {
+        "label": "Body Type",
+        "formattedValue": "Mixto",
+        "value": "MIXTO"
+      },
+      {
+        "label": "Body Type",
+        "formattedValue": "Chassis",
+        "value": "CHASSIS"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1033,6 +1061,11 @@
         "label": "Drive type",
         "formattedValue": "",
         "value": "UNDEFINED"
+      },
+      {
+        "label": "Drive type",
+        "formattedValue": "All-wheel drive",
+        "value": "AWD"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1395,6 +1428,18 @@
       {
         "formattedValue": "SELECT",
         "value": "182703dc"
+      },
+      {
+        "formattedValue": "PRO",
+        "value": "db902fa"
+      },
+      {
+        "formattedValue": "SELECT",
+        "value": "176d03c9"
+      },
+      {
+        "formattedValue": "Tourer SELECT",
+        "value": "3fd2066a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2336,6 +2381,26 @@
       {
         "formattedValue": "Dört mevsim lastikleri",
         "value": "acba0bc4"
+      },
+      {
+        "formattedValue": "Plastic floor load compartment",
+        "value": "f0550da5"
+      },
+      {
+        "formattedValue": "Split rear doors",
+        "value": "58260826"
+      },
+      {
+        "formattedValue": "Tailgate",
+        "value": "23b10534"
+      },
+      {
+        "formattedValue": "Two-person co-driver's seat",
+        "value": "c7a60c19"
+      },
+      {
+        "formattedValue": "Wooden floor load compartment",
+        "value": "e2c40d41"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4181,6 +4246,9 @@
       },
       {
         "value": 48
+      },
+      {
+        "value": 12
       }
     ],
     "facetType": "MULTI_VALUE"
