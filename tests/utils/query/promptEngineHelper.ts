@@ -1,7 +1,7 @@
 import { AzureOpenAI } from "openai";
+import { OPENAI_MAX_TOKENS } from "./openaiConfig";
 
 const OPENAI_CHAT_MODEL = process.env.NEXUS_GPT_MODEL || "gpt-4o-mini";
-const OPENAI_DEFAULT_MAX_TOKENS = 200; // Increased from 40 to support query generation with gpt-5-mini
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
 /**
@@ -12,13 +12,13 @@ const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
 const COMPLETE_QUERY_STYLE_HINTS = [
   "Use exact form '<facet name> <filter value>'",
-  // "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
-  // "Use a feature-led style",
-  // "Use a shortlist style",
-  // "Use a conversational ask style",
-  // "Use an explore/discover style",
-  // "Use a minimal keyword style",
-  // "Use a preference-led style",
+  "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
+  "Use a feature-led style",
+  "Use a shortlist style",
+  "Use a conversational ask style",
+  "Use an explore/discover style",
+  "Use a minimal keyword style",
+  "Use a preference-led style",
 ];
 
 const REPETITIVE_COMPLETE_QUERY_PREFIXES = [
@@ -59,10 +59,23 @@ interface GenerationOptions {
     formattedValue: string,
     rawValue: unknown,
   ) => string;
-  maxTokens?: number;
 }
 
 const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
+  campaigns: {
+    tr: "kampanyalar",
+    th: "แคมเปญ",
+    ko: "캠페인",
+    ja: "キャンペーン",
+    hi: "अभियान",
+    ta: "பிரச்சாரங்கள்",
+    te: "క్యాంపెయిన్‌లు",
+    bn: "ক্যাম্পেইন",
+    gu: "કૅમ્પેઇન",
+    kn: "ಪ್ರಚಾರಗಳು",
+    ml: "ക്യാമ്പെയ്‌നുകൾ",
+    mr: "मोहीम",
+  },
   bodyType: {
     tr: "gövde tipi",
     th: "ประเภทรถ",
@@ -110,28 +123,28 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     th: "สีภายใน",
     ko: "내장 색상",
     ja: "内装色",
-    hi: "अपहोल्स्ट्री",
-    ta: "உள் அலங்கார நிறம்",
-    te: "అప్హోల్స్టరీ",
-    bn: "আপহোলস্টারি",
-    gu: "અપહોલ્સ્ટરી",
-    kn: "ಅಪ್ಹೋಲ್ಸ್ಟರಿ",
-    ml: "അപ്ഹോൾസ്റ്ററി",
-    mr: "अपहोल्स्ट्री",
+    hi: "आंतरिक रंग",
+    ta: "உட்புற நிறं",
+    te: "లోపలి రంగు",
+    bn: "অভ্যন্তরীণ রঙ",
+    gu: "અંદરનો રંગ",
+    kn: "ಆಂತರಿಕ ಬಣ್ಣ",
+    ml: "ഉൾനിറം",
+    mr: "अंतर्गत रंग",
   },
   upholsteryPolish: {
-    tr: "döşeme kaplaması",
-    th: "วัสดุตกแต่งภายใน",
-    ko: "내장 마감",
-    ja: "内装仕上げ",
-    hi: "अपहोल्स्ट्री फिनिश",
-    ta: "உள் அலங்கார முடிப்பு",
-    te: "అప్హోల్స్టరీ ఫినిష్",
-    bn: "আপহোলস্টারি ফিনিশ",
-    gu: "અપહોલ્સ્ટરી ફિનિશ",
-    kn: "ಅಪ್ಹೋಲ್ಸ್ಟರಿ ಫಿನಿಷ್",
-    ml: "അപ്ഹോൾസ്റ്ററി ഫിനിഷ്",
-    mr: "अपहोल्स्ट्री फिनिश",
+    tr: "döşeme malzemesi",
+    th: "วัสดุบุผิว",
+    ko: "시트 마감재",
+    ja: "内装表皮材",
+    hi: "अपहोल्स्ट्री मटेरियल",
+    ta: "அப்ஹோல்ஸ்டரி துணி",
+    te: "అప్హోల్స్టరీ మెటీరియల్",
+    bn: "আপহোলস্টারি সামগ্রী",
+    gu: "અપહોલ્સ્ટરી મટીરીયલ",
+    kn: "ಅಪ್ಹೋಲ್ಸ್ಟರಿ ಮೆಟೀರಿಯಲ್",
+    ml: "അപ്ഹോൾസ്റ്ററി മെറ്റീരിയൽ",
+    mr: "अपहोल्स्ट्री मटेरियल",
   },
   stockType: {
     tr: "stok tipi",
@@ -288,27 +301,54 @@ const LOCALIZED_FACET_LABELS: Record<string, Record<string, string>> = {
     mr: "गिअरबॉक्स",
   },
   packages: {
-    kr: "패키지",
+    ko: "패키지",
     tr: "donanım paketi",
   },
   lines: {
-    kr: "라인",
+    ko: "라인",
     tr: "tasarım konsepti",
   },
   colorPolish: {
-    kr: "실내 장식품 (소재)",
-    th: "เบาะ",
-    tr: "döşeme",
+    ko: "외장 페인트",
+    ja: "外装ペイント",
+    th: "สีภายนอก", 
+    tr: "dış renk",
+    hi: "बाहरी रंग",
+    ta: "வெளிப்புற நிறம்",
+    te: "బయటి రంగు",
+    bn: "বাহ্যিক রঙ",
+    gu: "બહારનો રંગ",
+    kn: "ಬಾಹ್ಯ ಬಣ್ಣ",
+    ml: "പുറംനിറം",
+    mr: "बाह्य रंग",
   },
   enginePowerHP: {
-    en: "horsepower",
-    kr: "엔진 출력(마력)",
-    tr: "motor gücü (HP)",
+    tr: "motor gücü",
+    th: "กำลังเครื่องยนต์",
+    ko: "최고 출력",
+    ja: "最高出力",
+    hi: "इंजन की शक्ति",
+    ta: "இன்ஜின் சக்தி",
+    te: "ఇంజిన్ పవర్",
+    bn: "ইঞ্জিনের ক্ষমতা",
+    gu: "એન્જિન પાવર",
+    kn: "ಎಂಜಿನ್ ಶಕ್ತಿ",
+    ml: "എഞ്ചിൻ പവർ",
+    mr: "इंजिन पॉवर",
   },
   enginePowerKW: {
-    en: "kilowatts",
-    kr: "엔진 출력(킬로와트)",
-    tr: "motor gücü (kW)",
+    tr: "motor gücü",
+    th: "กำลังเครื่องยนต์",
+    ko: "최고 출력",
+    ja: "最高出力",
+    hi: "इंजन की शक्ति",
+    ta: "இன்ஜின் சக்தி",
+    te: "ఇంజిన్ పవర్",
+    bn: "ইঞ্জিনের ক্ষমতা",
+    gu: "એન્જિન પાવર",
+    kn: "ಎಂಜಿನ್ ಶಕ್ತಿ",
+    ml: "എഞ്ചിൻ പവർ",
+    mr: "इंजिन पॉवर",
   },
 };
 
@@ -323,6 +363,147 @@ function normalizeWhitespace(value: unknown): string {
 
 function normalizeLanguageCode(language: string): string {
   return normalizeWhitespace(language).toLowerCase().split(/[-_]/)[0] || "en";
+}
+
+function isEnglishLanguage(language: string): boolean {
+  return normalizeLanguageCode(language) === "en";
+}
+
+function getLocalizedSentenceTemplate(
+  language: string,
+  styleHint: string,
+  keyLabel: string,
+  valueLabel: string,
+): string {
+  const normalizedLanguage = normalizeLanguageCode(language);
+
+  const styleKey = styleHint.includes("'<facet name> <filter value>'")
+    ? "exact"
+    : styleHint.includes("direct command")
+      ? "direct"
+      : styleHint.includes("feature-led")
+        ? "feature"
+        : styleHint.includes("shortlist")
+          ? "shortlist"
+          : styleHint.includes("conversational ask")
+            ? "ask"
+            : styleHint.includes("explore/discover")
+              ? "explore"
+              : styleHint.includes("minimal keyword")
+                ? "minimal"
+                : styleHint.includes("preference-led")
+                  ? "preference"
+                  : "default";
+
+  if (normalizedLanguage === "ko") {
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("direct command")) {
+      return `${keyLabel} ${valueLabel}로 보여줘.`;
+    }
+    if (styleHint.includes("feature-led")) {
+      return `${keyLabel} 기준으로 ${valueLabel} 차량을 추천해줘.`;
+    }
+    if (styleHint.includes("shortlist")) {
+      return `${valueLabel} ${keyLabel} 중심으로 후보를 추려줘.`;
+    }
+    if (styleHint.includes("conversational ask")) {
+      return `${valueLabel} ${keyLabel} 차량을 찾아줄 수 있을까?`;
+    }
+    if (styleHint.includes("explore/discover")) {
+      return `${valueLabel} ${keyLabel} 옵션을 살펴보고 싶어.`;
+    }
+    if (styleHint.includes("minimal keyword")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("preference-led")) {
+      return `${valueLabel} ${keyLabel}를 선호해.`;
+    }
+    return `${valueLabel} ${keyLabel} 차량 보여줘.`;
+  }
+
+  if (normalizedLanguage === "ja") {
+    if (styleHint.includes("'<facet name> <filter value>'")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("direct command")) {
+      return `${keyLabel}が${valueLabel}の車を見せてください。`;
+    }
+    if (styleHint.includes("feature-led")) {
+      return `${keyLabel}を基準に${valueLabel}の車を提案してください。`;
+    }
+    if (styleHint.includes("shortlist")) {
+      return `${valueLabel}の${keyLabel}で候補を絞ってください。`;
+    }
+    if (styleHint.includes("conversational ask")) {
+      return `${valueLabel}の${keyLabel}の車を探せますか？`;
+    }
+    if (styleHint.includes("explore/discover")) {
+      return `${valueLabel}の${keyLabel}オプションを見たいです。`;
+    }
+    if (styleHint.includes("minimal keyword")) {
+      return `${keyLabel} ${valueLabel}`;
+    }
+    if (styleHint.includes("preference-led")) {
+      return `${valueLabel}の${keyLabel}を希望します。`;
+    }
+    return `${valueLabel}の${keyLabel}の車を表示してください。`;
+  }
+
+  if (normalizedLanguage === "th") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `แสดงรถที่ ${keyLabel}เป็น${valueLabel}`,
+      feature: `ช่วยแนะนำรถตาม ${keyLabel} ${valueLabel}`,
+      shortlist: `ช่วยคัดตัวเลือก ${valueLabel}ใน${keyLabel}`,
+      ask: `ช่วยค้นหารถที่ ${keyLabel}เป็น${valueLabel}ได้ไหม`,
+      explore: `อยากดูตัวเลือก ${valueLabel}สำหรับ${keyLabel}`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `ฉันต้องการ ${keyLabel}แบบ${valueLabel}`,
+      default: `ขอดูรถที่ ${keyLabel}เป็น${valueLabel}`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  if (normalizedLanguage === "tr") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `${keyLabel} ${valueLabel} olan araclari goster.`,
+      feature: `${keyLabel} kriterinde ${valueLabel} araclari oner.`,
+      shortlist: `${valueLabel} ${keyLabel} icin kisa liste hazirla.`,
+      ask: `${keyLabel} ${valueLabel} olan arac bulabilir misin?`,
+      explore: `${valueLabel} ${keyLabel} seceneklerini kesfetmek istiyorum.`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `${valueLabel} ${keyLabel} tercih ediyorum.`,
+      default: `${valueLabel} ${keyLabel} araclari gormek istiyorum.`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  if (normalizedLanguage === "hi") {
+    const templates: Record<string, string> = {
+      exact: `${keyLabel} ${valueLabel}`,
+      direct: `${keyLabel} ${valueLabel} wali gadiyan dikhao.`,
+      feature: `${keyLabel} ${valueLabel} ke adhar par gadiyan suggest karo.`,
+      shortlist: `${valueLabel} ${keyLabel} ke liye shortlist banao.`,
+      ask: `kya aap ${keyLabel} ${valueLabel} wali gadi dhoondh sakte hain?`,
+      explore: `main ${valueLabel} ${keyLabel} options explore karna chahta hoon.`,
+      minimal: `${valueLabel} ${keyLabel}`,
+      preference: `mujhe ${valueLabel} ${keyLabel} pasand hai.`,
+      default: `mujhe ${valueLabel} ${keyLabel} wali gadiyan dikhaiye.`,
+    };
+    return templates[styleKey] || templates.default;
+  }
+
+  // Safe non-English default sentence form for remaining locales.
+  if (styleKey === "exact" || styleKey === "minimal") {
+    return `${keyLabel} ${valueLabel}`;
+  }
+  if (styleKey === "ask") {
+    return `${keyLabel} ${valueLabel} ?`;
+  }
+  return `${keyLabel} ${valueLabel} options`;
 }
 
 function getLocalizedFacetLabel(
@@ -386,6 +567,56 @@ function buildFacetFirstQuery(
   return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
 }
 
+function buildStyleHintFallbackQuery(
+  styleHint: string,
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+  facetDisplayNameFn: (key: string) => string,
+  language: string,
+): string {
+  const valueLabel = normalizeWhitespace(formattedValue || rawValue);
+  const keyLabel = getLocalizedFacetLabel(
+    facetKey,
+    facetDisplayNameFn,
+    language,
+  );
+
+  // For non-English locales, avoid generating hard-coded English wrappers.
+  if (!isEnglishLanguage(language)) {
+    return normalizeWhitespace(
+      getLocalizedSentenceTemplate(language, styleHint, keyLabel, valueLabel),
+    );
+  }
+
+  if (styleHint.includes("'<facet name> <filter value>'")) {
+    return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("direct command")) {
+    return normalizeWhitespace(`filter ${keyLabel} ${valueLabel}`);
+  }
+  if (styleHint.includes("feature-led")) {
+    return normalizeWhitespace(`${keyLabel}: ${valueLabel}`);
+  }
+  if (styleHint.includes("shortlist")) {
+    return normalizeWhitespace(`shortlist ${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("conversational ask")) {
+    return normalizeWhitespace(`can you find ${keyLabel} ${valueLabel}`);
+  }
+  if (styleHint.includes("explore/discover")) {
+    return normalizeWhitespace(`explore ${valueLabel} ${keyLabel} options`);
+  }
+  if (styleHint.includes("minimal keyword")) {
+    return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+  }
+  if (styleHint.includes("preference-led")) {
+    return normalizeWhitespace(`prefer ${valueLabel} ${keyLabel}`);
+  }
+
+  return normalizeWhitespace(`${valueLabel} ${keyLabel}`);
+}
+
 /**
  * Build varied fallback phrase by rotating through templates
  */
@@ -403,6 +634,63 @@ function buildVariedFallbackPhrase(
     facetDisplayNameFn,
     language,
   );
+
+  if (!isEnglishLanguage(language)) {
+    const localeSentenceTemplates = [
+      getLocalizedSentenceTemplate(
+        language,
+        "Use exact form '<facet name> <filter value>'",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a direct command without opening words style e.g. 'show me', 'filter', 'Mercedes-Benz'",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a feature-led style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a shortlist style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a conversational ask style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use an explore/discover style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a minimal keyword style",
+        keyLabel,
+        valueLabel,
+      ),
+      getLocalizedSentenceTemplate(
+        language,
+        "Use a preference-led style",
+        keyLabel,
+        valueLabel,
+      ),
+    ];
+    const idx = context.templateCursor % localeSentenceTemplates.length;
+    context.templateCursor += 1;
+    return normalizeWhitespace(localeSentenceTemplates[idx]);
+  }
+
   const templates = [
     `${valueLabel} ${keyLabel} options`,
     `vehicles with ${valueLabel} ${keyLabel}`,
@@ -489,7 +777,6 @@ async function generateOpenAiQuery(
   client: AzureOpenAI,
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = OPENAI_DEFAULT_MAX_TOKENS,
 ): Promise<string> {
   console.log("[prompt-engine] Generating query with AI...");
   console.log(`[prompt-engine] System prompt: ${systemPrompt}`);
@@ -500,7 +787,7 @@ async function generateOpenAiQuery(
       { role: "system", content: systemPrompt },
       { role: "user", content: userPrompt },
     ],    
-    max_completion_tokens: maxTokens,
+    max_completion_tokens: OPENAI_MAX_TOKENS,
   });
   return completion?.choices?.[0]?.message?.content?.trim() || "";
 }
@@ -531,7 +818,7 @@ async function generateQueryWithVariation(
   context: PromptContext,
   options: GenerationOptions = {},
 ): Promise<string> {
-  const { language = "en", fallbackFn, filterTextFn, maxTokens = 32 } = options;
+  const { language = "en", fallbackFn, filterTextFn } = options;
   const exactQuery = buildFacetFirstQuery(
     facetKey,
     formattedValue,
@@ -542,11 +829,22 @@ async function generateQueryWithVariation(
   const fallback = fallbackFn
     ? fallbackFn(facetKey, formattedValue, rawValue)
     : exactQuery;
+  const styleHint = pickNextCompleteStyle(context);
+  const styledFallback = buildStyleHintFallbackQuery(
+    styleHint,
+    facetKey,
+    formattedValue,
+    rawValue,
+    facetDisplayNameFn,
+    language,
+  );
+
+  if (styleHint.includes("'<facet name> <filter value>'"))
+    return normalizeWhitespace(exactQuery);  
 
   if (!client || !systemPrompt || !userPromptTemplate) {
-    // return normalizeWhitespace(formattedValue);
     return enforceCompleteQueryVariation(
-      fallback,
+      styledFallback || fallback,
       facetKey,
       formattedValue,
       rawValue,
@@ -561,7 +859,6 @@ async function generateQueryWithVariation(
       ? filterTextFn(facetKey, formattedValue, rawValue)
       : `${getLocalizedFacetLabel(facetKey, facetDisplayNameFn, language)} ${formattedValue}`;
 
-    const styleHint = pickNextCompleteStyle(context);
     const resolvedSystemPrompt = String(systemPrompt).replace(
       /\{LANGUAGE\}/g,
       language,
@@ -572,17 +869,11 @@ async function generateQueryWithVariation(
       .replace(/\{styleHint\}/g, styleHint);
     const resolvedUserPrompt = `${resolvedUserPromptBase}\nStyle requirement: ${styleHint}.`;
 
-    // If the style hint is the exact query format, skip AI generation and return the exact query to ensure we have that variation covered
-    if (styleHint.includes("'<facet name> <filter value>'"))
-      return normalizeWhitespace(exactQuery);
-
     const generated = await generateOpenAiQuery(
       client,
       resolvedSystemPrompt,
       resolvedUserPrompt,
-      maxTokens,
     );
-    // return generated;
     const generatedVariation = enforceCompleteQueryVariation(
       generated || fallback,
       facetKey,
@@ -598,7 +889,7 @@ async function generateQueryWithVariation(
       `[prompt-engine] Error generating query: ${error instanceof Error ? error.message : error}`,
     );
     return enforceCompleteQueryVariation(
-      fallback,
+      styledFallback || fallback,
       facetKey,
       formattedValue,
       rawValue,

@@ -21,26 +21,25 @@ type SmartSearchResponseCapture = {
 };
 
 export function getSmartSearchLocators(page: Page): SmartSearchLocators {
+  const host = page.locator("wb7-input.smart-search__input").first();
+
   return {
-    searchInputArea: page
-      .locator(".smart-search__input, wb7-input.smart-search__input")
-      .first(),
-    searchButton: page
-      .locator(
-        ".smart-search__input.wb-input wb7-input-action div[data-on='contrast'] button",
-      )
-      .or(page.locator("wb7-input-action button"))
-      .or(page.locator(".smart-search__input button"))
-      .or(
-        page.locator(
-          "button[aria-label*='search' i], button[title*='search' i]",
-        ),
-      )
-      .first(),
+    searchInputArea: host,
+    
     input: page
-      .locator("wb7-input.smart-search__input wb7-grey-box input")
-      .or(page.locator(".smart-search__input input"))
-      .or(page.locator("input[placeholder*='search' i]"))
+      .locator("wb7-input.smart-search__input input[type='search'][inputmode='search']")
+      .or(host.locator("input[id^='input-']"))
+      .or(host.locator("input[aria-invalid]"))
+      .first(),
+
+    searchButton: page
+      // 1. Chained Selection: This forces Playwright to cross both shadow boundaries in order
+      .locator(".smart-search__action-button button[aria-label='検索']")
+      // 2. Class Chaining: Direct route through the smart search action block element
+      .or(page.locator("wb7-input-action.smart-search__action-button button"))
+      // 3. Exact target fallback using the specific icon layout name string
+      .or(page.locator(".smart-search__action-button button:has(wb7-icon[name*='arrow-right'])"))
+      .filter({ visible: true })
       .first(),
   };
 }
@@ -54,20 +53,19 @@ export async function waitForSmartSearchControls(
       state: "visible",
       timeout: 15000,
     });
-    console.debug("[DEBUG] Waiting for search button to be visible...");
-    await locators.searchButton.waitFor({ state: "visible", timeout: 10000 });
-    for (let j = 0; j < 10; j++) {
-      const enabled = await locators.searchButton.isEnabled();
-      console.debug(
-        `[DEBUG] Search button enabled: ${enabled} (attempt ${j + 1}/10)`,
-      );
-      if (enabled) break;
-      await page.waitForTimeout(1000);
-    }
+    console.debug("[DEBUG] Waiting for input field to be not read-only...");
+    await page.waitForFunction(
+      (el) => {
+        if (!el) return false;
+        return !(el as HTMLInputElement).readOnly;
+      },
+      await locators.searchInputArea.elementHandle(),
+      { timeout: 10000 },
+    );
     return null;
   } catch (e: any) {
     const details = e?.message || e;
-    console.debug("[DEBUG] Error waiting for search UI:", details);
+
     return `Search UI not visible: ${details}`;
   }
 }
@@ -77,13 +75,12 @@ export async function fillSmartSearchInput(
   actualInput: any,
 ): Promise<string | null> {
   try {
-    console.debug(`[DEBUG] Filling input with: '${actualInput}'`);
     await input.waitFor({ state: "visible", timeout: 10000 });
     await input.fill(" ");
     await input.fill(actualInput);
     return null;
   } catch (e: any) {
-    console.debug("[DEBUG] Error filling input:", e?.message || e);
+
     return `Search input not usable: ${e?.message || e}`;
   }
 }
@@ -112,7 +109,7 @@ export async function assertSubmitDisabled(
     };
   }
 
-  console.debug("[DEBUG] FAILED: Submit Button Enabled");
+
   return {
     query,
     results: "[Script] FAILED: Submit Button Enabled",
@@ -152,7 +149,7 @@ export function createSmartSearchResponseCapture(
         if (responseCapturedPromiseResolve) responseCapturedPromiseResolve();
       }
     } catch (e) {
-      console.warn("[DEBUG] Failed to capture API response payload:", e);
+      console.warn("Failed to capture API response payload:", e);
     }
   };
 
@@ -202,7 +199,7 @@ async function retrySmartSearchClick(
     return false;
   } catch (e: any) {
     if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-      console.warn("[DEBUG] Page closed during retry button click");
+      console.warn("Page closed during retry button click");
       return true;
     }
     return false;
@@ -228,7 +225,7 @@ export async function clickSearchAndWaitForResult(
   while (retries < 3 && !pageClosed) {
     try {
       if (page.isClosed()) {
-        console.warn("[DEBUG] Page was closed, cannot proceed with retries");
+        console.warn("Page was closed, cannot proceed with retries");
         pageClosed = true;
         break;
       }
@@ -247,7 +244,7 @@ export async function clickSearchAndWaitForResult(
         isSuccessVisible = await successBubbleLocator.isVisible();
       } catch (e: any) {
         if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-          console.warn("[DEBUG] Page closed during isVisible check");
+          console.warn("Page closed during isVisible check");
           pageClosed = true;
           break;
         }
@@ -266,7 +263,7 @@ export async function clickSearchAndWaitForResult(
         errorVisible = await errorResultLocator.isVisible({ timeout: 3000 });
       } catch (e: any) {
         if (e?.message?.includes("closed") || e?.message?.includes("context")) {
-          console.warn("[DEBUG] Page closed during error check");
+          console.warn("Page closed during error check");
           pageClosed = true;
           break;
         }
@@ -295,7 +292,7 @@ export async function clickSearchAndWaitForResult(
         errMsg.includes("closed") ||
         errMsg.includes("context")
       ) {
-        console.warn(`[DEBUG] Page appears to be closed: ${errMsg}`);
+        console.warn(`Page appears to be closed: ${errMsg}`);
         pageClosed = true;
         break;
       }

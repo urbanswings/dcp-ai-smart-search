@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const adapter = require("./lib/resultSchemaAdapter.js");
 
 // Function to recursively find all JSON files in subdirectories
 function findJsonFiles(dir, fileList = []) {
@@ -76,17 +77,20 @@ allSubdirs.forEach((subdir) => {
       const fileName = path.basename(file);
       const fileMatch = fileName.match(/^([A-Z]{2})_([A-Z]+)_/);
 
-      // Add metadata to each result
-      const enrichedData = data.map((result) => ({
-        ...result,
-        _metadata: {
-          date: subdir.dateMatch[1],
-          environment: subdir.dateMatch[2],
-          country: fileMatch ? fileMatch[1] : "UNKNOWN",
-          product: fileMatch ? fileMatch[2] : "UNKNOWN",
-          fileName: fileName,
-        },
-      }));
+      // Add metadata to each result and normalize to new schema
+      const enrichedData = data.map((result) => {
+        const normalized = adapter.normalizeToNewSchema(result);
+        return {
+          ...normalized,
+          _metadata: {
+            date: subdir.dateMatch[1],
+            environment: subdir.dateMatch[2],
+            country: fileMatch ? fileMatch[1] : "UNKNOWN",
+            product: fileMatch ? fileMatch[2] : "UNKNOWN",
+            fileName: fileName,
+          },
+        };
+      });
 
       allResults = allResults.concat(enrichedData);
     } catch (err) {
@@ -276,43 +280,47 @@ function formatMultiLanguageText(textObj) {
 
 // Normalize results to handle both UI and API formats
 allResults = allResults.map((r) => {
-  // Check if this is an API result (has testMode: 'api')
-  if (r.testMode === "api") {
-    // For API results, treat "no_results" scenarios as successful responses (not errors)
-    // Also treat expected status code matches as successful
+  const fields = adapter.extractFields(r);
+  const testMode = r.metadata?.testMode || r.testMode || "ui";
+  
+  // Check if this is an API result
+  if (testMode === "api") {
+    const feedback = fields.responseFeedback || r.openaiEvaluation || "";
     const isExpectedStatusCode =
-      r.openaiEvaluation &&
-      r.openaiEvaluation.includes("Expected status code") &&
-      r.openaiEvaluation.includes("received as expected");
-    const isActualError = r.hasError && !isExpectedStatusCode;
-    const hasValidMessage =
-      r.apiResults?.data?.smartSearch?.message ||
-      r.apiResults?.message ||
-      isExpectedStatusCode;
-
-    const resultText =
-      r.apiResults?.data?.smartSearch?.message ||
-      r.apiResults?.message ||
-      "No message available";
+      feedback.includes("Expected status code") &&
+      feedback.includes("received as expected");
+    const isActualError = fields.hasError && !isExpectedStatusCode;
+    const hasValidMessage = fields.responseMessage || isExpectedStatusCode;
 
     return {
       ...r,
-      query: formatMultiLanguageText(r.query),
-      resultText: escapeScriptTags(resultText),
-      openaiEvaluation: escapeScriptTags(r.openaiEvaluation),
+      testDescribe: fields.testSuite,
+      testTitle: fields.testCase,
+      query: formatMultiLanguageText(fields.queryText),
+      resultText: escapeScriptTags(fields.responseMessage || ""),
+      openaiEvaluation: escapeScriptTags(feedback),
+      statusCode: fields.statusCode,
+      responseTime: fields.responseTime,
       passed: !isActualError && !!hasValidMessage,
       icon: isActualError || !hasValidMessage ? "❌" : "✅",
+      testMode: "api",
     };
   }
+  
   // UI result - handle multi-language query and response
-  const queryText = formatMultiLanguageText(r.query);
-  const responseText = formatMultiLanguageText(r.response || r.resultText);
+  const queryText = formatMultiLanguageText(fields.queryText);
+  const responseText = formatMultiLanguageText(fields.responseMessage || "");
 
   return {
     ...r,
+    testDescribe: fields.testSuite,
+    testTitle: fields.testCase,
     query: queryText,
     resultText: responseText,
-    openaiEvaluation: escapeScriptTags(r.openaiEvaluation),
+    openaiEvaluation: escapeScriptTags(fields.responseFeedback || ""),
+    passed: fields.overallStatus === "PASS",
+    icon: fields.overallStatus === "PASS" ? "✅" : "❌",
+    testMode: "ui",
   };
 });
 

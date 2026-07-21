@@ -117,6 +117,13 @@ function formatNumberForQuery(value) {
   return Math.round(Number(value)).toLocaleString("en-US");
 }
 
+function getCompleteDisplayValue(facetKey, formattedValue, rawValue) {
+  if (facetKey === "bodyType") {
+    return toQueryLabel(facetKey, rawValue);
+  }
+  return String(formattedValue || rawValue);
+}
+
 function fallbackCompleteQuery(facetKey, formattedValue, rawValue) {
   if (facetKey === "modelIdentifier") {
     return `list me all ${formattedValue}`;
@@ -225,10 +232,15 @@ async function buildComplete(data) {
   for (const facetKey of Object.keys(facets)) {
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
+      const displayValue = getCompleteDisplayValue(
+        facetKey,
+        entry.formattedValue,
+        entry.rawValue,
+      );
       const query = await promptEngine.generateQueryWithVariation(
         getOpenAIClient(),
         facetKey,
-        entry.formattedValue,
+        displayValue,
         entry.rawValue,
         promptConfig.systemPrompt,
         promptConfig.userPromptTemplate,
@@ -238,14 +250,13 @@ async function buildComplete(data) {
           language: process.env.LANGUAGE || "en",
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
-          maxTokens: promptConfig.maxTokens,
         },
       );
       addCompleteQuery(
         queryMap,
         query,
         facetKey,
-        entry.formattedValue || entry.rawValue,
+        displayValue,
         {
           include: [{ [facetKey]: [entry.rawValue] }],
           exclude: [],
@@ -284,7 +295,6 @@ async function buildComplete(data) {
             language: process.env.LANGUAGE || "en",
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
-            maxTokens: promptConfig.maxTokens,
           },
         );
         addCompleteQuery(queryMap, query, facetKey, value, {
@@ -319,7 +329,7 @@ function toQueryLabel(facetKey, value) {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return (
       map[String(value)] ||
@@ -387,7 +397,7 @@ function toHintLabel(facetKey, value) {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }

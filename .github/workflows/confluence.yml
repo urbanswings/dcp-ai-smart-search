@@ -1,0 +1,104 @@
+name: Confluence Triggered SmartSearch Tests
+
+# This changes the title of each run dynamically based on your dropdown choices 
+run-name: "[${{ github.event.inputs.environment }}][${{ github.event.inputs.market }}] ${{ github.event.inputs.test_suite == 'all' && 'Full Test Suite' || github.event.inputs.test_suite }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target target runtime instance environment selector'
+        required: true
+        default: 'PREPROD'
+      market:
+        description: 'Target localized user market context container filter'
+        required: true
+        default: 'AU-EN'
+      test_suite:
+        description: 'The specific test suite description block to execute'
+        required: true
+        default: 'all'
+
+jobs:
+  execute-playwright-automation:
+    runs-on: [linux, self-hosted]
+    
+    steps:
+      - name: Checkout Code Base
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js Environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Install Playwright Browser Engines
+        run: npx playwright install --with-deps
+
+      - name: Execute SmartSearch Test Suites
+        env:
+          TARGET_ENV: ${{ github.event.inputs.environment }}
+          TARGET_MARKET: ${{ github.event.inputs.market }}
+        run: |
+          echo "Target Environment: $TARGET_ENV"
+          echo "Target Market: $TARGET_MARKET"
+          
+          if [ "${{ github.event.inputs.test_suite }}" = "all" ]; then
+            echo "Launching complete automation run sequence"
+            npx playwright test
+          else
+            echo "Filtering targeting constraints directly down to: [SmartSearch] ${{ github.event.inputs.test_suite }}"
+            npx playwright test --grep "\[SmartSearch\] ${{ github.event.inputs.test_suite }}"
+          fi
+
+      - name: Archive Execution Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-execution-report
+          path: playwright-report/
+          retention-days: 30
+
+      # New Step: Report final metrics back to the Confluence source page
+      - name: Report Results to Confluence
+        if: always() # Ensures this runs even if the Playwright tests fail
+        run: |
+          # 1. Define status styling based on pipeline outcome
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS_COLOR="green"
+            STATUS_TEXT="PASSED ✅"
+          else
+            STATUS_COLOR="red"
+            STATUS_TEXT="FAILED ❌"
+          fi
+
+          # 2. Build out a direct console link to this specific workflow run
+          RUN_URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          # 3. HTML payload for the Confluence storage format comment
+          COMMENT_BODY="<p><strong>SmartSearch Run Report:</strong></p><ul><li><strong>Environment:</strong> <code>${{ github.event.inputs.environment }}</code></li><li><strong>Market:</strong> <code>${{ github.event.inputs.market }}</code></li><li><strong>Suite:</strong> <code>${{ github.event.inputs.test_suite }}</code></li><li><strong>Result:</strong> <span style='color:${STATUS_COLOR};font-weight:bold;'>${STATUS_TEXT}</span></li><li><strong>Execution Logs:</strong> <a href='${RUN_URL}'>View GitHub Run #${{ github.run_number }}</a></li></ul>"
+
+          # 4. Escape quotes carefully for the JSON curl payload string construction
+          ESC_BODY=$(echo "$COMMENT_BODY" | sed 's/"/\\"/g')
+
+          # 5. Send POST request to Confluence Data Center REST API
+          curl -v -X POST "https://${{ secrets.CONFLUENCE_DOMAIN }}/rest/api/content" \
+            -H "Authorization: Bearer ${{ secrets.CONFLUENCE_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"type\": \"comment\",
+              \"container\": {
+                \"id\": \"1003688880\",
+                \"type\": \"page\"
+              },
+              \"body\": {
+                \"storage\": {
+                  \"value\": \"${ESC_BODY}\",
+                  \"representation\": \"storage\"
+                }
+              }
+            }"

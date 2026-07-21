@@ -147,6 +147,35 @@ export interface ExpectedFacetValidationResult {
   failureReasons: string[];
 }
 
+const ENGINE_POWER_KW_PER_HP = 1.343;
+
+function getEnginePowerCompanionFacetKey(facetKey: string): string | null {
+  if (facetKey === "enginePowerHP") return "enginePowerKW";
+  if (facetKey === "enginePowerKW") return "enginePowerHP";
+  return null;
+}
+
+function convertEnginePowerValueBetweenFacets(
+  value: unknown,
+  fromFacetKey: string,
+  toFacetKey: string,
+): number | null {
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) {
+    return null;
+  }
+  if (fromFacetKey === toFacetKey) {
+    return Math.round(numericValue);
+  }
+  if (fromFacetKey === "enginePowerHP" && toFacetKey === "enginePowerKW") {
+    return Math.round(numericValue / ENGINE_POWER_KW_PER_HP);
+  }
+  if (fromFacetKey === "enginePowerKW" && toFacetKey === "enginePowerHP") {
+    return Math.round(numericValue * ENGINE_POWER_KW_PER_HP);
+  }
+  return null;
+}
+
 function buildUuidToSemanticMap(
   facetsData: Record<string, any>,
 ): Record<string, Record<string, string>> {
@@ -206,6 +235,78 @@ function matchesFacetCandidates(
   );
 }
 
+function parseUpholsteryCompositeParts(value: unknown): string[] {
+  const rawValue = String(value || "").trim().toUpperCase();
+  if (!rawValue.startsWith("UPHOLSTERY_COLOR_")) {
+    return [];
+  }
+
+  const rawParts = rawValue
+    .replace(/^UPHOLSTERY_COLOR_/, "")
+    .split("_")
+    .filter(Boolean);
+  if (rawParts.length < 2) {
+    return [];
+  }
+
+  return rawParts.map((part) => normalizeFacetToken(part)).filter(Boolean);
+}
+
+function getNormalizedFacetValueSet(
+  resultsFacets: Record<string, any>,
+  key: string,
+): Set<string> {
+  return new Set(
+    collectPrimitiveFacetValues(resultsFacets[key])
+      .map((value) => normalizeFacetToken(String(value || "")))
+      .filter(Boolean),
+  );
+}
+
+function isSplitUpholsteryCompositePresent(
+  expected: unknown,
+  resultsFacets: Record<string, any>,
+): boolean {
+  const parts = parseUpholsteryCompositeParts(expected);
+  if (parts.length < 2) {
+    return false;
+  }
+
+  const upholsteryValues = getNormalizedFacetValueSet(resultsFacets, "upholstery");
+  const colorValues = getNormalizedFacetValueSet(resultsFacets, "color");
+  if (upholsteryValues.size === 0 || colorValues.size === 0) {
+    return false;
+  }
+
+  const combinedValues = new Set<string>([...upholsteryValues, ...colorValues]);
+  const allPartsPresent = parts.every((part) => combinedValues.has(part));
+  if (!allPartsPresent) {
+    return false;
+  }
+
+  return parts.some((part) => upholsteryValues.has(part));
+}
+
+function isUpholsteryValueCoveredByCompositeExpectation(
+  actualValue: unknown,
+  expectedValues: unknown[],
+  resultsFacets: Record<string, any>,
+): boolean {
+  const normalizedActual = normalizeFacetToken(String(actualValue || ""));
+  if (!normalizedActual) {
+    return false;
+  }
+
+  return expectedValues.some((expected) => {
+    const parts = parseUpholsteryCompositeParts(expected);
+    if (parts.length < 2 || !parts.includes(normalizedActual)) {
+      return false;
+    }
+
+    return isSplitUpholsteryCompositePresent(expected, resultsFacets);
+  });
+}
+
 export async function validateExpectedFacets({
   actualFacets,
   resultsFacets,
@@ -239,12 +340,97 @@ export async function validateExpectedFacets({
   for (const filterObj of include) {
     for (const [key, expectedValues] of Object.entries(filterObj)) {
       if (!resultsKeysSet.has(key)) {
+        const companionKey = getEnginePowerCompanionFacetKey(key);
+        if (companionKey && resultsKeysSet.has(companionKey)) {
+          const companionRange = getFacetRangeBounds(resultsFacets[companionKey]);
+          if (companionRange) {
+            // true: companion key exists, pass
+            if (expectedValues === true) {
+              continue;
+            }
+            // { min/max }: convert constraint to companion unit and check
+            if (
+              typeof expectedValues === "object" &&
+              !Array.isArray(expectedValues) &&
+              expectedValues !== null &&
+              ("min" in expectedValues || "max" in expectedValues)
+            ) {
+              const constraint = expectedValues as { min?: number; max?: number };
+              if (constraint.min !== undefined) {
+                const convertedMin = convertEnginePowerValueBetweenFacets(constraint.min, key, companionKey);
+                if (convertedMin !== null && companionRange.min !== convertedMin) {
+                  failureReasons.push(
+                    `Expected ${key} min == ${constraint.min} (as ${companionKey} min == ${convertedMin}, actual min: ${companionRange.min})`,
+                  );
+                }
+              }
+              if (constraint.max !== undefined) {
+                const convertedMax = convertEnginePowerValueBetweenFacets(constraint.max, key, companionKey);
+                if (convertedMax !== null && companionRange.max !== convertedMax) {
+                  failureReasons.push(
+                    `Expected ${key} max == ${constraint.max} (as ${companionKey} max == ${convertedMax}, actual max: ${companionRange.max})`,
+                  );
+                }
+              }
+              continue;
+            }
+            // array: convert each value and check within companion range
+            if (Array.isArray(expectedValues) && expectedValues.length > 0) {
+              for (const expected of expectedValues) {
+                const convertedExpected = convertEnginePowerValueBetweenFacets(
+                  expected,
+                  key,
+                  companionKey,
+                );
+                if (
+                  convertedExpected === null ||
+                  !isExpectedValueWithinFacetRange(convertedExpected, companionRange)
+                ) {
+                  failureReasons.push(
+                    `Expected facet value outside range: ${key}=${expected} (validated via ${companionKey} range: ${companionRange.min}-${companionRange.max})`,
+                  );
+                }
+              }
+              continue;
+            }
+          }
+        }
+
         if (Array.isArray(expectedValues) && expectedValues.length > 0) {
           failureReasons.push(
             `Missing required facet key: ${key} (expected value(s): ${formatExpectedFacetValues(key, expectedValues, facetValueDisplayMap)})`,
           );
-        } else {
+        } else if (expectedValues !== true) {
           failureReasons.push(`Missing required facet key: ${key}`);
+        }
+        continue;
+      }
+
+      // Handle true: facet key exists in actual → pass
+      if (expectedValues === true) {
+        continue;
+      }
+
+      // Handle { min?, max? } range constraint
+      if (
+        typeof expectedValues === "object" &&
+        !Array.isArray(expectedValues) &&
+        expectedValues !== null &&
+        ("min" in expectedValues || "max" in expectedValues)
+      ) {
+        const rangeBounds = getFacetRangeBounds(resultsFacets[key]);
+        if (rangeBounds) {
+          const constraint = expectedValues as { min?: number; max?: number };
+          if (constraint.min !== undefined && rangeBounds.min !== constraint.min) {
+            failureReasons.push(
+              `Expected ${key} range min == ${constraint.min} (actual min: ${rangeBounds.min})`,
+            );
+          }
+          if (constraint.max !== undefined && rangeBounds.max !== constraint.max) {
+            failureReasons.push(
+              `Expected ${key} range max == ${constraint.max} (actual max: ${rangeBounds.max})`,
+            );
+          }
         }
         continue;
       }
@@ -297,6 +483,13 @@ export async function validateExpectedFacets({
           continue;
         }
 
+        if (
+          key === "upholstery" &&
+          isSplitUpholsteryCompositePresent(expected, resultsFacets)
+        ) {
+          continue;
+        }
+
         failureReasons.push(`Missing required facet value: ${key}=${expected}`);
       }
 
@@ -307,6 +500,17 @@ export async function validateExpectedFacets({
         for (const actual of actualValues) {
           const rawActual = String(actual).trim().toUpperCase();
           if (!expectedSet.has(rawActual)) {
+            if (
+              key === "upholstery" &&
+              isUpholsteryValueCoveredByCompositeExpectation(
+                actual,
+                expectedValues,
+                resultsFacets,
+              )
+            ) {
+              continue;
+            }
+
             failureReasons.push(
               `Unexpected facet value in ${key}: ${actual} (expected only: ${expectedValues.join(", ")})`,
             );

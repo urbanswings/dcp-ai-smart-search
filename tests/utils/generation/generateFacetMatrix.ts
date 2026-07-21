@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import { AzureOpenAI } from "openai";
 import path from "path";
+import { getLocalizedCurrencyFormats } from "../core/currencyFormattingHelpers";
 import { getOpenAIClient } from "../core/openaiClient";
 import * as promptEngine from "../query/promptEngineHelper";
 
@@ -22,9 +23,8 @@ const FACET_ORDER = [
   "bodyType",
   "fuelType",
   "color",
-  "stockType",
   "brand",
-  "seats",
+  "price",
 ];
 
 // Facets to exclude from query generation
@@ -59,13 +59,11 @@ export const INCLUDE_FACETS = [
   "modelYear",
   "motorization",
   "packages",
-  "page",
   "price",
   "stockType",
   "seats",
   "upholstery",
   "upholsteryPolish",
-  "vehicleCategory",
 ];
 
 export function isIncludedFacet(facetKey: string): boolean {
@@ -88,11 +86,38 @@ interface FacetRange {
   max: number;
 }
 
+const ENGINE_POWER_KW_PER_HP = 1.343;
+
+const QUERY_UNIT_BY_FACET: Readonly<Record<string, string>> = {
+  enginePowerHP: "HP",
+  enginePowerKW: "kW",
+};
+
+export function appendFacetUnitForQuery(
+  facetKey: string,
+  value: unknown,
+): string {
+  const formattedValue = String(value ?? "").trim();
+  const unit = QUERY_UNIT_BY_FACET[facetKey];
+  if (!formattedValue || !unit) {
+    return formattedValue;
+  }
+
+  const escapedUnit = unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const alreadyContainsUnit = new RegExp(
+    `(?:^|\\s)${escapedUnit}(?=\\s|$)`,
+    "i",
+  ).test(formattedValue);
+
+  return alreadyContainsUnit ? formattedValue : `${formattedValue} ${unit}`;
+}
+
 interface RangeQueryCase {
   formattedValue: string;
   rawValue: number;
   filterValue: string;
   expectedValue: number;
+  shouldFilterValue: { min?: number; max?: number } | true;
 }
 
 interface Facets {
@@ -148,7 +173,6 @@ interface GeneratedSuite {
 interface PromptConfig {
   systemPrompt?: string;
   userPromptTemplate?: string;
-  maxTokens?: number;
 }
 
 interface FacetMatrixHintRules {
@@ -297,26 +321,127 @@ function getFacetListEntries(
 }
 
 function getFacetRange(facets: Facets, facetKey: string): FacetRange | null {
+  // For engine power, keep scenario unit but prefer EMH HP source for KW scenarios.
+  if (facetKey === "enginePowerKW") {
+    const convertedFromHp = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      "enginePowerKW",
+    );
+    if (convertedFromHp) {
+      return convertedFromHp;
+    }
+  }
+
+  const values = facets?.[facetKey]?.values;
+  if (!values || typeof values !== "object" || Array.isArray(values)) {
+    const convertedFallbackRange = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      facetKey,
+    );
+    return convertedFallbackRange;
+  }
+  const min = Number((values as Record<string, unknown>).min);
+  const max = Number((values as Record<string, unknown>).max);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    const convertedFallbackRange = getConvertedEnginePowerRangeFromCounterpart(
+      facets,
+      facetKey,
+    );
+    return convertedFallbackRange;
+  }
+  return { min, max };
+}
+
+function getDirectFacetRange(facets: Facets, facetKey: string): FacetRange | null {
   const values = facets?.[facetKey]?.values;
   if (!values || typeof values !== "object" || Array.isArray(values)) {
     return null;
   }
+
   const min = Number((values as Record<string, unknown>).min);
   const max = Number((values as Record<string, unknown>).max);
   if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
     return null;
   }
+
   return { min, max };
 }
 
-function formatLocalizedInteger(value: unknown, locale: string): string {
-  const numericValue = Math.round(Number(value));
-  if (!Number.isFinite(numericValue)) {
-    return String(value);
+function resolveEffectiveFacetKeyForShouldFilter(
+  facets: Facets,
+  facetKey: string,
+): string {
+  if (facetKey !== "enginePowerHP" && facetKey !== "enginePowerKW") {
+    return facetKey;
   }
-  return new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(
-    numericValue,
+
+  // Prefer backend/base facet key from EMH response.
+  if (getDirectFacetRange(facets, "enginePowerHP")) {
+    return "enginePowerHP";
+  }
+  if (getDirectFacetRange(facets, "enginePowerKW")) {
+    return "enginePowerKW";
+  }
+
+  return facetKey;
+}
+
+function convertEnginePowerValue(
+  sourceFacetKey: string,
+  targetFacetKey: string,
+  value: number,
+): number {
+  if (sourceFacetKey === targetFacetKey) {
+    return Math.round(value);
+  }
+  if (sourceFacetKey === "enginePowerKW" && targetFacetKey === "enginePowerHP") {
+    return Math.round(value * ENGINE_POWER_KW_PER_HP);
+  }
+  if (sourceFacetKey === "enginePowerHP" && targetFacetKey === "enginePowerKW") {
+    return Math.round(value / ENGINE_POWER_KW_PER_HP);
+  }
+  return Math.round(value);
+}
+
+function getConvertedEnginePowerRangeFromCounterpart(
+  facets: Facets,
+  targetFacetKey: string,
+): FacetRange | null {
+  if (targetFacetKey !== "enginePowerHP" && targetFacetKey !== "enginePowerKW") {
+    return null;
+  }
+
+  const sourceFacetKey =
+    targetFacetKey === "enginePowerHP" ? "enginePowerKW" : "enginePowerHP";
+  const sourceValues = facets?.[sourceFacetKey]?.values;
+  if (!sourceValues || typeof sourceValues !== "object" || Array.isArray(sourceValues)) {
+    return null;
+  }
+
+  const sourceMin = Number((sourceValues as Record<string, unknown>).min);
+  const sourceMax = Number((sourceValues as Record<string, unknown>).max);
+  if (!Number.isFinite(sourceMin) || !Number.isFinite(sourceMax) || sourceMin === sourceMax) {
+    return null;
+  }
+
+  const convertedMin = convertEnginePowerValue(
+    sourceFacetKey,
+    targetFacetKey,
+    sourceMin,
   );
+  const convertedMax = convertEnginePowerValue(
+    sourceFacetKey,
+    targetFacetKey,
+    sourceMax,
+  );
+
+  const min = Math.min(convertedMin, convertedMax);
+  const max = Math.max(convertedMin, convertedMax);
+  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
+    return null;
+  }
+
+  return { min, max };
 }
 
 function getCountryCode(): string {
@@ -333,34 +458,29 @@ function getLanguageCode(): string {
   return language;
 }
 
-function formatLocalizedPriceValue(value: unknown): string {
-  switch (getCountryCode()) {
-    case "TR":
-      return `₺${formatLocalizedInteger(value, "tr-TR")}`;
-    case "AU":
-      return `A$ ${formatLocalizedInteger(value, "en-AU")}`;
-    case "IN":
-      return `₹ ${formatLocalizedInteger(value, "en-IN")}`;
-    case "SG":
-      return `${formatLocalizedInteger(value, "en-SG")} SGD`;
-    case "KR":
-      return `${formatLocalizedInteger(value, "ko-KR")} 원`;
-    case "TH":
-      return `THB ${formatLocalizedInteger(value, "en-TH")}`;
-    default:
-      return formatLocalizedInteger(value, "en-US");
-  }
-}
-
 function formatFacetValueForQuery(
   facetKey: string,
   formattedValue: string,
   rawValue: unknown,
 ): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return formatLocalizedPriceValue(rawValue);
+    return getLocalizedCurrencyFormats(rawValue).primary;
   }
-  return String(formattedValue || rawValue);
+  if (facetKey === "bodyType") {
+    return toQueryLabel(facetKey, rawValue);
+  }
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
+}
+
+function getCompleteDisplayValue(
+  facetKey: string,
+  formattedValue: string,
+  rawValue: unknown,
+): string {
+  if (facetKey === "bodyType" || facetKey === "fuelType") {
+    return toQueryLabel(facetKey, rawValue);
+  }
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }
 
 type RangePhraseKey = "lessThan" | "under" | "moreThan" | "above";
@@ -642,7 +762,11 @@ function buildCompleteFilterText(
   rawValue: unknown,
 ): string {
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || formatLocalizedPriceValue(rawValue)}'`;
+    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${formattedValue || getLocalizedCurrencyFormats(rawValue).primary}'`;
+  }
+  if (facetKey === "fuelType") {
+    const label = toQueryLabel(facetKey, rawValue).replace(/ cars$/, "");
+    return `'category'='${facetDisplayNameForQuery(facetKey)}' 'value'='${label}'`;
   }
   if (facetKey === "fuelType") {
     const label = toQueryLabel(facetKey, rawValue).replace(/ cars$/, "");
@@ -743,7 +867,18 @@ function buildAcceptedFacetValueLabels(
       DIESEL: ["diesel"],
       ELECTRIC: ["electric", "electric vehicle", "ev"],
       PETROL: ["petrol", "gasoline"],
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: [
+        "hybrid diesel",
+        "diesel hybrid",
+        "plug-in hybrid diesel",
+        "plugin hybrid diesel",
+        "hybrid (diesel + electric)",
+        "diesel electric hybrid",
+      ],
       PETROL_ELECTRIC_PLUGIN_HYBRID: [
+        "hybrid petrol",
+        "petrol hybrid",
+        "hybrid gasoline",
         "plug-in hybrid",
         "plugin hybrid",
         "hybrid (petrol + electric)",
@@ -800,9 +935,9 @@ function toCompleteHintValueLabel(
     return toHintLabel(facetKey, rawValue);
   }
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return formatLocalizedPriceValue(rawValue);
+    return getLocalizedCurrencyFormats(rawValue).primary;
   }
-  return String(formattedValue || rawValue);
+  return appendFacetUnitForQuery(facetKey, formattedValue || rawValue);
 }
 
 function createCompleteRangeHints(
@@ -843,6 +978,7 @@ function getRangeValueMatrix(
       rawValue: midpoint,
       filterValue: formattedMidpoint,
       expectedValue: midpoint,
+      shouldFilterValue: true as const,
     },
     {
       formattedValue: formatRangePhrase(
@@ -855,6 +991,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint,
+      shouldFilterValue: { max: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -867,6 +1004,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint,
+      shouldFilterValue: { max: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -879,6 +1017,7 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint + 1,
+      shouldFilterValue: { min: midpoint },
     },
     {
       formattedValue: formatRangePhrase(
@@ -891,11 +1030,15 @@ function getRangeValueMatrix(
         formattedMidpoint,
       ),
       expectedValue: midpoint + 1,
+      shouldFilterValue: { min: midpoint },
     },
   ];
 }
 
-async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
+async function buildComplete(
+  data: ApiResponse,
+  targetFacetKeys?: string[],
+): Promise<GeneratedSuite> {
   const facets = data?.data?.search?.facets || {};
   setGlobalFacets(facets);
   const queryMap = new Map<string, CompleteQuery>();
@@ -904,7 +1047,12 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   const aiContext = promptEngine.createPromptContext();
   const motorizationModelMap = buildMotorizationModelMap(data);
 
-  for (const facetKey of Object.keys(facets)) {
+  const facetKeysToProcess =
+    Array.isArray(targetFacetKeys) && targetFacetKeys.length > 0
+      ? targetFacetKeys.filter((key) => Object.prototype.hasOwnProperty.call(facets, key))
+      : Object.keys(facets);
+
+  for (const facetKey of facetKeysToProcess) {
     // Skip excluded facets
     if (EXCLUDE_FACETS.includes(facetKey)) {
       continue;
@@ -916,10 +1064,15 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
 
     const listEntries = getFacetListEntries(facets, facetKey);
     for (const entry of listEntries) {
+      const displayValue = getCompleteDisplayValue(
+        facetKey,
+        entry.formattedValue,
+        entry.rawValue,
+      );
       const query = await promptEngine.generateQueryWithVariation(
         getOpenAIClient(),
         facetKey,
-        entry.formattedValue,
+        displayValue,
         entry.rawValue,
         promptConfig.systemPrompt,
         promptConfig.userPromptTemplate,
@@ -929,14 +1082,13 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
           language: process.env.LANGUAGE || "en",
           fallbackFn: fallbackCompleteQuery,
           filterTextFn: buildCompleteFilterText,
-          maxTokens: promptConfig.maxTokens,
         },
       );
       addCompleteQuery(
         queryMap,
         query,
         facetKey,
-        entry.formattedValue || entry.rawValue,
+        displayValue,
         buildCompleteShouldFilter(
           facetKey,
           entry.rawValue,
@@ -972,11 +1124,32 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
             language: process.env.LANGUAGE || "en",
             fallbackFn: fallbackCompleteQuery,
             filterTextFn: buildCompleteFilterText,
-            maxTokens: promptConfig.maxTokens,
           },
         );
+        const effectiveFacetKey = resolveEffectiveFacetKeyForShouldFilter(
+          facets,
+          facetKey,
+        );
+
+        let effectiveShouldFilterValue: { min?: number; max?: number } | true;
+        if (rangeValue.shouldFilterValue === true) {
+          effectiveShouldFilterValue = true;
+        } else if (effectiveFacetKey === facetKey) {
+          effectiveShouldFilterValue = rangeValue.shouldFilterValue;
+        } else {
+          const raw = rangeValue.shouldFilterValue as { min?: number; max?: number };
+          const converted: { min?: number; max?: number } = {};
+          if (raw.min !== undefined) {
+            converted.min = convertEnginePowerValue(facetKey, effectiveFacetKey, raw.min);
+          }
+          if (raw.max !== undefined) {
+            converted.max = convertEnginePowerValue(facetKey, effectiveFacetKey, raw.max);
+          }
+          effectiveShouldFilterValue = converted;
+        }
+
         addCompleteQuery(queryMap, query, facetKey, rangeValue.filterValue, {
-          include: [{ [facetKey]: [rangeValue.expectedValue] }],
+          include: [{ [effectiveFacetKey]: effectiveShouldFilterValue }],
           exclude: [],
           strict: false,
         });
@@ -1000,7 +1173,28 @@ async function buildComplete(data: ApiResponse): Promise<GeneratedSuite> {
   };
 }
 
+function getFacetFormattedValue(
+  facetKey: string,
+  rawValue: unknown,
+): string | null {
+  const facetData = globalFacets?.[facetKey];
+  if (facetData && Array.isArray(facetData.values)) {
+    for (const entry of facetData.values) {
+      if (entry?.value === rawValue && entry?.formattedValue) {
+        return String(entry.formattedValue).trim();
+      }
+    }
+  }
+  return null;
+}
+
 function toQueryLabel(facetKey: string, value: unknown): string {
+  // First try to get formattedValue from API response facet data
+  const apiFormattedValue = getFacetFormattedValue(facetKey, value);
+  if (apiFormattedValue) {
+    value = apiFormattedValue;
+  }
+
   if (facetKey === "bodyType") {
     const map: Record<string, string> = {
       LIMOUSINE: "sedans",
@@ -1008,7 +1202,7 @@ function toQueryLabel(facetKey: string, value: unknown): string {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return (
       map[String(value)] ||
@@ -1018,13 +1212,14 @@ function toQueryLabel(facetKey: string, value: unknown): string {
 
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
-      DIESEL: "diesel cars",
-      ELECTRIC: "electric cars",
-      PETROL: "petrol cars",
-      PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
+      DIESEL: "diesel",
+      ELECTRIC: "electric",
+      PETROL: "petrol",
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: "hybrid diesel",
+      PETROL_ELECTRIC_PLUGIN_HYBRID: "hybrid petrol",
     };
     return (
-      map[String(value)] || `${titleCaseFromToken(value)} cars`.toLowerCase()
+      map[String(value)] || `${titleCaseFromToken(value)}`.toLowerCase()
     );
   }
 
@@ -1040,8 +1235,8 @@ function toQueryLabel(facetKey: string, value: unknown): string {
 
   if (facetKey === "stockType") {
     const map: Record<string, string> = {
-      AVAILABLE: "available vehicles",
-      IN_PIPELINE: "in-pipeline vehicles",
+      AVAILABLE: "in-stock",
+      IN_PIPELINE: "future",
     };
     return (
       map[String(value)] ||
@@ -1096,6 +1291,12 @@ function setGlobalFacets(facets: Facets): void {
 }
 
 function toHintLabel(facetKey: string, value: unknown): string {
+  // First try to get formattedValue from API response facet data
+  const apiFormattedValue = getFacetFormattedValue(facetKey, value);
+  if (apiFormattedValue) {
+    return apiFormattedValue;
+  }
+
   if (facetKey === "color") {
     const colorMap = buildUUIDMapFromFacets(globalFacets, "color");
     const strValue = String(value).toLowerCase();
@@ -1126,10 +1327,11 @@ function toHintLabel(facetKey: string, value: unknown): string {
   }
   if (facetKey === "fuelType") {
     const map: Record<string, string> = {
-      DIESEL: "diesel cars",
-      ELECTRIC: "electric cars",
-      PETROL: "petrol cars",
-      PETROL_ELECTRIC_PLUGIN_HYBRID: "plug-in hybrid cars",
+      DIESEL: "diesel",
+      ELECTRIC: "electric",
+      PETROL: "petrol",
+      DIESEL_ELECTRIC_PLUGIN_HYBRID: "hybrid diesel",
+      PETROL_ELECTRIC_PLUGIN_HYBRID: "hybrid petrol",
     };
     return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
@@ -1140,7 +1342,7 @@ function toHintLabel(facetKey: string, value: unknown): string {
       HATCHBACK: "hatchbacks",
       COUPE: "coupes",
       CABRIO_ROADSTER: "cabriolets",
-      PEOPLE_CARRIER: "people carriers",
+      PEOPLE_CARRIER: "MPV",
     };
     return map[String(value)] || String(value).toLowerCase().replace(/_/g, " ");
   }
@@ -1207,9 +1409,71 @@ function pairwise<T>(values: T[]): Array<[T, T]> {
   return out;
 }
 
+interface LocalizedMatrixPhrases {
+  showMeOnly: string;
+  and: string;
+  or: string;
+  allVehiclesExcept: string;
+}
+
+function getLocalizedMatrixPhrases(): LocalizedMatrixPhrases {
+  const language = getLanguageCode();
+  const phrases: Record<string, LocalizedMatrixPhrases> = {
+    en: {
+      showMeOnly: "show me only",
+      and: "and",
+      or: "or",
+      allVehiclesExcept: "all vehicles except",
+    },
+    tr: {
+      showMeOnly: "bana sadece göster",
+      and: "ve",
+      or: "veya",
+      allVehiclesExcept: "hariç tüm araçlar",
+    },
+    th: {
+      showMeOnly: "แสดงให้ฉันดูเฉพาะ",
+      and: "และ",
+      or: "หรือ",
+      allVehiclesExcept: "ยานพาหนะทั้งหมดยกเว้น",
+    },
+    ko: {
+      showMeOnly: "다음만 보여주세요",
+      and: "및",
+      or: "또는",
+      allVehiclesExcept: "를 제외한 모든 차량",
+    },
+    ja: {
+      showMeOnly: "次のみを表示してください",
+      and: "と",
+      or: "または",
+      allVehiclesExcept: "次以外のすべての車両",
+    },
+  };
+  return phrases[language] || phrases.en;
+}
+
+function buildExclusionQuery(
+  facetKey: string,
+  excludedValue: unknown,
+  phrases: LocalizedMatrixPhrases,
+): string {
+  const valueLabel = toQueryLabel(facetKey, excludedValue);
+  const language = getLanguageCode();
+  
+  // Korean uses postfix word order: <value> + suffix
+  if (language === "ko") {
+    return `${valueLabel} ${phrases.allVehiclesExcept}`;
+  }
+  
+  // Other languages use prefix word order: prefix + <value>
+  return `${phrases.allVehiclesExcept} ${valueLabel}`;
+}
+
 function buildMatrix(data: ApiResponse): GeneratedSuite {
   const facets = data?.data?.search?.facets || {};
   setGlobalFacets(facets);
+  const phrases = getLocalizedMatrixPhrases();
 
   const regressionQueries: RegressionQuery[] = [];
   const informativeHintsByQuery: Record<string, string[]> = {};
@@ -1225,7 +1489,7 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
       if (allowedValues.length === 0) {
         continue;
       }
-      const query = `all vehicles except ${toQueryLabel(facetKey, excludedValue)}`;
+      const query = buildExclusionQuery(facetKey, excludedValue, phrases);
       regressionQueries.push({
         value: query,
         skipOpenAiEvaluation: true,
@@ -1246,8 +1510,8 @@ function buildMatrix(data: ApiResponse): GeneratedSuite {
     for (const [a, b] of pairwise(values)) {
       const left = toQueryLabel(facetKey, a);
       const right = toQueryLabel(facetKey, b);
-      const andQuery = `show me only ${left} and ${right}`;
-      const orQuery = `show me only ${left} or ${right}`;
+      const andQuery = `${phrases.showMeOnly} ${left} ${phrases.and} ${right}`;
+      const orQuery = `${phrases.showMeOnly} ${left} ${phrases.or} ${right}`;
 
       regressionQueries.push(
         {

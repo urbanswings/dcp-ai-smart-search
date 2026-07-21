@@ -1,12 +1,16 @@
 import fs from "fs/promises";
 import path from "path";
+import { getLocalizedCurrencyFormats } from "../core/currencyFormattingHelpers";
 import { extractMissingFacetValuesFromData } from "../facets/facetValueHelpers";
 import {
   buildComplete,
   buildMatrix,
+  facetDisplayName,
   isIncludedFacet,
   readJson,
+  toQueryLabel,
 } from "../generation/generateFacetMatrix.js";
+import * as promptEngine from "./promptEngineHelper";
 
 const DATA_DIR = path.join(__dirname, "../../data");
 
@@ -32,6 +36,7 @@ export interface ShouldFilterSpec {
 
 export interface FixedQueryCase {
   value: string;
+  totalVehicles?: number;
   shouldRecommend?: boolean;
   shouldFilter?: ShouldFilterSpec | Record<string, any> | boolean;
   aiEvaluationHints?: AiEvaluationHints;
@@ -98,10 +103,10 @@ async function generateCompleteSuiteOnTheFly(
 ): Promise<GeneratedFacetSuite> {
   const sourceDataPath = path.join(DATA_DIR, "emh-api-response.json");
   const sourceData = readJson(sourceDataPath);
-  const scopedSourceData = filterFacetsInApiResponse(
-    sourceData,
-    facetKeys || [],
-  );
+  const scopedSourceData = filterFacetsInApiResponse(sourceData, facetKeys || []);
+  if (Array.isArray(facetKeys) && facetKeys.length > 0) {
+    return buildComplete(sourceData, facetKeys);
+  }
   return buildComplete(scopedSourceData);
 }
 
@@ -197,53 +202,10 @@ function formatExpandedThousands(value: number): string {
   return `${Math.round(value / 1000)} thousand`;
 }
 
-function getCountryCode(): string {
-  return (process.env.COUNTRY || "AU").toUpperCase();
-}
-
 function uniqueValues(values: string[]): string[] {
   return Array.from(
     new Set(values.map((value) => value.trim()).filter(Boolean)),
   );
-}
-
-function getCurrencyUnitVariants(value: number): string[] {
-  const formattedValue = formatWithThousandsSeparator(value);
-
-  switch (getCountryCode()) {
-    case "TR":
-      return [`₺${formattedValue}`, `${formattedValue} lira`];
-    case "TH":
-      return [
-        `THB ${formattedValue}`,
-        `${formattedValue} baht`,
-        `฿${formattedValue}`,
-      ];
-    case "KR":
-      return [`${formattedValue} 원`, `KRW ${formattedValue}`];
-    case "JP":
-      return [
-        `¥${formattedValue}`,
-        `${formattedValue} yen`,
-        `${formattedValue}円`,
-      ];
-    case "SG":
-      return [
-        `${formattedValue} SGD`,
-        `SGD ${formattedValue}`,
-        `S$${formattedValue}`,
-      ];
-    case "AU":
-      return [`A$ ${formattedValue}`, `AUD ${formattedValue}`];
-    case "IN":
-      return [
-        `₹ ${formattedValue}`,
-        `${formattedValue} rupees`,
-        `INR ${formattedValue}`,
-      ];
-    default:
-      return [];
-  }
 }
 
 function getNumericUnitValueVariants(
@@ -257,7 +219,10 @@ function getNumericUnitValueVariants(
   ];
 
   if (facetKey === "price" || facetKey === "monthlyRate") {
-    return uniqueValues([...baseVariants, ...getCurrencyUnitVariants(value)]);
+    return uniqueValues([
+      ...baseVariants,
+      ...getLocalizedCurrencyFormats(value).variants,
+    ]);
   }
 
   if (facetKey === "mileage") {
@@ -349,12 +314,14 @@ function createUnavailableFacetValueHint(
   return {
     overwrite: true,
     value: [
-      `Respond with "PASS" if the response explicitly states the requested ${facetKey} (${valueLabel}) is unavailable, not available, couldn't find, no exact match, not in stock, or similar unavailability language.`,
-      `PASS is acceptable even if alternatives or other recommendations are offered afterward. The key is an upfront explicit unavailability statement.`,
-      `Examples of acceptable PASS responses: "couldn't find exact match", "not available", "no results for ${valueLabel}", "not in stock", "we don't have ${valueLabel}".`,
-      `FAIL only if: (1) response is completely silent about the request without any acknowledgment, OR (2) response only lists alternatives without ever stating the requested ${valueLabel} is unavailable/not found.`,
+      `Respond with "PASS" ONLY if the response explicitly states that the requested ${facetKey} (${valueLabel}), the user's request, or an exact answer/match is unavailable, not available, not found, has no results, has no exact match, or is not in stock.`,
+      `Request-level wording such as "we could not find the exact answer to your request" or "no exact match was found for your request" counts as explicit unavailability even when ${valueLabel} is not repeated.`,
+      `Alternatives or other recommendations are acceptable only after that explicit unavailability statement.`,
+      `Words such as "closest", "similar", "alternative", or "other options" do NOT by themselves establish that ${valueLabel} is unavailable.`,
+      `If the response only offers closest/similar/alternative vehicles without explicitly stating that ${valueLabel}, the request, or an exact answer/match is unavailable or not found, respond with "MSG FAIL: requested ${facetKey} (${valueLabel}) unavailability not stated".`,
+      `If the response presents ${valueLabel} as available matching inventory, respond with "MSG FAIL: unavailable ${facetKey} (${valueLabel}) presented as available".`,
       `If the response is off-topic, unsafe, or unrelated to automotive search, respond with "MSG FAIL: off-topic or unsafe response".`,
-      "Explicitly stated unavailability = PASS. Respond with 'PASS' or provide specific failure reason.",
+      `Explicit unavailability is mandatory. Respond with "PASS" or the specific failure reason only.`,
     ],
   };
 }
@@ -374,10 +341,30 @@ async function generateMissingFacetValuesSuiteOnTheFly(
     stockData,
   );
 
-  const regressionQueries: FixedQueryCase[] = missingValues.map((entry) => {
-    const valueLabel = entry.formattedValue;
-    return {
-      value: `show me ${valueLabel} ${facetKey}`,
+  const queryContext = promptEngine.createPromptContext();
+  const regressionQueries: FixedQueryCase[] = [];
+
+  for (const entry of missingValues) {
+    const valueLabel =
+      facetKey === "stockType"
+        ? toQueryLabel(facetKey, entry.rawValue)
+        : entry.formattedValue;
+    const query = await promptEngine.generateQueryWithVariation(
+      null,
+      facetKey,
+      valueLabel,
+      entry.rawValue,
+      undefined,
+      undefined,
+      facetDisplayName,
+      queryContext,
+      {
+        language: process.env.LANGUAGE || "en",
+      },
+    );
+
+    regressionQueries.push({
+      value: query,
       facet: facetKey,
       filterValue: entry.rawValue,
       shouldRecommend: false,
@@ -387,8 +374,8 @@ async function generateMissingFacetValuesSuiteOnTheFly(
         strict: false,
       },
       aiEvaluationHints: createUnavailableFacetValueHint(facetKey, valueLabel),
-    };
-  });
+    });
+  }
 
   return {
     generatedAt: new Date().toISOString(),

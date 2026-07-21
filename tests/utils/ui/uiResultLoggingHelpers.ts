@@ -3,7 +3,9 @@ import { validateExpectedFacets } from "../facets/facetAssertionHelpers";
 import {
   addFailureReason,
   evaluateSmartSearchMessage,
+  extractMotorizationFromSmartSearchMessage,
   extractSmartSearchParameters,
+  getDetectedMotorizationValues,
   getCountStatus,
   getSmartSearchResultCount,
   isPassEvaluation,
@@ -43,22 +45,46 @@ export async function processAndLogUiResult({
   const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  const actualCount = query?.totalVehicles ?? 0;
 
   if (results.error) {
     console.error(`UI call failed with error: ${results.error}`);
     return {
-      testMode: "ui",
-      testDescribe,
-      testTitle,
-      query: {
-        [`${lang}`]: actualInput,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        testMode: "ui",
+        testSuite: testDescribe,
+        testCase: testTitle,
+        language: lang,
       },
-      openaiEvaluation: `UI call failed with error: ${results.error}`,
-      results: {
-        responseResult: "FAIL",
-        facetsResult: "FAIL",
+      request: {
+        query: {
+          [`${lang}`]: actualInput,
+        },
       },
-      hasError: true,
+      response: {
+        message: null,
+        statusCode: null,
+        responseTime: results.responseTime || 0,
+        hasError: true,
+        data: null,
+      },
+      assertions: {
+        response: {
+          status: "FAIL",
+          failureReasons: [`UI call failed with error: ${results.error}`],
+        },
+        facets: {
+          expected: null,
+          actual: null,
+          status: "FAIL",
+        },
+      },
+      summary: {
+        overallStatus: "FAIL",
+        resultCount: 0,
+        vehicleCount: 0,
+      },
     };
   }
 
@@ -73,6 +99,13 @@ export async function processAndLogUiResult({
   const resultsFacets = extractSmartSearchParameters(
     results.results.responseData,
   );
+  if (!Array.isArray(resultsFacets.motorization)) {
+    const motorizationFromMessage =
+      extractMotorizationFromSmartSearchMessage(smartSearchMessage);
+    if (motorizationFromMessage.length > 0) {
+      resultsFacets.motorization = motorizationFromMessage;
+    }
+  }
   let openaiEvaluation = await evaluateSmartSearchMessage({
     smartSearchMessage,
     aiEvaluationHints,
@@ -85,6 +118,7 @@ export async function processAndLogUiResult({
   let responseCheckPassed = true;
   let facetsCheckPassed = true;
   let countCheckPassed = true;
+  const failureReasons: string[] = [];
   let uiFacetComparison: {
     matches: boolean;
     missingFacetValues: string[];
@@ -127,7 +161,7 @@ export async function processAndLogUiResult({
       uiVehicleCount = null;
     }
   } catch (e) {
-    console.debug("[DEBUG] Could not extract UI vehicle count:", e);
+
   }
   if (uiVehicleCount === 0 && resultCount > 0) {
     responseCheckPassed = false;
@@ -146,15 +180,27 @@ export async function processAndLogUiResult({
     resultCount,
   );
   const responseVehicleTotalCount = countValidation.responseVehicleTotalCount;
+  const queryCountMismatch =
+    Boolean(actualFacets) && resultCount !== actualCount;
   countCheckPassed = countValidation.countCheckPassed;
   if (!countValidation.countCheckPassed) {
     responseCheckPassed = false;
     addUiFailureReason(countValidation.failureReason || "");
   }
+  if (queryCountMismatch) {
+    countCheckPassed = false;
+    responseCheckPassed = false;
+    addUiFailureReason(
+      `Result count does not match expected count from query (expected: ${actualCount}, got: ${resultCount})`,
+    );
+  }
 
   if (actualFacets === false) {
     if (Object.keys(resultsFacets).length > 0) {
       facetsCheckPassed = false;
+      failureReasons.push(
+        `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
+      );
       addUiFailureReason(
         `Expected no filters, but got ${JSON.stringify(resultsFacets)}`,
       );
@@ -162,6 +208,7 @@ export async function processAndLogUiResult({
   } else if (actualFacets === true) {
     if (Object.keys(resultsFacets).length === 0) {
       facetsCheckPassed = false;
+      failureReasons.push("Expected at least one filter to be applied, but got none");
       addUiFailureReason(
         `Expected at least one filter to be applied, but got none`,
       );
@@ -177,6 +224,7 @@ export async function processAndLogUiResult({
 
     if (!facetValidation.passed) {
       facetsCheckPassed = false;
+      failureReasons.push(...facetValidation.failureReasons);
       addUiFailureReason(
         `BE Facets check failed: ${facetValidation.failureReasons.join("; ")}`,
       );
@@ -234,6 +282,7 @@ export async function processAndLogUiResult({
   }
   if (testFacets && facetMismatches.length > 0) {
     facetsCheckPassed = false;
+    failureReasons.push(...facetMismatches);
     addUiFailureReason(facetMismatches.join(" | "));
   }
 
@@ -250,14 +299,17 @@ export async function processAndLogUiResult({
   const evaluationPassed = isPassEvaluation(normalizedEvaluation);
   const displayHasError = hasError || !evaluationPassed;
   const messageStatus = evaluationPassed ? "PASS" : "FAIL";
-  const countStatus = getCountStatus(
-    responseVehicleTotalCount,
-    countCheckPassed,
-  );
+  const countStatus = queryCountMismatch
+    ? "FAIL"
+    : getCountStatus(responseVehicleTotalCount, countCheckPassed);
   const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
   const { queryEn, smartSearchMessageEn } = await translateResultText(
     lang,
     actualInput,
+    smartSearchMessage,
+  );
+  const motorization = getDetectedMotorizationValues(
+    resultsFacets,
     smartSearchMessage,
   );
 
@@ -271,6 +323,7 @@ export async function processAndLogUiResult({
     actualInput,
     smartSearchMessage,
     translatedText: { queryEn, smartSearchMessageEn },
+    actualCount,
     responseVehicleTotalCount,
     resultCount,
     actualFacets,
@@ -280,50 +333,97 @@ export async function processAndLogUiResult({
   });
   console.log("\n");
 
+  // Parse openaiEvaluation and separate response vs facet failures
+  let responseFailureReasons: string[] = [];
+  let facetFailureReasons: string[] = [];
+  
+  if (openaiEvaluation && openaiEvaluation !== "PASS" && openaiEvaluation !== "No results to evaluate") {
+    const parts = openaiEvaluation.split(" | ");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+      
+      if (trimmed.includes("Facets check failed:")) {
+        const detail = trimmed.replace("Facets check failed:", "").trim();
+        facetFailureReasons.push(detail);
+      } else {
+        responseFailureReasons.push(trimmed);
+      }
+    }
+  }
+  
+  // response failures: only from openaiEvaluation (non-facet parts)
+  const allResponseFailures: string[] = [...responseFailureReasons];
+  
+  // facet failures: from failureReasons array (populated by validateExpectedFacets)
+  const allFacetFailures: string[] = [...failureReasons];
+  for (const reason of facetFailureReasons) {
+    if (!allFacetFailures.includes(reason)) {
+      allFacetFailures.push(reason);
+    }
+  }
+  
+  // Build summary failures (consolidated from both)
+  const summaryFailures: string[] = [];
+  summaryFailures.push(...allResponseFailures);
+  summaryFailures.push(...allFacetFailures);
+  const uniqueSummaryFailures = Array.from(new Set(summaryFailures));
+
   return {
-    timestamp: new Date().toISOString(),
-    timestampSG: new Date().toLocaleString("en-SG", {
-      timeZone: "Asia/Singapore",
-    }),
-    testMode: "ui",
-    testDescribe,
-    testTitle,
-    query: {
-      [`${lang}`]: actualInput,
-      en: queryEn,
+    metadata: {
+      timestamp: new Date().toISOString(),
+      testMode: "ui",
+      testSuite: testDescribe,
+      testCase: testTitle,
+      language: lang,
+    },
+    request: {
+      query: {
+        [`${lang}`]: actualInput,
+        en: queryEn,
+      },
     },
     response: {
-      [`${lang}`]: smartSearchMessage,
-      en: smartSearchMessageEn,
+      message: {
+        [`${lang}`]: smartSearchMessage,
+        en: smartSearchMessageEn,
+      },
+      statusCode: null,
+      responseTime: results.responseTime,
+      hasError: displayHasError,
+      data: {
+        resultCount,
+        vehicleCount: responseVehicleTotalCount || uiVehicleCount,
+        motorization,
+        uiVehicleCount,
+      },
     },
-    resultCount,
-    uiVehicleCount,
-    responseVehicleTotalCount,
-    responseTime: results.responseTime,
-    statusCode: null,
-    hasError: displayHasError,
-    error: results.error,
-    // apiResponse,
-    openaiEvaluation,
-    results: {
-      responseResult: responseCheckPassed ? "PASS" : "FAIL",
-      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
-      countResult:
-        responseVehicleTotalCount === null
-          ? "SKIP"
-          : countCheckPassed
-            ? "PASS"
-            : "FAIL",
-      responseVehicleTotalCount,
-      backendResultCount: resultCount,
-      uiVehicleCount,
+    assertions: {
+      response: {
+        status: responseCheckPassed ? "PASS" : "FAIL",
+        ...(allResponseFailures.length && { failureReasons: allResponseFailures }),
+      },
+      facets: {
+        expected: actualFacets,
+        actual: resultsFacets,
+        status: facetsCheckPassed ? "PASS" : "FAIL",
+        ui: uiSelectedFiltersKV,
+        uiFacetComparison,
+        ...(allFacetFailures.length && { failureReasons: allFacetFailures }),
+      },
+      count: {
+        expected: actualFacets ? actualCount : null,
+        actual: resultCount,
+        status: countStatus,
+        backendCount: resultCount,
+      },
     },
-    facets: {
-      expected: actualFacets,
-      actual: resultsFacets,
-      ui: uiSelectedFiltersKV,
+    summary: {
+      overallStatus: responseCheckPassed && facetsCheckPassed ? "PASS" : "FAIL",
+      resultCount,
+      vehicleCount: responseVehicleTotalCount || uiVehicleCount,
+      motorization,
+      ...(uniqueSummaryFailures.length && { failureReasons: uniqueSummaryFailures }),
     },
-    uiSelectedFiltersKV,
-    uiFacetComparison,
   };
 }

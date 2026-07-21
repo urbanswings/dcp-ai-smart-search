@@ -3,9 +3,9 @@ import fs from "fs";
 import path from "path";
 import { COUNTRY, LANGUAGE } from "../core/testHelpers";
 import { getOpenAIClient } from "../core/openaiClient";
+import { OPENAI_MAX_TOKENS } from "./openaiConfig";
 
 const OPENAI_CHAT_MODEL = process.env.NEXUS_GPT_MODEL || "gpt-4o-mini";
-const OPENAI_DEFAULT_MAX_TOKENS = 200; // Increased from 40 to support query generation with gpt-5-mini
 const OPENAI_DEFAULT_TEMPERATURE = 0.7;
 
 export async function fetchTranslation(
@@ -46,7 +46,6 @@ export async function fetchTranslation(
 export async function openaiChatCompletion(
   messages: any[],
   options: Record<string, any> = {},
-  max_tokens: number = OPENAI_DEFAULT_MAX_TOKENS,
 ) {
   const client = getOpenAIClient();
   if (!client) {
@@ -55,8 +54,8 @@ export async function openaiChatCompletion(
   return client.chat.completions.create({
     model: OPENAI_CHAT_MODEL,
     messages,
-    max_completion_tokens: max_tokens,
     ...options,
+    max_completion_tokens: OPENAI_MAX_TOKENS,
   });
 }
 
@@ -78,7 +77,6 @@ export async function isSemanticallySimilarOpenAI(
   const {
     systemPrompt: systemPromptArray,
     userPromptTemplate: userPromptTemplateArray,
-    maxTokens,
     temperature,
   } = evaluationRules.semanticsSimilarity;
   const systemPrompt = Array.isArray(systemPromptArray)
@@ -92,11 +90,7 @@ export async function isSemanticallySimilarOpenAI(
     const userPrompt = userPromptTemplate
       .replace("{str1}", str1)
       .replace("{str2}", str2);
-    const answer = await generateOpenAIQuery(
-      systemPrompt,
-      userPrompt,
-      maxTokens,
-    );
+    const answer = await generateOpenAIQuery(systemPrompt, userPrompt);
     return answer.includes("YES");
   } catch (error) {
     console.warn(
@@ -125,7 +119,6 @@ export async function evaluateSearchResult(
 
   const {
     systemPrompt: systemPromptArray,
-    maxTokens,
     temperature,
   } = evaluationRules.resultsEvaluation;
   let systemPrompt = Array.isArray(systemPromptArray)
@@ -196,19 +189,12 @@ export async function evaluateSearchResult(
   };
 
   try {
-    const answer = await generateOpenAIQuery(
-      systemPrompt,
-      userPrompt,
-      maxTokens,
-    );
+    const answer = await generateOpenAIQuery(systemPrompt, userPrompt);
 
     if (shouldPassNegativeContradictoryBoundaryResponse(answer)) {
       return "PASS";
     }
 
-    if (!answer.includes("PASS")) {
-      console.warn(`[WARN] OpenAI Evaluation indicates failure: ${answer}`);
-    }
     return answer ?? "No response from OpenAI.";
   } catch (error) {
     console.warn(
@@ -225,7 +211,6 @@ export async function evaluateSearchResult(
 export async function generateOpenAIQuery(
   systemPrompt: string,
   userPrompt: string,
-  maxTokens: number = OPENAI_DEFAULT_MAX_TOKENS,
   fallback: string = "",
 ): Promise<string> {
   systemPrompt = systemPrompt
@@ -241,7 +226,6 @@ export async function generateOpenAIQuery(
         { role: "user", content: userPrompt },
       ],
       {},
-      maxTokens,
     );
     return completion.choices[0].message.content?.trim() ?? fallback;
   } catch (err) {
@@ -257,7 +241,6 @@ export async function generateUniqueQueries(
   count: number,
   systemPrompt: string,
   userPromptTemplate: string,
-  maxTokens: number = 50,
   fallback: string = "",
   maxAttempts: number = 10,
 ): Promise<string[]> {
@@ -286,7 +269,6 @@ export async function generateUniqueQueries(
       query = await generateOpenAIQuery(
         systemPrompt,
         `${userPromptTemplate}${diversityHint}`,
-        maxTokens,
       );
       query = query.replace(/^"|"$/g, "");
       const normalized = query.toLowerCase();

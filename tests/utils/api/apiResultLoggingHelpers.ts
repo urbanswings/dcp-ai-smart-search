@@ -6,6 +6,7 @@ import {
   addFailureReason,
   evaluateSmartSearchMessage,
   extractSmartSearchParameters,
+  getDetectedMotorizationValues,
   getCountStatus,
   getSmartSearchResultCount,
   isPassEvaluation,
@@ -52,22 +53,48 @@ export async function processAndLogApiResult({
   const lang = (process.env.LANGUAGE || LANGUAGE)?.toLocaleLowerCase() || "en";
   const actualInput = query?.value ?? query;
   const actualFacets = query?.shouldFilter;
+  const actualCount = query?.totalVehicles ?? 0;
 
   if (results.error) {
     console.error(
       `API call failed with error for '${actualInput}': ${results.error}`,
     );
     return {
-      testMode: "api",
-      testDescribe,
-      testTitle,
-      query: {
-        [`${lang}`]: actualInput,
+      metadata: {
+        timestamp: new Date().toISOString(),
+        testMode: "api",
+        testSuite: testDescribe,
+        testCase: testTitle,
+        language: lang,
       },
-      openaiEvaluation: `API call failed with error: ${results.error}`,
-      responseResult: "FAIL",
-      facetsResult: "FAIL",
-      hasError: true,
+      request: {
+        query: {
+          [`${lang}`]: actualInput,
+        },
+      },
+      response: {
+        message: null,
+        statusCode: results.statusCode || 0,
+        responseTime: results.responseTime || 0,
+        hasError: true,
+        data: null,
+      },
+      assertions: {
+        response: {
+          status: "FAIL",
+          failureReasons: [`API call failed with error: ${results.error}`],
+        },
+        facets: {
+          expected: null,
+          actual: null,
+          status: "FAIL",
+        },
+      },
+      summary: {
+        overallStatus: "FAIL",
+        resultCount: 0,
+        vehicleCount: 0,
+      },
     };
   }
 
@@ -179,10 +206,19 @@ export async function processAndLogApiResult({
     resultCount,
   );
   const responseVehicleTotalCount = countValidation.responseVehicleTotalCount;
+  const queryCountMismatch =
+    Boolean(actualFacets) && resultCount !== actualCount;
   let countCheckPassed = countValidation.countCheckPassed;
   if (!countValidation.countCheckPassed) {
     responseCheckPassed = false;
     addApiFailureReason(countValidation.failureReason || "");
+  }
+  if (queryCountMismatch) {
+    countCheckPassed = false;
+    responseCheckPassed = false;
+    addApiFailureReason(
+      `Result count does not match expected count from query (expected: ${actualCount}, got: ${resultCount})`,
+    );
   }
 
   if (actualFacets === false) {
@@ -249,14 +285,17 @@ export async function processAndLogApiResult({
   });
   const displayHasError = hasError || !evaluationPassed;
   const messageStatus = evaluationPassed ? "PASS" : "FAIL";
-  const countStatus = getCountStatus(
-    responseVehicleTotalCount,
-    countCheckPassed,
-  );
+  const countStatus = queryCountMismatch
+    ? "FAIL"
+    : getCountStatus(responseVehicleTotalCount, countCheckPassed);
   const filterStatus = facetsCheckPassed ? "PASS" : "FAIL";
   const { queryEn, smartSearchMessageEn } = await translateResultText(
     lang,
     actualInput,
+    smartSearchMessage,
+  );
+  const motorization = getDetectedMotorizationValues(
+    resultsFacets,
     smartSearchMessage,
   );
 
@@ -270,52 +309,101 @@ export async function processAndLogApiResult({
     actualInput,
     smartSearchMessage,
     translatedText: { queryEn, smartSearchMessageEn },
+    actualCount,
     responseVehicleTotalCount,
     resultCount,
     actualFacets,
     resultsFacets,
   });
 
+  // Parse openaiEvaluation and separate response vs facet failures
+  let responseFailureReasons: string[] = [];
+  let facetFailureReasons: string[] = [];
+  
+  if (openaiEvaluation && openaiEvaluation !== "PASS" && openaiEvaluation !== "No results to evaluate") {
+    const parts = openaiEvaluation.split(" | ");
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+      
+      if (trimmed.includes("Facets check failed:")) {
+        const detail = trimmed.replace("Facets check failed:", "").trim();
+        facetFailureReasons.push(detail);
+      } else {
+        responseFailureReasons.push(trimmed);
+      }
+    }
+  }
+  
+  // response failures: only from openaiEvaluation (non-facet parts)
+  const allResponseFailures: string[] = [...responseFailureReasons];
+  
+  // facet failures: from failureReasons array (populated by validateExpectedFacets)
+  const allFacetFailures: string[] = [...failureReasons];
+  for (const reason of facetFailureReasons) {
+    if (!allFacetFailures.includes(reason)) {
+      allFacetFailures.push(reason);
+    }
+  }
+  
+  // Build summary failures (consolidated from both)
+  const summaryFailures: string[] = [];
+  summaryFailures.push(...allResponseFailures);
+  summaryFailures.push(...allFacetFailures);
+  const uniqueSummaryFailures = Array.from(new Set(summaryFailures));
+
   return {
-    timestamp: new Date().toISOString(),
-    timestampSG: new Date().toLocaleString("en-SG", {
-      timeZone: "Asia/Singapore",
-    }),
-    testMode: "api",
-    testDescribe,
-    testTitle,
-    query: {
-      [`${lang}`]: actualInput,
-      en: queryEn,
+    metadata: {
+      timestamp: new Date().toISOString(),
+      testMode: "api",
+      testSuite: testDescribe,
+      testCase: testTitle,
+      language: lang,
+    },
+    request: {
+      query: {
+        [`${lang}`]: actualInput,
+        en: queryEn,
+      },
     },
     response: {
-      [`${lang}`]: smartSearchMessage,
-      en: smartSearchMessageEn,
+      message: {
+        [`${lang}`]: smartSearchMessage,
+        en: smartSearchMessageEn,
+      },
+      statusCode: results.statusCode,
+      responseTime: results.responseTime,
+      hasError: displayHasError,
+      data: {
+        resultCount,
+        vehicleCount: responseVehicleTotalCount,
+        motorization,
+      },
     },
-    resultCount,
-    responseVehicleTotalCount,
-    responseTime: results.responseTime,
-    statusCode: results.statusCode,
-    hasError: displayHasError,
-    error: results.error,
-    // apiResponse,
-    openaiEvaluation: openaiEvaluation,
-    results: {
-      responseResult: responseCheckPassed ? "PASS" : "FAIL",
-      facetsResult: facetsCheckPassed ? "PASS" : "FAIL",
-      countResult:
-        responseVehicleTotalCount === null
-          ? "SKIP"
-          : countCheckPassed
-            ? "PASS"
-            : "FAIL",
-      responseVehicleTotalCount,
-      backendResultCount: resultCount,
+    assertions: {
+      response: {
+        status: responseCheckPassed ? "PASS" : "FAIL",
+        ...(allResponseFailures.length && { failureReasons: allResponseFailures }),
+      },
+      facets: {
+        expected: actualFacets,
+        actual: resultsFacets,
+        status: facetsCheckPassed ? "PASS" : "FAIL",
+        ...(allFacetFailures.length && { failureReasons: allFacetFailures }),
+      },
+      count: {
+        expected: actualFacets ? actualCount : null,
+        actual: resultCount,
+        status: countStatus,
+        backendCount: resultCount,
+      },
     },
-    facets: {
-      expected: actualFacets,
-      actual: resultsFacets,
-      failureReasons: !facetsCheckPassed ? failureReasons : undefined,
+    summary: {
+      overallStatus: responseCheckPassed && facetsCheckPassed ? "PASS" : "FAIL",
+      resultCount,
+      vehicleCount: responseVehicleTotalCount,
+      motorization,
+      ...(uniqueSummaryFailures.length && { failureReasons: uniqueSummaryFailures }),
     },
   };
 }

@@ -164,6 +164,22 @@
         "tags": [
           "NEW"
         ]
+      },
+      {
+        "label": "Model",
+        "formattedValue": "GLB",
+        "value": "GLB_NEW",
+        "tags": [
+          "NEW"
+        ]
+      },
+      {
+        "label": "モデル",
+        "formattedValue": "EQS",
+        "value": "EQS_NEW",
+        "tags": [
+          "NEW"
+        ]
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -577,6 +593,42 @@
       },
       {
         "value": "E 400 e 4MATIC"
+      },
+      {
+        "value": "EQB 300 4MATIC"
+      },
+      {
+        "value": "GLE 400 e 4MATIC"
+      },
+      {
+        "value": "CLA 220"
+      },
+      {
+        "value": "Sprinter 317"
+      },
+      {
+        "value": "Sprinter 519"
+      },
+      {
+        "value": "eSprinter 320"
+      },
+      {
+        "value": "Sprinter 311"
+      },
+      {
+        "value": "Sprinter 315"
+      },
+      {
+        "value": "Sprinter 415"
+      },
+      {
+        "value": "Vito 116"
+      },
+      {
+        "value": "Vito 119"
+      },
+      {
+        "value": "Sprinter null"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -640,6 +692,16 @@
         "label": "ボディタイプ",
         "formattedValue": "シューティングブレーク",
         "value": "SHOOTING_BRAKE"
+      },
+      {
+        "label": "Body Type",
+        "formattedValue": "Mixto",
+        "value": "MIXTO"
+      },
+      {
+        "label": "Body Type",
+        "formattedValue": "Chassis",
+        "value": "CHASSIS"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -657,15 +719,15 @@
   },
   "price": {
     "values": {
-      "min": 64421.55,
-      "max": 530966.4
+      "min": 1.99,
+      "max": 999888777.66
     },
     "facetType": "RANGE"
   },
   "monthlyRate": {
     "values": {
-      "min": 207.52,
-      "max": 2064.7
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },
@@ -882,6 +944,66 @@
       {
         "formattedValue": "STARSTRUCK",
         "value": "29f5051f"
+      },
+      {
+        "formattedValue": "'RoF' 스페셜 에디션",
+        "value": "dcae100e"
+      },
+      {
+        "formattedValue": "E-Class 7월 구매 혜택",
+        "value": "dd6c0fd9"
+      },
+      {
+        "formattedValue": "개별소비세 인하분 잔여재고",
+        "value": "5cae1c36"
+      },
+      {
+        "formattedValue": "전기차 7월 구매 혜택",
+        "value": "4e951417"
+      },
+      {
+        "formattedValue": "C-Class 7월 구매 혜택",
+        "value": "dd360fd7"
+      },
+      {
+        "formattedValue": "GLC 7월 구매 혜택",
+        "value": "b0fc0e47"
+      },
+      {
+        "formattedValue": "140주년 기념 스페셜 에디션",
+        "value": "d84217ff"
+      },
+      {
+        "formattedValue": "GLE 7월 구매 혜택",
+        "value": "b1260e49"
+      },
+      {
+        "formattedValue": "$5,000 Deposit Contribution",
+        "value": "a73d0b36"
+      },
+      {
+        "formattedValue": "$6,000 Deposit Contribution",
+        "value": "a7580b37"
+      },
+      {
+        "formattedValue": "$8,000 Deposit Contribution",
+        "value": "a78e0b39"
+      },
+      {
+        "formattedValue": "All new CLA",
+        "value": "305c057c"
+      },
+      {
+        "formattedValue": "From $118,888 Driveaway",
+        "value": "7e59091b"
+      },
+      {
+        "formattedValue": "CLE 53 限定車",
+        "value": "5b1a09e9"
+      },
+      {
+        "formattedValue": "新型CLA先行予約",
+        "value": "c42a0f57"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -923,8 +1045,8 @@
   },
   "enginePowerHP": {
     "values": {
-      "min": 163,
-      "max": 680
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },
@@ -939,6 +1061,11 @@
         "label": "Drive type",
         "formattedValue": "",
         "value": "UNDEFINED"
+      },
+      {
+        "label": "Drive type",
+        "formattedValue": "All-wheel drive",
+        "value": "AWD"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1063,6 +1190,30 @@
       {
         "formattedValue": "화이트",
         "value": "3c320896"
+      },
+      {
+        "formattedValue": "그레이 ",
+        "value": "461a08d9"
+      },
+      {
+        "formattedValue": "레드  ",
+        "value": "2f60067d"
+      },
+      {
+        "formattedValue": "베이지 ",
+        "value": "45a208bd"
+      },
+      {
+        "formattedValue": "브라운 ",
+        "value": "45ba08dd"
+      },
+      {
+        "formattedValue": "블랙  ",
+        "value": "309f06a9"
+      },
+      {
+        "formattedValue": "화이트 ",
+        "value": "448b08b6"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -1265,6 +1416,30 @@
       {
         "formattedValue": "일렉트릭 아트 라인",
         "value": "354813cf"
+      },
+      {
+        "formattedValue": "Electric Art ライン",
+        "value": "9c880cc4"
+      },
+      {
+        "formattedValue": "プログレッシブ",
+        "value": "d2be1039"
+      },
+      {
+        "formattedValue": "SELECT",
+        "value": "182703dc"
+      },
+      {
+        "formattedValue": "PRO",
+        "value": "db902fa"
+      },
+      {
+        "formattedValue": "SELECT",
+        "value": "176d03c9"
+      },
+      {
+        "formattedValue": "Tourer SELECT",
+        "value": "3fd2066a"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -2206,6 +2381,26 @@
       {
         "formattedValue": "Dört mevsim lastikleri",
         "value": "acba0bc4"
+      },
+      {
+        "formattedValue": "Plastic floor load compartment",
+        "value": "f0550da5"
+      },
+      {
+        "formattedValue": "Split rear doors",
+        "value": "58260826"
+      },
+      {
+        "formattedValue": "Tailgate",
+        "value": "23b10534"
+      },
+      {
+        "formattedValue": "Two-person co-driver's seat",
+        "value": "c7a60c19"
+      },
+      {
+        "formattedValue": "Wooden floor load compartment",
+        "value": "e2c40d41"
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4051,6 +4246,9 @@
       },
       {
         "value": 48
+      },
+      {
+        "value": 12
       }
     ],
     "facetType": "MULTI_VALUE"
@@ -4129,8 +4327,8 @@
   },
   "enginePowerKW": {
     "values": {
-      "min": 120,
-      "max": 410
+      "min": 1,
+      "max": 9999
     },
     "facetType": "RANGE"
   },
@@ -4145,13 +4343,25 @@
     "facetType": "RANGE"
   },
   "loadspaceLength": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 3316,
+      "max": 4351
+    }
   },
   "loadspaceWidth": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 1555,
+      "max": 1555
+    }
   },
   "loadspaceHeight": {
-    "facetType": "RANGE"
+    "facetType": "RANGE",
+    "values": {
+      "min": 1846,
+      "max": 1846
+    }
   },
   "wheelbase": {
     "values": {

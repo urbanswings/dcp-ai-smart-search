@@ -32,11 +32,27 @@ dcp-ai-smart-search/
 ├── tsconfig.json                  # TypeScript configuration
 ├── generate-results-html.js       # HTML report generator
 ├── generate-results-json.js       # Non-pass results JSON generator
+├── migrate-results-schema.py      # Migrate old JSON files to new schema format
 ├── clean-old-results.sh           # Script to clean old test results
+├── lib/
+│   └── resultSchemaAdapter.js     # Schema detection & conversion for backward compatibility
+├── results/
+│   ├── html/
+│   │   ├── test-results-viewer.html      # Interactive viewer (reads both schemas)
+│   │   └── search-results-all-*.html     # Generated HTML reports
+│   └── json/                      # Test result JSON files
 ├── tests/
 │   ├── search.spec.ts             # Main test suite
+│   ├── regression.spec.ts         # Regression test suite
 │   ├── zephyr_scale_import.csv    # Zephyr Scale test case export
 │   ├── utils/
+│   │   ├── api/
+│   │   │   └── apiResultLoggingHelpers.ts    # Logs API test results (generates new schema)
+│   │   ├── ui/
+│   │   │   └── uiResultLoggingHelpers.ts     # Logs UI test results (generates new schema)
+│   │   ├── core/
+│   │   │   ├── resultEvaluationHelpers.ts    # Evaluates test results with OpenAI
+│   │   │   └── searchResultTypes.ts          # Type definitions
 │   │   ├── testHelpers.ts         # UI test helper functions
 │   │   ├── apiHelpers.ts          # API test helper functions
 │   │   ├── shared.ts              # Shared utilities
@@ -48,9 +64,6 @@ dcp-ai-smart-search/
 │       ├── emh-urls.json          # EMH environment URLs
 │       ├── search-api-response-kr-ucos-dcp.json  # KR UCOS API response
 │       └── search-queries.json     # Non-MB brand/model queries
-├── results/                       # Test results (gitignored)
-│   ├── json/                      # JSON result files
-│   └── html/                      # HTML reports
 ├── test-results/                  # Playwright test artifacts (gitignored)
 ├── .playwright-cache/             # Playwright browser cache (gitignored)
 └── .playwright-tmp/               # Playwright temp files (gitignored)
@@ -248,7 +261,6 @@ npx playwright test --grep-invert @api
 - Each scenario generates queries (some via OpenAI), executes them via UI/API/both, and logs results.
 - Results are saved as JSON files in `results/json/` with mode indicators.
 
-
 ### 2. Result Processing
 
 - `generate-results-html.js` reads all result JSON files from `results/json/`.
@@ -265,6 +277,117 @@ npx playwright test --grep-invert @api
 
 ---
 
+## Jira Integration
+
+The results viewer (`results/html/test-results-viewer.html`) can create Jira bugs directly from a selected failed query, via a local bridge script (`jira-api-bridge.js`) that talks to the Jira REST API using your `.env` credentials. Before submitting, a preview modal lets you review and edit everything.
+
+### Setup
+
+1. Add Jira credentials to your local `.env` (see `.env.example` for the full list): `JIRA_BASE_URL`, `JIRA_API_TOKEN`, `JIRA_AUTH_TYPE` (`bearer` for a PAT, or `basic` with `JIRA_USER_EMAIL`), and optionally `JIRA_ASSIGNEE_FIELD_MODE`. Keep the real token in your local `.env` only — never commit it.
+2. Start the bridge: `npm run jira:bridge` (listens on `JIRA_BRIDGE_PORT`, default `8787`).
+3. Select a failed query row, click **Create JIRA** in the selected-row panel, then the **⚙️** button next to it to configure Jira settings:
+   - **Jira Instance URL**, **Project Key**, **Issue Type**
+   - **Jira Bridge URL** (default `http://localhost:8787`)
+   - **Board ID** and **Sprint Field ID** — needed for the Sprint dropdown to fetch real sprints (Board ID auto-detects from Project Key if left blank, but that only works reliably when the project has a single board)
+   - **Affected Markets Field ID** / **Affected Environments Field ID** — the custom field IDs for "Affected Market(s)" / "Affected Environment(s)" (e.g. `customfield_15237` / `customfield_14407`). These are option-based select/multiselect fields (common in Jira), so the viewer resolves the checkbox/dropdown selections against Jira's real option list live and submits the correct option ID — plain text doesn't work against option fields.
+   - **Known Labels** — seeds the Labels checkboxes (in addition to a hardcoded `SMARTSEARCH` label that's always pre-checked)
+   - **Project ID** / **Issue Type ID** (numeric, optional) — only used by the "Open in Jira (manual)" fallback link, not by direct submission
+
+### Viewer Usage
+
+1. Select a failed query row in the results table.
+2. Click **Create JIRA** in the selected-row panel.
+3. A preview modal opens with the summary (prefixed `[SMARTSEARCH]`) and description pre-filled from the query/response/facets/failure reasons:
+   - **Description** has **Visual**/**Text** tabs — Visual renders the Jira wiki markup (panels, bullets, pass/fail icons) so you can eyeball it; Text is the raw editable markup.
+   - **Affected Market(s)** and **Labels** are checkboxes — markets always offer this suite's supported set (AU, IN, JP, KR, SG, TH, TR — see `TEST_SUITE_BREAKDOWN.md`) with the row's market pre-checked; labels include a free-text "Add" box for one-off tags.
+   - **Assignee** is a live-searching autocomplete against Jira's assignable-users API (results filter as you type).
+   - **Sprint**, **Priority** (Minor/Major/Critical/Blocker), and **Affected Environment** (INT/PREPROD/PROD, auto-detected from the row) are populated/resolved live from Jira.
+4. Edit anything that needs adjusting, then either:
+   - **Submit to Jira** — creates the issue directly via the REST API (through the local bridge) and opens it once created, or
+   - **Open in Jira (manual)** — falls back to Jira's own Create Issue page with the summary/description/markets/labels/priority prefilled, for when the bridge isn't running.
+
+---
+
+## Test Result Schema
+
+All test results are stored as JSON files with the following **new 5-section schema** (generated automatically by test helpers):
+
+```json
+{
+  "metadata": {
+    "timestamp": "2026-07-09T05:24:05.914Z",
+    "testMode": "api",          // "api" or "ui"
+    "testSuite": "Regression",  // Old field: testDescribe
+    "testCase": "Intermittent Issues Check (IIC)",  // Old field: testTitle
+    "language": "en"
+  },
+  "request": {
+    "query": {
+      "en": "A180 grade",
+      "th": "ปริญญา A180"
+    }
+  },
+  "response": {
+    "message": {
+      "en": "I found vehicles matching...",
+      "th": "ฉันพบรถยนต์ที่ตรงกัน..."
+    },
+    "statusCode": 200,
+    "responseTime": 8143,
+    "hasError": false,
+    "data": {
+      "resultCount": 2,
+      "vehicleCount": 2,
+      "motorization": ["CLE 300 4MATIC"]
+    }
+  },
+  "assertions": {
+    "response": {
+      "status": "PASS",
+      "feedback": "PASS"
+    },
+    "facets": {
+      "expected": { "include": { "motorization": ["CLE 300 4MATIC"] } },
+      "actual": { "motorization": ["CLE 300 4MATIC"] },
+      "status": "PASS"
+    },
+    "count": {
+      "expected": null,
+      "actual": 2,
+      "status": "PASS",
+      "backendCount": 2
+    }
+  },
+  "summary": {
+    "overallStatus": "PASS",
+    "resultCount": 2,
+    "vehicleCount": 2,
+    "motorization": ["CLE 300 4MATIC"]
+  }
+}
+```
+
+### Schema Migration
+
+**New test runs automatically generate results in this new schema format** (no manual migration needed).
+
+If you have **legacy result files** in the old flat schema format, use the migration script:
+
+```sh
+python3 migrate-results-schema.py results/json/<old-folder> results/json/<new-folder>
+```
+
+The migration tool converts:
+- Old flat structure → New organized 5-section structure
+- Old field names → New field paths (e.g., `testDescribe` → `metadata.testSuite`)
+- Maintains backward compatibility via [lib/resultSchemaAdapter.js](lib/resultSchemaAdapter.js)
+
+### Viewing Results
+
+- **Interactive Viewer:** `results/html/test-results-viewer.html` (supports both old and new schemas)
+- **Generated Reports:** `results/html/search-results-all-<timestamp>.html` (uses [lib/resultSchemaAdapter.js](lib/resultSchemaAdapter.js) for compatibility)
+
+---
 
 ## Usage
 
@@ -274,9 +397,16 @@ npx playwright test --grep-invert @api
 npm install
 ```
 
-### 2. Configure Environment
+### 2. Install Playwright Browsers
+
+```sh
+npx playwright install
+```
+
+### 3. Configure Environment
 
 Edit `.env` to set your test context:
+
 
 ```properties
 ENVIRONMENT=PREPROD   # Options: PREPROD, INT, DEV, PROD
@@ -295,7 +425,7 @@ PLAYWRIGHT_CDP_URL=http://localhost:9222
 # CDP_URL=http://localhost:9222
 ```
 
-### 3. Run Tests
+### 4. Run Tests
 
 ```sh
 npx playwright test
@@ -308,7 +438,7 @@ ENVIRONMENT=INT COUNTRY=JP LANGUAGE=EN PRODUCT=UCOS npx playwright test
 ENVIRONMENT=INT COUNTRY=JP LANGUAGE=JP PRODUCT=UCOS npx playwright test
 ```
 
-### 4. Generate HTML Report
+### 5. Generate HTML Report
 
 ```sh
 node generate-results-html.js
@@ -316,7 +446,7 @@ node generate-results-html.js
 
 - Output: `results/html/search-results-all-<timestamp>.html`
 
-### 4b. Generate Shareable Standalone Viewer (Embedded JSON)
+### 5b. Generate Shareable Standalone Viewer (Embedded JSON)
 
 ```sh
 node embed-results-into-viewer.js results/json/<run-folder> results/html/test-results-viewer-standalone.html
@@ -325,12 +455,31 @@ node embed-results-into-viewer.js results/json/<run-folder> results/html/test-re
 - Output: `results/html/test-results-viewer-standalone.html`
 - This embeds JSON directly into the HTML so the file can be shared and opened on another machine without selecting a local folder.
 
-### 5. Generate Non-Pass Results JSON
+### 6. Generate Non-Pass Results JSON
 
 ```sh
 node generate-results-json.js results/json/<run-folder>
+```
 
-### 6. Run Regression Tests
+### 7. Migrate Old Result Files to New Schema (Optional)
+
+If you have result files in the old flat schema format and need to convert them to the new 5-section schema format:
+
+```sh
+python3 migrate-results-schema.py results/json/<old-folder> results/json/<new-folder>
+```
+
+- **Input:** Old schema JSON files (flat structure with `testDescribe`, `testTitle`, `query`, etc. at root level)
+- **Output:** New schema JSON files with organized sections:
+  - `metadata` (testSuite, testCase, timestamp, language, etc.)
+  - `request` (query)
+  - `response` (message, statusCode, responseTime, hasError, data)
+  - `assertions` (response.feedback, facets with expected/actual)
+  - `summary` (overallStatus, resultCount, vehicleCount, etc.)
+
+**Note:** New test runs automatically generate results in the new schema format. This script is only needed to convert legacy result files for historical analysis or comparison.
+
+### 8. Run Regression Tests
 
 Use the dedicated regression suite in `tests/regression.spec.ts` for bug-focused validation and repeated-run stability checks.
 

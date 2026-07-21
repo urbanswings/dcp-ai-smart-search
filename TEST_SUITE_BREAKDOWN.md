@@ -1,11 +1,62 @@
 # SMART SEARCH Automation Test Suite - Updated Breakdown
-**Last Updated:** June 19, 2026
+**Last Updated:** July 12, 2026
 
 ## Summary Statistics
-- **Total Test Cases:** 66
-- **Total Queries (estimated):** ~550+ queries
-- **Test Suites:** 10 describe blocks
-- **New Additions:** Negative facet suite, expanded facet coverage, scenario reporting groups
+- **Total Test Cases:** 66+ (search.spec.ts) + 4 regression groups (regression.spec.ts)
+- **Total Queries (estimated):** ~550+ queries (search) + multi-country variations (regression)
+- **Test Suites:** 10 describe blocks (search.spec.ts) + 4 describe blocks (regression.spec.ts)
+- **Supported Countries:** AU, IN, JP, KR, SG, TH, TR (for multi-country evaluation)
+- **New Additions:** Regression tests, Multi-Country Evaluation, Multi-Country Facet Evaluation, Negative facet suite, expanded facet coverage, scenario reporting groups
+
+---
+
+## Regression Test Suites (regression.spec.ts)
+
+### 11. Smart Regression Evaluation (SRE)
+
+Comprehensive regression testing loading queries from description text.
+
+| S/N | Test | Query Source | Details |
+|-----|------|--------------|---------|
+| 11.1 | Smart Regression Evaluation | Description-based | Loads regression queries from regression.description.txt |
+
+| | **Subtotal** | | **1 test** |
+
+---
+
+### 12. Intermittent Issues Check (IIC)
+
+Repeated query testing to identify intermittent failures.
+
+| S/N | Test | Query Source | Details |
+|-----|------|--------------|---------|
+| 12.1 | Intermittent Issues Check | Intermittency-queries.json | Repeated execution for stability analysis |
+
+| | **Subtotal** | | **1 test** |
+
+---
+
+### 13. Multi Country Evaluation (MCE)
+
+Multi-country regression testing across supported markets.
+
+| S/N | Test | Countries | Details |
+|-----|------|-----------|---------|
+| 13.1-13.7 | Multi Country Evaluation | AU, IN, JP, KR, SG, TH, TR | Regression queries per country with language mapping |
+
+| | **Subtotal** | | **7 tests (1 per country)** |
+
+---
+
+### 14. Multi Country Facet Evaluation (MCFE)
+
+Dedicated facet evaluation across supported countries with dynamic facet loading.
+
+| S/N | Test | Countries | Details |
+|-----|------|-----------|---------|
+| 14.1-14.7 | Multi Country Facet Evaluation | AU, IN, JP, KR, SG, TH, TR | Facet-specific testing per country (default: motorization, configurable via MCFE_TARGET_FACET) |
+
+| | **Subtotal** | | **7 tests (1 per country)** |
 
 ---
 
@@ -193,11 +244,13 @@ Dedicated test suite for negative/missing facet value scenarios
 
 | S/N | Category | Count |
 |-----|----------|-------|
-| 1 | **Total Test Cases** | 66 |
-| 2 | **Reporting Groups** | 10 |
-| 3 | **Total Fixed Queries** | ~240 |
-| 4 | **Total AI-Generated Queries** | ~150 |
-| 5 | **Edge Case Queries** | 17 |
+| 1 | **Total Test Cases (search.spec.ts)** | 66 |
+| 2 | **Total Test Cases (regression.spec.ts)** | 16 (4 groups + multi-country iterations) |
+| 3 | **Reporting Groups** | 14 (10 search + 4 regression) |
+| 4 | **Total Fixed Queries** | ~240 |
+| 5 | **Total AI-Generated Queries** | ~150 |
+| 6 | **Edge Case Queries** | 17 |
+| 7 | **Supported Markets (MCE/MCFE)** | 7 (AU, IN, JP, KR, SG, TH, TR) |
 | 6 | **Dynamic/Variable Queries** | Variable (facet-dependent) |
 | 7 | **Estimated Total Queries** | **550+** |
 
